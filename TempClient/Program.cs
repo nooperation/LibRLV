@@ -10,6 +10,7 @@ namespace TempClient
             var rlv = new RLV();
             rlv.Enabled = true;
 
+            rlv.Actions.TpTo += Rlv_TpTo;
             rlv.SendReplyAsync = RLVSendMessage;
             rlv.DataProviderAsync = RLVDataProvider;
 
