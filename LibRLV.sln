@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36301.6
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibRLV", "LibRLV\LibRLV.csproj", "{6094D838-EB53-4825-9DF4-36050272FD20}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibRLV.Tests", "LibRLV.Tests\LibRLV.Tests.csproj", "{695B9BE1-3E51-4FDB-BEEE-1F9DC8DFD669}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TempClient", "TempClient\TempClient.csproj", "{6E715B8F-8196-4100-BCF1-269A5975E3B9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6094D838-EB53-4825-9DF4-36050272FD20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6094D838-EB53-4825-9DF4-36050272FD20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6094D838-EB53-4825-9DF4-36050272FD20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6094D838-EB53-4825-9DF4-36050272FD20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{695B9BE1-3E51-4FDB-BEEE-1F9DC8DFD669}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{695B9BE1-3E51-4FDB-BEEE-1F9DC8DFD669}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{695B9BE1-3E51-4FDB-BEEE-1F9DC8DFD669}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{695B9BE1-3E51-4FDB-BEEE-1F9DC8DFD669}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E715B8F-8196-4100-BCF1-269A5975E3B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E715B8F-8196-4100-BCF1-269A5975E3B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E715B8F-8196-4100-BCF1-269A5975E3B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E715B8F-8196-4100-BCF1-269A5975E3B9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {93D23F53-CD30-42E3-8878-226BE92691F3}
+	EndGlobalSection
+EndGlobal
