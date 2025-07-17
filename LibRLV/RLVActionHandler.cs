@@ -241,52 +241,58 @@ namespace LibRLV
 
         private bool HandleTpTo(RLVMessage command)
         {
-            var args = command.Option.Split('/');
-            if (args.Length == 3)
+            var commandArgs = command.Option.Split(';');
+            var locationArgs = commandArgs[0].Split('/');
+
+            if (locationArgs.Length < 3 || locationArgs.Length > 4)
             {
-                if (!double.TryParse(args[0], out double x))
-                {
-                    return false;
-                }
-                if (!double.TryParse(args[1], out double y))
-                {
-                    return false;
-                }
-                if (!double.TryParse(args[2], out double z))
+                return false;
+            }
+
+            double? lookat = null;
+            if (commandArgs.Length > 1)
+            {
+                if (!double.TryParse(commandArgs[1], out double val))
                 {
                     return false;
                 }
 
-                TpTo?.Invoke(this, new TpToEventArgs(x, y, z, null, null));
+                lookat = val;
+            }
+
+            if (locationArgs.Length == 3)
+            {
+                if (!double.TryParse(locationArgs[0], out var x))
+                {
+                    return false;
+                }
+                if (!double.TryParse(locationArgs[1], out var y))
+                {
+                    return false;
+                }
+                if (!double.TryParse(locationArgs[2], out var z))
+                {
+                    return false;
+                }
+
+                TpTo?.Invoke(this, new TpToEventArgs(x, y, z, null, lookat));
                 return true;
             }
-            else if (args.Length == 4)
+            else if (locationArgs.Length == 4)
             {
-                var regionName = args[0];
-                var subargs = args[3].Split(';');
+                var regionName = locationArgs[0];
 
-                if (!double.TryParse(args[1], out double x))
+                if (!double.TryParse(locationArgs[1], out var x))
                 {
                     return false;
                 }
-                if (!double.TryParse(args[2], out double y))
+                if (!double.TryParse(locationArgs[2], out var y))
                 {
                     return false;
                 }
-                if (!double.TryParse(subargs[0], out double z))
+                if (!double.TryParse(locationArgs[3], out var z))
                 {
                     return false;
-                }
-
-                double? lookat = null;
-                if (subargs.Length == 2)
-                {
-                    if (!double.TryParse(subargs[1], out double val))
-                    {
-                        return false;
-                    }
-
-                    lookat = val;
                 }
 
                 TpTo?.Invoke(this, new TpToEventArgs(x, y, z, regionName, lookat));

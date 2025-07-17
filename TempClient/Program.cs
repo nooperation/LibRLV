@@ -50,7 +50,7 @@ namespace TempClient
             Console.WriteLine($"Tp To: {e.X}/{e.Y}/{e.Z} Region={e.RegionName} Lookat={e.Lookat}");
         }
 
-        static void Main(string[] args)
+        static void Main()
         {
             new Program();
         }
