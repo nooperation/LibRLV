@@ -11,8 +11,8 @@ namespace TempClient
             rlv.Enabled = true;
 
             rlv.Actions.TpTo += Rlv_TpTo;
-            rlv.SendReplyAsync = RLVSendMessage;
-            rlv.DataProviderAsync = RLVDataProvider;
+            rlv.Get.SendReplyAsync = RLVSendMessage;
+            rlv.Get.DataProviderAsync = RLVDataProvider;
 
             rlv.ProcessMessage("@accepttprequest=y", new OpenMetaverse.UUID(Guid.NewGuid()), "Sender Name");
             rlv.ProcessMessage($"@accepttprequest:{new OpenMetaverse.UUID(Guid.NewGuid())}=n", new OpenMetaverse.UUID(Guid.NewGuid()), "Sender Name");
@@ -23,6 +23,10 @@ namespace TempClient
             //rlv.ProcessMessage("@tpto:1/2/3=force", new OpenMetaverse.UUID(Guid.NewGuid()), "Sender Name");
             //rlv.ProcessMessage("@tpto:My Land/1/2/3=force", new OpenMetaverse.UUID(Guid.NewGuid()), "Sender Name");
             rlv.ProcessMessage("@tpto:My Land/1/2/3;3.1415=force", new OpenMetaverse.UUID(Guid.NewGuid()), "Sender Name");
+
+            rlv.Blacklist.BlacklistCommand("getstatusall");
+            rlv.ProcessMessage("@getstatusall=1234", new OpenMetaverse.UUID(Guid.NewGuid()), "Sender Name");
+
         }
 
         private Task RLVSendMessage(int channel, string message, CancellationToken token)
