@@ -1,4 +1,5 @@
 ﻿using LibRLV;
+using LibRLV.EventArguments;
 using System.Linq;
 
 namespace TempClient
@@ -7,8 +8,10 @@ namespace TempClient
     {
         public Program()
         {
-            var rlv = new RLV();
-            rlv.Enabled = true;
+            var rlv = new RLV
+            {
+                Enabled = true
+            };
 
             rlv.Actions.TpTo += Rlv_TpTo;
             rlv.Get.SendReplyAsync = RLVSendMessage;
@@ -37,7 +40,7 @@ namespace TempClient
 
         private Task<string> RLVDataProvider(RLVDataRequest request, List<object> list, CancellationToken token)
         {
-            Console.WriteLine($"DataProvider: {request.ToString()} {string.Join(',', list)}");
+            Console.WriteLine($"DataProvider: {request} {string.Join(',', list)}");
 
             return Task.FromResult(new OpenMetaverse.UUID(Guid.NewGuid()).ToString());
         }

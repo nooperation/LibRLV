@@ -5,26 +5,26 @@ namespace LibRLV
 {
     public class RLVBlacklist : IBlacklistProvider
     {
-        private HashSet<string> Blacklist = new HashSet<string>();
+        private readonly HashSet<string> _blacklist = new HashSet<string>();
 
         public HashSet<string> GetBlacklist()
         {
-            return new HashSet<string>(Blacklist);
+            return new HashSet<string>(_blacklist);
         }
 
         public void BlacklistCommand(string command)
         {
-            Blacklist.Add(command);
+            _blacklist.Add(command);
         }
 
         public void UnBlacklistCommand(string command)
         {
-            Blacklist.Remove(command);
+            _blacklist.Remove(command);
         }
 
         internal bool IsBlacklisted(string behavior)
         {
-            return Blacklist.Contains(behavior);
+            return _blacklist.Contains(behavior);
         }
     }
 }

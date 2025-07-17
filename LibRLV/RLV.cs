@@ -5,11 +5,6 @@ using System.Threading;
 
 namespace LibRLV
 {
-    /*
-      TODO:
-        - Implement @version and @getblacklist instant message handlers
-        - 
-    */
     public class RLV
     {
         public bool Enabled { get; set; }

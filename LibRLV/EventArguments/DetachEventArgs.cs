@@ -1,7 +1,7 @@
 ﻿using OpenMetaverse;
 using System;
 
-namespace LibRLV
+namespace LibRLV.EventArguments
 {
     public class DetachEventArgs : EventArgs
     {

@@ -1,4 +1,5 @@
 ﻿using OpenMetaverse;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -7,17 +8,16 @@ namespace LibRLV
 {
     public class RLVRestriction
     {
-        public RLVRestriction(RLVRestrictionType behavior, bool isException, UUID sender, string senderName, ICollection<object> args)
+        public RLVRestriction(RLVRestrictionType behavior, UUID sender, string senderName, ICollection<object> args)
         {
             this.Behavior = behavior;
-            this.IsException = isException;
             this.Sender = sender;
             this.SenderName = senderName;
             this.Args = args.ToImmutableList();
         }
 
         public RLVRestrictionType Behavior { get; }
-        public bool IsException { get; set; }
+        public bool IsException => IsRestrictionAnException(this);
         public UUID Sender { get; }
         public string SenderName { get; }
         public ImmutableList<object> Args { get; }
@@ -25,6 +25,37 @@ namespace LibRLV
         public bool Validate()
         {
             return Validate(this);
+        }
+        
+        public static bool IsRestrictionAnException(RLVRestriction restriction)
+        {
+            switch (restriction.Behavior)
+            {
+                case RLVRestrictionType.RecvEmote:
+                case RLVRestrictionType.RecvChat:
+                case RLVRestrictionType.SendIm:
+                case RLVRestrictionType.StartIm:
+                case RLVRestrictionType.RecvIm:
+                case RLVRestrictionType.SendChannel:
+                case RLVRestrictionType.TpRequest:
+                case RLVRestrictionType.TpLure:
+                case RLVRestrictionType.Edit:
+                case RLVRestrictionType.Share:
+                case RLVRestrictionType.TouchWorld:
+                case RLVRestrictionType.ShowNamesSec:
+                case RLVRestrictionType.ShowNames:
+                case RLVRestrictionType.AcceptTp:
+                case RLVRestrictionType.AcceptTpRequest:
+                    return restriction.Args.Count > 0;
+
+                case RLVRestrictionType.DetachThisExcept:
+                case RLVRestrictionType.DetachAllThisExcept:
+                case RLVRestrictionType.AttachThisExcept:
+                case RLVRestrictionType.AttachAllThisExcept:
+                    return true;
+            }
+
+            return false;
         }
 
         public static bool Validate(RLVRestriction newCommand)
@@ -213,6 +244,27 @@ namespace LibRLV
             }
 
             return false;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is RLVRestriction restriction &&
+                   this.Behavior == restriction.Behavior &&
+                   this.Sender.Equals(restriction.Sender) &&
+                   Args.SequenceEqual(restriction.Args);
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(this.Behavior);
+            hashCode.Add(this.Sender);
+            foreach (var item in Args)
+            {
+                hashCode.Add(item);
+            }
+
+            return hashCode.ToHashCode();
         }
     }
 }
