@@ -1,48 +1,75 @@
 ﻿using LibRLV;
 using LibRLV.EventArguments;
+using OpenMetaverse;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace TempClient
 {
     internal class Program
     {
+        public class RlvObject
+        {
+            public RlvObject(string name)
+            {
+                Id = new UUID(Guid.NewGuid());
+                Name = name;
+            }
+
+            public UUID Id { get; set; }
+            public string Name { get; set; }
+        }
+
+        public class MyRLVCallbacks : RLVCallbacksDefault
+        {
+            public override Task<string> ProvideDataAsync(RLVDataRequest request, List<object> list, CancellationToken cancellationToken)
+            {
+                Console.WriteLine($"DataProvider: {request} {string.Join(',', list)}");
+
+                return Task.FromResult(new OpenMetaverse.UUID(Guid.NewGuid()).ToString());
+            }
+
+            public override Task SendReplyAsync(int channel, string message, CancellationToken cancellationToken)
+            {
+                Console.WriteLine($"[{channel}] {message}");
+                return Task.CompletedTask;
+            }
+        }
+
         public Program()
         {
-            var rlv = new RLV
+            var rlv = new RLV(new MyRLVCallbacks())
             {
                 Enabled = true
             };
 
             rlv.Actions.TpTo += Rlv_TpTo;
-            rlv.Get.SendReplyAsync = RLVSendMessage;
-            rlv.Get.DataProviderAsync = RLVDataProvider;
+            rlv.Restrictions.RestrictionUpdated += Restrictions_RestrictionUpdated;
 
-            rlv.ProcessMessage("@accepttprequest=y", new OpenMetaverse.UUID(Guid.NewGuid()), "Sender Name");
-            rlv.ProcessMessage($"@accepttprequest:{new OpenMetaverse.UUID(Guid.NewGuid())}=n", new OpenMetaverse.UUID(Guid.NewGuid()), "Sender Name");
-            rlv.ProcessMessage("@getstatusall=123", new OpenMetaverse.UUID(Guid.NewGuid()), "Sender Name");
+            var object1 = new RlvObject("First");
+            var object2 = new RlvObject("Second");
 
-            rlv.ProcessMessage("@getsitid=123", new OpenMetaverse.UUID(Guid.NewGuid()), "Sender Name");
+            rlv.ProcessMessage("@notify:5678=add", object1.Id, object1.Name);
+            rlv.ProcessMessage("@accepttprequest=add", object1.Id, object1.Name);
+            rlv.ProcessMessage($"@accepttprequest:{object1.Id}=add", object1.Id, object1.Name);
+            rlv.ProcessMessage("@getstatusall=123", object1.Id, object1.Name);
 
-            //rlv.ProcessMessage("@tpto:1/2/3=force", new OpenMetaverse.UUID(Guid.NewGuid()), "Sender Name");
-            //rlv.ProcessMessage("@tpto:My Land/1/2/3=force", new OpenMetaverse.UUID(Guid.NewGuid()), "Sender Name");
-            rlv.ProcessMessage("@tpto:My Land/1/2/3;3.1415=force", new OpenMetaverse.UUID(Guid.NewGuid()), "Sender Name");
+            rlv.ProcessMessage("@getsitid=123", object1.Id, object1.Name);
+
+            //rlv.ProcessMessage("@tpto:1/2/3=force", object1Id.Id,object1.Name);
+            //rlv.ProcessMessage("@tpto:My Land/1/2/3=force", object1Id.Id,object1.Name);
+            rlv.ProcessMessage("@tpto:My Land/1/2/3;3.1415=force", object1.Id, object1.Name);
 
             rlv.Blacklist.BlacklistCommand("getstatusall");
-            rlv.ProcessMessage("@getstatusall=1234", new OpenMetaverse.UUID(Guid.NewGuid()), "Sender Name");
+            rlv.ProcessMessage("@getstatusall=1234", object1.Id, object1.Name);
+
+            rlv.ProcessMessage("@accepttprequest=rem", object1.Id, object1.Name);
 
         }
 
-        private Task RLVSendMessage(int channel, string message, CancellationToken token)
+        private void Restrictions_RestrictionUpdated(object? sender, RestrictionUpdatedEventArgs e)
         {
-            Console.WriteLine($"[{channel}] {message}");
-            return Task.CompletedTask;
-        }
-
-        private Task<string> RLVDataProvider(RLVDataRequest request, List<object> list, CancellationToken token)
-        {
-            Console.WriteLine($"DataProvider: {request} {string.Join(',', list)}");
-
-            return Task.FromResult(new OpenMetaverse.UUID(Guid.NewGuid()).ToString());
+            Console.WriteLine($"Restriction update: {(e.IsDeleted ? "REM" : "ADD")} {e.Restriction}");
         }
 
         private void Rlv_TpTo(object? sender, TpToEventArgs e)
@@ -52,7 +79,7 @@ namespace TempClient
 
         static void Main()
         {
-            new Program();
+            _ = new Program();
         }
     }
 }

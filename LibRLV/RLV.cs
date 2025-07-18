@@ -14,15 +14,17 @@ namespace LibRLV
         public RLVActionHandler Actions { get; }
         public RLVGetHandler Get { get; }
         public RLVRestrictionHandler Restrictions { get; }
+        public IRLVCallbacks Callbacks { get; }
 
         private readonly Regex RLVRegexPattern = new Regex(@"(?<behavior>[^:=]+)(:(?<option>[^=]*))?=(?<param>\w+)", RegexOptions.Compiled);
 
-        public RLV()
+        public RLV(IRLVCallbacks callbacks)
         {
+            Callbacks = callbacks;
             Blacklist = new RLVBlacklist();
             Actions = new RLVActionHandler();
-            Restrictions = new RLVRestrictionHandler();
-            Get = new RLVGetHandler(Blacklist, Restrictions);
+            Restrictions = new RLVRestrictionHandler(Callbacks);
+            Get = new RLVGetHandler(Blacklist, Restrictions, Callbacks);
         }
 
         private bool ProcessRLVMessage(RLVMessage rlvMessage)
@@ -31,7 +33,7 @@ namespace LibRLV
             {
                 if (int.TryParse(rlvMessage.Param, out int channel))
                 {
-                    Get.SendReplyAsync?.Invoke(channel, "", CancellationToken.None);
+                    Callbacks.SendReplyAsync(channel, "", CancellationToken.None);
                 }
 
                 return false;

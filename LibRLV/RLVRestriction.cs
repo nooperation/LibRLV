@@ -26,7 +26,7 @@ namespace LibRLV
         {
             return Validate(this);
         }
-        
+
         public static bool IsRestrictionAnException(RLVRestriction restriction)
         {
             switch (restriction.Behavior)
@@ -172,7 +172,7 @@ namespace LibRLV
                 case RLVRestrictionType.ShowNames:
                 case RLVRestrictionType.ShowNamesSec:
                 case RLVRestrictionType.ShowNameTags: // RLVA adds optional UUID
-                                                  // [] || [UUID]
+                                                      // [] || [UUID]
                     return newCommand.Args.Count == 0 ||
                            (newCommand.Args.Count == 1 && newCommand.Args[0] is UUID);
 
@@ -244,6 +244,11 @@ namespace LibRLV
             }
 
             return false;
+        }
+
+        public override string ToString()
+        {
+            return $"[{SenderName}] {Behavior}{(Args.Count == 0 ? "" : ":")}{string.Join(",", Args)}";
         }
 
         public override bool Equals(object obj)

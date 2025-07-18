@@ -14,20 +14,16 @@ namespace LibRLV
         private string RLVVersion => "RestrainedLove viewer v3.4.3 (RLVa 2.4.2)";
         private string RLVVersionNum => "2040213";
 
-        public Func<RLVDataRequest, List<object>, CancellationToken, Task<string>> DataProviderAsync { get; set; }
-        public Func<int, string, CancellationToken, Task> SendReplyAsync { get; set; }
-
-        public Func<RLVGetEnvType, Task<string>> HandleGetEnv { get; set; }
-        public Func<RLVGetDebugType, Task<string>> HandleGetDebug { get; set; }
-
         private readonly ImmutableDictionary<string, RLVDataRequest> RLVDataRequestToNameMap;
         private readonly IRestrictionProvider _restrictions;
         private readonly IBlacklistProvider _blacklist;
+        private readonly IRLVCallbacks _callbacks;
 
-        internal RLVGetHandler(IBlacklistProvider blacklist, IRestrictionProvider restrictions)
+        internal RLVGetHandler(IBlacklistProvider blacklist, IRestrictionProvider restrictions, IRLVCallbacks callbacks)
         {
             _restrictions = restrictions;
             _blacklist = blacklist;
+            _callbacks = callbacks;
 
             RLVDataRequestToNameMap = new Dictionary<string, RLVDataRequest>()
             {
@@ -163,28 +159,14 @@ namespace LibRLV
                         break;
                 }
 
-                if (DataProviderAsync == null)
-                {
-                    response = string.Empty;
-                }
-                else
-                {
-                    response = DataProviderAsync(name, args, CancellationToken.None).Result;
-                }
+                response = _callbacks.ProvideDataAsync(name, args, CancellationToken.None).Result;
             }
             else if (rlvMessage.Behavior.StartsWith("getdebug_"))
             {
                 var commandRaw = rlvMessage.Behavior.Substring("getdebug_".Length);
                 if (Enum.TryParse<RLVGetDebugType>(commandRaw, true, out var command))
                 {
-                    if (HandleGetDebug != null)
-                    {
-                        response = HandleGetDebug(command).Result;
-                    }
-                    else
-                    {
-                        response = ProcessGetDebug(command);
-                    }
+                    response = _callbacks.GetDebugInfoAsync(command).Result;
                 }
             }
             else if (rlvMessage.Behavior.StartsWith("getenv_"))
@@ -192,26 +174,19 @@ namespace LibRLV
                 var commandRaw = rlvMessage.Behavior.Substring("getenv_".Length);
                 if (Enum.TryParse<RLVGetEnvType>(commandRaw, true, out var command))
                 {
-                    if (HandleGetEnv != null)
-                    {
-                        response = HandleGetEnv(command).Result;
-                    }
-                    else
-                    {
-                        response = ProcessGetEnv(command);
-                    }
+                    response = _callbacks.GetEnvironmentAsync(command).Result;
                 }
             }
 
             if (response != null)
             {
-                SendReplyAsync?.Invoke(channel, response, CancellationToken.None).Wait();
+                _callbacks.SendReplyAsync(channel, response, CancellationToken.None).Wait();
                 return true;
             }
 
             return false;
         }
-        
+
         internal bool ProcessInstantMessageCommand(string message, UUID senderId, string senderName, Action<UUID, string> instantMessageReply)
         {
             switch (message)
@@ -226,109 +201,6 @@ namespace LibRLV
             }
 
             return false;
-        }
-
-        private static string ProcessGetEnv(RLVGetEnvType command)
-        {
-            switch (command)
-            {
-                case RLVGetEnvType.Daytime:
-                case RLVGetEnvType.AmbientR:
-                case RLVGetEnvType.AmbientG:
-                case RLVGetEnvType.AmbientB:
-                case RLVGetEnvType.AmbientI:
-                case RLVGetEnvType.BlueDensityR:
-                case RLVGetEnvType.BlueDensityG:
-                case RLVGetEnvType.BlueDensityB:
-                case RLVGetEnvType.BlueDensityI:
-                case RLVGetEnvType.BlueHorizonR:
-                case RLVGetEnvType.BlueHorizonG:
-                case RLVGetEnvType.BlueHorizonB:
-                case RLVGetEnvType.BlueHorizonI:
-                case RLVGetEnvType.CloudColorR:
-                case RLVGetEnvType.CloudColorG:
-                case RLVGetEnvType.CloudColorB:
-                case RLVGetEnvType.CloudColorI:
-                case RLVGetEnvType.CloudCoverage:
-                case RLVGetEnvType.CloudX:
-                case RLVGetEnvType.CloudY:
-                case RLVGetEnvType.CloudD:
-                case RLVGetEnvType.CloudDetailX:
-                case RLVGetEnvType.CloudDetailY:
-                case RLVGetEnvType.CloudDetailD:
-                case RLVGetEnvType.CloudScale:
-                case RLVGetEnvType.CloudScrollX:
-                case RLVGetEnvType.CloudScrollY:
-                case RLVGetEnvType.CloudVariance:
-                case RLVGetEnvType.DensityMultiplier:
-                case RLVGetEnvType.DistanceMultiplier:
-                case RLVGetEnvType.DropletRadius:
-                case RLVGetEnvType.EastAngle:
-                case RLVGetEnvType.IceLevel:
-                case RLVGetEnvType.HazeDensity:
-                case RLVGetEnvType.HazeHorizon:
-                case RLVGetEnvType.MaxAltitude:
-                case RLVGetEnvType.MoistureLevel:
-                case RLVGetEnvType.MoonAzim:
-                case RLVGetEnvType.MoonNBrightness:
-                case RLVGetEnvType.MoonElev:
-                case RLVGetEnvType.MoonScale:
-                case RLVGetEnvType.SceneGamma:
-                case RLVGetEnvType.StarBrightness:
-                case RLVGetEnvType.SunGlowFocus:
-                case RLVGetEnvType.SunAzim:
-                case RLVGetEnvType.SunElev:
-                case RLVGetEnvType.SunScale:
-                case RLVGetEnvType.SunMoonPosition:
-                case RLVGetEnvType.SunMoonColorR:
-                case RLVGetEnvType.SunMoonColorG:
-                case RLVGetEnvType.SunMoonColorB:
-                case RLVGetEnvType.SunMoonColorI:
-                    return "0";
-
-                case RLVGetEnvType.Ambient:
-                case RLVGetEnvType.BlueDensity:
-                case RLVGetEnvType.BlueHorizon:
-                case RLVGetEnvType.CloudColor:
-                case RLVGetEnvType.Cloud:
-                case RLVGetEnvType.CloudDetail:
-                case RLVGetEnvType.SunMoonColor:
-                    return "0;0;0";
-
-                case RLVGetEnvType.CloudScroll:
-                    return "0;0";
-
-                case RLVGetEnvType.Preset:
-                case RLVGetEnvType.Asset:
-                    return "";
-
-                case RLVGetEnvType.MoonImage:
-                case RLVGetEnvType.SunImage:
-                case RLVGetEnvType.CloudImage:
-                    return UUID.Zero.ToString();
-
-                case RLVGetEnvType.SunGlowSize:
-                    return "1";
-            }
-
-            return null;
-        }
-
-        private static string ProcessGetDebug(RLVGetDebugType command)
-        {
-            switch (command)
-            {
-                case RLVGetDebugType.AvatarSex:
-                case RLVGetDebugType.RestrainedLoveForbidGiveToRLV:
-                case RLVGetDebugType.WindLightUseAtmosShaders:
-                    return "0";
-
-                case RLVGetDebugType.RenderResolutionDivisor:
-                case RLVGetDebugType.RestrainedLoveNoSetEnv:
-                    return "1";
-            }
-
-            return null;
         }
     }
 }

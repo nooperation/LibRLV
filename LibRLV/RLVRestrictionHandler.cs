@@ -135,9 +135,50 @@ namespace LibRLV
 
         private readonly Dictionary<RLVRestrictionType, HashSet<RLVRestriction>> _currentRestrictions = new Dictionary<RLVRestrictionType, HashSet<RLVRestriction>>();
 
-        public RLVRestrictionHandler()
+        private readonly IRLVCallbacks _callbacks;
+
+        public RLVRestrictionHandler(IRLVCallbacks callbacks)
         {
-            
+            this._callbacks = callbacks;
+        }
+
+        private void Notify(RLVRestriction restriction, bool wasAdded)
+        {
+            if (!_currentRestrictions.TryGetValue(RLVRestrictionType.Notify, out var notificationRestrictions))
+            {
+                return;
+            }
+
+            if (!RestrictionToNameMap.TryGetValue(restriction.Behavior, out var restrictionName))
+            {
+                return;
+            }
+
+            foreach (var notificationRestriction in notificationRestrictions)
+            {
+                var filter = "";
+
+                if (!(notificationRestriction.Args[0] is int notificationChannel))
+                {
+                    continue;
+                }
+
+                if (notificationRestriction.Args.Count > 1)
+                {
+                    filter = notificationRestriction.Args[1].ToString();
+                }
+
+                if (!restrictionName.Contains(filter))
+                {
+                    continue;
+                }
+
+                _callbacks.SendReplyAsync(
+                    notificationChannel,
+                    $"/{restrictionName}={(wasAdded ? "n" : "y")}",
+                    System.Threading.CancellationToken.None
+                ).Wait();
+            }
         }
 
         public List<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType, UUID? senderFilter = null)
@@ -188,10 +229,11 @@ namespace LibRLV
         {
             if (!_currentRestrictions.TryGetValue(restriction.Behavior, out var restrictions))
             {
+                Notify(restriction, false);
                 return;
             }
 
-            if(restrictions.Contains(restriction))
+            if (restrictions.Contains(restriction))
             {
                 RestrictionUpdated?.Invoke(this, new RestrictionUpdatedEventArgs()
                 {
@@ -202,30 +244,34 @@ namespace LibRLV
                 restrictions.Remove(restriction);
             }
 
-            if(restrictions.Count == 0)
+            if (restrictions.Count == 0)
             {
                 _currentRestrictions.Remove(restriction.Behavior);
             }
+
+            Notify(restriction, false);
         }
 
         private void AddRestriction(RLVRestriction newRestriction)
         {
             if (!_currentRestrictions.TryGetValue(newRestriction.Behavior, out var restrictions))
             {
-                _currentRestrictions.Add(newRestriction.Behavior, new HashSet<RLVRestriction>()
-                {
-                    newRestriction
-                });
-
-                return;
+                restrictions = new HashSet<RLVRestriction>();
+                _currentRestrictions.Add(newRestriction.Behavior, restrictions);
             }
 
-            if (restrictions.Contains(newRestriction))
+            if (!restrictions.Contains(newRestriction))
             {
-                return;
+                restrictions.Add(newRestriction);
+                RestrictionUpdated?.Invoke(this, new RestrictionUpdatedEventArgs()
+                {
+                    IsDeleted = false,
+                    IsNew = true,
+                    Restriction = newRestriction
+                });
             }
 
-            restrictions.Add(newRestriction);
+            Notify(newRestriction, true);
         }
 
         public void RemoveRestrictionsRelatedToObjects(ICollection<UUID> objectIds)
@@ -285,7 +331,7 @@ namespace LibRLV
                 return false;
             }
 
-            if(isAddingRestriction)
+            if (isAddingRestriction)
             {
                 AddRestriction(newCommand);
             }
