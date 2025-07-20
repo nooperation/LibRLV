@@ -142,7 +142,7 @@ namespace LibRLV
             this._callbacks = callbacks;
         }
 
-        private void Notify(RLVRestriction restriction, bool wasAdded)
+        private void NotifyRestrictionChange(RLVRestriction restriction, bool wasAdded)
         {
             if (!_currentRestrictions.TryGetValue(RLVRestrictionType.Notify, out var notificationRestrictions))
             {
@@ -181,21 +181,107 @@ namespace LibRLV
             }
         }
 
-        public List<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType, UUID? senderFilter = null)
+        public bool IsPermissiveMode { get; set; }
+
+        private RLVRestrictionType GetSecureRestriction(RLVRestrictionType restrictionType)
         {
-            if (!_currentRestrictions.TryGetValue(restrictionType, out var unfilteredRestrictions))
+            switch (restrictionType)
             {
-                return new List<RLVRestriction>();
+                case RLVRestrictionType.RecvChat:
+                    return RLVRestrictionType.RecvChatSec;
+                case RLVRestrictionType.RecvEmoteFrom:
+                    return RLVRestrictionType.RecvEmoteSec;
+                case RLVRestrictionType.SendChannel:
+                    return RLVRestrictionType.SendChannelSec;
+                case RLVRestrictionType.SendIm:
+                    return RLVRestrictionType.SendImSec;
+                case RLVRestrictionType.RecvIm:
+                    return RLVRestrictionType.RecvImSec;
+                case RLVRestrictionType.TpLure:
+                    return RLVRestrictionType.TpLureSec;
+                case RLVRestrictionType.TpRequest:
+                    return RLVRestrictionType.TpRequestSec;
+                case RLVRestrictionType.Share:
+                    return RLVRestrictionType.ShareSec;
+                case RLVRestrictionType.ShowNames:
+                    return RLVRestrictionType.ShowNamesSec;
             }
 
-            var result = unfilteredRestrictions
-                .Where(n => senderFilter == null || n.Sender == senderFilter)
-                .ToList();
-
-            return result;
+            return restrictionType;
         }
 
-        public List<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", UUID? senderFilter = null)
+        private bool IsSecureRestriction(RLVRestrictionType restrictionType)
+        {
+            switch (restrictionType)
+            {
+                case RLVRestrictionType.RecvChatSec:
+                case RLVRestrictionType.RecvEmoteSec:
+                case RLVRestrictionType.SendChannelSec:
+                case RLVRestrictionType.SendImSec:
+                case RLVRestrictionType.RecvImSec:
+                case RLVRestrictionType.TpLureSec:
+                case RLVRestrictionType.TpRequestSec:
+                case RLVRestrictionType.ShareSec:
+                case RLVRestrictionType.ShowNamesSec:
+                    return true;
+            }
+
+            return false;
+        }
+
+        private RLVRestrictionType GetInsecureRestriction(RLVRestrictionType restrictionType)
+        {
+            if (IsPermissiveMode)
+            {
+                switch (restrictionType)
+                {
+                    case RLVRestrictionType.RecvChatSec:
+                        return RLVRestrictionType.RecvChat;
+                    case RLVRestrictionType.RecvEmoteSec:
+                        return RLVRestrictionType.RecvEmoteFrom;
+                    case RLVRestrictionType.SendChannelSec:
+                        return RLVRestrictionType.SendChannel;
+                    case RLVRestrictionType.SendImSec:
+                        return RLVRestrictionType.SendIm;
+                    case RLVRestrictionType.RecvImSec:
+                        return RLVRestrictionType.RecvIm;
+                    case RLVRestrictionType.TpLureSec:
+                        return RLVRestrictionType.TpLure;
+                    case RLVRestrictionType.TpRequestSec:
+                        return RLVRestrictionType.TpRequest;
+                    case RLVRestrictionType.ShareSec:
+                        return RLVRestrictionType.Share;
+                    case RLVRestrictionType.ShowNamesSec:
+                        return RLVRestrictionType.ShowNames;
+                }
+            }
+
+            return restrictionType;
+        }
+
+        public ImmutableList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType, UUID? sender = null)
+        {
+            var useSecure = sender != null && (IsPermissiveMode || IsSecureRestriction(restrictionType));
+
+            restrictionType = RLVRestriction.GetRealRestriction(restrictionType);
+            restrictionType = GetInsecureRestriction(restrictionType);
+
+            if (!_currentRestrictions.TryGetValue(restrictionType, out var restrictions))
+            {
+                return ImmutableList<RLVRestriction>.Empty;
+            }
+
+            if(useSecure)
+            {
+                return restrictions
+                    .Where(n => n.Sender == sender)
+                    .ToImmutableList();
+            }
+
+            return restrictions.ToImmutableList();
+        }
+
+        public ImmutableList<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", UUID? senderFilter = null)
         {
             var restrictions = new List<RLVRestriction>();
 
@@ -211,7 +297,12 @@ namespace LibRLV
                     continue;
                 }
 
-                foreach (var restriction in item.Value)
+                if(!_currentRestrictions.TryGetValue(item.Key, out var realRestrictions))
+                {
+                    continue;
+                }
+
+                foreach (var restriction in realRestrictions)
                 {
                     if (senderFilter != null && restriction.Sender != senderFilter)
                     {
@@ -222,14 +313,14 @@ namespace LibRLV
                 }
             }
 
-            return restrictions;
+            return restrictions.ToImmutableList();
         }
 
         private void RemoveRestriction(RLVRestriction restriction)
         {
             if (!_currentRestrictions.TryGetValue(restriction.Behavior, out var restrictions))
             {
-                Notify(restriction, false);
+                NotifyRestrictionChange(restriction, false);
                 return;
             }
 
@@ -249,7 +340,7 @@ namespace LibRLV
                 _currentRestrictions.Remove(restriction.Behavior);
             }
 
-            Notify(restriction, false);
+            NotifyRestrictionChange(restriction, false);
         }
 
         private void AddRestriction(RLVRestriction newRestriction)
@@ -271,7 +362,7 @@ namespace LibRLV
                 });
             }
 
-            Notify(newRestriction, true);
+            NotifyRestrictionChange(newRestriction, true);
         }
 
         public void RemoveRestrictionsRelatedToObjects(ICollection<UUID> objectIds)
@@ -322,6 +413,7 @@ namespace LibRLV
             {
                 return false;
             }
+
 
             var args = RLVCommon.ParseOptions(option);
             var newCommand = new RLVRestriction(behavior, message.Sender, message.SenderName, args);

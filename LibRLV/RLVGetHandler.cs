@@ -65,7 +65,7 @@ namespace LibRLV
             StringBuilder sb = new StringBuilder();
             foreach (var restriction in restrictions)
             {
-                if (!RLVRestrictionHandler.RestrictionToNameMap.TryGetValue(restriction.Behavior, out var behaviorName))
+                if (!RLVRestrictionHandler.RestrictionToNameMap.TryGetValue(restriction.OriginalBehavior, out var behaviorName))
                 {
                     continue;
                 }

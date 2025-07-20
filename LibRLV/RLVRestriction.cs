@@ -10,13 +10,15 @@ namespace LibRLV
     {
         public RLVRestriction(RLVRestrictionType behavior, UUID sender, string senderName, ICollection<object> args)
         {
-            this.Behavior = behavior;
+            this.Behavior = GetRealRestriction(behavior);
+            this.OriginalBehavior = behavior;
             this.Sender = sender;
             this.SenderName = senderName;
             this.Args = args.ToImmutableList();
         }
 
         public RLVRestrictionType Behavior { get; }
+        public RLVRestrictionType OriginalBehavior { get; }
         public bool IsException => IsRestrictionAnException(this);
         public UUID Sender { get; }
         public string SenderName { get; }
@@ -25,6 +27,25 @@ namespace LibRLV
         public bool Validate()
         {
             return Validate(this);
+        }
+
+        public static RLVRestrictionType GetRealRestriction(RLVRestrictionType restrictionType)
+        {
+            switch (restrictionType)
+            {
+                case RLVRestrictionType.CamDistMax:
+                    return RLVRestrictionType.SetCamAvDistMax;
+                case RLVRestrictionType.CamDistMin:
+                    return RLVRestrictionType.SetCamAvDistMin;
+                case RLVRestrictionType.CamUnlock:
+                    return RLVRestrictionType.SetCamUnlock;
+                case RLVRestrictionType.CamTextures:
+                    return RLVRestrictionType.SetCamTextures;
+                case RLVRestrictionType.FarTouch:
+                    return RLVRestrictionType.TouchFar;
+            }
+
+            return restrictionType;
         }
 
         public static bool IsRestrictionAnException(RLVRestriction restriction)
@@ -92,8 +113,8 @@ namespace LibRLV
                     // [float, float, float]
                     return newCommand.Args.Count == 3 && newCommand.Args.All(n => n is float);
 
-                case RLVRestrictionType.RedirChat:
-                case RLVRestrictionType.RedirEmote:
+                case RLVRestrictionType.RedirChat:                  // TODO: Handle internally
+                case RLVRestrictionType.RedirEmote:                 // TODO: Handle internally
                 case RLVRestrictionType.SendChannelExcept:
                     // [int]
                     return newCommand.Args.Count == 1 && newCommand.Args[0] is int;

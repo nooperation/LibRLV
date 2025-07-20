@@ -1,10 +1,12 @@
 ﻿using OpenMetaverse;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace LibRLV
 {
-    internal interface IRestrictionProvider
+    public interface IRestrictionProvider
     {
-        List<RLVRestriction> GetRestrictions(string filter = "", UUID? sender = null);
+        ImmutableList<RLVRestriction> GetRestrictions(string filter = "", UUID? sender = null);
+        ImmutableList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType, UUID? sender = null);
     }
 }
