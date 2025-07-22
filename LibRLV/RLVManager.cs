@@ -9,10 +9,12 @@ namespace LibRLV
     public class RLVManager
     {
         IRestrictionProvider _restrictionProvider;
+        IRLVCallbacks _callbacks;
 
-        public RLVManager(IRestrictionProvider restrictionProvider)
+        public RLVManager(IRestrictionProvider restrictionProvider, IRLVCallbacks callbacks)
         {
             _restrictionProvider = restrictionProvider;
+            _callbacks = callbacks;
         }
 
         public bool CanFly()
@@ -142,7 +144,33 @@ namespace LibRLV
             return GetOptionalRestrictionValueMin(RLVRestrictionType.TpLocal, 0.0f, out tpLocalDist);
         }
 
-        public bool GetCamDrawColor(out Vector3 camDrawColor)
+        public bool IsRedirChat(out List<int> channels)
+        {
+            channels = _restrictionProvider
+                .GetRestrictions(RLVRestrictionType.RedirChat)
+                .Where(n => n.Args.Count == 1 && n.Args[0] is int)
+                .Select(n => (int)n.Args[0])
+                .Distinct()
+                .ToList();
+
+            return channels.Count > 0;
+        }
+
+        public bool IsRedirEmote(out List<int> channels)
+        {
+            channels = _restrictionProvider
+                .GetRestrictions(RLVRestrictionType.RedirEmote)
+                .Where(n => n.Args.Count == 1 && n.Args[0] is int)
+                .Select(n => (int)n.Args[0])
+                .Distinct()
+                .ToList();
+
+            return channels.Count > 0;
+        }
+
+
+
+        public bool HasCamDrawColor(out Vector3 camDrawColor)
         {
             camDrawColor.X = 0;
             camDrawColor.Y = 0;
@@ -252,7 +280,6 @@ namespace LibRLV
                     .ToList();
 
                 // @sendchannel_sec
-                var permissiveMode = false;
                 foreach (var restriction in sendChannelRestrictionsSecure)
                 {
                     var hasSecureException = channelExceptions
@@ -266,6 +293,7 @@ namespace LibRLV
                 }
 
                 // @sendchannel
+                var permissiveMode = IsPermissive();
                 foreach (var restriction in sendChannelRestrictions.Where(n => !n.IsException && n.Args.Count == 0))
                 {
                     var hasException = channelExceptions
@@ -325,7 +353,7 @@ namespace LibRLV
             }
 
             // Normal restrictions
-            var permissiveMode = false;
+            var permissiveMode = IsPermissive();
             foreach (var restriction in sendImRestrictions.Where(n => !n.IsException && n.Args.Count == 0))
             {
                 var hasException = sendImExceptions
@@ -342,7 +370,7 @@ namespace LibRLV
             return true;
         }
 
-        public bool StartIM(UUID? userId)
+        public bool CanStartIM(UUID? userId)
         {
             return CheckSecureRestriction(userId, null, RLVRestrictionType.StartIm, null, RLVRestrictionType.StartImTo);
         }
@@ -387,6 +415,21 @@ namespace LibRLV
         public bool CanShare(UUID? userId)
         {
             return CheckSecureRestriction(userId, null, RLVRestrictionType.Share, RLVRestrictionType.ShareSec, null);
+        }
+
+        public bool IsAutoDenyPermissions()
+        {
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.DenyPermission).Any();
+        }
+
+        public bool IsAutoAcceptPermissions()
+        {
+            if (IsAutoDenyPermissions())
+            {
+                return false;
+            }
+
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.AcceptPermission).Any();
         }
 
         public bool IsAutoAcceptTp(UUID userId)
@@ -457,6 +500,11 @@ namespace LibRLV
         }
         public bool CanEdit(UUID objectId, ObjectLocation objectLocation)
         {
+            if (!CanInteract())
+            {
+                return false;
+            }
+
             // @edit=<y/n>
             // @edit:<UUID>=<rem/add>
             // @editobj:<UUID>=<y/n>
@@ -489,6 +537,370 @@ namespace LibRLV
                     return false;
                 }
             }
+
+            return true;
+        }
+
+        public bool CanSendGesture()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SendGesture).Any();
+        }
+        public bool CanCamUnlock()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.CamUnlock).Any();
+        }
+        public bool CanTpLm()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.TpLm).Any();
+        }
+        public bool CanTpLoc()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.TpLoc).Any();
+        }
+        public bool CanStandTp()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.StandTp).Any();
+        }
+        public bool CanShowInv()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowInv).Any();
+        }
+        public bool CanViewNote()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ViewNote).Any();
+        }
+        public bool CanViewScript()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ViewScript).Any();
+        }
+        public bool CanViewTexture()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ViewTexture).Any();
+        }
+        public bool CanUnsit()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Unsit).Any();
+        }
+        public bool CanSit()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Sit).Any();
+        }
+        public bool CanDefaultWear()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.DefaultWear).Any();
+        }
+        public bool CanSetGroup()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SetGroup).Any();
+        }
+        public bool CanSetDebug()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SetDebug).Any();
+        }
+        public bool CanSetEnv()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SetEnv).Any();
+        }
+        public bool CanAllowIdle()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.AllowIdle).Any();
+        }
+        public bool CanInteract()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Interact).Any();
+        }
+        public bool CanShowWorldMap()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowWorldMap).Any();
+        }
+        public bool CanShowMiniMap()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowMiniMap).Any();
+        }
+        public bool CanShowLoc()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowLoc).Any();
+        }
+        public bool CanShowNearby()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowNearby).Any();
+        }
+        public bool CanUnsharedWear()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.UnsharedWear).Any();
+        }
+        public bool CanUnsharedUnwear()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.UnsharedUnwear).Any();
+        }
+        public bool CanSharedWear()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SharedWear).Any();
+        }
+        public bool CanSharedUnwear()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SharedUnwear).Any();
+        }
+
+        public bool CanDetachWearable(WearableType? typeToRemove)
+        {
+            return !_restrictionProvider
+                .GetRestrictions(RLVRestrictionType.RemOutfit)
+                .Where(n => n.Args.Count == 0 || (n.Args[0] is WearableType restrictedType && typeToRemove == restrictedType))
+                .Any();
+        }
+
+        public bool CanDetachAttached(AttachmentPoint? attachmentPoint)
+        {
+            return !_restrictionProvider
+                .GetRestrictions(RLVRestrictionType.RemAttach)
+                .Where(n => n.Args.Count == 0 || (n.Args[0] is AttachmentPoint restrictedAttachmentPoint && attachmentPoint == restrictedAttachmentPoint))
+                .Any();
+        }
+
+        public bool IsPermissive()
+        {
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Permissive).Any();
+        }
+
+        public bool CanRez()
+        {
+            if (!CanInteract())
+            {
+                return false;
+            }
+
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Rez).Any();
+        }
+
+        public bool CanTouchHud(UUID objectId)
+        {
+            return _restrictionProvider
+                .GetRestrictions(RLVRestrictionType.TouchHud)
+                .Where(n => n.Args.Count == 0 || (n.Args[0] is UUID restrictedObjectId && restrictedObjectId == objectId))
+                .Any();
+        }
+
+        private bool CanTouchAttachment(bool isAttachedToSelf, UUID? otherUserId)
+        {
+            // @touchattach
+            if (_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAttach).Any())
+            {
+                return false;
+            }
+
+            if (isAttachedToSelf)
+            {
+                // @touchattachself
+                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAttachSelf).Any())
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                // @touchattachother
+                var canTouchOtherAttachments = _restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAttachOther)
+                    .Where(n => n.Args.Count == 0 || (n.Args[0] is UUID restrictedUserId && restrictedUserId == otherUserId))
+                    .Any();
+                if (!canTouchOtherAttachments)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public enum TouchLocation
+        {
+            Hud,
+            AttachedSelf,
+            AttachedOther,
+            RezzedInWorld
+        }
+        public bool CanTouch(TouchLocation location, UUID objectId, UUID? userId, float? distance)
+        {
+            // @FarTouch | TouchFar ?
+            if (distance != null)
+            {
+                if (GetRestrictionValueMin(RLVRestrictionType.CamZoomMax, out float? maxTouchDistance))
+                {
+                    if (distance > maxTouchDistance)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            if (!CanInteract())
+            {
+                return false;
+            }
+
+            // @TouchMe
+            if (_restrictionProvider
+                .GetRestrictions(RLVRestrictionType.TouchMe)
+                .Where(n => n.Args.Count == 1 && n.Args[0] is UUID allowedObjectId && allowedObjectId == objectId)
+                .Any())
+            {
+                return true;
+            }
+
+            // @TouchThis
+            if (_restrictionProvider
+                .GetRestrictions(RLVRestrictionType.TouchThis)
+                .Where(n => n.Args.Count == 1 && n.Args[0] is UUID restrictedItemId && restrictedItemId == objectId)
+                .Any())
+            {
+                return false;
+            }
+
+            if (location != TouchLocation.Hud)
+            {
+                // @TouchAll
+                if (!_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAll).Any())
+                {
+                    return false;
+                }
+            }
+
+            if (location == TouchLocation.RezzedInWorld)
+            {
+                // @touchworld
+                var touchWorldRestrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.TouchWorld);
+                var hasException = touchWorldRestrictions
+                    .Where(n => n.IsException && n.Args.Count == 1 && n.Args[0] is UUID allowedObjectId && allowedObjectId == objectId)
+                    .Any();
+
+                if (!hasException && touchWorldRestrictions.Any(n => n.Args.Count == 0))
+                {
+                    return false;
+                }
+            }
+            else if (location == TouchLocation.AttachedSelf || location == TouchLocation.AttachedOther)
+            {
+                // @TouchAttachOther
+                // @TouchAttach
+                // @TouchAttachSelf
+                if (!CanTouchAttachment(location == TouchLocation.AttachedSelf, userId))
+                {
+                    return false;
+                }
+            }
+
+            if (location == TouchLocation.Hud)
+            {
+                // @TouchHud
+                if (!CanTouchHud(objectId))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public enum HoverTextLocation
+        {
+            Other,
+            World,
+            Hud
+        }
+        public bool ShowHoverText(HoverTextLocation location, UUID? objectId)
+        {
+            // @showhovertextall
+            if (_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowHoverTextAll).Any())
+            {
+                return false;
+            }
+
+            // @showhovertext:<UUID>
+            if (_restrictionProvider
+                .GetRestrictions(RLVRestrictionType.ShowHoverText)
+                .Where(n => n.Args.Count == 1 && n.Args[0] is UUID restrictedObjectId && restrictedObjectId == objectId)
+                .Any())
+            {
+                return false;
+            }
+
+            if (location == HoverTextLocation.Hud)
+            {
+                // @showhovertexthud
+                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowHoverTextHud).Any())
+                {
+                    return false;
+                }
+            }
+            else if (location == HoverTextLocation.World)
+            {
+                // @showhovertexthud
+                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowHoverTextWorld).Any())
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool CanDetach(UUID objectId, List<string> inventoryPath, InventoryType itemType, AttachmentPoint attachmentPoint, WearableType wearableType)
+        {
+            // @remoutfit[:<part>]=<y/n>
+            if (!CanDetachWearable(wearableType))
+            {
+                return false;
+            }
+
+            // @remattach[:<attach_point_name>]=<y/n>
+            if (!CanDetachAttached(attachmentPoint))
+            {
+                return false;
+            }
+
+            // @detach=<y/n>
+            // @detach:<attach_point_name>=<y/n>
+            var detachRestrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.Detach);
+            foreach (var restriction in detachRestrictions)
+            {
+                if(restriction.Args.Count == 0)
+                {
+                    return false;
+                }
+
+                if (restriction.Args[0] is AttachmentPoint restrictedAttachmentPoint && attachmentPoint == restrictedAttachmentPoint)
+                {
+                    return false;
+                }
+            }
+
+
+            if (inventoryPath.Count > 0 && inventoryPath[1].ToLower() == "#rlv")
+            {
+                // @sharedunwear=<y/n>
+                //   When prevented, no object, piece of clothing or bodypart can be removed from the avatar if it is part of the #RLV folder
+                if (!CanSharedUnwear())
+                {
+                    return false;
+                }
+
+                // These are all dealing with locked folders, handle internally:
+                //  @detachthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
+                //  @detachthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
+                //  @detachallthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
+                //  @detachthis_except:<folder>=<rem/add>
+                //  @detachallthis_except:<folder>=<rem/add>
+            }
+            else
+            {
+                // @unsharedunwear=<y/n>
+                //   When prevented, no object, piece of clothing or bodypart can be removed from the avatar unless it is part of the #RLV folder
+                if (!CanUnsharedUnwear())
+                {
+                    return false;
+                }
+            }
+
 
             return true;
         }

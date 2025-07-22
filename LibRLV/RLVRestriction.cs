@@ -102,19 +102,19 @@ namespace LibRLV
                     return newCommand.Args.Count == 1 && newCommand.Args[0] is float;
 
                 case RLVRestrictionType.SitTp:              // CanSitTp
-                case RLVRestrictionType.FarTouch:           // CanFarTouch
-                case RLVRestrictionType.TouchFar:           // CanTouchFar
+                case RLVRestrictionType.FarTouch:           // CanFarTouch, CanTouch
+                case RLVRestrictionType.TouchFar:           // CanTouchFar, CanTouch
                 case RLVRestrictionType.TpLocal:            // CanTpLocal
                     // [] || [float]
                     return newCommand.Args.Count == 0 ||
                            (newCommand.Args.Count == 1 && newCommand.Args[0] is float);
 
-                case RLVRestrictionType.CamDrawColor:
+                case RLVRestrictionType.CamDrawColor:       // HasCamDrawColor
                     // [float, float, float]
                     return newCommand.Args.Count == 3 && newCommand.Args.All(n => n is float);
 
-                case RLVRestrictionType.RedirChat:                  // TODO: Handle internally
-                case RLVRestrictionType.RedirEmote:                 // TODO: Handle internally
+                case RLVRestrictionType.RedirChat:          // IsRedirChat        // TODO: Handle internally automatically
+                case RLVRestrictionType.RedirEmote:         // IsRedirEmote       // TODO: Handle internally automatically
                 case RLVRestrictionType.SendChannelExcept:  // CanChat
                     // [int]
                     return newCommand.Args.Count == 1 && newCommand.Args[0] is int;
@@ -151,9 +151,9 @@ namespace LibRLV
                     return newCommand.Args.Count == 0 ||
                            (newCommand.Args.Count == 1 && newCommand.Args.All(n => n is WearableType));
 
-                case RLVRestrictionType.DetachThis:
-                case RLVRestrictionType.DetachAllThis:
-                case RLVRestrictionType.AttachAllThis:
+                case RLVRestrictionType.DetachThis:         // Folder locks - Handle internally
+                case RLVRestrictionType.DetachAllThis:      // Folder locks - Handle internally
+                case RLVRestrictionType.AttachAllThis:      // Folder locks - Handle internally
                     //[] || [uuid | layer | attachpt | string]
                     return newCommand.Args.Count == 0 || (newCommand.Args.Count == 1 && newCommand.Args.All(n =>
                                n is UUID ||
@@ -161,7 +161,7 @@ namespace LibRLV
                                n is AttachmentPoint ||
                                n is string));
 
-                case RLVRestrictionType.AttachThis:
+                case RLVRestrictionType.AttachThis:         // Folder locks - Handle internally
                     // [uuid | layer | attachpt | string]
                     return newCommand.Args.Count == 1 && newCommand.Args.All(n =>
                                n is UUID ||
@@ -169,10 +169,10 @@ namespace LibRLV
                                n is AttachmentPoint ||
                                n is string);
 
-                case RLVRestrictionType.DetachThisExcept:
-                case RLVRestrictionType.DetachAllThisExcept:
-                case RLVRestrictionType.AttachThisExcept:
-                case RLVRestrictionType.AttachAllThisExcept:
+                case RLVRestrictionType.DetachThisExcept:   // Folder locks - Handle internally
+                case RLVRestrictionType.DetachAllThisExcept:// Folder locks - Handle internally
+                case RLVRestrictionType.AttachThisExcept:   // Folder locks - Handle internally
+                case RLVRestrictionType.AttachAllThisExcept:// Folder locks - Handle internally
                     // [string]
                     return newCommand.Args.Count == 1 && newCommand.Args[0] is string;
 
@@ -187,9 +187,9 @@ namespace LibRLV
                 case RLVRestrictionType.TpRequest:          // CanTpRequest
                 case RLVRestrictionType.Edit:               // CanEdit
                 case RLVRestrictionType.Share:              // CanShare
-                case RLVRestrictionType.TouchWorld:
-                case RLVRestrictionType.TouchAttachOther:
-                case RLVRestrictionType.TouchHud:
+                case RLVRestrictionType.TouchWorld:         // CanTouch
+                case RLVRestrictionType.TouchAttachOther:   // CanTouch
+                case RLVRestrictionType.TouchHud:           // CanTouchHud
                 case RLVRestrictionType.ShowNames:          // CanShowNames
                 case RLVRestrictionType.ShowNamesSec:       // CanShowNames
                 case RLVRestrictionType.ShowNameTags: // RLVA adds optional UUID
@@ -201,17 +201,12 @@ namespace LibRLV
                 case RLVRestrictionType.RecvEmoteFrom:      // CanReceiveChat
                 case RLVRestrictionType.StartImTo:          // CanStartIM
                 case RLVRestrictionType.EditObj:            // CanEdit
-                case RLVRestrictionType.TouchThis:
-                case RLVRestrictionType.ShowHoverText:
+                case RLVRestrictionType.TouchThis:          // CanTouch
+                case RLVRestrictionType.ShowHoverText:      // ShowHoverText
                     // [UUID]
                     return newCommand.Args.Count == 1 && newCommand.Args[0] is UUID;
 
-                case RLVRestrictionType.Permissive:
-                case RLVRestrictionType.Fly:
-                case RLVRestrictionType.TempRun:
-                case RLVRestrictionType.AlwaysRun:
-                case RLVRestrictionType.CamUnlock:
-                case RLVRestrictionType.SetCamUnlock:
+                case RLVRestrictionType.Permissive:         // IsPermissive
                 case RLVRestrictionType.SendChat:           // CanChat
                 case RLVRestrictionType.ChatShout:          // CanChat
                 case RLVRestrictionType.ChatNormal:         // CanChat
@@ -219,47 +214,60 @@ namespace LibRLV
                 case RLVRestrictionType.Emote:              // CanChat
                 case RLVRestrictionType.RecvChatSec:        // CanReceiveChat
                 case RLVRestrictionType.RecvEmoteSec:       // CanReceiveChat
-                case RLVRestrictionType.SendGesture:
+                case RLVRestrictionType.SendGesture:        // CanSendGesture
                 case RLVRestrictionType.SendImSec:          // CanSendIM
                 case RLVRestrictionType.RecvImSec:          // CanReceiveIM
-                case RLVRestrictionType.TpLm:
-                case RLVRestrictionType.TpLoc:
                 case RLVRestrictionType.TpLureSec:          // CanTPLure
-                case RLVRestrictionType.StandTp:
                 case RLVRestrictionType.TpRequestSec:       // CanTpRequest
-                case RLVRestrictionType.ShowInv:
-                case RLVRestrictionType.ViewNote:
-                case RLVRestrictionType.ViewScript:
-                case RLVRestrictionType.ViewTexture:
-                case RLVRestrictionType.Rez:
+
+                case RLVRestrictionType.ShareSec:           // CanShare
+                case RLVRestrictionType.Fly:                // CanFly
+                case RLVRestrictionType.TempRun:            // CanTempRun
+                case RLVRestrictionType.AlwaysRun:          // CanAlwaysRun
+                case RLVRestrictionType.CamUnlock:          // CanCamUnlock
+                case RLVRestrictionType.SetCamUnlock:       // CanCamUnlock
+                case RLVRestrictionType.TpLm:               // CanTpLm
+                case RLVRestrictionType.TpLoc:              // CanTpLoc
+                case RLVRestrictionType.StandTp:            // CanStandTp
+                case RLVRestrictionType.ShowInv:            // CanShowInv
+                case RLVRestrictionType.ViewNote:           // CanViewNote
+                case RLVRestrictionType.ViewScript:         // CanViewScript
+                case RLVRestrictionType.ViewTexture:        // CanViewTexture
+                case RLVRestrictionType.Unsit:              // CanUnsit
+                case RLVRestrictionType.Sit:                // CanSit
+                case RLVRestrictionType.DefaultWear:        // CanDefaultWear
+                case RLVRestrictionType.SetGroup:           // CanSetGroup
+                case RLVRestrictionType.SetDebug:           // CanSetDebug
+                case RLVRestrictionType.SetEnv:             // CanSetEnv
+                case RLVRestrictionType.AllowIdle:          // CanAllowIdle
+                case RLVRestrictionType.ShowWorldMap:       // CanShowWorldMap
+                case RLVRestrictionType.ShowMiniMap:        // CanShowMiniMap
+                case RLVRestrictionType.ShowLoc:            // CanShowLoc
+                case RLVRestrictionType.ShowNearby:         // CanShowNearby
+
                 case RLVRestrictionType.EditWorld:          // CanEdit
                 case RLVRestrictionType.EditAttach:         // CanEdit
-                case RLVRestrictionType.ShareSec:           // CanShare
-                case RLVRestrictionType.Unsit:
-                case RLVRestrictionType.Sit:
-                case RLVRestrictionType.DefaultWear:
-                case RLVRestrictionType.AcceptPermission:
-                case RLVRestrictionType.DenyPermission:
-                case RLVRestrictionType.UnsharedWear:
-                case RLVRestrictionType.UnsharedUnwear:
-                case RLVRestrictionType.SharedWear:
-                case RLVRestrictionType.SharedUnwear:
-                case RLVRestrictionType.TouchAll:
-                case RLVRestrictionType.TouchMe:
-                case RLVRestrictionType.TouchAttach:
-                case RLVRestrictionType.TouchAttachSelf:
-                case RLVRestrictionType.Interact:
-                case RLVRestrictionType.ShowWorldMap:
-                case RLVRestrictionType.ShowMiniMap:
-                case RLVRestrictionType.ShowLoc:
-                case RLVRestrictionType.ShowNearby:
-                case RLVRestrictionType.ShowHoverTextAll:
-                case RLVRestrictionType.ShowHoverTextHud:
-                case RLVRestrictionType.ShowHoverTextWorld:
-                case RLVRestrictionType.SetGroup:
-                case RLVRestrictionType.SetDebug:
-                case RLVRestrictionType.SetEnv:
-                case RLVRestrictionType.AllowIdle:
+                case RLVRestrictionType.Rez:                // CanRez
+
+                case RLVRestrictionType.DenyPermission:     // IsAutoDenyPermissions, IsAutoAcceptPermissions
+                case RLVRestrictionType.AcceptPermission:   // IsAutoAcceptPermissions
+
+                case RLVRestrictionType.UnsharedWear:       // CanUnsharedWear, CanAttach?
+                case RLVRestrictionType.UnsharedUnwear:     // CanUnsharedUnwear, CanDetach?
+                case RLVRestrictionType.SharedWear:         // CanSharedWear, CanAttach?
+                case RLVRestrictionType.SharedUnwear:       // CanSharedUnwear, CanDetach?
+
+                case RLVRestrictionType.TouchAll:           // CanTouch
+                case RLVRestrictionType.TouchMe:            // CanTouch
+                case RLVRestrictionType.TouchAttach:        // CanTouch
+                case RLVRestrictionType.TouchAttachSelf:    // CanTouch
+
+                case RLVRestrictionType.Interact:           // MULTIPLE - CanTouch, CanEdit, CanRez
+
+
+                case RLVRestrictionType.ShowHoverTextAll:   // ShowHoverText
+                case RLVRestrictionType.ShowHoverTextHud:   // ShowHoverText
+                case RLVRestrictionType.ShowHoverTextWorld: // ShowHoverText
                     // []
                     return newCommand.Args.Count == 0;
             }

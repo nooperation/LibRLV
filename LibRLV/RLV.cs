@@ -15,6 +15,7 @@ namespace LibRLV
         public RLVGetHandler Get { get; }
         public RLVRestrictionHandler Restrictions { get; }
         public IRLVCallbacks Callbacks { get; }
+        public RLVManager RLVManager { get; }
 
         private readonly Regex RLVRegexPattern = new Regex(@"(?<behavior>[^:=]+)(:(?<option>[^=]*))?=(?<param>\w+)", RegexOptions.Compiled);
 
@@ -25,6 +26,7 @@ namespace LibRLV
             Actions = new RLVActionHandler();
             Restrictions = new RLVRestrictionHandler(Callbacks);
             Get = new RLVGetHandler(Blacklist, Restrictions, Callbacks);
+            RLVManager = new RLVManager(Restrictions, Callbacks);
         }
 
         private bool ProcessRLVMessage(RLVMessage rlvMessage)

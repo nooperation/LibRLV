@@ -121,5 +121,11 @@ namespace LibRLV
 
             return null;
         }
+
+        public virtual Task<bool> TryGetRlvInventoryTree(out InventoryTree sharedFolder)
+        {
+            sharedFolder = null;
+            return Task.FromResult(false);
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenMetaverse;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,5 +12,6 @@ namespace LibRLV
         Task<string> ProvideDataAsync(RLVDataRequest request, List<object> data, CancellationToken cancellationToken);
         Task<string> GetEnvironmentAsync(RLVGetEnvType envType);
         Task<string> GetDebugInfoAsync(RLVGetDebugType debugType);
+        Task<bool> TryGetRlvInventoryTree(out InventoryTree sharedFolder);
     }
 }

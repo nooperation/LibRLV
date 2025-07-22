@@ -128,6 +128,7 @@ namespace LibRLV
 
         private bool HandleDetach(RLVMessage command)
         {
+            // TODO: Look into whatever the "(nostrip)" tag is - restriction applied here?
             if (UUID.TryParse(command.Option, out UUID uuid))
             {
                 Detach?.Invoke(this, new DetachEventArgs(uuid, null));
