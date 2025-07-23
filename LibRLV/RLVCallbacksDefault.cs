@@ -127,5 +127,10 @@ namespace LibRLV
             sharedFolder = null;
             return Task.FromResult(false);
         }
+
+        public Task SendInstantMessageAsync(UUID targetUser, string message, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

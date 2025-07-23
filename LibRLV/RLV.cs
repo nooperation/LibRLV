@@ -7,6 +7,9 @@ namespace LibRLV
 {
     public class RLV
     {
+        public const string RLVVersion = "RestrainedLove viewer v3.4.3 (RLVa 2.4.2)";
+        public const string RLVVersionNum = "2040213";
+
         public bool Enabled { get; set; }
         public bool EnableInstantMessageProcessing { get; set; }
 
@@ -17,9 +20,9 @@ namespace LibRLV
         public IRLVCallbacks Callbacks { get; }
         public RLVManager RLVManager { get; }
 
-        private readonly Regex RLVRegexPattern = new Regex(@"(?<behavior>[^:=]+)(:(?<option>[^=]*))?=(?<param>\w+)", RegexOptions.Compiled);
+        private readonly Regex RLVRegexPattern = new Regex(@"(?<behavior>[^:=]+)(:(?<option>[^=]*))?=(?<param>.+)", RegexOptions.Compiled);
 
-        public RLV(IRLVCallbacks callbacks)
+        public RLV(IRLVCallbacks callbacks, bool enabled)
         {
             Callbacks = callbacks;
             Blacklist = new RLVBlacklist();
@@ -27,6 +30,7 @@ namespace LibRLV
             Restrictions = new RLVRestrictionHandler(Callbacks);
             Get = new RLVGetHandler(Blacklist, Restrictions, Callbacks);
             RLVManager = new RLVManager(Restrictions, Callbacks);
+            Enabled = enabled;
         }
 
         private bool ProcessRLVMessage(RLVMessage rlvMessage)
@@ -55,6 +59,11 @@ namespace LibRLV
             }
             else if (int.TryParse(rlvMessage.Param, out int channel))
             {
+                if(channel == 0)
+                {
+                    return false;
+                }
+
                 return Get.ProcessGetCommand(rlvMessage, channel);
             }
 
@@ -101,7 +110,7 @@ namespace LibRLV
             return result;
         }
 
-        public bool ProcessInstantMessage(string message, UUID senderId, string senderName, Action<UUID, string> instantMessageReply)
+        public bool ProcessInstantMessage(string message, UUID senderId, string senderName)
         {
             if (!EnableInstantMessageProcessing || !Enabled || !message.StartsWith("@"))
             {
@@ -113,7 +122,7 @@ namespace LibRLV
                 return false;
             }
 
-            return Get.ProcessInstantMessageCommand(message.ToLower(), senderId, senderName, instantMessageReply);
+            return Get.ProcessInstantMessageCommand(message.ToLower(), senderId, senderName);
         }
     }
 }

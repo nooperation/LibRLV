@@ -904,5 +904,160 @@ namespace LibRLV
 
             return true;
         }
+
+        public enum InventoryOfferAction
+        {
+            Accepted = 1,
+            Denied = 2
+        }
+        public void ReportInventoryOffer(string itemOrFolderPath, InventoryOfferAction action)
+        {
+            var isSharedFolder = false;
+
+            if(itemOrFolderPath.StartsWith("#RLV/"))
+            {
+                itemOrFolderPath = itemOrFolderPath.Substring("#RLV/".Length);
+                isSharedFolder = true;
+            }
+
+            var notificationText = "";
+            if (action == InventoryOfferAction.Accepted)
+            {
+                if (isSharedFolder)
+                {
+                    notificationText = $"/accepted_in_rlv inv_offer {itemOrFolderPath}";
+                }
+                else
+                {
+                    notificationText = $"/accepted_in_inv inv_offer {itemOrFolderPath}";
+                }
+            }
+            else
+            {
+                notificationText = $"/declined inv_offer {itemOrFolderPath}";
+            }
+
+            SendNotification(notificationText);
+        }
+
+        public enum WornItemChange
+        {
+            Attached = 1,
+            Detached = 2
+        }
+        public void ReportWornItemChange(UUID objectId, List<string> objectPath, WearableType wearableType, WornItemChange changeType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public enum AttachedItemChange
+        {
+            Attached = 1,
+            Detached = 2
+        }
+        public void ReportAttachedItemChange(AttachmentPoint attachmentPoint, AttachedItemChange changeType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public enum SitType
+        {
+            Sit = 1,
+            Stand,
+        }
+        public void ReportSit(SitType sitType, UUID? objectId, float? objectDistance)
+        {
+            var notificationText = "";
+
+            if(sitType == SitType.Sit && objectId != null)
+            {
+                var isLegal = CanInteract() && CanSit();
+
+                if(CanSitTp(out var maxObjectDistance))
+                {
+                    if(objectDistance == null || objectDistance > maxObjectDistance)
+                    {
+                        isLegal = false;
+                    }
+                }
+
+                if(isLegal)
+                {
+                    notificationText = $"/sat object legally {objectId}";
+                }
+                else
+                {
+                    notificationText = $"/sat object illegally {objectId}";
+                }
+            }
+            else if(sitType == SitType.Stand && objectId != null)
+            {
+                var isLegal = CanInteract() && CanUnsit();
+
+                if (isLegal)
+                {
+                    notificationText = $"/unsat object legally {objectId}";
+                }
+                else
+                {
+                    notificationText = $"/unsat object illegally {objectId}";
+                }
+            }
+            else if(sitType == SitType.Sit && objectId == null)
+            {
+                var isLegal = CanSit();
+
+                if (isLegal)
+                {
+                    notificationText = $"/sat ground legally";
+                }
+                else
+                {
+                    notificationText = $"/sat ground illegally";
+                }
+            }
+            else if(sitType == SitType.Stand && objectId == null)
+            {
+                var isLegal = CanUnsit();
+
+                if (isLegal)
+                {
+                    notificationText = $"/unsat ground legally";
+                }
+                else
+                {
+                    notificationText = $"/unsat ground illegally";
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            SendNotification(notificationText);
+        }
+
+        private void SendNotification(string notificationText)
+        {
+            var notificationRestrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.Notify);
+
+            foreach (var notificationRestriction in notificationRestrictions)
+            {
+                if (!(notificationRestriction.Args[0] is int channel))
+                {
+                    continue;
+                }
+
+                if (!(notificationRestriction.Args.Count > 1 && notificationRestriction.Args[1] is string filter))
+                {
+                    filter = "";
+                }
+
+                if (notificationText.Contains(filter))
+                {
+                    _callbacks.SendReplyAsync(channel, notificationText, System.Threading.CancellationToken.None);
+                }
+            }
+        }
     }
 }

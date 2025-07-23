@@ -175,9 +175,16 @@ namespace LibRLV
                     continue;
                 }
 
+                var notification = restrictionName;
+                if (restriction.Args.Count > 0)
+                {
+                    notification += ":" + string.Join(";", restriction.Args);
+                }
+                notification += wasAdded ? "=n" : "=y";
+
                 _callbacks.SendReplyAsync(
                     notificationChannel,
-                    $"/{restrictionName}={(wasAdded ? "n" : "y")}",
+                    $"/{notification}",
                     System.Threading.CancellationToken.None
                 ).Wait();
             }

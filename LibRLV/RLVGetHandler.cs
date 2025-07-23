@@ -11,9 +11,6 @@ namespace LibRLV
 {
     public class RLVGetHandler
     {
-        private string RLVVersion => "RestrainedLove viewer v3.4.3 (RLVa 2.4.2)";
-        private string RLVVersionNum => "2040213";
-
         private readonly ImmutableDictionary<string, RLVDataRequest> RLVDataRequestToNameMap;
         private readonly IRestrictionProvider _restrictions;
         private readonly IBlacklistProvider _blacklist;
@@ -85,19 +82,19 @@ namespace LibRLV
             {
                 case "version":
                 case "versionnew":
-                    response = RLVVersion;
+                    response = RLV.RLVVersion;
                     break;
                 case "versionnum":
-                    response = RLVVersionNum;
+                    response = RLV.RLVVersionNum;
                     break;
                 case "versionnumbl":
                     if (blacklist.Count > 0)
                     {
-                        response = $"{RLVVersionNum},{string.Join(",", blacklist)}";
+                        response = $"{RLV.RLVVersionNum},{string.Join(",", blacklist)}";
                     }
                     else
                     {
-                        response = RLVVersionNum;
+                        response = RLV.RLVVersionNum;
                     }
                     break;
                 case "getblacklist":
@@ -187,16 +184,16 @@ namespace LibRLV
             return false;
         }
 
-        internal bool ProcessInstantMessageCommand(string message, UUID senderId, string senderName, Action<UUID, string> instantMessageReply)
+        internal bool ProcessInstantMessageCommand(string message, UUID senderId, string senderName)
         {
             switch (message)
             {
                 case "@version":
-                    instantMessageReply?.Invoke(senderId, RLVVersion);
+                    _callbacks.SendInstantMessageAsync(senderId, RLV.RLVVersion, CancellationToken.None).Wait();
                     return true;
                 case "@getblacklist":
                     var blacklist = _blacklist.GetBlacklist();
-                    instantMessageReply?.Invoke(senderId, string.Join(",", _blacklist));
+                    _callbacks.SendInstantMessageAsync(senderId, string.Join(",", blacklist), CancellationToken.None).Wait();
                     return true;
             }
 
