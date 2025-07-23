@@ -146,7 +146,7 @@ namespace LibRLV
 
         private void NotifyRestrictionChange(RLVRestriction restriction, bool wasAdded)
         {
-            if (!RestrictionToNameMap.TryGetValue(restriction.Behavior, out var restrictionName))
+            if (!RestrictionToNameMap.TryGetValue(restriction.OriginalBehavior, out var restrictionName))
             {
                 return;
             }
@@ -766,13 +766,12 @@ namespace LibRLV
                 return false;
             }
 
-            var args = RLVCommon.ParseOptions(option);
-            var newCommand = new RLVRestriction(behavior, message.Sender, message.SenderName, args);
-
-            if (!newCommand.Validate())
+            if(!RLVRestriction.ParseOptions(behavior, option, out var args))
             {
                 return false;
             }
+
+            var newCommand = new RLVRestriction(behavior, message.Sender, message.SenderName, args);
 
             if (isAddingRestriction)
             {

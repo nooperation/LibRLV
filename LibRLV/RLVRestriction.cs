@@ -24,11 +24,6 @@ namespace LibRLV
         public string SenderName { get; }
         public ImmutableList<object> Args { get; }
 
-        public bool Validate()
-        {
-            return Validate(this);
-        }
-
         public static RLVRestrictionType GetRealRestriction(RLVRestrictionType restrictionType)
         {
             switch (restrictionType)
@@ -79,14 +74,28 @@ namespace LibRLV
             return false;
         }
 
-        public static bool Validate(RLVRestriction newCommand)
+        public static bool ParseOptions(RLVRestrictionType behavior, string options, out List<object> parsedArgs)
         {
-            switch (newCommand.Behavior)
+            parsedArgs = new List<object>();
+            var args = options.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+            switch (behavior)
             {
                 case RLVRestrictionType.Notify:             // INTERNAL
-                    //[int] || [int, string]
-                    return (newCommand.Args.Count == 1 && newCommand.Args[0] is int) ||
-                           (newCommand.Args.Count == 2 && newCommand.Args[0] is int && newCommand.Args[1] is string);
+                {
+                    if (args.Length < 1 || !int.TryParse(args[0], out var channel))
+                    {
+                        return false;
+                    }
+                    parsedArgs.Add(channel);
+
+                    if (args.Length == 2)
+                    {
+                        parsedArgs.Add(args[1]);
+                    }
+
+                    return true;
+                }
 
                 case RLVRestrictionType.CamZoomMax:         // HasCamZoomMax
                 case RLVRestrictionType.CamZoomMin:         // HasCamZoomMin
@@ -98,84 +107,269 @@ namespace LibRLV
                 case RLVRestrictionType.SetCamAvDistMin:    // HasSetCamAvDistMin
                 case RLVRestrictionType.CamDrawAlphaMax:    // HasCamDrawAlphaMax
                 case RLVRestrictionType.CamAvDist:          // HasCamAvDist
-                    // [float]
-                    return newCommand.Args.Count == 1 && newCommand.Args[0] is float;
+                {
+                    if (args.Length < 1 || !float.TryParse(args[0], out var val))
+                    {
+                        return false;
+                    }
+                    parsedArgs.Add(val);
+
+                    return true;
+                }
 
                 case RLVRestrictionType.SitTp:              // CanSitTp
                 case RLVRestrictionType.FarTouch:           // CanFarTouch, CanTouch
                 case RLVRestrictionType.TouchFar:           // CanTouchFar, CanTouch
                 case RLVRestrictionType.TpLocal:            // CanTpLocal
-                    // [] || [float]
-                    return newCommand.Args.Count == 0 ||
-                           (newCommand.Args.Count == 1 && newCommand.Args[0] is float);
+                {
+                    if (args.Length == 0)
+                    {
+                        return true;
+                    }
+
+                    if (args.Length != 1 || !float.TryParse(args[0], out var val))
+                    {
+                        return false;
+                    }
+
+                    parsedArgs.Add(val);
+                    return true;
+                }
 
                 case RLVRestrictionType.CamDrawColor:       // HasCamDrawColor
-                    // [float, float, float]
-                    return newCommand.Args.Count == 3 && newCommand.Args.All(n => n is float);
+                {
+                    if (args.Length != 3)
+                    {
+                        return false;
+                    }
+
+                    foreach (var arg in args)
+                    {
+                        if (!float.TryParse(arg, out var val))
+                        {
+                            return false;
+                        }
+
+                        parsedArgs.Add(val);
+                    }
+                    return true;
+                }
 
                 case RLVRestrictionType.RedirChat:          // IsRedirChat        // TODO: Handle internally automatically
                 case RLVRestrictionType.RedirEmote:         // IsRedirEmote       // TODO: Handle internally automatically
                 case RLVRestrictionType.SendChannelExcept:  // CanChat
-                    // [int]
-                    return newCommand.Args.Count == 1 && newCommand.Args[0] is int;
+                {
+                    if (args.Length != 1 || !int.TryParse(args[0], out var val))
+                    {
+                        return false;
+                    }
+
+                    parsedArgs.Add(val);
+                    return true;
+                }
 
                 case RLVRestrictionType.SendChannel:        // CanChat
                 case RLVRestrictionType.SendChannelSec:     // CanChat
-                    // [] || [int]
-                    return newCommand.Args.Count == 0 ||
-                           (newCommand.Args.Count == 1 && newCommand.Args[0] is int);
+                {
+                    if (args.Length == 0)
+                    {
+                        return true;
+                    }
+
+                    if (args.Length != 1 || !int.TryParse(args[0], out var val))
+                    {
+                        return false;
+                    }
+
+                    parsedArgs.Add(val);
+                    return true;
+                }
 
                 case RLVRestrictionType.SendImTo:           // CanSendIM
                 case RLVRestrictionType.RecvImFrom:         // CanReceiveIM
+                {
                     // [UUID | string]
-                    return newCommand.Args.Count == 1 && newCommand.Args.All(n => n is UUID || n is string);
+                    if (args.Length != 1)
+                    {
+                        return false;
+                    }
+
+                    if (UUID.TryParse(args[0], out var val))
+                    {
+                        parsedArgs.Add(val);
+                    }
+                    else
+                    {
+                        parsedArgs.Add(args[0]);
+                    }
+
+                    return true;
+                }
 
                 case RLVRestrictionType.SendIm:             // CanSendIM
                 case RLVRestrictionType.RecvIm:             // CanReceiveIM
-                    // [] || [UUID | string]
-                    return newCommand.Args.Count == 0 ||
-                           (newCommand.Args.Count == 1 && newCommand.Args.All(n => n is UUID || n is string));
+                {
+                    // [] | [UUID | string]
+                    if (args.Length == 0)
+                    {
+                        return true;
+                    }
+
+                    if (args.Length != 1)
+                    {
+                        return false;
+                    }
+
+                    if (UUID.TryParse(args[0], out var val))
+                    {
+                        parsedArgs.Add(val);
+                    }
+                    else
+                    {
+                        parsedArgs.Add(args[0]);
+                    }
+
+                    return true;
+                }
 
                 case RLVRestrictionType.Detach:             // CanDetach
+                {
                     // [AttachmentPoint]
-                    return newCommand.Args.Count == 1 && newCommand.Args.All(n => n is AttachmentPoint);
+                    if (args.Length != 1)
+                    {
+                        return false;
+                    }
+
+                    if (!Enum.TryParse<AttachmentPoint>(args[0], true, out var val))
+                    {
+                        return false;
+                    }
+
+                    parsedArgs.Add(val);
+                    return true;
+                }
 
                 case RLVRestrictionType.AddAttach:
                 case RLVRestrictionType.RemAttach:          // CanDetach
-                    // [] || [AttachmentPoint]
-                    return newCommand.Args.Count == 0 ||
-                           (newCommand.Args.Count == 1 && newCommand.Args.All(n => n is AttachmentPoint));
+                {
+                    // [] | [AttachmentPoint]
+                    if (args.Length == 0)
+                    {
+                        return true;
+                    }
+
+                    if (args.Length != 1)
+                    {
+                        return false;
+                    }
+
+                    if (!Enum.TryParse<AttachmentPoint>(args[0], true, out var val))
+                    {
+                        return false;
+                    }
+
+                    parsedArgs.Add(val);
+                    return true;
+                }
 
                 case RLVRestrictionType.AddOutfit:
                 case RLVRestrictionType.RemOutfit:
+                {
                     // [] || [layer]
-                    return newCommand.Args.Count == 0 ||
-                           (newCommand.Args.Count == 1 && newCommand.Args.All(n => n is WearableType));
+                    if (args.Length == 0)
+                    {
+                        return true;
+                    }
+
+                    if (args.Length != 1)
+                    {
+                        return false;
+                    }
+
+                    if (!Enum.TryParse<WearableType>(args[0], true, out var val))
+                    {
+                        return false;
+                    }
+
+                    parsedArgs.Add(val);
+                    return true;
+                }
 
                 case RLVRestrictionType.DetachThis:         // CanDetach
                 case RLVRestrictionType.DetachAllThis:      // CanDetach
                 case RLVRestrictionType.AttachAllThis:
-                    //[] || [uuid | layer | attachpt | string]
-                    return newCommand.Args.Count == 0 || (newCommand.Args.Count == 1 && newCommand.Args.All(n =>
-                               n is UUID ||
-                               n is WearableType ||
-                               n is AttachmentPoint ||
-                               n is string));
+                {
+                    // [] || [uuid | layer | attachpt | string]
+                    if (args.Length == 0)
+                    {
+                        return true;
+                    }
+
+                    if (args.Length != 1)
+                    {
+                        return false;
+                    }
+
+                    if (UUID.TryParse(args[0], out var uuid))
+                    {
+                        parsedArgs.Add(uuid);
+                    }
+                    else if (Enum.TryParse<WearableType>(args[0], true, out var wearableType))
+                    {
+                        parsedArgs.Add(wearableType);
+                        return true;
+                    }
+                    else if (Enum.TryParse<AttachmentPoint>(args[0], true, out var attachmentPoint))
+                    {
+                        parsedArgs.Add(attachmentPoint);
+                        return true;
+                    }
+
+                    parsedArgs.Add(args[0]);
+                    return true;
+                }
 
                 case RLVRestrictionType.AttachThis:
+                {
                     // [uuid | layer | attachpt | string]
-                    return newCommand.Args.Count == 1 && newCommand.Args.All(n =>
-                               n is UUID ||
-                               n is WearableType ||
-                               n is AttachmentPoint ||
-                               n is string);
+                    if (args.Length != 1)
+                    {
+                        return false;
+                    }
+
+                    if (UUID.TryParse(args[0], out var uuid))
+                    {
+                        parsedArgs.Add(uuid);
+                    }
+                    else if (Enum.TryParse<WearableType>(args[0], true, out var wearableType))
+                    {
+                        parsedArgs.Add(wearableType);
+                        return true;
+                    }
+                    else if (Enum.TryParse<AttachmentPoint>(args[0], true, out var attachmentPoint))
+                    {
+                        parsedArgs.Add(attachmentPoint);
+                        return true;
+                    }
+
+                    parsedArgs.Add(args[0]);
+                    return true;
+                }
 
                 case RLVRestrictionType.DetachThisExcept:   // CanDetach
                 case RLVRestrictionType.DetachAllThisExcept:// CanDetach
                 case RLVRestrictionType.AttachThisExcept:   // 
                 case RLVRestrictionType.AttachAllThisExcept:// 
+                {
                     // [string]
-                    return newCommand.Args.Count == 1 && newCommand.Args[0] is string;
+                    if (args.Length != 1)
+                    {
+                        return false;
+                    }
+
+                    parsedArgs.Add(args[0]);
+                    return true;
+                }
 
                 case RLVRestrictionType.CamTextures:        // HasSetCamtextures
                 case RLVRestrictionType.SetCamTextures:     // HasSetCamtextures
@@ -194,9 +388,26 @@ namespace LibRLV
                 case RLVRestrictionType.ShowNames:          // CanShowNames
                 case RLVRestrictionType.ShowNamesSec:       // CanShowNames
                 case RLVRestrictionType.ShowNameTags: // RLVA adds optional UUID
-                                                      // [] || [UUID]
-                    return newCommand.Args.Count == 0 ||
-                           (newCommand.Args.Count == 1 && newCommand.Args[0] is UUID);
+                {
+                    // [] [UUID]
+                    if (args.Length == 0)
+                    {
+                        return true;
+                    }
+
+                    if (args.Length != 1)
+                    {
+                        return false;
+                    }
+
+                    if (!UUID.TryParse(args[0], out UUID uuid))
+                    {
+                        return false;
+                    }
+
+                    parsedArgs.Add(uuid);
+                    return true;
+                }
 
                 case RLVRestrictionType.RecvChatFrom:       // CanReceiveChat
                 case RLVRestrictionType.RecvEmoteFrom:      // CanReceiveChat
@@ -204,8 +415,21 @@ namespace LibRLV
                 case RLVRestrictionType.EditObj:            // CanEdit
                 case RLVRestrictionType.TouchThis:          // CanTouch
                 case RLVRestrictionType.ShowHoverText:      // ShowHoverText
+                {
                     // [UUID]
-                    return newCommand.Args.Count == 1 && newCommand.Args[0] is UUID;
+                    if (args.Length != 1)
+                    {
+                        return false;
+                    }
+
+                    if (!UUID.TryParse(args[0], out UUID uuid))
+                    {
+                        return false;
+                    }
+
+                    parsedArgs.Add(uuid);
+                    return true;
+                }
 
                 case RLVRestrictionType.Permissive:         // IsPermissive
                 case RLVRestrictionType.SendChat:           // CanChat
@@ -265,17 +489,14 @@ namespace LibRLV
 
                 case RLVRestrictionType.Interact:           // MULTIPLE - CanTouch, CanEdit, CanRez
 
-
                 case RLVRestrictionType.ShowHoverTextAll:   // ShowHoverText
                 case RLVRestrictionType.ShowHoverTextHud:   // ShowHoverText
                 case RLVRestrictionType.ShowHoverTextWorld: // ShowHoverText
                     // []
-                    return newCommand.Args.Count == 0;
+                    return args.Length == 0;
                 default:
                     throw new NotImplementedException();
             }
-
-            return false;
         }
 
         public override string ToString()

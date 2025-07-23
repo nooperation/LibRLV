@@ -117,19 +117,23 @@ namespace LibRLV
                 switch (name)
                 {
                     case RLVDataRequest.GetOutfit:
+                    {
                         if (!Enum.TryParse<WearableType>(rlvMessage.Option, out var part))
                         {
                             return false;
                         }
                         args.Add(part);
                         break;
+                    }
                     case RLVDataRequest.GetAttach:
+                    {
                         if (!Enum.TryParse<AttachmentPoint>(rlvMessage.Option, out var attachmentPoint))
                         {
                             return false;
                         }
                         args.Add(attachmentPoint);
                         break;
+                    }
                     case RLVDataRequest.GetInv:
                     case RLVDataRequest.GetInvWorn:
                         args.Add(rlvMessage.Option);
@@ -142,18 +146,36 @@ namespace LibRLV
                         break;
                     case RLVDataRequest.GetPath:
                     case RLVDataRequest.GetPathNew:
-                        var parsedOptions = RLVCommon.ParseOptions(rlvMessage.Option);
-                        if (parsedOptions.Count != 1)
-                        {
-                            return false;
-                        }
-                        if (!parsedOptions.All(n => n is UUID || n is WearableType || n is AttachmentPoint))
+                    {
+                        // [uuid | layer | attachpt ]
+
+                        var result = new List<object>();
+                        var parsedOptions = rlvMessage.Option.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        if (parsedOptions.Length != 1)
                         {
                             return false;
                         }
 
-                        args.AddRange(parsedOptions);
-                        break;
+                        if (UUID.TryParse(parsedOptions[0], out var uuid))
+                        {
+                            args.Add(uuid);
+                        }
+                        else if (Enum.TryParse<WearableType>(parsedOptions[0], out var wearableType))
+                        {
+                            args.Add(wearableType);
+                        }
+                        else if (Enum.TryParse<AttachmentPoint>(parsedOptions[0], out var attachmentPoint))
+                        {
+                            args.Add(attachmentPoint);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+
+                        return true;
+                    }
                 }
 
                 response = _callbacks.ProvideDataAsync(name, args, CancellationToken.None).Result;

@@ -267,6 +267,27 @@ namespace LibRLV.Tests
             Assert.Equal(expected, actual);
         }
 
+        [Theory]
+        [InlineData("@camdistmax:123=n", "/camdistmax:123=n")]
+        [InlineData("@setcam_avdistmax:123=n", "/setcam_avdistmax:123=n")]
+        [InlineData("@camdistmin:123=n", "/camdistmin:123=n")]
+        [InlineData("@setcam_avdistmin:123=n", "/setcam_avdistmin:123=n")]
+        [InlineData("@camunlock=n", "/camunlock=n")]
+        [InlineData("@setcam_unlock=n", "/setcam_unlock=n")]
+        [InlineData("@camtextures:1cdbc6a2-ae6b-3130-9348-3d3b1ca84c53=n", "/camtextures:1cdbc6a2-ae6b-3130-9348-3d3b1ca84c53=n")]
+        [InlineData("@touchfar:5=n", "/touchfar:5=n")]
+        [InlineData("@fartouch:5=n", "/fartouch:5=n")]
+        public void NotifySynonyms(string command, string expectedReply)
+        {
+            _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
+
+            _callbacks.Verify(c => c.SendReplyAsync(1234, "/notify:1234=n", It.IsAny<CancellationToken>()), Times.Once);
+            _callbacks.Verify(c => c.SendReplyAsync(1234, expectedReply, It.IsAny<CancellationToken>()), Times.Once);
+
+            _callbacks.VerifyNoOtherCalls();
+        }
+
         [Fact]
         public void NotifyClear_Filtered()
         {
