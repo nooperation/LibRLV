@@ -604,5 +604,149 @@ namespace LibRLV.Tests
             Assert.True(_rlv.RLVManager.IsPermissive());
         }
         #endregion
+
+        #region @Clear
+
+        [Fact]
+        public void Clear()
+        {
+            _rlv.ProcessMessage("@tploc=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplm=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
+
+            _rlv.ProcessMessage("@clear", _sender.Id, _sender.Name);
+
+            var restrictions = _rlv.Restrictions.GetRestrictions();
+            Assert.Empty(restrictions);
+        }
+
+        [Fact]
+        public void Clear_SenderBased()
+        {
+            var sender2 = new RlvObject("Sender 2");
+
+            _rlv.ProcessMessage("@tploc=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplm=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@unsit=n", sender2.Id, sender2.Name);
+            _rlv.ProcessMessage("@fly=n", sender2.Id, sender2.Name);
+
+            _rlv.ProcessMessage("@clear", sender2.Id, sender2.Name);
+
+            Assert.False(_rlv.RLVManager.CanTpLoc());
+            Assert.False(_rlv.RLVManager.CanTpLm());
+            Assert.True(_rlv.RLVManager.CanUnsit());
+            Assert.True(_rlv.RLVManager.CanFly());
+        }
+
+        [Fact]
+        public void Clear_Filtered()
+        {
+            _rlv.ProcessMessage("@tploc=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplm=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
+
+            _rlv.ProcessMessage("@clear=tp", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanTpLoc());
+            Assert.True(_rlv.RLVManager.CanTpLm());
+            Assert.False(_rlv.RLVManager.CanUnsit());
+            Assert.False(_rlv.RLVManager.CanFly());
+        }
+        #endregion
+
+        #region @GetStatus
+
+        [Fact]
+        public void GetStatus()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sender2 = new RlvObject("Sender 2");
+
+            _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplure=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplure:3d6181b0-6a4b-97ef-18d8-722652995cf1=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplocal=n", sender2.Id, sender2.Name);
+
+            _rlv.ProcessMessage("@getstatus=1234", _sender.Id, _sender.Name);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, $"/fly/tplure/tplure:3d6181b0-6a4b-97ef-18d8-722652995cf1"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetStatus_filtered()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sender2 = new RlvObject("Sender 2");
+
+            _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplure=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplure:3d6181b0-6a4b-97ef-18d8-722652995cf1=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplocal=n", sender2.Id, sender2.Name);
+
+            _rlv.ProcessMessage("@getstatus:tp=1234", _sender.Id, _sender.Name);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, $"/tplure/tplure:3d6181b0-6a4b-97ef-18d8-722652995cf1"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetStatus_customSeparator()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sender2 = new RlvObject("Sender 2");
+
+            _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplure=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplure:3d6181b0-6a4b-97ef-18d8-722652995cf1=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplocal=n", sender2.Id, sender2.Name);
+
+            _rlv.ProcessMessage("@getstatus:; ! =1234", _sender.Id, _sender.Name);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, $" ! fly ! tplure ! tplure:3d6181b0-6a4b-97ef-18d8-722652995cf1"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        #endregion
+
+        #region @GetStatusAll
+
+        [Fact]
+        public void GetStatusAll()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sender2 = new RlvObject("Sender 2");
+
+            _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplure=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplure:3d6181b0-6a4b-97ef-18d8-722652995cf1=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplocal=n", sender2.Id, sender2.Name);
+
+            _rlv.ProcessMessage("@getstatusall=1234", _sender.Id, _sender.Name);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, $"/fly/tplure/tplure:3d6181b0-6a4b-97ef-18d8-722652995cf1/tplocal"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        #endregion
+
     }
 }

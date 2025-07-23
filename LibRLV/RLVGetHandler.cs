@@ -67,7 +67,11 @@ namespace LibRLV
                     continue;
                 }
 
-                sb.Append($"{separator}{behaviorName}:{string.Join(";", restriction.Args)}");
+                sb.Append($"{separator}{behaviorName}");
+                if(restriction.Args.Count > 0)
+                {
+                    sb.Append($":{string.Join(";", restriction.Args)}");
+                }
             }
 
             return sb.ToString();
