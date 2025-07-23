@@ -72,6 +72,19 @@ namespace LibRLV
 
         private bool ProcessSingleMessage(string message, UUID senderId, string senderName)
         {
+            // Special hack for @clear, which doesn't match the standard pattern of @behavior=param
+            if(message == "clear")
+            {
+                return ProcessRLVMessage(new RLVMessage()
+                {
+                    Behavior = message,
+                    Option = "",
+                    Param = "",
+                    Sender = senderId,
+                    SenderName = senderName
+                });
+            }
+
             var match = RLVRegexPattern.Match(message);
             if (!match.Success)
             {

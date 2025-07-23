@@ -297,7 +297,7 @@ namespace LibRLV
                 foreach (var restriction in sendChannelRestrictions.Where(n => !n.IsException && n.Args.Count == 0))
                 {
                     var hasException = channelExceptions
-                        .Where(n => !permissiveMode || n.Sender == restriction.Sender)
+                        .Where(n => permissiveMode || n.Sender == restriction.Sender)
                         .Any();
                     if (hasException)
                     {
@@ -357,7 +357,7 @@ namespace LibRLV
             foreach (var restriction in sendImRestrictions.Where(n => !n.IsException && n.Args.Count == 0))
             {
                 var hasException = sendImExceptions
-                    .Where(n => !permissiveMode || n.Sender == restriction.Sender)
+                    .Where(n => permissiveMode || n.Sender == restriction.Sender)
                     .Any();
                 if (hasException)
                 {
@@ -676,7 +676,7 @@ namespace LibRLV
 
         public bool IsPermissive()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Permissive).Any();
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Permissive).Any();
         }
 
         public bool CanRez()

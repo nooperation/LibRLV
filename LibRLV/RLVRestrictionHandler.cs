@@ -146,12 +146,25 @@ namespace LibRLV
 
         private void NotifyRestrictionChange(RLVRestriction restriction, bool wasAdded)
         {
-            if (!_currentRestrictions.TryGetValue(RLVRestrictionType.Notify, out var notificationRestrictions))
+            if (!RestrictionToNameMap.TryGetValue(restriction.Behavior, out var restrictionName))
             {
                 return;
             }
 
-            if (!RestrictionToNameMap.TryGetValue(restriction.Behavior, out var restrictionName))
+            var notification = restrictionName;
+            if (restriction.Args.Count > 0)
+            {
+                notification += ":" + string.Join(";", restriction.Args);
+            }
+
+            notification += wasAdded ? "=n" : "=y";
+
+            NotifyRestrictionChange(restrictionName, notification);
+        }
+
+        private void NotifyRestrictionChange(string restrictionName, string notificationMessage)
+        {
+            if (!_currentRestrictions.TryGetValue(RLVRestrictionType.Notify, out var notificationRestrictions))
             {
                 return;
             }
@@ -175,16 +188,9 @@ namespace LibRLV
                     continue;
                 }
 
-                var notification = restrictionName;
-                if (restriction.Args.Count > 0)
-                {
-                    notification += ":" + string.Join(";", restriction.Args);
-                }
-                notification += wasAdded ? "=n" : "=y";
-
                 _callbacks.SendReplyAsync(
                     notificationChannel,
-                    $"/{notification}",
+                    $"/{notificationMessage}",
                     System.Threading.CancellationToken.None
                 ).Wait();
             }
@@ -240,7 +246,7 @@ namespace LibRLV
 
         private RLVRestrictionType GetInsecureRestriction(RLVRestrictionType restrictionType)
         {
-            if (IsPermissiveMode)
+            if (!IsPermissiveMode)
             {
                 switch (restrictionType)
                 {
@@ -270,7 +276,7 @@ namespace LibRLV
 
         public ImmutableList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType, UUID? sender = null)
         {
-            var useSecure = sender != null && (IsPermissiveMode || IsSecureRestriction(restrictionType));
+            var useSecure = sender != null && (!IsPermissiveMode || IsSecureRestriction(restrictionType));
 
             restrictionType = RLVRestriction.GetRealRestriction(restrictionType);
             restrictionType = GetInsecureRestriction(restrictionType);
@@ -415,7 +421,7 @@ namespace LibRLV
         internal bool ProcessClearCommand(RLVMessage command)
         {
             var filteredRestrictions = RestrictionToNameMap
-                .Where(n => n.Value.Contains(command.Option))
+                .Where(n => n.Value.Contains(command.Param))
                 .Select(n => n.Key)
                 .ToList();
 
@@ -428,10 +434,23 @@ namespace LibRLV
 
                 foreach (var restrictionToRemove in restrictionsToRemove)
                 {
+                    if(restrictionToRemove.Sender != command.Sender)
+                    {
+                        continue;
+                    }
+
                     RemoveRestriction(restrictionToRemove);
                 }
             }
 
+
+            var notificationMessage = "clear";
+            if(command.Param != "")
+            {
+                notificationMessage += $":{command.Param}";
+            }
+
+            NotifyRestrictionChange("clear", notificationMessage);
             return true;
         }
 

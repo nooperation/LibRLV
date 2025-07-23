@@ -268,6 +268,48 @@ namespace LibRLV.Tests
         }
 
         [Fact]
+        public void NotifyClear_Filtered()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@clear=fly", _sender.Id, _sender.Name);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "/notify:1234=n"),
+                (1234, "/fly=n"),
+                // Begin processing clear()...
+                (1234, "/fly=y"),
+                (1234, "/clear:fly"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void NotifyClear()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            _rlv.ProcessMessage("@notify:1234=add", UUID.Random(), "Main");
+            _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@clear", _sender.Id, _sender.Name);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "/notify:1234=n"),
+                (1234, "/fly=n"),
+                // Begin processing clear()...
+                (1234, "/fly=y"),
+                (1234, "/clear"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
         public void NotifyInventoryOffer()
         {
             var actual = _callbacks.RecordReplies();
@@ -520,6 +562,25 @@ namespace LibRLV.Tests
             };
 
             Assert.Equal(expected, actual);
+        }
+        #endregion
+
+        #region @Permissive
+        [Fact]
+        public void Permissive_On()
+        {
+            _rlv.ProcessMessage("@permissive=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.IsPermissive());
+        }
+
+        [Fact]
+        public void Permissive_Off()
+        {
+            _rlv.ProcessMessage("@permissive=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@permissive=y", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.IsPermissive());
         }
         #endregion
     }
