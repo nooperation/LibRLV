@@ -8,5 +8,7 @@ namespace LibRLV
     {
         ImmutableList<RLVRestriction> GetRestrictions(string filter = "", UUID? sender = null);
         ImmutableList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType, UUID? sender = null);
+        bool TryGetLockedFolder(UUID folderId, out LockedFolder lockedFolder);
+
     }
 }

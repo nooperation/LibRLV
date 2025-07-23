@@ -642,6 +642,14 @@ namespace LibRLV
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SharedUnwear).Any();
         }
 
+        public bool CanAttachWearable(WearableType? typeToRemove)
+        {
+            return !_restrictionProvider
+                .GetRestrictions(RLVRestrictionType.AddOutfit)
+                .Where(n => n.Args.Count == 0 || (n.Args[0] is WearableType restrictedType && typeToRemove == restrictedType))
+                .Any();
+        }
+
         public bool CanDetachWearable(WearableType? typeToRemove)
         {
             return !_restrictionProvider
@@ -654,6 +662,14 @@ namespace LibRLV
         {
             return !_restrictionProvider
                 .GetRestrictions(RLVRestrictionType.RemAttach)
+                .Where(n => n.Args.Count == 0 || (n.Args[0] is AttachmentPoint restrictedAttachmentPoint && attachmentPoint == restrictedAttachmentPoint))
+                .Any();
+        }
+
+        public bool CanAttachAttached(AttachmentPoint? attachmentPoint)
+        {
+            return !_restrictionProvider
+                .GetRestrictions(RLVRestrictionType.AddAttach)
                 .Where(n => n.Args.Count == 0 || (n.Args[0] is AttachmentPoint restrictedAttachmentPoint && attachmentPoint == restrictedAttachmentPoint))
                 .Any();
         }
@@ -844,16 +860,54 @@ namespace LibRLV
             return true;
         }
 
-        public bool CanDetach(UUID objectId, List<string> inventoryPath, InventoryType itemType, AttachmentPoint attachmentPoint, WearableType wearableType)
+        public bool CanAttach(UUID objectId, UUID objectFolderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        {
+            if (wearableType != null && !CanAttachWearable(wearableType))
+            {
+                return false;
+            }
+
+            if (attachmentPoint != null && !CanAttachAttached(attachmentPoint))
+            {
+                return false;
+            }
+
+            if (isShared)
+            {
+                if (!CanSharedWear())
+                {
+                    return false;
+                }
+
+                if (_restrictionProvider.TryGetLockedFolder(objectFolderId, out var lockedFolder))
+                {
+                    if (!lockedFolder.CanAttach)
+                    {
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                if (!CanUnsharedWear())
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool CanDetach(UUID objectId, UUID objectFolderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
             // @remoutfit[:<part>]=<y/n>
-            if (!CanDetachWearable(wearableType))
+            if (wearableType != null && !CanDetachWearable(wearableType))
             {
                 return false;
             }
 
             // @remattach[:<attach_point_name>]=<y/n>
-            if (!CanDetachAttached(attachmentPoint))
+            if (attachmentPoint != null && !CanDetachAttached(attachmentPoint))
             {
                 return false;
             }
@@ -874,27 +928,23 @@ namespace LibRLV
                 }
             }
 
-
-            if (inventoryPath.Count > 0 && inventoryPath[1].ToLower() == "#rlv")
+            if (isShared)
             {
-                // @sharedunwear=<y/n>
-                //   When prevented, no object, piece of clothing or bodypart can be removed from the avatar if it is part of the #RLV folder
                 if (!CanSharedUnwear())
                 {
                     return false;
                 }
 
-                // These are all dealing with locked folders, handle internally:
-                //  @detachthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
-                //  @detachthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
-                //  @detachallthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
-                //  @detachthis_except:<folder>=<rem/add>
-                //  @detachallthis_except:<folder>=<rem/add>
+                if(_restrictionProvider.TryGetLockedFolder(objectFolderId, out var lockedFolder))
+                {
+                    if(!lockedFolder.CanDetach)
+                    {
+                        return false;
+                    }
+                }
             }
             else
             {
-                // @unsharedunwear=<y/n>
-                //   When prevented, no object, piece of clothing or bodypart can be removed from the avatar unless it is part of the #RLV folder
                 if (!CanUnsharedUnwear())
                 {
                     return false;
@@ -945,9 +995,42 @@ namespace LibRLV
             Attached = 1,
             Detached = 2
         }
-        public void ReportWornItemChange(UUID objectId, List<string> objectPath, WearableType wearableType, WornItemChange changeType)
+        public void ReportWornItemChange(UUID objectId, UUID objectFolderId, bool isShared, WearableType wearableType, WornItemChange changeType)
         {
-            throw new NotImplementedException();
+            var notificationText = "";
+
+            if(changeType == WornItemChange.Attached)
+            {
+                var isLegal = CanAttach(objectId, objectFolderId, isShared, null, wearableType);
+
+                if(isLegal)
+                {
+                    notificationText = $"/worn legally {wearableType.ToString().ToLower()}";
+                }
+                else
+                {
+                    notificationText = $"/worn illegally {wearableType.ToString().ToLower()}";
+                }
+            }
+            else if(changeType == WornItemChange.Detached)
+            {
+                var isLegal = CanDetach(objectId, objectFolderId, isShared, null, wearableType);
+
+                if (isLegal)
+                {
+                    notificationText = $"/unworn legally {wearableType.ToString().ToLower()}";
+                }
+                else
+                {
+                    notificationText = $"/unworn illegally {wearableType.ToString().ToLower()}";
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            SendNotification(notificationText);
         }
 
         public enum AttachedItemChange
@@ -955,9 +1038,42 @@ namespace LibRLV
             Attached = 1,
             Detached = 2
         }
-        public void ReportAttachedItemChange(AttachmentPoint attachmentPoint, AttachedItemChange changeType)
+        public void ReportAttachedItemChange(UUID objectId, UUID objectFolderId, bool isShared, AttachmentPoint attachmentPoint, AttachedItemChange changeType)
         {
-            throw new NotImplementedException();
+            var notificationText = "";
+
+            if (changeType == AttachedItemChange.Attached)
+            {
+                var isLegal = CanAttach(objectId, objectFolderId, isShared, attachmentPoint, null);
+
+                if (isLegal)
+                {
+                    notificationText = $"/attached legally {attachmentPoint.ToString().ToLower()}";
+                }
+                else
+                {
+                    notificationText = $"/attached illegally {attachmentPoint.ToString().ToLower()}";
+                }
+            }
+            else if (changeType == AttachedItemChange.Detached)
+            {
+                var isLegal = CanDetach(objectId, objectFolderId, isShared, attachmentPoint, null);
+
+                if (isLegal)
+                {
+                    notificationText = $"/detached legally {attachmentPoint.ToString().ToLower()}";
+                }
+                else
+                {
+                    notificationText = $"/detached illegally {attachmentPoint.ToString().ToLower()}";
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            SendNotification(notificationText);
         }
 
         public enum SitType

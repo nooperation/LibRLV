@@ -136,24 +136,25 @@ namespace LibRLV
                     return newCommand.Args.Count == 0 ||
                            (newCommand.Args.Count == 1 && newCommand.Args.All(n => n is UUID || n is string));
 
-                case RLVRestrictionType.Detach:
+                case RLVRestrictionType.Detach:             // CanDetach
                     // [AttachmentPoint]
                     return newCommand.Args.Count == 1 && newCommand.Args.All(n => n is AttachmentPoint);
 
                 case RLVRestrictionType.AddAttach:
-                case RLVRestrictionType.RemAttach:
+                case RLVRestrictionType.RemAttach:          // CanDetach
                     // [] || [AttachmentPoint]
                     return newCommand.Args.Count == 0 ||
                            (newCommand.Args.Count == 1 && newCommand.Args.All(n => n is AttachmentPoint));
 
                 case RLVRestrictionType.AddOutfit:
+                case RLVRestrictionType.RemOutfit:
                     // [] || [layer]
                     return newCommand.Args.Count == 0 ||
                            (newCommand.Args.Count == 1 && newCommand.Args.All(n => n is WearableType));
 
-                case RLVRestrictionType.DetachThis:         // Folder locks - Handle internally
-                case RLVRestrictionType.DetachAllThis:      // Folder locks - Handle internally
-                case RLVRestrictionType.AttachAllThis:      // Folder locks - Handle internally
+                case RLVRestrictionType.DetachThis:         // CanDetach
+                case RLVRestrictionType.DetachAllThis:      // CanDetach
+                case RLVRestrictionType.AttachAllThis:
                     //[] || [uuid | layer | attachpt | string]
                     return newCommand.Args.Count == 0 || (newCommand.Args.Count == 1 && newCommand.Args.All(n =>
                                n is UUID ||
@@ -161,7 +162,7 @@ namespace LibRLV
                                n is AttachmentPoint ||
                                n is string));
 
-                case RLVRestrictionType.AttachThis:         // Folder locks - Handle internally
+                case RLVRestrictionType.AttachThis:
                     // [uuid | layer | attachpt | string]
                     return newCommand.Args.Count == 1 && newCommand.Args.All(n =>
                                n is UUID ||
@@ -169,10 +170,10 @@ namespace LibRLV
                                n is AttachmentPoint ||
                                n is string);
 
-                case RLVRestrictionType.DetachThisExcept:   // Folder locks - Handle internally
-                case RLVRestrictionType.DetachAllThisExcept:// Folder locks - Handle internally
-                case RLVRestrictionType.AttachThisExcept:   // Folder locks - Handle internally
-                case RLVRestrictionType.AttachAllThisExcept:// Folder locks - Handle internally
+                case RLVRestrictionType.DetachThisExcept:   // CanDetach
+                case RLVRestrictionType.DetachAllThisExcept:// CanDetach
+                case RLVRestrictionType.AttachThisExcept:   // 
+                case RLVRestrictionType.AttachAllThisExcept:// 
                     // [string]
                     return newCommand.Args.Count == 1 && newCommand.Args[0] is string;
 
@@ -270,6 +271,8 @@ namespace LibRLV
                 case RLVRestrictionType.ShowHoverTextWorld: // ShowHoverText
                     // []
                     return newCommand.Args.Count == 0;
+                default:
+                    throw new NotImplementedException();
             }
 
             return false;

@@ -361,6 +361,166 @@ namespace LibRLV.Tests
 
             Assert.Equal(expected, actual);
         }
+
+
+        [Fact]
+        public void NotifyWear()
+        {
+            var actual = _callbacks.RecordReplies();
+            var wornItem = new RlvObject("TargetItem");
+
+            _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
+            _rlv.RLVManager.ReportWornItemChange(wornItem.Id, UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Attached);
+            _rlv.RLVManager.ReportWornItemChange(wornItem.Id, UUID.Random(), true, WearableType.Tattoo, RLVManager.WornItemChange.Attached);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, $"/notify:1234=n"),
+                (1234, $"/worn legally skin"),
+                (1234, $"/worn legally tattoo"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+
+        [Fact]
+        public void NotifyWear_Illegal()
+        {
+            var actual = _callbacks.RecordReplies();
+            var wornItem = new RlvObject("TargetItem");
+
+            _rlv.ProcessMessage("@addoutfit:skin=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
+            _rlv.RLVManager.ReportWornItemChange(wornItem.Id, UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Attached);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, $"/notify:1234=n"),
+                (1234, $"/worn illegally skin"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void NotifyUnWear()
+        {
+            var actual = _callbacks.RecordReplies();
+            var wornItem = new RlvObject("TargetItem");
+
+            _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
+            _rlv.RLVManager.ReportWornItemChange(wornItem.Id, UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Detached);
+            _rlv.RLVManager.ReportWornItemChange(wornItem.Id, UUID.Random(), true, WearableType.Tattoo, RLVManager.WornItemChange.Detached);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, $"/notify:1234=n"),
+                (1234, $"/unworn legally skin"),
+                (1234, $"/unworn legally tattoo"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void NotifyUnWear_illegal()
+        {
+            var actual = _callbacks.RecordReplies();
+            var wornItem = new RlvObject("TargetItem");
+
+            _rlv.ProcessMessage("@remoutfit:skin=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
+
+            _rlv.RLVManager.ReportWornItemChange(wornItem.Id, UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Detached);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, $"/notify:1234=n"),
+                (1234, $"/unworn illegally skin"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void NotifyAttached()
+        {
+            var actual = _callbacks.RecordReplies();
+            var wornItem = new RlvObject("TargetItem");
+
+            _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
+            _rlv.RLVManager.ReportAttachedItemChange(wornItem.Id, UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Attached);
+            _rlv.RLVManager.ReportAttachedItemChange(wornItem.Id, UUID.Random(), true, AttachmentPoint.Skull, RLVManager.AttachedItemChange.Attached);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, $"/notify:1234=n"),
+                (1234, $"/attached legally chest"),
+                (1234, $"/attached legally skull"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+
+        [Fact]
+        public void NotifyAttached_Illegal()
+        {
+            var actual = _callbacks.RecordReplies();
+            var wornItem = new RlvObject("TargetItem");
+
+            _rlv.ProcessMessage("@addattach:chest=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
+            _rlv.RLVManager.ReportAttachedItemChange(wornItem.Id, UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Attached);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, $"/notify:1234=n"),
+                (1234, $"/attached illegally chest"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void NotifyDetached()
+        {
+            var actual = _callbacks.RecordReplies();
+            var wornItem = new RlvObject("TargetItem");
+
+            _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
+            _rlv.RLVManager.ReportAttachedItemChange(wornItem.Id, UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Detached);
+            _rlv.RLVManager.ReportAttachedItemChange(wornItem.Id, UUID.Random(), true, AttachmentPoint.Skull, RLVManager.AttachedItemChange.Detached);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, $"/notify:1234=n"),
+                (1234, $"/detached legally chest"),
+                (1234, $"/detached legally skull"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void NotifyDetached_Illegal()
+        {
+            var actual = _callbacks.RecordReplies();
+            var wornItem = new RlvObject("TargetItem");
+
+            _rlv.ProcessMessage("@remattach:chest=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
+            _rlv.RLVManager.ReportAttachedItemChange(wornItem.Id, UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Detached);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, $"/notify:1234=n"),
+                (1234, $"/detached illegally chest"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
         #endregion
     }
 }
