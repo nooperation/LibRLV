@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static LibRLV.RLVManager;
 
 namespace LibRLV
 {
@@ -17,20 +18,7 @@ namespace LibRLV
             _callbacks = callbacks;
         }
 
-        public bool CanFly()
-        {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Fly).Count == 0;
-        }
 
-        public bool CanTempRun()
-        {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.TempRun).Count == 0;
-        }
-
-        public bool CanAlwaysRun()
-        {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.TempRun).Count == 0;
-        }
 
         private bool GetRestrictionValueMax<T>(RLVRestrictionType restrictionType, out T val)
         {
@@ -61,7 +49,7 @@ namespace LibRLV
             val = restriction
                 .Where(n => n.Args.Count > 0 && n.Args[0] is T)
                 .Select(n => (T)n.Args[0])
-                .Max();
+                .Min();
 
             return true;
         }
@@ -84,16 +72,145 @@ namespace LibRLV
                 val = restrictions
                     .Where(n => n.Args.Count > 0 && n.Args[0] is T)
                     .Select(n => (T)n.Args[0])
-                    .Max();
+                    .Min();
             }
 
             return true;
         }
 
-        public bool HasCamZoomMax(out float camZoomMax)
+        public bool CanFly()
         {
-            return GetRestrictionValueMin(RLVRestrictionType.CamZoomMax, out camZoomMax);
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Fly).Any();
         }
+        public bool CanTempRun()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.TempRun).Any();
+        }
+        public bool CanAlwaysRun()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.AlwaysRun).Any();
+        }
+        public bool CanChatShout()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ChatShout).Any();
+        }
+        public bool CanChatWhisper()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ChatWhisper).Any();
+        }
+        public bool CanChatNormal()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ChatNormal).Any();
+        }
+        public bool CanSendChat()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SendChat).Any();
+        }
+        public bool CanSendGesture()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SendGesture).Any();
+        }
+        public bool CanSetCamUnlock()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SetCamUnlock).Any();
+        }
+        public bool CanTpLm()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.TpLm).Any();
+        }
+        public bool CanTpLoc()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.TpLoc).Any();
+        }
+        public bool CanStandTp()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.StandTp).Any();
+        }
+        public bool CanShowInv()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowInv).Any();
+        }
+        public bool CanViewNote()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ViewNote).Any();
+        }
+        public bool CanViewScript()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ViewScript).Any();
+        }
+        public bool CanViewTexture()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ViewTexture).Any();
+        }
+        public bool CanUnsit()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Unsit).Any();
+        }
+        public bool CanSit()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Sit).Any();
+        }
+        public bool CanDefaultWear()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.DefaultWear).Any();
+        }
+        public bool CanSetGroup()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SetGroup).Any();
+        }
+        public bool CanSetDebug()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SetDebug).Any();
+        }
+        public bool CanSetEnv()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SetEnv).Any();
+        }
+        public bool CanAllowIdle()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.AllowIdle).Any();
+        }
+        public bool CanInteract()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Interact).Any();
+        }
+        public bool CanShowWorldMap()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowWorldMap).Any();
+        }
+        public bool CanShowMiniMap()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowMiniMap).Any();
+        }
+        public bool CanShowLoc()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowLoc).Any();
+        }
+        public bool CanShowNearby()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowNearby).Any();
+        }
+        public bool CanUnsharedWear()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.UnsharedWear).Any();
+        }
+        public bool CanUnsharedUnwear()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.UnsharedUnwear).Any();
+        }
+        public bool CanSharedWear()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SharedWear).Any();
+        }
+        public bool CanSharedUnwear()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SharedUnwear).Any();
+        }
+        public bool IsAutoDenyPermissions()
+        {
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.DenyPermission).Any();
+        }
+
         public bool HasCamZoomMin(out float camZoomMin)
         {
             return GetRestrictionValueMax(RLVRestrictionType.CamZoomMin, out camZoomMin);
@@ -102,25 +219,23 @@ namespace LibRLV
         {
             return GetRestrictionValueMax(RLVRestrictionType.SetCamFovMin, out setCamFovMin);
         }
+
+        public bool HasSetCamAvDistMin(out float setCamAvDistMin)
+        {
+            return GetRestrictionValueMax(RLVRestrictionType.SetCamAvDistMin, out setCamAvDistMin);
+        }
+        public bool HasCamZoomMax(out float camZoomMax)
+        {
+            return GetRestrictionValueMin(RLVRestrictionType.CamZoomMax, out camZoomMax);
+        }
         public bool HasSetCamFovMax(out float setCamFovMax)
         {
             return GetRestrictionValueMin(RLVRestrictionType.SetCamFovMax, out setCamFovMax);
         }
-        public bool HasCamDistMax(out float camDistMax)
-        {
-            return GetRestrictionValueMin(RLVRestrictionType.CamDistMax, out camDistMax);
-        }
+
         public bool HasSetCamAvDistMax(out float setCamAvDistMax)
         {
             return GetRestrictionValueMin(RLVRestrictionType.SetCamAvDistMax, out setCamAvDistMax);
-        }
-        public bool HasCamDistMin(out float camDistMin)
-        {
-            return GetRestrictionValueMax(RLVRestrictionType.CamDistMin, out camDistMin);
-        }
-        public bool HasSetCamAvDistMin(out float setCamAvDistMin)
-        {
-            return GetRestrictionValueMax(RLVRestrictionType.SetCamAvDistMin, out setCamAvDistMin);
         }
         public bool HasCamDrawAlphaMax(out float camDrawAlphaMax)
         {
@@ -168,8 +283,6 @@ namespace LibRLV
             return channels.Count > 0;
         }
 
-
-
         public bool HasCamDrawColor(out Vector3 camDrawColor)
         {
             camDrawColor.X = 0;
@@ -199,6 +312,16 @@ namespace LibRLV
             return true;
         }
 
+        public bool CanEmote()
+        {
+            if(CanSendChat())
+            {
+                return true;
+            }
+
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Emote).Count != 0;
+        }
+
         public enum ChatType
         {
             Whisper = 0,
@@ -221,26 +344,22 @@ namespace LibRLV
                     return false;
                 }
 
-                var canSendChat = _restrictionProvider.GetRestrictions(RLVRestrictionType.SendChat).Count != 0;
-                if (!canSendChat)
+                if (!CanSendChat())
                 {
                     return false;
                 }
 
-                var canChatWhisper = _restrictionProvider.GetRestrictions(RLVRestrictionType.ChatWhisper).Count != 0;
-                if (chatType == ChatType.Whisper && !canChatWhisper)
+                if (chatType == ChatType.Whisper && !CanChatWhisper())
                 {
                     return false;
                 }
 
-                var canChatShout = _restrictionProvider.GetRestrictions(RLVRestrictionType.ChatShout).Count != 0;
-                if (chatType == ChatType.Shout && !canChatShout)
+                if (chatType == ChatType.Shout && !CanChatShout())
                 {
                     return false;
                 }
 
-                var canChatNormal = _restrictionProvider.GetRestrictions(RLVRestrictionType.ChatNormal).Count != 0;
-                if (chatType == ChatType.Normal && !canChatNormal)
+                if (chatType == ChatType.Normal && !CanChatNormal())
                 {
                     return false;
                 }
@@ -417,10 +536,7 @@ namespace LibRLV
             return CheckSecureRestriction(userId, null, RLVRestrictionType.Share, RLVRestrictionType.ShareSec, null);
         }
 
-        public bool IsAutoDenyPermissions()
-        {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.DenyPermission).Any();
-        }
+
 
         public bool IsAutoAcceptPermissions()
         {
@@ -539,107 +655,6 @@ namespace LibRLV
             }
 
             return true;
-        }
-
-        public bool CanSendGesture()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SendGesture).Any();
-        }
-        public bool CanCamUnlock()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.CamUnlock).Any();
-        }
-        public bool CanTpLm()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.TpLm).Any();
-        }
-        public bool CanTpLoc()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.TpLoc).Any();
-        }
-        public bool CanStandTp()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.StandTp).Any();
-        }
-        public bool CanShowInv()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowInv).Any();
-        }
-        public bool CanViewNote()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ViewNote).Any();
-        }
-        public bool CanViewScript()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ViewScript).Any();
-        }
-        public bool CanViewTexture()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ViewTexture).Any();
-        }
-        public bool CanUnsit()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Unsit).Any();
-        }
-        public bool CanSit()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Sit).Any();
-        }
-        public bool CanDefaultWear()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.DefaultWear).Any();
-        }
-        public bool CanSetGroup()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SetGroup).Any();
-        }
-        public bool CanSetDebug()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SetDebug).Any();
-        }
-        public bool CanSetEnv()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SetEnv).Any();
-        }
-        public bool CanAllowIdle()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.AllowIdle).Any();
-        }
-        public bool CanInteract()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Interact).Any();
-        }
-        public bool CanShowWorldMap()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowWorldMap).Any();
-        }
-        public bool CanShowMiniMap()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowMiniMap).Any();
-        }
-        public bool CanShowLoc()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowLoc).Any();
-        }
-        public bool CanShowNearby()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowNearby).Any();
-        }
-        public bool CanUnsharedWear()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.UnsharedWear).Any();
-        }
-        public bool CanUnsharedUnwear()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.UnsharedUnwear).Any();
-        }
-        public bool CanSharedWear()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SharedWear).Any();
-        }
-        public bool CanSharedUnwear()
-        {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SharedUnwear).Any();
         }
 
         public bool CanAttachWearable(WearableType? typeToRemove)

@@ -444,7 +444,6 @@ namespace LibRLV
                 case RLVRestrictionType.RecvImSec:          // CanReceiveIM
                 case RLVRestrictionType.TpLureSec:          // CanTPLure
                 case RLVRestrictionType.TpRequestSec:       // CanTpRequest
-
                 case RLVRestrictionType.ShareSec:           // CanShare
                 case RLVRestrictionType.Fly:                // CanFly
                 case RLVRestrictionType.TempRun:            // CanTempRun
@@ -469,26 +468,20 @@ namespace LibRLV
                 case RLVRestrictionType.ShowMiniMap:        // CanShowMiniMap
                 case RLVRestrictionType.ShowLoc:            // CanShowLoc
                 case RLVRestrictionType.ShowNearby:         // CanShowNearby
-
                 case RLVRestrictionType.EditWorld:          // CanEdit
                 case RLVRestrictionType.EditAttach:         // CanEdit
                 case RLVRestrictionType.Rez:                // CanRez
-
                 case RLVRestrictionType.DenyPermission:     // IsAutoDenyPermissions, IsAutoAcceptPermissions
                 case RLVRestrictionType.AcceptPermission:   // IsAutoAcceptPermissions
-
                 case RLVRestrictionType.UnsharedWear:       // CanUnsharedWear, CanAttach?
                 case RLVRestrictionType.UnsharedUnwear:     // CanUnsharedUnwear, CanDetach?
                 case RLVRestrictionType.SharedWear:         // CanSharedWear, CanAttach?
                 case RLVRestrictionType.SharedUnwear:       // CanSharedUnwear, CanDetach?
-
                 case RLVRestrictionType.TouchAll:           // CanTouch
                 case RLVRestrictionType.TouchMe:            // CanTouch
                 case RLVRestrictionType.TouchAttach:        // CanTouch
                 case RLVRestrictionType.TouchAttachSelf:    // CanTouch
-
                 case RLVRestrictionType.Interact:           // MULTIPLE - CanTouch, CanEdit, CanRez
-
                 case RLVRestrictionType.ShowHoverTextAll:   // ShowHoverText
                 case RLVRestrictionType.ShowHoverTextHud:   // ShowHoverText
                 case RLVRestrictionType.ShowHoverTextWorld: // ShowHoverText

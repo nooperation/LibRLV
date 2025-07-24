@@ -748,5 +748,429 @@ namespace LibRLV.Tests
 
         #endregion
 
+
+        #region SimpleBooleanFlags
+
+        private void CheckSimpleCommand(string cmd, Func<RLVManager, bool> canFunc)
+        {
+            _rlv.ProcessMessage($"@{cmd}=n", _sender.Id, _sender.Name);
+            Assert.False(canFunc(_rlv.RLVManager));
+
+            _rlv.ProcessMessage($"@{cmd}=y", _sender.Id, _sender.Name);
+            Assert.True(canFunc(_rlv.RLVManager));
+        }
+
+        [Fact] public void CanFly() => CheckSimpleCommand("fly", m => m.CanFly());
+        [Fact] public void CanTempRun() => CheckSimpleCommand("tempRun", m => m.CanTempRun());
+        [Fact] public void CanAlwaysRun() => CheckSimpleCommand("alwaysRun", m => m.CanAlwaysRun());
+        [Fact] public void CanChatShout() => CheckSimpleCommand("chatShout", m => m.CanChatShout());
+        [Fact] public void CanChatWhisper() => CheckSimpleCommand("chatWhisper", m => m.CanChatWhisper());
+        [Fact] public void CanChatNormal() => CheckSimpleCommand("chatNormal", m => m.CanChatNormal());
+        [Fact] public void CanSendChat() => CheckSimpleCommand("sendChat", m => m.CanSendChat());
+        [Fact] public void CanSendGesture() => CheckSimpleCommand("sendGesture", m => m.CanSendGesture());
+        [Fact] public void CanCamUnlock() => CheckSimpleCommand("camUnlock", m => m.CanSetCamUnlock()); // CanSetCamUnlock() is correct here - alias
+        [Fact] public void CanSetCamUnlock() => CheckSimpleCommand("setcam_unlock", m => m.CanSetCamUnlock());
+        [Fact] public void CanTpLm() => CheckSimpleCommand("tpLm", m => m.CanTpLm());
+        [Fact] public void CanTpLoc() => CheckSimpleCommand("tpLoc", m => m.CanTpLoc());
+        [Fact] public void CanStandTp() => CheckSimpleCommand("standTp", m => m.CanStandTp());
+        [Fact] public void CanShowInv() => CheckSimpleCommand("showInv", m => m.CanShowInv());
+        [Fact] public void CanViewNote() => CheckSimpleCommand("viewNote", m => m.CanViewNote());
+        [Fact] public void CanViewScript() => CheckSimpleCommand("viewScript", m => m.CanViewScript());
+        [Fact] public void CanViewTexture() => CheckSimpleCommand("viewTexture", m => m.CanViewTexture());
+        [Fact] public void CanUnsit() => CheckSimpleCommand("unsit", m => m.CanUnsit());
+        [Fact] public void CanSit() => CheckSimpleCommand("sit", m => m.CanSit());
+        [Fact] public void CanDefaultWear() => CheckSimpleCommand("defaultWear", m => m.CanDefaultWear());
+        [Fact] public void CanSetGroup() => CheckSimpleCommand("setGroup", m => m.CanSetGroup());
+        [Fact] public void CanSetDebug() => CheckSimpleCommand("setDebug", m => m.CanSetDebug());
+        [Fact] public void CanSetEnv() => CheckSimpleCommand("setEnv", m => m.CanSetEnv());
+        [Fact] public void CanAllowIdle() => CheckSimpleCommand("allowIdle", m => m.CanAllowIdle());
+        [Fact] public void CanInteract() => CheckSimpleCommand("interact", m => m.CanInteract());
+        [Fact] public void CanShowWorldMap() => CheckSimpleCommand("showWorldMap", m => m.CanShowWorldMap());
+        [Fact] public void CanShowMiniMap() => CheckSimpleCommand("showMiniMap", m => m.CanShowMiniMap());
+        [Fact] public void CanShowLoc() => CheckSimpleCommand("showLoc", m => m.CanShowLoc());
+        [Fact] public void CanShowNearby() => CheckSimpleCommand("showNearby", m => m.CanShowNearby());
+        [Fact] public void CanUnsharedWear() => CheckSimpleCommand("unsharedWear", m => m.CanUnsharedWear());
+        [Fact] public void CanUnsharedUnwear() => CheckSimpleCommand("unsharedUnwear", m => m.CanUnsharedUnwear());
+        [Fact] public void CanSharedWear() => CheckSimpleCommand("sharedWear", m => m.CanSharedWear());
+        [Fact] public void CanSharedUnwear() => CheckSimpleCommand("sharedUnwear", m => m.CanSharedUnwear());
+
+        #endregion
+
+
+        #region CamMinFunctionsThrough
+
+        [Fact]
+        public void CamZoomMin_Default()
+        {
+            Assert.False(_rlv.RLVManager.HasCamZoomMin(out var camZoomMin));
+            Assert.Equal(default, camZoomMin);
+        }
+
+        [Fact]
+        public void CamZoomMin_Single()
+        {
+            _rlv.ProcessMessage("@CamZoomMin:1.5=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamZoomMin(out var camZoomMin));
+            Assert.Equal(1.5f, camZoomMin);
+        }
+
+        [Fact]
+        public void CamZoomMin_Multiple_SingleSender()
+        {
+            _rlv.ProcessMessage("@CamZoomMin:3.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamZoomMin:4.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamZoomMin:1.5=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamZoomMin(out var camZoomMin));
+            Assert.Equal(4.5f, camZoomMin);
+        }
+
+        [Fact]
+        public void CamZoomMin_Multiple_SingleSender_WithRemoval()
+        {
+            _rlv.ProcessMessage("@CamZoomMin:3.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamZoomMin:4.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamZoomMin:1.5=n", _sender.Id, _sender.Name);
+
+            _rlv.ProcessMessage("@CamZoomMin:8.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamZoomMin:8.5=y", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamZoomMin(out var camZoomMin));
+            Assert.Equal(4.5f, camZoomMin);
+        }
+
+        [Fact]
+        public void CamZoomMin_Multiple_MultipleSenders()
+        {
+            var sender2 = new RlvObject("Sender 2");
+            var sender3 = new RlvObject("Sender 3");
+
+            _rlv.ProcessMessage("@CamZoomMin:3.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamZoomMin:4.5=n", sender2.Id, sender2.Name);
+            _rlv.ProcessMessage("@CamZoomMin:1.5=n", sender3.Id, sender3.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamZoomMin(out var camZoomMin));
+            Assert.Equal(4.5f, camZoomMin);
+        }
+
+        [Fact]
+        public void CamZoomMin_Off()
+        {
+            _rlv.ProcessMessage("@CamZoomMin:1.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamZoomMin:1.5=y", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.HasCamZoomMin(out var camZoomMin));
+            Assert.Equal(default, camZoomMin);
+        }
+        #endregion
+
+        #region CamMaxFunctionsThrough
+        [Fact]
+        public void CamZoomMax_Default()
+        {
+            Assert.False(_rlv.RLVManager.HasCamZoomMax(out var camZoomMax));
+            Assert.Equal(default, camZoomMax);
+        }
+
+        [Fact]
+        public void CamZoomMax_Single()
+        {
+            _rlv.ProcessMessage("@CamZoomMax:1.5=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamZoomMax(out var camZoomMax));
+            Assert.Equal(1.5f, camZoomMax);
+        }
+
+        [Fact]
+        public void CamZoomMax_Multiple_SingleSender()
+        {
+            _rlv.ProcessMessage("@CamZoomMax:3.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamZoomMax:4.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamZoomMax:1.5=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamZoomMax(out var camZoomMax));
+            Assert.Equal(1.5f, camZoomMax);
+        }
+
+        [Fact]
+        public void CamZoomMax_Multiple_SingleSender_WithRemoval()
+        {
+            _rlv.ProcessMessage("@CamZoomMax:3.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamZoomMax:4.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamZoomMax:1.5=n", _sender.Id, _sender.Name);
+
+            _rlv.ProcessMessage("@CamZoomMax:0.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamZoomMax:0.5=y", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamZoomMax(out var camZoomMax));
+            Assert.Equal(1.5f, camZoomMax);
+        }
+
+        [Fact]
+        public void CamZoomMax_Multiple_MultipleSenders()
+        {
+            var sender2 = new RlvObject("Sender 2");
+            var sender3 = new RlvObject("Sender 3");
+
+            _rlv.ProcessMessage("@CamZoomMax:3.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamZoomMax:4.5=n", sender2.Id, sender2.Name);
+            _rlv.ProcessMessage("@CamZoomMax:1.5=n", sender3.Id, sender3.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamZoomMax(out var camZoomMax));
+            Assert.Equal(1.5f, camZoomMax);
+        }
+
+        [Fact]
+        public void CamZoomMax_Off()
+        {
+            _rlv.ProcessMessage("@CamZoomMax:1.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamZoomMax:1.5=y", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.HasCamZoomMax(out var camZoomMax));
+            Assert.Equal(default, camZoomMax);
+        }
+
+        #endregion
+
+
+        #region @CamZoomMin
+        [Fact]
+        public void CamZoomMin()
+        {
+            _rlv.ProcessMessage("@CamZoomMin:0.5=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamZoomMin(out var camZoomMin));
+            Assert.Equal(0.5f, camZoomMin);
+        }
+        #endregion
+
+        #region @CamZoomMax
+        [Fact]
+        public void CamZoomMax()
+        {
+            _rlv.ProcessMessage("@CamZoomMax:1.5=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamZoomMax(out var camZoomMax));
+            Assert.Equal(1.5f, camZoomMax);
+        }
+        #endregion
+
+        #region @setcam_fovmin
+        [Fact]
+        public void SetCamFovMin()
+        {
+            _rlv.ProcessMessage("@setcam_fovmin:15=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasSetCamFovMin(out var setCamFovMin));
+            Assert.Equal(15f, setCamFovMin);
+        }
+        #endregion
+
+        #region @CamDistMin
+        [Fact]
+        public void CamDistMin()
+        {
+            _rlv.ProcessMessage("@CamDistMin:0.2=n", _sender.Id, _sender.Name);
+
+            // @CamDistMin is an alias of @SetCamAvDistMin
+            Assert.True(_rlv.RLVManager.HasSetCamAvDistMin(out var distance));
+            Assert.Equal(0.2f, distance);
+        }
+        #endregion
+
+        #region @setcam_avdistmin
+        [Fact]
+        public void SetCamAvDistMin()
+        {
+            _rlv.ProcessMessage("@setcam_avdistmin:0.3=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasSetCamAvDistMin(out var setCamAvDistMin));
+            Assert.Equal(0.3f, setCamAvDistMin);
+        }
+        #endregion
+
+        #region @setcam_fovmax
+        [Fact]
+        public void SetCamFovMax()
+        {
+            _rlv.ProcessMessage("@setcam_fovmax:45=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasSetCamFovMax(out var setCamFovMax));
+            Assert.Equal(45f, setCamFovMax);
+        }
+        #endregion
+
+        #region @CamDistMax
+        [Fact]
+        public void CamDistMax()
+        {
+            _rlv.ProcessMessage("@CamDistMax:20=n", _sender.Id, _sender.Name);
+
+            // CamDistMax is an alias for SetCamAvDistMax
+            Assert.True(_rlv.RLVManager.HasSetCamAvDistMax(out var camDistMax));
+            Assert.Equal(20f, camDistMax);
+        }
+        #endregion
+
+        #region @setcam_avdistmax
+        [Fact]
+        public void SetCamAvDistMax()
+        {
+            _rlv.ProcessMessage("@setcam_avdistmax:30=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasSetCamAvDistMax(out var setCamAvDistMax));
+            Assert.Equal(30f, setCamAvDistMax);
+        }
+        [Fact]
+        public void SetCamAvDistMax_Synonym()
+        {
+            _rlv.ProcessMessage("@setcam_avdistmax:30=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasSetCamAvDistMax(out var setCamAvDistMax));
+            Assert.Equal(30f, setCamAvDistMax);
+        }
+        #endregion
+
+        #region @CamDrawAlphaMax
+        [Fact]
+        public void CamDrawAlphaMax()
+        {
+            _rlv.ProcessMessage("@CamDrawAlphaMax:0.9=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamDrawAlphaMax(out var camDrawAlphaMax));
+            Assert.Equal(0.9f, camDrawAlphaMax);
+        }
+        #endregion
+
+        #region @CamAvDist
+        [Fact]
+        public void CamAvDist()
+        {
+            _rlv.ProcessMessage("@CamAvDist:5=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamAvDist(out var camAvDist));
+            Assert.Equal(5f, camAvDist);
+        }
+        #endregion
+
+        #region @CanSitTp
+
+        [Fact]
+        public void CanSitTp_Default()
+        {
+            Assert.False(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.Equal(1.5f, maxDistance);
+        }
+
+        [Fact]
+        public void CanSitTp_Single()
+        {
+            _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.Equal(2.5f, maxDistance);
+        }
+
+        [Fact]
+        public void CanSitTp_Multiple_SingleSender()
+        {
+            _rlv.ProcessMessage("@SitTp:3.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@SitTp:4.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.Equal(2.5f, maxDistance);
+        }
+
+        [Fact]
+        public void CanSitTp_Multiple_SingleSender_WithRemoval()
+        {
+            _rlv.ProcessMessage("@SitTp:3.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@SitTp:4.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
+
+            _rlv.ProcessMessage("@SitTp:8.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@SitTp:8.5=y", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.Equal(2.5f, maxDistance);
+        }
+
+        [Fact]
+        public void CanSitTp_Multiple_MultipleSenders()
+        {
+            var sender2 = new RlvObject("Sender 2");
+            var sender3 = new RlvObject("Sender 3");
+
+            _rlv.ProcessMessage("@SitTp:3.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@SitTp:4.5=n", sender2.Id, sender2.Name);
+            _rlv.ProcessMessage("@SitTp:2.5=n", sender3.Id, sender3.Name);
+
+            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.Equal(2.5f, maxDistance);
+        }
+
+        [Fact]
+        public void CanSitTp_Off()
+        {
+            _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@SitTp:2.5=y", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.Equal(1.5f, maxDistance);
+        }
+        #endregion
+
+        #region @FarTouch
+        [Fact]
+        public void CanFarTouch()
+        {
+            _rlv.ProcessMessage("@FarTouch:0.9=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
+            Assert.Equal(0.9f, distance);
+        }
+
+        [Fact]
+        public void CanFarTouch_Synonym()
+        {
+            _rlv.ProcessMessage("@TouchFar:0.9=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
+            Assert.Equal(0.9f, distance);
+        }
+
+        [Fact]
+        public void CanFarTouch_Default()
+        {
+            _rlv.ProcessMessage("@FarTouch=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
+            Assert.Equal(1.5f, distance);
+        }
+        #endregion
+
+        #region @TpLocal
+        [Fact]
+        public void CanTpLocal()
+        {
+            _rlv.ProcessMessage("@TpLocal:0.9=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanTpLocal(out var distance));
+            Assert.Equal(0.9f, distance);
+        }
+
+        [Fact]
+        public void CanTpLocal_Default()
+        {
+            _rlv.ProcessMessage("@TpLocal=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanTpLocal(out var distance));
+            Assert.Equal(0.0f, distance);
+        }
+        #endregion
+
+
     }
 }
