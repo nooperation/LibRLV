@@ -28,7 +28,6 @@ namespace LibRLV.Tests
             _rlv = new RLV(_callbacks.Object, true);
         }
 
-
         #region General
         [Theory]
         [InlineData("@versionnew=1234", RLV.RLVVersion)]
@@ -748,7 +747,6 @@ namespace LibRLV.Tests
 
         #endregion
 
-
         #region SimpleBooleanFlags
 
         private void CheckSimpleCommand(string cmd, Func<RLVManager, bool> canFunc)
@@ -795,7 +793,6 @@ namespace LibRLV.Tests
         [Fact] public void CanSharedUnwear() => CheckSimpleCommand("sharedUnwear", m => m.CanSharedUnwear());
 
         #endregion
-
 
         #region CamMinFunctionsThrough
 
@@ -932,7 +929,6 @@ namespace LibRLV.Tests
         }
 
         #endregion
-
 
         #region @CamZoomMin
         [Fact]
@@ -1151,6 +1147,8 @@ namespace LibRLV.Tests
         }
         #endregion
 
+        public const float FloatTolerance = 0.00001f;
+
         #region @TpLocal
         [Fact]
         public void CanTpLocal()
@@ -1158,7 +1156,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@TpLocal:0.9=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.RLVManager.CanTpLocal(out var distance));
-            Assert.Equal(0.9f, distance);
+            Assert.Equal(0.9f, distance, FloatTolerance);
         }
 
         [Fact]
@@ -1167,7 +1165,304 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@TpLocal=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.RLVManager.CanTpLocal(out var distance));
-            Assert.Equal(0.0f, distance);
+            Assert.Equal(0.0f, distance, FloatTolerance);
+        }
+        #endregion
+
+        #region @CamDrawColor
+
+        [Fact]
+        public void CamDrawColor()
+        {
+            _rlv.ProcessMessage("@CamDrawColor:0.1;0.2;0.3=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamDrawColor(out var color));
+
+            Assert.Equal(0.1f, color.X, FloatTolerance);
+            Assert.Equal(0.2f, color.Y, FloatTolerance);
+            Assert.Equal(0.3f, color.Z, FloatTolerance);
+        }
+
+        [Fact]
+        public void CamDrawColor_Default()
+        {
+            Assert.False(_rlv.RLVManager.HasCamDrawColor(out var color));
+        }
+
+        [Fact]
+        public void CamDrawColor_Large()
+        {
+            _rlv.ProcessMessage("@CamDrawColor:5;6;7=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamDrawColor(out var color));
+            Assert.Equal(1.0f, color.X, FloatTolerance);
+            Assert.Equal(1.0f, color.Y, FloatTolerance);
+            Assert.Equal(1.0f, color.Z, FloatTolerance);
+        }
+
+        [Fact]
+        public void CamDrawColor_Negative()
+        {
+            _rlv.ProcessMessage("@CamDrawColor:-5;-6;-7=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamDrawColor(out var color));
+            Assert.Equal(0.0f, color.X, FloatTolerance);
+            Assert.Equal(0.0f, color.Y, FloatTolerance);
+            Assert.Equal(0.0f, color.Z, FloatTolerance);
+        }
+
+        [Fact]
+        public void CamDrawColor_Removal()
+        {
+            _rlv.ProcessMessage("@CamDrawColor:0.1;0.2;0.3=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamDrawColor:0.1;0.2;0.3=y", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.HasCamDrawColor(out var color));
+        }
+
+        [Fact]
+        public void CamDrawColor_Multi()
+        {
+            _rlv.ProcessMessage("@CamDrawColor:0.1;0.2;0.3=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@CamDrawColor:0.2;0.3;0.6=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamDrawColor(out var color));
+            Assert.Equal(0.15f, color.X, FloatTolerance);
+            Assert.Equal(0.25f, color.Y, FloatTolerance);
+            Assert.Equal(0.45f, color.Z, FloatTolerance);
+        }
+
+        #endregion
+
+        #region @redirchat
+
+        [Fact]
+        public void IsRedirChat()
+        {
+            _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.IsRedirChat(out var channels));
+
+            var expected = new List<int>
+            {
+                1234,
+            };
+
+            Assert.Equal(expected, channels);
+        }
+
+        [Fact]
+        public void IsRedirChat_Removed()
+        {
+            _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@redirchat:1234=rem", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.IsRedirChat(out var channels));
+        }
+
+        [Fact]
+        public void IsRedirChat_MultipleChannels()
+        {
+            _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@redirchat:12345=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.IsRedirChat(out var channels));
+
+            var expected = new List<int>
+            {
+                1234,
+                12345,
+            };
+
+            Assert.Equal(expected, channels);
+        }
+
+        [Fact]
+        public void IsRedirChat_RedirectChat()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
+            _rlv.RLVManager.ReportSendPublicMessage("Hello World");
+
+            Assert.True(_rlv.RLVManager.IsRedirChat(out var channels));
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "Hello World"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void IsRedirChat_RedirectChatMultiple()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@redirchat:5678=add", _sender.Id, _sender.Name);
+
+            _rlv.RLVManager.ReportSendPublicMessage("Hello World");
+            _rlv.RLVManager.IsRedirChat(out var channels);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "Hello World"),
+                (5678, "Hello World"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void IsRedirChat_RedirectChatEmote()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
+
+            _rlv.RLVManager.ReportSendPublicMessage("/me says Hello World");
+
+            Assert.True(_rlv.RLVManager.IsRedirChat(out var channels));
+            Assert.Empty(actual);
+        }
+
+        #endregion
+
+        #region @rediremote
+        [Fact]
+        public void IsRedirEmote()
+        {
+            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
+
+            var expected = new List<int>
+            {
+                1234,
+            };
+
+            Assert.Equal(expected, channels);
+        }
+
+        [Fact]
+        public void IsRedirEmote_Removed()
+        {
+            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@rediremote:1234=rem", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.IsRedirEmote(out var channels));
+        }
+
+        [Fact]
+        public void IsRedirEmote_MultipleChannels()
+        {
+            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@rediremote:12345=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
+
+            var expected = new List<int>
+            {
+                1234,
+                12345,
+            };
+
+            Assert.Equal(expected, channels);
+        }
+
+        [Fact]
+        public void IsRedirEmote_RedirectEmote()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
+            _rlv.RLVManager.ReportSendPublicMessage("/me says Hello World");
+
+            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "/me says Hello World"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void IsRedirEmote_RedirectEmoteMultiple()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@rediremote:5678=n", _sender.Id, _sender.Name);
+
+            _rlv.RLVManager.ReportSendPublicMessage("/me says Hello World");
+            _rlv.RLVManager.IsRedirEmote(out var channels);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "/me says Hello World"),
+                (5678, "/me says Hello World"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void IsRedirEmote_RedirectEmoteChat()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
+            _rlv.RLVManager.ReportSendPublicMessage("Hello World");
+
+            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
+            Assert.Empty(actual);
+        }
+
+        #endregion
+
+        #region @sendchannel_except
+
+        [Fact]
+        public void HasSendChannelExceptions()
+        {
+            _rlv.ProcessMessage("@sendchannel_except:1234=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasSendChannelExceptions(out var channels));
+
+            var expected = new List<int>
+            {
+                1234,
+            };
+
+            Assert.Equal(expected, channels);
+        }
+
+        [Fact]
+        public void HasSendChannelExceptions_Removed()
+        {
+            _rlv.ProcessMessage("@sendchannel_except:1234=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@sendchannel_except:1234=y", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.HasSendChannelExceptions(out var channels));
+        }
+
+        [Fact]
+        public void HasSendChannelExceptions_MultipleChannels()
+        {
+            _rlv.ProcessMessage("@sendchannel_except:1234=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@sendchannel_except:12345=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasSendChannelExceptions(out var channels));
+
+            var expected = new List<int>
+            {
+                1234,
+                12345,
+            };
+
+            Assert.Equal(expected, channels);
         }
         #endregion
 

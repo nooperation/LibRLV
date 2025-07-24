@@ -283,6 +283,18 @@ namespace LibRLV
             return channels.Count > 0;
         }
 
+        public bool HasSendChannelExceptions(out List<int> channels)
+        {
+            channels = _restrictionProvider
+                .GetRestrictions(RLVRestrictionType.SendChannelExcept)
+                .Where(n => n.Args.Count == 1 && n.Args[0] is int)
+                .Select(n => (int)n.Args[0])
+                .Distinct()
+                .ToList();
+
+            return channels.Count > 0;
+        }
+
         public bool HasCamDrawColor(out Vector3 camDrawColor)
         {
             camDrawColor.X = 0;
@@ -300,9 +312,9 @@ namespace LibRLV
 
             foreach (var restriction in restrictions)
             {
-                camDrawColor.X += Math.Min(0.0f, Math.Max(1.0f, (float)restriction.Args[0]));
-                camDrawColor.Y += Math.Min(0.0f, Math.Max(1.0f, (float)restriction.Args[1]));
-                camDrawColor.Z += Math.Min(0.0f, Math.Max(1.0f, (float)restriction.Args[2]));
+                camDrawColor.X += Math.Min(1.0f, Math.Max(0.0f, (float)restriction.Args[0]));
+                camDrawColor.Y += Math.Min(1.0f, Math.Max(0.0f, (float)restriction.Args[1]));
+                camDrawColor.Z += Math.Min(1.0f, Math.Max(0.0f, (float)restriction.Args[2]));
             }
 
             camDrawColor.X /= restrictions.Count;
@@ -968,6 +980,34 @@ namespace LibRLV
 
 
             return true;
+        }
+
+        public void ReportSendPublicMessage(string message)
+        {
+            if(message.StartsWith("/me"))
+            {
+                if(!IsRedirEmote(out var channels))
+                {
+                    return;
+                }
+
+                foreach (var channel in channels)
+                {
+                    _callbacks.SendReplyAsync(channel, message, System.Threading.CancellationToken.None);
+                }
+            }
+            else
+            {
+                if (!IsRedirChat(out var channels))
+                {
+                    return;
+                }
+
+                foreach (var channel in channels)
+                {
+                    _callbacks.SendReplyAsync(channel, message, System.Threading.CancellationToken.None);
+                }
+            }
         }
 
         public enum InventoryOfferAction
