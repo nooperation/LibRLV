@@ -157,7 +157,7 @@ namespace LibRLV
 
                 case RLVRestrictionType.RedirChat:          // IsRedirChat        // TODO: Handle internally automatically
                 case RLVRestrictionType.RedirEmote:         // IsRedirEmote       // TODO: Handle internally automatically
-                case RLVRestrictionType.SendChannelExcept:  // CanChat
+                case RLVRestrictionType.SendChannelExcept:  // HasSendChannelExceptions - CanChat
                 {
                     if (args.Length != 1 || !int.TryParse(args[0], out var val))
                     {

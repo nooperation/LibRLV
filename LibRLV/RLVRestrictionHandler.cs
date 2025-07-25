@@ -276,21 +276,11 @@ namespace LibRLV
 
         public ImmutableList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType, UUID? sender = null)
         {
-            var useSecure = sender != null && (!IsPermissiveMode || IsSecureRestriction(restrictionType));
-
             restrictionType = RLVRestriction.GetRealRestriction(restrictionType);
-            restrictionType = GetInsecureRestriction(restrictionType);
 
             if (!_currentRestrictions.TryGetValue(restrictionType, out var restrictions))
             {
                 return ImmutableList<RLVRestriction>.Empty;
-            }
-
-            if (useSecure)
-            {
-                return restrictions
-                    .Where(n => n.Sender == sender)
-                    .ToImmutableList();
             }
 
             return restrictions.ToImmutableList();
@@ -434,7 +424,7 @@ namespace LibRLV
 
                 foreach (var restrictionToRemove in restrictionsToRemove)
                 {
-                    if(restrictionToRemove.Sender != command.Sender)
+                    if (restrictionToRemove.Sender != command.Sender)
                     {
                         continue;
                     }
@@ -445,7 +435,7 @@ namespace LibRLV
 
 
             var notificationMessage = "clear";
-            if(command.Param != "")
+            if (command.Param != "")
             {
                 notificationMessage += $":{command.Param}";
             }
@@ -766,7 +756,7 @@ namespace LibRLV
                 return false;
             }
 
-            if(!RLVRestriction.ParseOptions(behavior, option, out var args))
+            if (!RLVRestriction.ParseOptions(behavior, option, out var args))
             {
                 return false;
             }

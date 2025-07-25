@@ -259,42 +259,6 @@ namespace LibRLV
             return GetOptionalRestrictionValueMin(RLVRestrictionType.TpLocal, 0.0f, out tpLocalDist);
         }
 
-        public bool IsRedirChat(out List<int> channels)
-        {
-            channels = _restrictionProvider
-                .GetRestrictions(RLVRestrictionType.RedirChat)
-                .Where(n => n.Args.Count == 1 && n.Args[0] is int)
-                .Select(n => (int)n.Args[0])
-                .Distinct()
-                .ToList();
-
-            return channels.Count > 0;
-        }
-
-        public bool IsRedirEmote(out List<int> channels)
-        {
-            channels = _restrictionProvider
-                .GetRestrictions(RLVRestrictionType.RedirEmote)
-                .Where(n => n.Args.Count == 1 && n.Args[0] is int)
-                .Select(n => (int)n.Args[0])
-                .Distinct()
-                .ToList();
-
-            return channels.Count > 0;
-        }
-
-        public bool HasSendChannelExceptions(out List<int> channels)
-        {
-            channels = _restrictionProvider
-                .GetRestrictions(RLVRestrictionType.SendChannelExcept)
-                .Where(n => n.Args.Count == 1 && n.Args[0] is int)
-                .Select(n => (int)n.Args[0])
-                .Distinct()
-                .ToList();
-
-            return channels.Count > 0;
-        }
-
         public bool HasCamDrawColor(out Vector3 camDrawColor)
         {
             camDrawColor.X = 0;
@@ -324,33 +288,104 @@ namespace LibRLV
             return true;
         }
 
-        public bool CanEmote()
+        #region Chat
+        public bool IsRedirChat(out List<int> channels)
         {
-            if(CanSendChat())
+            channels = _restrictionProvider
+                .GetRestrictions(RLVRestrictionType.RedirChat)
+                .Where(n => n.Args.Count == 1 && n.Args[0] is int)
+                .Select(n => (int)n.Args[0])
+                .Distinct()
+                .ToList();
+
+            return channels.Count > 0;
+        }
+
+        public bool IsRedirEmote(out List<int> channels)
+        {
+            channels = _restrictionProvider
+                .GetRestrictions(RLVRestrictionType.RedirEmote)
+                .Where(n => n.Args.Count == 1 && n.Args[0] is int)
+                .Select(n => (int)n.Args[0])
+                .Distinct()
+                .ToList();
+
+            return channels.Count > 0;
+        }
+
+        private bool CanChatOnChannelPrivateChannel(int channel)
+        {
+            var sendChannelExceptRestrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.SendChannelExcept);
+
+            // @sendchannel_except
+            foreach (var restriction in sendChannelExceptRestrictions)
             {
-                return true;
+                if (restriction.Args.Count == 0)
+                {
+                    continue;
+                }
+
+                if (!(restriction.Args[0] is int restrictedChannel))
+                {
+                    continue;
+                }
+
+                if (channel == restrictedChannel)
+                {
+                    return false;
+                }
             }
 
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Emote).Count != 0;
+            var sendChannelRestrictionsSecure = _restrictionProvider.GetRestrictions(RLVRestrictionType.SendChannelSec);
+            var sendChannelRestrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.SendChannel);
+            var channelExceptions = sendChannelExceptRestrictions
+                .Where(n =>
+                    n.IsException &&
+                    n.Args.Count > 0 &&
+                    n.Args[0] is int exceptionChannel &&
+                    exceptionChannel == channel
+                )
+                .ToList();
+
+            // @sendchannel_sec
+            foreach (var restriction in sendChannelRestrictionsSecure)
+            {
+                var hasSecureException = channelExceptions
+                    .Where(n => n.Sender == restriction.Sender).Any();
+                if (hasSecureException)
+                {
+                    continue;
+                }
+
+                return false;
+            }
+
+            // @sendchannel
+            var permissiveMode = IsPermissive();
+            foreach (var restriction in sendChannelRestrictions.Where(n => !n.IsException && n.Args.Count == 0))
+            {
+                var hasException = channelExceptions
+                    .Where(n => permissiveMode || n.Sender == restriction.Sender)
+                    .Any();
+                if (hasException)
+                {
+                    continue;
+                }
+
+                return false;
+            }
+
+            return true;
         }
 
-        public enum ChatType
-        {
-            Whisper = 0,
-            Normal = 1,
-            Shout = 2
-        }
-        public bool CanChat(int channel, string message, ChatType chatType)
+        public bool CanChat(int channel, string message)
         {
             if (channel == 0)
             {
                 // @sendchat=<y/n>
-                //      @chatshout=<y/n>
-                //      @chatnormal=<y/n>
-                //      @chatwhisper=<y/n>
                 //      @emote=<rem/add>
 
-                var canEmote = _restrictionProvider.GetRestrictions(RLVRestrictionType.Emote).Count != 0;
+                var canEmote = !_restrictionProvider.GetRestrictions(RLVRestrictionType.Emote).Any();
                 if (message.StartsWith("/me ") && !canEmote)
                 {
                     return false;
@@ -358,89 +393,36 @@ namespace LibRLV
 
                 if (!CanSendChat())
                 {
-                    return false;
-                }
+                    // TODO: Implement weird hacked on restrictions from @sendchat?
+                    //  emotes and messages beginning with a slash ('/') will go through,
+                    //  truncated to strings of 30 and 15 characters long respectively (likely
+                    //  to change later). Messages with special signs like ()"-*=_^ are prohibited,
+                    //  and will be discarded. When a period ('.') is present, the rest of the
+                    //  message is discarded. 
 
-                if (chatType == ChatType.Whisper && !CanChatWhisper())
-                {
-                    return false;
-                }
-
-                if (chatType == ChatType.Shout && !CanChatShout())
-                {
-                    return false;
-                }
-
-                if (chatType == ChatType.Normal && !CanChatNormal())
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                var sendChannelExceptRestrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.SendChannelExcept);
-
-                // @sendchannel_except
-                foreach (var restriction in sendChannelExceptRestrictions)
-                {
-                    if (restriction.Args.Count == 0)
+                    if (message.IndexOfAny(new char[] { '(', ')', '"', '-', '*', '=', '_', '^' }) != -1)
                     {
-                        continue;
+                        return false;
                     }
 
-                    if (!(restriction.Args[0] is int restrictedChannel))
-                    {
-                        continue;
-                    }
-
-                    if (channel == restrictedChannel)
+                    if (!message.StartsWith("/"))
                     {
                         return false;
                     }
                 }
-
-                var sendChannelRestrictionsSecure = _restrictionProvider.GetRestrictions(RLVRestrictionType.SendChannelSec);
-                var sendChannelRestrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.SendChannel);
-                var channelExceptions = sendChannelExceptRestrictions
-                    .Where(n =>
-                        n.IsException &&
-                        n.Args.Count > 0 &&
-                        n.Args[0] is int exceptionChannel &&
-                        exceptionChannel == channel
-                    )
-                    .ToList();
-
-                // @sendchannel_sec
-                foreach (var restriction in sendChannelRestrictionsSecure)
+            }
+            else
+            {
+                if (!CanChatOnChannelPrivateChannel(channel))
                 {
-                    var hasSecureException = channelExceptions
-                        .Where(n => n.Sender == restriction.Sender).Any();
-                    if (hasSecureException)
-                    {
-                        continue;
-                    }
-
-                    return false;
-                }
-
-                // @sendchannel
-                var permissiveMode = IsPermissive();
-                foreach (var restriction in sendChannelRestrictions.Where(n => !n.IsException && n.Args.Count == 0))
-                {
-                    var hasException = channelExceptions
-                        .Where(n => permissiveMode || n.Sender == restriction.Sender)
-                        .Any();
-                    if (hasException)
-                    {
-                        continue;
-                    }
-
                     return false;
                 }
             }
 
             return true;
         }
+
+        #endregion
 
         private bool CheckSecureRestriction(UUID? userId, string groupName, RLVRestrictionType normalType, RLVRestrictionType? secureType, RLVRestrictionType? fromToType)
         {
@@ -944,7 +926,7 @@ namespace LibRLV
             var detachRestrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.Detach);
             foreach (var restriction in detachRestrictions)
             {
-                if(restriction.Args.Count == 0)
+                if (restriction.Args.Count == 0)
                 {
                     return false;
                 }
@@ -962,9 +944,9 @@ namespace LibRLV
                     return false;
                 }
 
-                if(_restrictionProvider.TryGetLockedFolder(objectFolderId, out var lockedFolder))
+                if (_restrictionProvider.TryGetLockedFolder(objectFolderId, out var lockedFolder))
                 {
-                    if(!lockedFolder.CanDetach)
+                    if (!lockedFolder.CanDetach)
                     {
                         return false;
                     }
@@ -984,9 +966,9 @@ namespace LibRLV
 
         public void ReportSendPublicMessage(string message)
         {
-            if(message.StartsWith("/me"))
+            if (message.StartsWith("/me"))
             {
-                if(!IsRedirEmote(out var channels))
+                if (!IsRedirEmote(out var channels))
                 {
                     return;
                 }
@@ -1019,7 +1001,7 @@ namespace LibRLV
         {
             var isSharedFolder = false;
 
-            if(itemOrFolderPath.StartsWith("#RLV/"))
+            if (itemOrFolderPath.StartsWith("#RLV/"))
             {
                 itemOrFolderPath = itemOrFolderPath.Substring("#RLV/".Length);
                 isSharedFolder = true;
@@ -1054,11 +1036,11 @@ namespace LibRLV
         {
             var notificationText = "";
 
-            if(changeType == WornItemChange.Attached)
+            if (changeType == WornItemChange.Attached)
             {
                 var isLegal = CanAttach(objectId, objectFolderId, isShared, null, wearableType);
 
-                if(isLegal)
+                if (isLegal)
                 {
                     notificationText = $"/worn legally {wearableType.ToString().ToLower()}";
                 }
@@ -1067,7 +1049,7 @@ namespace LibRLV
                     notificationText = $"/worn illegally {wearableType.ToString().ToLower()}";
                 }
             }
-            else if(changeType == WornItemChange.Detached)
+            else if (changeType == WornItemChange.Detached)
             {
                 var isLegal = CanDetach(objectId, objectFolderId, isShared, null, wearableType);
 
@@ -1140,19 +1122,19 @@ namespace LibRLV
         {
             var notificationText = "";
 
-            if(sitType == SitType.Sit && objectId != null)
+            if (sitType == SitType.Sit && objectId != null)
             {
                 var isLegal = CanInteract() && CanSit();
 
-                if(CanSitTp(out var maxObjectDistance))
+                if (CanSitTp(out var maxObjectDistance))
                 {
-                    if(objectDistance == null || objectDistance > maxObjectDistance)
+                    if (objectDistance == null || objectDistance > maxObjectDistance)
                     {
                         isLegal = false;
                     }
                 }
 
-                if(isLegal)
+                if (isLegal)
                 {
                     notificationText = $"/sat object legally {objectId}";
                 }
@@ -1161,7 +1143,7 @@ namespace LibRLV
                     notificationText = $"/sat object illegally {objectId}";
                 }
             }
-            else if(sitType == SitType.Stand && objectId != null)
+            else if (sitType == SitType.Stand && objectId != null)
             {
                 var isLegal = CanInteract() && CanUnsit();
 
@@ -1174,7 +1156,7 @@ namespace LibRLV
                     notificationText = $"/unsat object illegally {objectId}";
                 }
             }
-            else if(sitType == SitType.Sit && objectId == null)
+            else if (sitType == SitType.Sit && objectId == null)
             {
                 var isLegal = CanSit();
 
@@ -1187,7 +1169,7 @@ namespace LibRLV
                     notificationText = $"/sat ground illegally";
                 }
             }
-            else if(sitType == SitType.Stand && objectId == null)
+            else if (sitType == SitType.Stand && objectId == null)
             {
                 var isLegal = CanUnsit();
 

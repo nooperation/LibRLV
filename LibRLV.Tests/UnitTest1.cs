@@ -1422,50 +1422,167 @@ namespace LibRLV.Tests
 
         #endregion
 
-        #region @sendchannel_except
+        #region CanChat
 
         [Fact]
-        public void HasSendChannelExceptions()
+        public void CanChat_Default()
         {
-            _rlv.ProcessMessage("@sendchannel_except:1234=n", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.RLVManager.HasSendChannelExceptions(out var channels));
-
-            var expected = new List<int>
-            {
-                1234,
-            };
-
-            Assert.Equal(expected, channels);
+            Assert.True(_rlv.RLVManager.CanChat(0, "Hello"));
+            Assert.True(_rlv.RLVManager.CanChat(0, "/me says Hello"));
+            Assert.True(_rlv.RLVManager.CanChat(5, "Hello"));
         }
 
         [Fact]
-        public void HasSendChannelExceptions_Removed()
+        public void CanChat_SendChatRestriction()
         {
-            _rlv.ProcessMessage("@sendchannel_except:1234=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@sendchannel_except:1234=y", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@sendchat=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.HasSendChannelExceptions(out var channels));
+            // No public chat allowed unless it starts with '/'
+            Assert.False(_rlv.RLVManager.CanChat(0, "Hello"));
+
+            // Emotes and other messages starting with / are allowed
+            Assert.True(_rlv.RLVManager.CanChat(0, "/me says Hello"));
+            Assert.True(_rlv.RLVManager.CanChat(0, "/ something?"));
+
+            // Messages containing ()"-*=_^ are prohibited
+            Assert.False(_rlv.RLVManager.CanChat(0, "/me says Hello ^_^"));
+
+            // Private channels are not impacted
+            Assert.True(_rlv.RLVManager.CanChat(5, "Hello"));
+        }
+
+        // TODO: @sendchannel @sendchannel_sec @sendchannel_except
+
+        #endregion
+
+        #region @recvchat @recvchat_sec
+
+        [Fact]
+        public void CanRecvChat_Default()
+        {
+            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", null));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", UUID.Random()));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", null));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", UUID.Random()));
         }
 
         [Fact]
-        public void HasSendChannelExceptions_MultipleChannels()
+        public void CanRecvChat()
         {
-            _rlv.ProcessMessage("@sendchannel_except:1234=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@sendchannel_except:12345=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@recvchat=n", _sender.Id, _sender.Name);
+            var userId = UUID.Random();
 
-            Assert.True(_rlv.RLVManager.HasSendChannelExceptions(out var channels));
+            Assert.False(_rlv.RLVManager.CanReceiveChat("Hello world", null));
+            Assert.False(_rlv.RLVManager.CanReceiveChat("Hello world", userId));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", null));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId));
+        }
 
-            var expected = new List<int>
-            {
-                1234,
-                12345,
-            };
+        [Fact]
+        public void CanRecvChat_Except()
+        {
+            var userId = UUID.Random();
 
-            Assert.Equal(expected, channels);
+            _rlv.ProcessMessage("@recvchat=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@recvchat:{userId}=add", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanReceiveChat("Hello world", null));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", null));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId));
+        }
+
+        [Fact]
+        public void CanRecvChat_Secure()
+        {
+            var sender2 = new RlvObject("Sender 2");
+
+            var userId1 = UUID.Random();
+            var userId2 = UUID.Random();
+
+            _rlv.ProcessMessage("@recvchat_sec=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@recvchat:{userId1}=add", sender2.Id, sender2.Name);
+            _rlv.ProcessMessage($"@recvchat:{userId2}=add", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanReceiveChat("Hello world", null));
+            Assert.False(_rlv.RLVManager.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId2));
+        }
+
+        [Fact]
+        public void CanRecvChat_RecvEmote()
+        {
+            _rlv.ProcessMessage("@recvemote=n", _sender.Id, _sender.Name);
+            var userId = UUID.Random();
+
+            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", null));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId));
+            Assert.False(_rlv.RLVManager.CanReceiveChat("/me says Hello world", null));
+            Assert.False(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId));
+        }
+
+        [Fact]
+        public void CanRecvChat_RecvEmoteFrom()
+        {
+            var userId1 = UUID.Random();
+            var userId2 = UUID.Random();
+
+            _rlv.ProcessMessage($"@recvemotefrom:{userId1}=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId2));
+            Assert.False(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId1));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId2));
+        }
+
+        [Fact]
+        public void CanRecvChat_RecvEmote_Except()
+        {
+            var userId1 = UUID.Random();
+            var userId2 = UUID.Random();
+
+            _rlv.ProcessMessage("@recvemote=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@recvemote:{userId1}=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId2));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId1));
+            Assert.False(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId2));
+        }
+
+        [Fact]
+        public void CanRecvChat_RecvEmote_Secure()
+        {
+            var sender2 = new RlvObject("Sender 2");
+
+            var userId1 = UUID.Random();
+            var userId2 = UUID.Random();
+
+            _rlv.ProcessMessage("@recvemote_sec=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@recvemote:{userId1}=add", sender2.Id, sender2.Name);
+            _rlv.ProcessMessage($"@recvemote:{userId2}=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId2));
+            Assert.False(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId1));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId2));
         }
         #endregion
 
+        #region @recvchatfrom
 
+        [Fact]
+        public void CanRecvChatFrom()
+        {
+            var userId1 = UUID.Random();
+            var userId2 = UUID.Random();
+
+            _rlv.ProcessMessage($"@recvchatfrom:{userId1}=add", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId2));
+        }
+
+        #endregion
     }
 }
