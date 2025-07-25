@@ -431,8 +431,8 @@ namespace LibRLV
             {
                 var isRestrictedBySendImTo = _restrictionProvider.GetRestrictions(fromToType.Value)
                     .Where(n => n.Args.Count == 1 &&
-                        (userId != null && n.Args[0] is UUID restrictedId && userId == restrictedId) ||
-                        (groupName != null && n.Args[0] is string restrictedGroupName && (restrictedGroupName == "allgroups" || restrictedGroupName == groupName))
+                        ((userId != null && n.Args[0] is UUID restrictedId && userId == restrictedId) ||
+                        (groupName != null && n.Args[0] is string restrictedGroupName && (restrictedGroupName == "allgroups" || restrictedGroupName == groupName)))
                     ).Any();
                 if (isRestrictedBySendImTo)
                 {
@@ -443,8 +443,8 @@ namespace LibRLV
             var sendImRestrictions = _restrictionProvider.GetRestrictions(normalType);
             var sendImExceptions = sendImRestrictions
                 .Where(n => n.IsException && n.Args.Count == 1 &&
-                    (userId != null && n.Args[0] is UUID restrictedId && userId == restrictedId) ||
-                    (groupName != null && n.Args[0] is string restrictedGroupName && (restrictedGroupName == "allgroups" || restrictedGroupName == groupName))
+                    ((userId != null && n.Args[0] is UUID restrictedId && userId == restrictedId) ||
+                    (groupName != null && n.Args[0] is string restrictedGroupName && (restrictedGroupName == "allgroups" || restrictedGroupName == groupName)))
                 ).ToList();
 
             // Secure restrictions
@@ -488,12 +488,12 @@ namespace LibRLV
             return CheckSecureRestriction(userId, null, RLVRestrictionType.StartIm, null, RLVRestrictionType.StartImTo);
         }
 
-        public bool CanSendIM(string message, UUID? userId, string groupName)
+        public bool CanSendIM(string message, UUID? userId, string groupName = null)
         {
             return CheckSecureRestriction(userId, groupName, RLVRestrictionType.SendIm, RLVRestrictionType.SendImSec, RLVRestrictionType.SendImTo);
         }
 
-        public bool CanReceiveIM(string message, UUID? userId, string groupName)
+        public bool CanReceiveIM(string message, UUID? userId, string groupName = null)
         {
             return CheckSecureRestriction(userId, groupName, RLVRestrictionType.RecvIm, RLVRestrictionType.RecvImSec, RLVRestrictionType.RecvImFrom);
         }

@@ -1633,6 +1633,190 @@ namespace LibRLV.Tests
 
         #endregion
 
- 
+
+        #region @sendim @sendim_sec @sendimto
+
+        [Fact]
+        public void CanSendIM_Default()
+        {
+            var userId1 = UUID.Random();
+
+            Assert.True(_rlv.RLVManager.CanSendIM("Hello", userId1));
+            Assert.True(_rlv.RLVManager.CanSendIM("Hello", userId1, "Group Name"));
+        }
+
+        [Fact]
+        public void CanSendIM()
+        {
+            var userId1 = UUID.Random();
+
+            _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanSendIM("Hello", userId1));
+            Assert.False(_rlv.RLVManager.CanSendIM("Hello", userId1, "Group Name"));
+        }
+
+        [Fact]
+        public void CanSendIM_Exception()
+        {
+            var userId1 = UUID.Random();
+
+            _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@sendim:{userId1}=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", userId1));
+        }
+
+        [Fact]
+        public void CanSendIM_Exception_SingleGroup()
+        {
+            var groupId1 = UUID.Random();
+
+            _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@sendim:Group Name=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "Group Name"));
+        }
+
+        [Fact]
+        public void CanSendIM_Exception_AllGroups()
+        {
+            var groupId1 = UUID.Random();
+
+            _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@sendim:allgroups=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "Group name"));
+        }
+
+        [Fact]
+        public void CanSendIM_Secure()
+        {
+            var sender2 = new RlvObject("Sender 2");
+
+            var userId1 = UUID.Random();
+            var userId2 = UUID.Random();
+
+            _rlv.ProcessMessage("@sendim_sec=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@sendim:{userId1}=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@sendim:{userId2}=add", sender2.Id, sender2.Name);
+
+            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", userId1));
+            Assert.False(_rlv.RLVManager.CanSendIM("Hello world", userId2));
+        }
+
+        [Fact]
+        public void CanSendIM_Secure_Group()
+        {
+            var sender2 = new RlvObject("Sender 2");
+
+            var groupId1 = UUID.Random();
+
+            _rlv.ProcessMessage("@sendim_sec=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@sendim:Group Name=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@sendim:allgroups=add", sender2.Id, sender2.Name);
+
+            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "Group Name"));
+            Assert.False(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "Another Group"));
+        }
+
+        [Fact]
+        public void CanSendIM_Secure_AllGroups()
+        {
+            var groupId1 = UUID.Random();
+
+            _rlv.ProcessMessage("@sendim_sec=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@sendim:allgroups=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "Group Name"));
+            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "Another Group"));
+        }
+
+        [Fact]
+        public void CanSendIMTo()
+        {
+            var userId1 = UUID.Random();
+            var userId2 = UUID.Random();
+
+            _rlv.ProcessMessage($"@sendimto:{userId1}=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanSendIM("Hello world", userId1));
+            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", userId2));
+        }
+
+        [Fact]
+        public void CanSendIMTo_Group()
+        {
+            var groupId1 = UUID.Random();
+            var groupId2 = UUID.Random();
+
+            _rlv.ProcessMessage($"@sendimto:First Group=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "First Group"));
+            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", groupId2, "Second Group"));
+        }
+
+        [Fact]
+        public void CanSendIMTo_AllGroups()
+        {
+            var groupId1 = UUID.Random();
+            var groupId2 = UUID.Random();
+
+            _rlv.ProcessMessage($"@sendimto:allgroups=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "First Group"));
+            Assert.False(_rlv.RLVManager.CanSendIM("Hello world", groupId2, "Second Group"));
+        }
+
+        #endregion
+
+        #region @startim @startimto
+
+        public void CanStartIM_Default()
+        {
+            var userId1 = UUID.Random();
+
+            Assert.True(_rlv.RLVManager.CanStartIM(null));
+            Assert.True(_rlv.RLVManager.CanStartIM(userId1));
+        }
+
+        [Fact]
+        public void CanStartIM()
+        {
+            var userId1 = UUID.Random();
+
+            _rlv.ProcessMessage("@startim=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanStartIM(null));
+            Assert.False(_rlv.RLVManager.CanStartIM(userId1));
+        }
+
+        [Fact]
+        public void CanStartIM_Exception()
+        {
+            var userId1 = UUID.Random();
+            var userId2 = UUID.Random();
+
+            _rlv.ProcessMessage("@startim=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@startim:{userId1}=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanStartIM(userId1));
+            Assert.False(_rlv.RLVManager.CanStartIM(userId2));
+        }
+
+        [Fact]
+        public void CanStartIMTo()
+        {
+            var userId1 = UUID.Random();
+            var userId2 = UUID.Random();
+
+            _rlv.ProcessMessage($"@startimto:{userId2}=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanStartIM(userId1));
+            Assert.False(_rlv.RLVManager.CanStartIM(userId2));
+        }
+
+        #endregion
+
     }
 }
