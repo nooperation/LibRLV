@@ -338,7 +338,7 @@ namespace LibRLV
 
             var sendChannelRestrictionsSecure = _restrictionProvider.GetRestrictions(RLVRestrictionType.SendChannelSec);
             var sendChannelRestrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.SendChannel);
-            var channelExceptions = sendChannelExceptRestrictions
+            var channelExceptions = sendChannelRestrictions
                 .Where(n =>
                     n.IsException &&
                     n.Args.Count > 0 &&

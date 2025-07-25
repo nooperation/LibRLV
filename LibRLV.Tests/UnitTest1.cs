@@ -1451,7 +1451,53 @@ namespace LibRLV.Tests
             Assert.True(_rlv.RLVManager.CanChat(5, "Hello"));
         }
 
-        // TODO: @sendchannel @sendchannel_sec @sendchannel_except
+        [Fact]
+        public void CanSendChannel_Default()
+        {
+            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
+        }
+
+        [Fact]
+        public void CanSendChannel()
+        {
+            _rlv.ProcessMessage("@sendchannel=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanChat(123, "Hello world"));
+        }
+
+        [Fact]
+        public void CanSendChannel_Exception()
+        {
+            _rlv.ProcessMessage("@sendchannel=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@sendchannel:123=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
+        }
+
+        [Fact]
+        public void CanSendChannel_Secure()
+        {
+            var sender2 = new RlvObject("Sender 2");
+
+            var userId1 = UUID.Random();
+            var userId2 = UUID.Random();
+
+            _rlv.ProcessMessage("@sendchannel_sec=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@sendchannel:123=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@sendchannel:456=n", sender2.Id, sender2.Name);
+
+            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
+            Assert.False(_rlv.RLVManager.CanChat(456, "Hello world"));
+        }
+
+        [Fact]
+        public void CanSendChannelExcept()
+        {
+            _rlv.ProcessMessage("@sendchannel_except:456=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
+            Assert.False(_rlv.RLVManager.CanChat(456, "Hello world"));
+        }
 
         #endregion
 
@@ -1580,9 +1626,13 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@recvchatfrom:{userId1}=add", _sender.Id, _sender.Name);
 
             Assert.False(_rlv.RLVManager.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId1));
+
             Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId2));
         }
 
         #endregion
+
+ 
     }
 }
