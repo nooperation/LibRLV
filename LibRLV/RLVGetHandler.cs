@@ -68,7 +68,7 @@ namespace LibRLV
                 }
 
                 sb.Append($"{separator}{behaviorName}");
-                if(restriction.Args.Count > 0)
+                if (restriction.Args.Count > 0)
                 {
                     sb.Append($":{string.Join(";", restriction.Args)}");
                 }
@@ -120,6 +120,16 @@ namespace LibRLV
 
                 switch (name)
                 {
+                    case RLVDataRequest.GetSitId:
+                        if (!_callbacks.TryGetSitId(out var sitId).Result || sitId == UUID.Zero)
+                        {
+                            response = "NULL_KEY";
+                        }
+                        else
+                        {
+                            response = sitId.ToString();
+                        }
+                        break;
                     case RLVDataRequest.GetOutfit:
                     {
                         if (!Enum.TryParse<WearableType>(rlvMessage.Option, out var part))
@@ -182,7 +192,10 @@ namespace LibRLV
                     }
                 }
 
-                response = _callbacks.ProvideDataAsync(name, args, CancellationToken.None).Result;
+                if (response == null)
+                {
+                    response = _callbacks.ProvideDataAsync(name, args, CancellationToken.None).Result;
+                }
             }
             else if (rlvMessage.Behavior.StartsWith("getdebug_"))
             {

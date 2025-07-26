@@ -59,7 +59,7 @@ namespace LibRLV
             }
             else if (int.TryParse(rlvMessage.Param, out int channel))
             {
-                if(channel == 0)
+                if (channel == 0)
                 {
                     return false;
                 }
@@ -73,7 +73,7 @@ namespace LibRLV
         private bool ProcessSingleMessage(string message, UUID senderId, string senderName)
         {
             // Special hack for @clear, which doesn't match the standard pattern of @behavior=param
-            if(message == "clear")
+            if (message == "clear")
             {
                 return ProcessRLVMessage(new RLVMessage()
                 {

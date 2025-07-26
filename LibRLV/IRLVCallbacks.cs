@@ -13,7 +13,9 @@ namespace LibRLV
         Task<string> ProvideDataAsync(RLVDataRequest request, List<object> data, CancellationToken cancellationToken);
         Task<string> GetEnvironmentAsync(RLVGetEnvType envType);
         Task<string> GetDebugInfoAsync(RLVGetDebugType debugType);
-        Task<bool> TryGetSitTarget(UUID objectID, out bool isCurrentlySitting);
+        Task<bool> TryGetSitId(out UUID sitId);
+        Task<bool> TryGetObjectExists(UUID objectID, out bool isCurrentlySitting);
         Task<bool> TryGetRlvInventoryTree(out InventoryTree sharedFolder);
+
     }
 }

@@ -148,12 +148,22 @@ namespace LibRLV
 
         private bool HandleUnsit(RLVMessage command)
         {
+            if (!_manager.CanUnsit())
+            {
+                return false;
+            }
+
             Unsit?.Invoke(this, new EventArgs());
             return true;
         }
 
         private bool HandleSitGround(RLVMessage command)
         {
+            if (!_manager.CanSit())
+            {
+                return false;
+            }
+
             SitGround?.Invoke(this, new EventArgs());
             return true;
         }
@@ -248,7 +258,7 @@ namespace LibRLV
                 return false;
             }
 
-            if (!_callbacks.TryGetSitTarget(sitTarget, out var isCurrentlySitting).Result)
+            if (!_callbacks.TryGetObjectExists(sitTarget, out var isCurrentlySitting).Result)
             {
                 return false;
             }

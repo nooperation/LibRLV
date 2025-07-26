@@ -12,6 +12,8 @@ namespace LibRLV.Tests
         private readonly Mock<IRLVCallbacks> _callbacks;
         private readonly RLV _rlv;
 
+        public const float FloatTolerance = 0.00001f;
+
         public UnitTest1()
         {
             _sender = new RlvObject("Sender 1", new UUID("ffffffff-ffff-4fff-8fff-ffffffffffff"));
@@ -46,18 +48,13 @@ namespace LibRLV.Tests
             Assert.False(_rlv.ProcessMessage(command, _sender.Id, _sender.Name));
             _callbacks.VerifyNoOtherCalls();
         }
-
-        [Theory]
-        [InlineData("@version")]
-        [InlineData("@getblacklist")]
-        public void CheckInstantMessageProcessingOff(string command)
-        {
-            Assert.False(_rlv.ProcessInstantMessage(command, _sender.Id, _sender.Name));
-            _callbacks.VerifyNoOtherCalls();
-        }
         #endregion
 
-        #region Version
+        //
+        // Version Checking
+        //
+
+        #region @version Manual
         [Fact]
         public void ManualVersion()
         {
@@ -71,6 +68,9 @@ namespace LibRLV.Tests
 
             _callbacks.VerifyNoOtherCalls();
         }
+        #endregion
+
+        #region @version @versionnew @versionnum
 
         [Theory]
         [InlineData("@version=1234", RLV.RLVVersion)]
@@ -90,7 +90,54 @@ namespace LibRLV.Tests
         }
         #endregion
 
-        #region Blacklist
+        //
+        // Blacklist handling
+        //
+
+        #region @versionnumbl=<channel_number>
+
+        [Theory]
+        [InlineData("@versionnumbl=1234", "", RLV.RLVVersionNum)]
+        [InlineData("@versionnumbl=1234", "sendim,recvim", RLV.RLVVersionNum + ",sendim,recvim")]
+        public void VersionNumBL(string command, string seed, string expected)
+        {
+            var expectedChannel = int.Parse(command.Substring(command.IndexOf('=') + 1));
+
+            SeedBlacklist(seed);
+
+            _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
+
+            _callbacks.Verify(c =>
+                c.SendReplyAsync(expectedChannel, expected, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _callbacks.VerifyNoOtherCalls();
+        }
+        #endregion
+
+        #region @getblacklist[:filter]=<channel_number>
+        [Theory]
+        [InlineData("@getblacklist=1234", "sendim,recvim", "sendim,recvim")]
+        [InlineData("@getblacklist:im=1234", "sendim,recvim", "sendim,recvim")]
+        [InlineData("@getblacklist:send=1234", "sendim,recvim", "sendim")]
+        [InlineData("@getblacklist:tpto=1234", "sendim,recvim", "")]
+        [InlineData("@getblacklist=1234", "", "")]
+        public void GetBlacklist(string command, string seed, string expected)
+        {
+            var expectedChannel = int.Parse(command.Substring(command.IndexOf('=') + 1));
+            SeedBlacklist(seed);
+
+            _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
+
+            _callbacks.Verify(c =>
+                c.SendReplyAsync(expectedChannel, expected, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _callbacks.VerifyNoOtherCalls();
+        }
+        #endregion
+
+        #region @getblacklist Manual
         private void SeedBlacklist(string seed)
         {
             var blacklistEntries = seed.Split(',', StringSplitOptions.RemoveEmptyEntries);
@@ -117,45 +164,12 @@ namespace LibRLV.Tests
 
             _callbacks.VerifyNoOtherCalls();
         }
-
-        [Theory]
-        [InlineData("@getblacklist=1234", "sendim,recvim", "sendim,recvim")]
-        [InlineData("@getblacklist:im=1234", "sendim,recvim", "sendim,recvim")]
-        [InlineData("@getblacklist:send=1234", "sendim,recvim", "sendim")]
-        [InlineData("@getblacklist:tpto=1234", "sendim,recvim", "")]
-        [InlineData("@getblacklist=1234", "", "")]
-        public void GetBlacklist(string command, string seed, string expected)
-        {
-            var expectedChannel = int.Parse(command.Substring(command.IndexOf('=') + 1));
-            SeedBlacklist(seed);
-
-            _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
-
-            _callbacks.Verify(c =>
-                c.SendReplyAsync(expectedChannel, expected, It.IsAny<CancellationToken>()),
-                Times.Once);
-
-            _callbacks.VerifyNoOtherCalls();
-        }
-
-        [Theory]
-        [InlineData("@versionnumbl=1234", "", RLV.RLVVersionNum)]
-        [InlineData("@versionnumbl=1234", "sendim,recvim", RLV.RLVVersionNum + ",sendim,recvim")]
-        public void VersionNumBL(string command, string seed, string expected)
-        {
-            var expectedChannel = int.Parse(command.Substring(command.IndexOf('=') + 1));
-
-            SeedBlacklist(seed);
-
-            _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
-
-            _callbacks.Verify(c =>
-                c.SendReplyAsync(expectedChannel, expected, It.IsAny<CancellationToken>()),
-                Times.Once);
-
-            _callbacks.VerifyNoOtherCalls();
-        }
         #endregion
+
+
+        //
+        // Miscellaneous
+        //
 
         #region @Notify
         [Fact]
@@ -646,7 +660,7 @@ namespace LibRLV.Tests
         }
         #endregion
 
-        #region @GetStatus
+        #region @getstatus
 
         [Fact]
         public void GetStatus()
@@ -713,7 +727,7 @@ namespace LibRLV.Tests
 
         #endregion
 
-        #region @GetStatusAll
+        #region @getstatusall
 
         [Fact]
         public void GetStatusAll()
@@ -738,46 +752,29 @@ namespace LibRLV.Tests
 
         #endregion
 
-        #region SimpleBooleanFlags
+        //
+        // Movement
+        //
 
-        private void CheckSimpleCommand(string cmd, Func<RLVManager, bool> canFunc)
-        {
-            _rlv.ProcessMessage($"@{cmd}=n", _sender.Id, _sender.Name);
-            Assert.False(canFunc(_rlv.RLVManager));
-
-            _rlv.ProcessMessage($"@{cmd}=y", _sender.Id, _sender.Name);
-            Assert.True(canFunc(_rlv.RLVManager));
-        }
-
+        #region @fly
         [Fact] public void CanFly() => CheckSimpleCommand("fly", m => m.CanFly());
-        [Fact] public void CanTempRun() => CheckSimpleCommand("tempRun", m => m.CanTempRun());
-        [Fact] public void CanAlwaysRun() => CheckSimpleCommand("alwaysRun", m => m.CanAlwaysRun());
-        [Fact] public void CanChatShout() => CheckSimpleCommand("chatShout", m => m.CanChatShout());
-        [Fact] public void CanChatWhisper() => CheckSimpleCommand("chatWhisper", m => m.CanChatWhisper());
-        [Fact] public void CanChatNormal() => CheckSimpleCommand("chatNormal", m => m.CanChatNormal());
-        [Fact] public void CanSendChat() => CheckSimpleCommand("sendChat", m => m.CanSendChat());
-        [Fact] public void CanSendGesture() => CheckSimpleCommand("sendGesture", m => m.CanSendGesture());
-        [Fact] public void CanCamUnlock() => CheckSimpleCommand("camUnlock", m => m.CanSetCamUnlock()); // CanSetCamUnlock() is correct here - alias
-        [Fact] public void CanSetCamUnlock() => CheckSimpleCommand("setcam_unlock", m => m.CanSetCamUnlock());
-        [Fact] public void CanTpLm() => CheckSimpleCommand("tpLm", m => m.CanTpLm());
-        [Fact] public void CanTpLoc() => CheckSimpleCommand("tpLoc", m => m.CanTpLoc());
-        [Fact] public void CanSit() => CheckSimpleCommand("sit", m => m.CanSit());
-        [Fact] public void CanDefaultWear() => CheckSimpleCommand("defaultWear", m => m.CanDefaultWear());
-        [Fact] public void CanSetGroup() => CheckSimpleCommand("setGroup", m => m.CanSetGroup());
-        [Fact] public void CanSetDebug() => CheckSimpleCommand("setDebug", m => m.CanSetDebug());
-        [Fact] public void CanSetEnv() => CheckSimpleCommand("setEnv", m => m.CanSetEnv());
-        [Fact] public void CanAllowIdle() => CheckSimpleCommand("allowIdle", m => m.CanAllowIdle());
-        [Fact] public void CanInteract() => CheckSimpleCommand("interact", m => m.CanInteract());
-        [Fact] public void CanShowWorldMap() => CheckSimpleCommand("showWorldMap", m => m.CanShowWorldMap());
-        [Fact] public void CanShowMiniMap() => CheckSimpleCommand("showMiniMap", m => m.CanShowMiniMap());
-        [Fact] public void CanShowLoc() => CheckSimpleCommand("showLoc", m => m.CanShowLoc());
-        [Fact] public void CanShowNearby() => CheckSimpleCommand("showNearby", m => m.CanShowNearby());
-        [Fact] public void CanUnsharedWear() => CheckSimpleCommand("unsharedWear", m => m.CanUnsharedWear());
-        [Fact] public void CanUnsharedUnwear() => CheckSimpleCommand("unsharedUnwear", m => m.CanUnsharedUnwear());
-        [Fact] public void CanSharedWear() => CheckSimpleCommand("sharedWear", m => m.CanSharedWear());
-        [Fact] public void CanSharedUnwear() => CheckSimpleCommand("sharedUnwear", m => m.CanSharedUnwear());
-
         #endregion
+
+        #region @temprun
+        [Fact] public void CanTempRun() => CheckSimpleCommand("tempRun", m => m.CanTempRun());
+        #endregion
+
+        #region @alwaysrun
+        [Fact] public void CanAlwaysRun() => CheckSimpleCommand("alwaysRun", m => m.CanAlwaysRun());
+        #endregion
+
+        // @setrot:<angle_in_radians>=force
+
+        // @adjustheight:<distance_pelvis_to_foot_in_meters>;<factor>[;delta_in_meters]=force
+
+        //
+        // Camera and view
+        //
 
         #region CamMinFunctionsThrough
 
@@ -948,29 +945,6 @@ namespace LibRLV.Tests
         }
         #endregion
 
-        #region @CamDistMin
-        [Fact]
-        public void CamDistMin()
-        {
-            _rlv.ProcessMessage("@CamDistMin:0.2=n", _sender.Id, _sender.Name);
-
-            // @CamDistMin is an alias of @SetCamAvDistMin
-            Assert.True(_rlv.RLVManager.HasSetCamAvDistMin(out var distance));
-            Assert.Equal(0.2f, distance);
-        }
-        #endregion
-
-        #region @setcam_avdistmin
-        [Fact]
-        public void SetCamAvDistMin()
-        {
-            _rlv.ProcessMessage("@setcam_avdistmin:0.3=n", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.RLVManager.HasSetCamAvDistMin(out var setCamAvDistMin));
-            Assert.Equal(0.3f, setCamAvDistMin);
-        }
-        #endregion
-
         #region @setcam_fovmax
         [Fact]
         public void SetCamFovMax()
@@ -982,17 +956,7 @@ namespace LibRLV.Tests
         }
         #endregion
 
-        #region @CamDistMax
-        [Fact]
-        public void CamDistMax()
-        {
-            _rlv.ProcessMessage("@CamDistMax:20=n", _sender.Id, _sender.Name);
-
-            // CamDistMax is an alias for SetCamAvDistMax
-            Assert.True(_rlv.RLVManager.HasSetCamAvDistMax(out var camDistMax));
-            Assert.Equal(20f, camDistMax);
-        }
-        #endregion
+        // setcam_fov
 
         #region @setcam_avdistmax
         [Fact]
@@ -1006,10 +970,30 @@ namespace LibRLV.Tests
         [Fact]
         public void SetCamAvDistMax_Synonym()
         {
-            _rlv.ProcessMessage("@setcam_avdistmax:30=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@camdistmax:30=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.RLVManager.HasSetCamAvDistMax(out var setCamAvDistMax));
             Assert.Equal(30f, setCamAvDistMax);
+        }
+        #endregion
+
+        #region @setcam_avdistmin
+        [Fact]
+        public void SetCamAvDistMin()
+        {
+            _rlv.ProcessMessage("@setcam_avdistmin:0.3=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasSetCamAvDistMin(out var setCamAvDistMin));
+            Assert.Equal(0.3f, setCamAvDistMin);
+        }
+
+        [Fact]
+        public void SetCamAvDistMin_Synonym()
+        {
+            _rlv.ProcessMessage("@camdistmin:0.3=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasSetCamAvDistMin(out var setCamAvDistMin));
+            Assert.Equal(0.3f, setCamAvDistMin);
         }
         #endregion
 
@@ -1024,47 +1008,7 @@ namespace LibRLV.Tests
         }
         #endregion
 
-        #region @CamAvDist
-        [Fact]
-        public void CamAvDist()
-        {
-            _rlv.ProcessMessage("@CamAvDist:5=n", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.RLVManager.HasCamAvDist(out var camAvDist));
-            Assert.Equal(5f, camAvDist);
-        }
-        #endregion
-
-        #region @FarTouch
-        [Fact]
-        public void CanFarTouch()
-        {
-            _rlv.ProcessMessage("@FarTouch:0.9=n", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
-            Assert.Equal(0.9f, distance);
-        }
-
-        [Fact]
-        public void CanFarTouch_Synonym()
-        {
-            _rlv.ProcessMessage("@TouchFar:0.9=n", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
-            Assert.Equal(0.9f, distance);
-        }
-
-        [Fact]
-        public void CanFarTouch_Default()
-        {
-            _rlv.ProcessMessage("@FarTouch=n", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
-            Assert.Equal(1.5f, distance);
-        }
-        #endregion
-
-        public const float FloatTolerance = 0.00001f;
+        // camdrawmin
 
         #region @CamDrawColor
 
@@ -1129,6 +1073,61 @@ namespace LibRLV.Tests
             Assert.Equal(0.45f, color.Z, FloatTolerance);
         }
 
+        #endregion
+
+        #region @camunlock
+        [Fact] public void CanSetCamUnlock() => CheckSimpleCommand("setcam_unlock", m => m.CanSetCamUnlock());
+        #endregion
+
+        #region @setcam_unlock
+        [Fact] public void CanCamUnlock() => CheckSimpleCommand("camunlock", m => m.CanSetCamUnlock());
+        #endregion
+
+        #region @camavdist
+        [Fact]
+        public void CamAvDist()
+        {
+            _rlv.ProcessMessage("@CamAvDist:5=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamAvDist(out var camAvDist));
+            Assert.Equal(5f, camAvDist);
+        }
+        #endregion
+
+        // camtextures
+
+        // @setcam_textures
+
+        // @getcam_avdistmin
+
+        // @getcam_avdistmax
+
+        // @getcam_fovmin
+
+        // @getcam_fovmax
+
+        // @getcam_zoommin
+
+        // @getcam_fov
+
+        //
+        // Chat, Emotes and Instant Messages
+        //
+
+        #region @sendChat
+        [Fact] public void CanSendChat() => CheckSimpleCommand("sendChat", m => m.CanSendChat());
+        #endregion
+
+        #region @chatshout
+        [Fact] public void CanChatShout() => CheckSimpleCommand("chatShout", m => m.CanChatShout());
+        #endregion
+
+        #region @chatnormal
+        [Fact] public void CanChatNormal() => CheckSimpleCommand("chatNormal", m => m.CanChatNormal());
+        #endregion
+
+        #region @chatwhisper
+        [Fact] public void CanChatWhisper() => CheckSimpleCommand("chatWhisper", m => m.CanChatWhisper());
         #endregion
 
         #region @redirchat
@@ -1226,179 +1225,7 @@ namespace LibRLV.Tests
 
         #endregion
 
-        #region @rediremote
-        [Fact]
-        public void IsRedirEmote()
-        {
-            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
-
-            var expected = new List<int>
-            {
-                1234,
-            };
-
-            Assert.Equal(expected, channels);
-        }
-
-        [Fact]
-        public void IsRedirEmote_Removed()
-        {
-            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@rediremote:1234=rem", _sender.Id, _sender.Name);
-
-            Assert.False(_rlv.RLVManager.IsRedirEmote(out var channels));
-        }
-
-        [Fact]
-        public void IsRedirEmote_MultipleChannels()
-        {
-            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@rediremote:12345=add", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
-
-            var expected = new List<int>
-            {
-                1234,
-                12345,
-            };
-
-            Assert.Equal(expected, channels);
-        }
-
-        [Fact]
-        public void IsRedirEmote_RedirectEmote()
-        {
-            var actual = _callbacks.RecordReplies();
-
-            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportSendPublicMessage("/me says Hello World");
-
-            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
-            var expected = new List<(int Channel, string Text)>
-            {
-                (1234, "/me says Hello World"),
-            };
-
-            Assert.Equal(expected, actual);
-        }
-
-        [Fact]
-        public void IsRedirEmote_RedirectEmoteMultiple()
-        {
-            var actual = _callbacks.RecordReplies();
-
-            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@rediremote:5678=n", _sender.Id, _sender.Name);
-
-            _rlv.RLVManager.ReportSendPublicMessage("/me says Hello World");
-            _rlv.RLVManager.IsRedirEmote(out var channels);
-
-            var expected = new List<(int Channel, string Text)>
-            {
-                (1234, "/me says Hello World"),
-                (5678, "/me says Hello World"),
-            };
-
-            Assert.Equal(expected, actual);
-        }
-
-        [Fact]
-        public void IsRedirEmote_RedirectEmoteChat()
-        {
-            var actual = _callbacks.RecordReplies();
-
-            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportSendPublicMessage("Hello World");
-
-            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
-            Assert.Empty(actual);
-        }
-
-        #endregion
-
-        #region CanChat
-
-        [Fact]
-        public void CanChat_Default()
-        {
-            Assert.True(_rlv.RLVManager.CanChat(0, "Hello"));
-            Assert.True(_rlv.RLVManager.CanChat(0, "/me says Hello"));
-            Assert.True(_rlv.RLVManager.CanChat(5, "Hello"));
-        }
-
-        [Fact]
-        public void CanChat_SendChatRestriction()
-        {
-            _rlv.ProcessMessage("@sendchat=n", _sender.Id, _sender.Name);
-
-            // No public chat allowed unless it starts with '/'
-            Assert.False(_rlv.RLVManager.CanChat(0, "Hello"));
-
-            // Emotes and other messages starting with / are allowed
-            Assert.True(_rlv.RLVManager.CanChat(0, "/me says Hello"));
-            Assert.True(_rlv.RLVManager.CanChat(0, "/ something?"));
-
-            // Messages containing ()"-*=_^ are prohibited
-            Assert.False(_rlv.RLVManager.CanChat(0, "/me says Hello ^_^"));
-
-            // Private channels are not impacted
-            Assert.True(_rlv.RLVManager.CanChat(5, "Hello"));
-        }
-
-        [Fact]
-        public void CanSendChannel_Default()
-        {
-            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
-        }
-
-        [Fact]
-        public void CanSendChannel()
-        {
-            _rlv.ProcessMessage("@sendchannel=n", _sender.Id, _sender.Name);
-
-            Assert.False(_rlv.RLVManager.CanChat(123, "Hello world"));
-        }
-
-        [Fact]
-        public void CanSendChannel_Exception()
-        {
-            _rlv.ProcessMessage("@sendchannel=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@sendchannel:123=n", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
-        }
-
-        [Fact]
-        public void CanSendChannel_Secure()
-        {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
-
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
-
-            _rlv.ProcessMessage("@sendchannel_sec=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@sendchannel:123=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@sendchannel:456=n", sender2.Id, sender2.Name);
-
-            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
-            Assert.False(_rlv.RLVManager.CanChat(456, "Hello world"));
-        }
-
-        [Fact]
-        public void CanSendChannelExcept()
-        {
-            _rlv.ProcessMessage("@sendchannel_except:456=add", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
-            Assert.False(_rlv.RLVManager.CanChat(456, "Hello world"));
-        }
-
-        #endregion
-
-        #region @recvchat @recvchat_sec
+        #region CanReceiveChat @recvchat @recvchat_sec @recvchatfrom @recvemote @recvemote_sec @recvemotefrom
 
         [Fact]
         public void CanRecvChat_Default()
@@ -1510,9 +1337,6 @@ namespace LibRLV.Tests
             Assert.False(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId1));
             Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId2));
         }
-        #endregion
-
-        #region @recvchatfrom
 
         [Fact]
         public void CanRecvChatFrom()
@@ -1530,6 +1354,188 @@ namespace LibRLV.Tests
 
         #endregion
 
+        #region @sendGesture
+        [Fact] public void CanSendGesture() => CheckSimpleCommand("sendGesture", m => m.CanSendGesture());
+        #endregion
+
+        #region @emote
+        [Fact] public void CanEmote() => CheckSimpleCommand("emote", m => m.CanEmote());
+
+        // TODO: Check 'ProcessChat' funcationality (not yet created, but the function doesn't exist yet) to make
+        //       sure it no longer censors emotes on @chat=n
+        #endregion
+
+        #region @rediremote
+        [Fact]
+        public void IsRedirEmote()
+        {
+            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
+
+            var expected = new List<int>
+            {
+                1234,
+            };
+
+            Assert.Equal(expected, channels);
+        }
+
+        [Fact]
+        public void IsRedirEmote_Removed()
+        {
+            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@rediremote:1234=rem", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.IsRedirEmote(out var channels));
+        }
+
+        [Fact]
+        public void IsRedirEmote_MultipleChannels()
+        {
+            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@rediremote:12345=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
+
+            var expected = new List<int>
+            {
+                1234,
+                12345,
+            };
+
+            Assert.Equal(expected, channels);
+        }
+
+        [Fact]
+        public void IsRedirEmote_RedirectEmote()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
+            _rlv.RLVManager.ReportSendPublicMessage("/me says Hello World");
+
+            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "/me says Hello World"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void IsRedirEmote_RedirectEmoteMultiple()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@rediremote:5678=n", _sender.Id, _sender.Name);
+
+            _rlv.RLVManager.ReportSendPublicMessage("/me says Hello World");
+            _rlv.RLVManager.IsRedirEmote(out var channels);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "/me says Hello World"),
+                (5678, "/me says Hello World"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void IsRedirEmote_RedirectEmoteChat()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
+            _rlv.RLVManager.ReportSendPublicMessage("Hello World");
+
+            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
+            Assert.Empty(actual);
+        }
+
+        #endregion
+
+        #region CanChat @sendchat @sendchannel @sendchannel_sec @sendchannel_except
+
+        [Fact]
+        public void CanChat_Default()
+        {
+            Assert.True(_rlv.RLVManager.CanChat(0, "Hello"));
+            Assert.True(_rlv.RLVManager.CanChat(0, "/me says Hello"));
+            Assert.True(_rlv.RLVManager.CanChat(5, "Hello"));
+        }
+
+        [Fact]
+        public void CanChat_SendChatRestriction()
+        {
+            _rlv.ProcessMessage("@sendchat=n", _sender.Id, _sender.Name);
+
+            // No public chat allowed unless it starts with '/'
+            Assert.False(_rlv.RLVManager.CanChat(0, "Hello"));
+
+            // Emotes and other messages starting with / are allowed
+            Assert.True(_rlv.RLVManager.CanChat(0, "/me says Hello"));
+            Assert.True(_rlv.RLVManager.CanChat(0, "/ something?"));
+
+            // Messages containing ()"-*=_^ are prohibited
+            Assert.False(_rlv.RLVManager.CanChat(0, "/me says Hello ^_^"));
+
+            // Private channels are not impacted
+            Assert.True(_rlv.RLVManager.CanChat(5, "Hello"));
+        }
+
+        [Fact]
+        public void CanSendChannel_Default()
+        {
+            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
+        }
+
+        [Fact]
+        public void CanSendChannel()
+        {
+            _rlv.ProcessMessage("@sendchannel=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanChat(123, "Hello world"));
+        }
+
+        [Fact]
+        public void CanSendChannel_Exception()
+        {
+            _rlv.ProcessMessage("@sendchannel=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@sendchannel:123=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
+        }
+
+        [Fact]
+        public void CanSendChannel_Secure()
+        {
+            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage("@sendchannel_sec=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@sendchannel:123=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@sendchannel:456=n", sender2.Id, sender2.Name);
+
+            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
+            Assert.False(_rlv.RLVManager.CanChat(456, "Hello world"));
+        }
+
+        [Fact]
+        public void CanSendChannelExcept()
+        {
+            _rlv.ProcessMessage("@sendchannel_except:456=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
+            Assert.False(_rlv.RLVManager.CanChat(456, "Hello world"));
+        }
+
+        #endregion
 
         #region @sendim @sendim_sec @sendimto
 
@@ -1716,7 +1722,7 @@ namespace LibRLV.Tests
 
         #endregion
 
-        #region @recvim @recvim_sec @recvimto
+        #region @recvim @recvim_sec @recvimto @recvimfrom
 
         [Fact]
         public void CanReceiveIM_Default()
@@ -1852,6 +1858,10 @@ namespace LibRLV.Tests
 
         #endregion
 
+        //
+        // Teleportation
+        //
+
         #region @TpLocal
         [Fact]
         public void CanTpLocal_Default()
@@ -1870,6 +1880,14 @@ namespace LibRLV.Tests
             Assert.True(_rlv.RLVManager.CanTpLocal(out var distance));
             Assert.Equal(0.9f, distance, FloatTolerance);
         }
+        #endregion
+
+        #region @tplm
+        [Fact] public void CanTpLm() => CheckSimpleCommand("tpLm", m => m.CanTpLm());
+        #endregion
+
+        #region @tploc
+        [Fact] public void CanTpLoc() => CheckSimpleCommand("tpLoc", m => m.CanTpLoc());
         #endregion
 
         #region @tplure @tplure_sec 
@@ -2008,7 +2026,7 @@ namespace LibRLV.Tests
         [Fact] public void CanStandTp() => CheckSimpleCommand("standTp", m => m.CanStandTp());
         #endregion
 
-        #region @tpto FORCE
+        #region @tpto:<region_name>/<X_local>/<Y_local>/<Z_local>[;lookat]=force
 
         [Fact]
         public void TpTo_Default()
@@ -2237,6 +2255,10 @@ namespace LibRLV.Tests
 
         #endregion
 
+        //
+        // Inventory, Editing and Rezzing
+        //
+
         #region @showinv
         [Fact] public void CanShowInv() => CheckSimpleCommand("showInv", m => m.CanShowInv());
 
@@ -2432,23 +2454,34 @@ namespace LibRLV.Tests
 
         #endregion
 
+        //
+        // Sitting
+        //
+
         #region @unsit
         [Fact] public void CanUnsit() => CheckSimpleCommand("unsit", m => m.CanUnsit());
         #endregion
 
         #region @sit FORCE
-        private void SetupSitTarget(UUID objectId, bool isCurrentlySitting)
+        private void SetObjectExists(UUID objectId, bool isCurrentlySitting)
         {
             _callbacks.Setup(e =>
-                e.TryGetSitTarget(objectId, out isCurrentlySitting)
+                e.TryGetObjectExists(objectId, out isCurrentlySitting)
             ).ReturnsAsync(true);
+        }
+
+        private void SetCurrentSitId(UUID objectId)
+        {
+            _callbacks.Setup(e =>
+                e.TryGetSitId(out objectId)
+            ).ReturnsAsync(objectId != UUID.Zero);
         }
 
         [Fact]
         public void ForceSit_Default()
         {
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            SetupSitTarget(objectId1, false);
+            SetObjectExists(objectId1, false);
 
             var raised = Assert.Raises<SitEventArgs>(
                 attach: n => _rlv.Actions.Sit += n,
@@ -2463,7 +2496,7 @@ namespace LibRLV.Tests
         public void ForceSit_RestrictedUnsit_WhileStanding()
         {
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            SetupSitTarget(objectId1, false);
+            SetObjectExists(objectId1, false);
 
             _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
@@ -2480,7 +2513,7 @@ namespace LibRLV.Tests
         public void ForceSit_RestrictedUnsit_WhileSeated()
         {
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            SetupSitTarget(objectId1, true);
+            SetObjectExists(objectId1, true);
 
             _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
@@ -2499,7 +2532,7 @@ namespace LibRLV.Tests
         public void ForceSit_RestrictedSit()
         {
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            SetupSitTarget(objectId1, true);
+            SetObjectExists(objectId1, true);
 
             _rlv.ProcessMessage("@sit=n", _sender.Id, _sender.Name);
 
@@ -2517,7 +2550,7 @@ namespace LibRLV.Tests
         public void ForceSit_RestrictedStandTp()
         {
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            SetupSitTarget(objectId1, true);
+            SetObjectExists(objectId1, true);
 
             _rlv.ProcessMessage("@standtp=n", _sender.Id, _sender.Name);
 
@@ -2545,6 +2578,149 @@ namespace LibRLV.Tests
 
             Assert.False(_rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
             Assert.False(raisedEvent);
+        }
+        #endregion
+
+        #region @getsitid=<channel_number>
+
+        [Fact]
+        public void GetSitID()
+        {
+            var actual = _callbacks.RecordReplies();
+            SetCurrentSitId(UUID.Zero);
+
+            _rlv.ProcessMessage("@getsitid=1234", _sender.Id, _sender.Name);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "NULL_KEY"),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetSitID_Default()
+        {
+            var actual = _callbacks.RecordReplies();
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            SetCurrentSitId(objectId1);
+
+            _rlv.ProcessMessage("@getsitid=1234", _sender.Id, _sender.Name);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, objectId1.ToString()),
+            };
+
+            Assert.Equal(expected, actual);
+        }
+
+        #endregion
+
+        #region @unsit=force
+
+        [Fact]
+        public void ForceUnSit()
+        {
+            Assert.True(_rlv.ProcessMessage("@unsit=force", _sender.Id, _sender.Name));
+        }
+
+        [Fact]
+        public void ForceUnSit_RestrictedUnsit()
+        {
+            _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.ProcessMessage("@unsit=force", _sender.Id, _sender.Name));
+        }
+
+        #endregion
+
+        #region @sit
+        [Fact] public void CanSit() => CheckSimpleCommand("sit", m => m.CanSit());
+        #endregion
+
+        #region @sitground=force
+
+        [Fact]
+        public void ForceSitGround()
+        {
+            Assert.True(_rlv.ProcessMessage("@sitground=force", _sender.Id, _sender.Name));
+        }
+
+        [Fact]
+        public void ForceSitGround_RestrictedSit()
+        {
+            _rlv.ProcessMessage("@sit=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.ProcessMessage("@sitground=force", _sender.Id, _sender.Name));
+        }
+
+        #endregion
+
+        //
+        // Clothing and Attachments
+        //
+
+        #region SimpleBooleanFlags
+
+        private void CheckSimpleCommand(string cmd, Func<RLVManager, bool> canFunc)
+        {
+            _rlv.ProcessMessage($"@{cmd}=n", _sender.Id, _sender.Name);
+            Assert.False(canFunc(_rlv.RLVManager));
+
+            _rlv.ProcessMessage($"@{cmd}=y", _sender.Id, _sender.Name);
+            Assert.True(canFunc(_rlv.RLVManager));
+        }
+
+
+        [Fact] public void CanDefaultWear() => CheckSimpleCommand("defaultWear", m => m.CanDefaultWear());
+        [Fact] public void CanSetGroup() => CheckSimpleCommand("setGroup", m => m.CanSetGroup());
+        [Fact] public void CanSetDebug() => CheckSimpleCommand("setDebug", m => m.CanSetDebug());
+        [Fact] public void CanSetEnv() => CheckSimpleCommand("setEnv", m => m.CanSetEnv());
+        [Fact] public void CanAllowIdle() => CheckSimpleCommand("allowIdle", m => m.CanAllowIdle());
+        [Fact] public void CanInteract() => CheckSimpleCommand("interact", m => m.CanInteract());
+        [Fact] public void CanShowWorldMap() => CheckSimpleCommand("showWorldMap", m => m.CanShowWorldMap());
+        [Fact] public void CanShowMiniMap() => CheckSimpleCommand("showMiniMap", m => m.CanShowMiniMap());
+        [Fact] public void CanShowLoc() => CheckSimpleCommand("showLoc", m => m.CanShowLoc());
+        [Fact] public void CanShowNearby() => CheckSimpleCommand("showNearby", m => m.CanShowNearby());
+        [Fact] public void CanUnsharedWear() => CheckSimpleCommand("unsharedWear", m => m.CanUnsharedWear());
+        [Fact] public void CanUnsharedUnwear() => CheckSimpleCommand("unsharedUnwear", m => m.CanUnsharedUnwear());
+        [Fact] public void CanSharedWear() => CheckSimpleCommand("sharedWear", m => m.CanSharedWear());
+        [Fact] public void CanSharedUnwear() => CheckSimpleCommand("sharedUnwear", m => m.CanSharedUnwear());
+
+        #endregion
+
+        //
+        // Touch
+        //
+
+        #region @FarTouch
+        [Fact]
+        public void CanFarTouch()
+        {
+            _rlv.ProcessMessage("@FarTouch:0.9=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
+            Assert.Equal(0.9f, distance);
+        }
+
+        [Fact]
+        public void CanFarTouch_Synonym()
+        {
+            _rlv.ProcessMessage("@TouchFar:0.9=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
+            Assert.Equal(0.9f, distance);
+        }
+
+        [Fact]
+        public void CanFarTouch_Default()
+        {
+            _rlv.ProcessMessage("@FarTouch=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
+            Assert.Equal(1.5f, distance);
         }
         #endregion
     }

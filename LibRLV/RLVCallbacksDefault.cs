@@ -134,9 +134,15 @@ namespace LibRLV
         }
 
         // TODO: Replace this, just temp hack to get the data i need right now for testing
-        public Task<bool> TryGetSitTarget(UUID objectID, out bool isCurrentlySitting)
+        public Task<bool> TryGetObjectExists(UUID objectID, out bool isCurrentlySitting)
         {
             isCurrentlySitting = false;
+            return Task.FromResult(false);
+        }
+
+        public Task<bool> TryGetSitId(out UUID sitId)
+        {
+            sitId = default;
             return Task.FromResult(false);
         }
     }

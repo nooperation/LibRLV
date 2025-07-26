@@ -106,6 +106,10 @@ namespace LibRLV
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SendChat).Any();
         }
+        public bool CanEmote()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Emote).Any();
+        }
         public bool CanSendGesture()
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SendGesture).Any();
