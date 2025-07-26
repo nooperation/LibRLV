@@ -128,7 +128,7 @@ namespace LibRLV
             return Task.FromResult(false);
         }
 
-        public Task SendInstantMessageAsync(UUID targetUser, string message, CancellationToken cancellationToken)
+        public virtual Task SendInstantMessageAsync(UUID targetUser, string message, CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
         }
@@ -140,9 +140,45 @@ namespace LibRLV
             return Task.FromResult(false);
         }
 
-        public Task<bool> TryGetSitId(out UUID sitId)
+        public virtual Task<bool> TryGetSitId(out UUID sitId)
         {
             sitId = default;
+            return Task.FromResult(false);
+        }
+
+        public virtual Task<bool> TryGetCamAvDistMin(out float camAvDistMin)
+        {
+            camAvDistMin = default;
+            return Task.FromResult(false);
+        }
+
+        public virtual Task<bool> TryGetCamAvDistMax(out float camAvdistmax)
+        {
+            camAvdistmax = default;
+            return Task.FromResult(false);
+        }
+
+        public virtual Task<bool> TryGetCamFovMin(out float camFovMin)
+        {
+            camFovMin = default;
+            return Task.FromResult(false);
+        }
+
+        public virtual Task<bool> TryGetCamFovMax(out float camFovMax)
+        {
+            camFovMax = default;
+            return Task.FromResult(false);
+        }
+
+        public virtual Task<bool> TryGetCamZoomMin(out float camZoomMin)
+        {
+            camZoomMin = default;
+            return Task.FromResult(false);
+        }
+
+        public virtual Task<bool> TryGetCamFov(out float camFov)
+        {
+            camFov = default;
             return Task.FromResult(false);
         }
     }

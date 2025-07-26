@@ -16,6 +16,12 @@ namespace LibRLV
         Task<bool> TryGetSitId(out UUID sitId);
         Task<bool> TryGetObjectExists(UUID objectID, out bool isCurrentlySitting);
         Task<bool> TryGetRlvInventoryTree(out InventoryTree sharedFolder);
+        Task<bool> TryGetCamAvDistMin(out float camAvDistMin);
+        Task<bool> TryGetCamAvDistMax(out float camAvdistmax);
+        Task<bool> TryGetCamFovMin(out float camFovMin);
+        Task<bool> TryGetCamFovMax(out float camFovMax);
+        Task<bool> TryGetCamZoomMin(out float camZoomMin);
+        Task<bool> TryGetCamFov(out float camFov);
 
     }
 }

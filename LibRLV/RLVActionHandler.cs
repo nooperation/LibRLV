@@ -237,6 +237,11 @@ namespace LibRLV
 
         private bool HandleSetCamFOV(RLVMessage command)
         {
+            if (_manager.IsCamLocked())
+            {
+                return false;
+            }
+
             if (!float.TryParse(command.Option, out float fov))
             {
                 return false;

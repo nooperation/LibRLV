@@ -114,9 +114,9 @@ namespace LibRLV
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SendGesture).Any();
         }
-        public bool CanSetCamUnlock()
+        public bool IsCamLocked()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SetCamUnlock).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SetCamUnlock).Any();
         }
         public bool CanTpLm()
         {
@@ -232,6 +232,22 @@ namespace LibRLV
         {
             return GetRestrictionValueMin(RLVRestrictionType.CamZoomMax, out camZoomMax);
         }
+        public bool HasCamDrawMin(out float camDrawMin)
+        {
+            return GetRestrictionValueMin(RLVRestrictionType.CamDrawMin, out camDrawMin);
+        }
+        public bool HasCamDrawMax(out float camDrawMax)
+        {
+            return GetRestrictionValueMin(RLVRestrictionType.CamDrawMax, out camDrawMax);
+        }
+        public bool HasCamDrawAlphaMin(out float camDrawAlphaMin)
+        {
+            return GetRestrictionValueMin(RLVRestrictionType.CamDrawAlphaMin, out camDrawAlphaMin);
+        }
+        public bool HasCamDrawAlphaMax(out float camDrawAlphaMax)
+        {
+            return GetRestrictionValueMin(RLVRestrictionType.CamDrawAlphaMax, out camDrawAlphaMax);
+        }
         public bool HasSetCamFovMax(out float setCamFovMax)
         {
             return GetRestrictionValueMin(RLVRestrictionType.SetCamFovMax, out setCamFovMax);
@@ -240,10 +256,6 @@ namespace LibRLV
         public bool HasSetCamAvDistMax(out float setCamAvDistMax)
         {
             return GetRestrictionValueMin(RLVRestrictionType.SetCamAvDistMax, out setCamAvDistMax);
-        }
-        public bool HasCamDrawAlphaMax(out float camDrawAlphaMax)
-        {
-            return GetRestrictionValueMin(RLVRestrictionType.CamDrawAlphaMax, out camDrawAlphaMax);
         }
         public bool HasCamAvDist(out float camAvDist)
         {
@@ -596,10 +608,18 @@ namespace LibRLV
 
             foreach (var restriction in restrictions)
             {
-                if (restriction.Args.Count == 1 && restriction.Args[0] is UUID restrictionTexture)
+                if (restriction.Args.Count == 0)
+                {
+                    textureUUID = UUID.Zero;
+                }
+                else if (restriction.Args.Count == 1 && restriction.Args[0] is UUID restrictionTexture)
                 {
                     textureUUID = restrictionTexture;
-                    return true;
+                }
+                else
+                {
+                    textureUUID = UUID.Zero;
+                    return false;
                 }
             }
 

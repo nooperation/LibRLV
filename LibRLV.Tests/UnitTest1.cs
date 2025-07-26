@@ -768,9 +768,50 @@ namespace LibRLV.Tests
         [Fact] public void CanAlwaysRun() => CheckSimpleCommand("alwaysRun", m => m.CanAlwaysRun());
         #endregion
 
-        // @setrot:<angle_in_radians>=force
+        #region @setrot:<angle_in_radians>=force
+        [Fact]
+        public void SetRot()
+        {
+            var raised = Assert.Raises<SetRotEventArgs>(
+                 attach: n => _rlv.Actions.SetRot += n,
+                 detach: n => _rlv.Actions.SetRot -= n,
+                 testCode: () => _rlv.ProcessMessage("@setrot:1.5=force", _sender.Id, _sender.Name)
+             );
 
-        // @adjustheight:<distance_pelvis_to_foot_in_meters>;<factor>[;delta_in_meters]=force
+            Assert.Equal(1.5f, raised.Arguments.AngleInRadians, FloatTolerance);
+        }
+        #endregion
+
+        #region @adjustheight:<distance_pelvis_to_foot_in_meters>;<factor>[;delta_in_meters]=force
+        [Fact]
+        public void AdjustHeight()
+        {
+            var raised = Assert.Raises<AdjustHeightEventArgs>(
+                 attach: n => _rlv.Actions.AdjustHeight += n,
+                 detach: n => _rlv.Actions.AdjustHeight -= n,
+                 testCode: () => _rlv.ProcessMessage("@adjustheight:4.3;1.25=force", _sender.Id, _sender.Name)
+             );
+
+            Assert.Equal(4.3f, raised.Arguments.Distance, FloatTolerance);
+            Assert.Equal(1.25f, raised.Arguments.Factor, FloatTolerance);
+            Assert.Equal(0.0f, raised.Arguments.Delta, FloatTolerance);
+        }
+
+        [Fact]
+        public void AdjustHeight_WithDelta()
+        {
+            var raised = Assert.Raises<AdjustHeightEventArgs>(
+                 attach: n => _rlv.Actions.AdjustHeight += n,
+                 detach: n => _rlv.Actions.AdjustHeight -= n,
+                 testCode: () => _rlv.ProcessMessage("@adjustheight:4.3;1.25;12.34=force", _sender.Id, _sender.Name)
+             );
+
+
+            Assert.Equal(4.3f, raised.Arguments.Distance, FloatTolerance);
+            Assert.Equal(1.25f, raised.Arguments.Factor, FloatTolerance);
+            Assert.Equal(12.34f, raised.Arguments.Delta, FloatTolerance);
+        }
+        #endregion
 
         //
         // Camera and view
@@ -956,7 +997,49 @@ namespace LibRLV.Tests
         }
         #endregion
 
-        // setcam_fov
+        #region @setcam_fov:<fov_in_radians>=force
+        [Fact]
+        public void SetCamFov()
+        {
+            var raised = Assert.Raises<SetCamFOVEventArgs>(
+                 attach: n => _rlv.Actions.SetCamFOV += n,
+                 detach: n => _rlv.Actions.SetCamFOV -= n,
+                 testCode: () => _rlv.ProcessMessage("@setcam_fov:1.75=force", _sender.Id, _sender.Name)
+             );
+
+            Assert.Equal(1.75f, raised.Arguments.FOVInRadians, FloatTolerance);
+        }
+
+        [Fact]
+        public void SetCamFov_Restricted()
+        {
+            bool raisedEvent = false;
+            _rlv.Actions.SetCamFOV += (sender, args) =>
+            {
+                raisedEvent = true;
+            };
+
+            _rlv.ProcessMessage("@setcam_unlock=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.ProcessMessage("@setcam_fov:1.75=force", _sender.Id, _sender.Name));
+            Assert.False(raisedEvent);
+        }
+
+        [Fact]
+        public void SetCamFov_Restricted_Synonym()
+        {
+            bool raisedEvent = false;
+            _rlv.Actions.SetCamFOV += (sender, args) =>
+            {
+                raisedEvent = true;
+            };
+
+            _rlv.ProcessMessage("@camunlock=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.ProcessMessage("@setcam_fov:1.75=force", _sender.Id, _sender.Name));
+            Assert.False(raisedEvent);
+        }
+        #endregion
 
         #region @setcam_avdistmax
         [Fact]
@@ -1008,7 +1091,58 @@ namespace LibRLV.Tests
         }
         #endregion
 
-        // camdrawmin
+        #region @camdrawmin:<min_distance>=<y/n>
+
+        [Fact]
+        public void CamDrawMin()
+        {
+            _rlv.ProcessMessage("@camdrawmin:1.75=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamDrawMin(out var camDrawMin));
+            Assert.Equal(1.75f, camDrawMin);
+        }
+
+        [Fact]
+        public void CamDrawMin_Small()
+        {
+            Assert.False(_rlv.ProcessMessage("@camdrawmin:0.15=n", _sender.Id, _sender.Name));
+            Assert.False(_rlv.RLVManager.HasCamDrawMin(out var camDrawMin));
+        }
+
+        #endregion
+
+        #region @camdrawmax:<max_distance>=<y/n>
+
+        [Fact]
+        public void CamDrawMax()
+        {
+            _rlv.ProcessMessage("@camdrawmax:1.75=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamDrawMax(out var camDrawMax));
+            Assert.Equal(1.75f, camDrawMax);
+        }
+
+        [Fact]
+        public void CamDrawMax_Small()
+        {
+            Assert.False(_rlv.ProcessMessage("@camdrawmax:0.15=n", _sender.Id, _sender.Name));
+            Assert.False(_rlv.RLVManager.HasCamDrawMax(out var camDrawMax));
+        }
+
+        #endregion
+
+        #region @camdrawalphamin:<min_distance>=<y/n>
+
+        [Fact]
+        public void CamDrawAlphaMin()
+        {
+            _rlv.ProcessMessage("@camdrawalphamin:1.75=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasCamDrawAlphaMin(out var camDrawAlphaMin));
+            Assert.Equal(1.75f, camDrawAlphaMin);
+        }
+
+        #endregion
 
         #region @CamDrawColor
 
@@ -1076,11 +1210,11 @@ namespace LibRLV.Tests
         #endregion
 
         #region @camunlock
-        [Fact] public void CanSetCamUnlock() => CheckSimpleCommand("setcam_unlock", m => m.CanSetCamUnlock());
+        [Fact] public void CanSetCamUnlock() => CheckSimpleCommand("setcam_unlock", m => !m.IsCamLocked());
         #endregion
 
         #region @setcam_unlock
-        [Fact] public void CanCamUnlock() => CheckSimpleCommand("camunlock", m => m.CanSetCamUnlock());
+        [Fact] public void CanCamUnlock() => CheckSimpleCommand("camunlock", m => !m.IsCamLocked());
         #endregion
 
         #region @camavdist
@@ -1094,21 +1228,273 @@ namespace LibRLV.Tests
         }
         #endregion
 
-        // camtextures
+        #region @camtextures @setcam_textures[:texture_uuid]=<y/n>
 
-        // @setcam_textures
+        [Theory]
+        [InlineData("setcam_textures")]
+        [InlineData("camtextures")]
+        public void SetCamTextures(string command)
+        {
+            _rlv.ProcessMessage($"@{command}=n", _sender.Id, _sender.Name);
 
-        // @getcam_avdistmin
+            Assert.True(_rlv.RLVManager.HasSetCamtextures(out var actualTextureId));
 
-        // @getcam_avdistmax
+            Assert.Equal(UUID.Zero, actualTextureId);
+        }
 
-        // @getcam_fovmin
+        [Theory]
+        [InlineData("setcam_textures")]
+        [InlineData("camtextures")]
+        public void SetCamTextures_Single(string command)
+        {
+            var textureId1 = new UUID("00000000-0000-4000-8000-000000000000");
 
-        // @getcam_fovmax
+            _rlv.ProcessMessage($"@{command}:{textureId1}=n", _sender.Id, _sender.Name);
 
-        // @getcam_zoommin
+            Assert.True(_rlv.RLVManager.HasSetCamtextures(out var actualTextureId));
 
-        // @getcam_fov
+            Assert.Equal(textureId1, actualTextureId);
+        }
+
+        [Theory]
+        [InlineData("setcam_textures", "setcam_textures")]
+        [InlineData("setcam_textures", "camtextures")]
+        [InlineData("camtextures", "camtextures")]
+        [InlineData("camtextures", "setcam_textures")]
+        public void SetCamTextures_Multiple_Synonyms(string command1, string command2)
+        {
+            var textureId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var textureId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage($"@{command1}:{textureId1}=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@{command2}:{textureId2}=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasSetCamtextures(out var actualTextureId2));
+
+            _rlv.ProcessMessage($"@{command1}:{textureId2}=y", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.HasSetCamtextures(out var actualTextureId1));
+
+            Assert.Equal(textureId2, actualTextureId2);
+            Assert.Equal(textureId1, actualTextureId1);
+        }
+
+        #endregion
+
+        #region @getcam_avdistmin=<channel_number>
+        [Fact]
+        public void GetCamAvDistMin()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            var distance = 12.34f;
+
+            _callbacks.Setup(e =>
+                e.TryGetCamAvDistMin(out distance)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, distance.ToString()),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getcam_avdistmin=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetCamAvDistMin_Default()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            var distance = 0.0f;
+            _callbacks.Setup(e =>
+                e.TryGetCamAvDistMin(out distance)
+            ).ReturnsAsync(false);
+
+            Assert.False(_rlv.ProcessMessage("@getcam_avdistmin=1234", _sender.Id, _sender.Name));
+            Assert.Empty(actual);
+        }
+        #endregion
+
+        #region @getcam_avdistmax=<channel_number>
+        [Fact]
+        public void GetCamAvDistMax()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            var distance = 12.34f;
+
+            _callbacks.Setup(e =>
+                e.TryGetCamAvDistMax(out distance)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, distance.ToString()),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getcam_avdistmax=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetCamAvDistMax_Default()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            var distance = 0.0f;
+            _callbacks.Setup(e =>
+                e.TryGetCamAvDistMax(out distance)
+            ).ReturnsAsync(false);
+
+            Assert.False(_rlv.ProcessMessage("@getcam_avdistmax=1234", _sender.Id, _sender.Name));
+            Assert.Empty(actual);
+        }
+        #endregion
+
+        #region @getcam_fovmin=<channel_number>
+        [Fact]
+        public void GetCamFovMin()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            var fov = 15.25f;
+
+            _callbacks.Setup(e =>
+                e.TryGetCamFovMin(out fov)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, fov.ToString()),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getcam_fovmin=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetCamFovMin_Default()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            var fov = 0.0f;
+            _callbacks.Setup(e =>
+                e.TryGetCamFovMin(out fov)
+            ).ReturnsAsync(false);
+
+            Assert.False(_rlv.ProcessMessage("@getcam_fovmin=1234", _sender.Id, _sender.Name));
+            Assert.Empty(actual);
+        }
+        #endregion
+
+        #region @getcam_fovmax=<channel_number>
+        [Fact]
+        public void GetCamFovMax()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            var fov = 45.75f;
+            _callbacks.Setup(e =>
+                e.TryGetCamFovMax(out fov)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, fov.ToString()),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getcam_fovmax=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetCamFovMax_Default()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            var fov = 0.0f;
+            _callbacks.Setup(e =>
+                e.TryGetCamFovMax(out fov)
+            ).ReturnsAsync(false);
+
+            Assert.False(_rlv.ProcessMessage("@getcam_fovmax=1234", _sender.Id, _sender.Name));
+            Assert.Empty(actual);
+        }
+        #endregion
+
+        #region @getcam_zoommin=<channel_number>
+        [Fact]
+        public void GetCamZoomMin()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            var zoom = 0.75f;
+
+            _callbacks.Setup(e =>
+                e.TryGetCamZoomMin(out zoom)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, zoom.ToString()),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getcam_zoommin=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetCamZoomMin_Default()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            var zoom = 0.0f;
+            _callbacks.Setup(e =>
+                e.TryGetCamZoomMin(out zoom)
+            ).ReturnsAsync(false);
+
+            Assert.False(_rlv.ProcessMessage("@getcam_zoommin=1234", _sender.Id, _sender.Name));
+            Assert.Empty(actual);
+        }
+        #endregion
+
+        #region @getcam_fov=<channel_number>
+        [Fact]
+        public void GetCamFov()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            var fov = 25.5f;
+
+            _callbacks.Setup(e =>
+                e.TryGetCamFov(out fov)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, fov.ToString()),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getcam_fov=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetCamFov_Default()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            var fov = 0.0f;
+            _callbacks.Setup(e =>
+                e.TryGetCamFov(out fov)
+            ).ReturnsAsync(false);
+
+            Assert.False(_rlv.ProcessMessage("@getcam_fov=1234", _sender.Id, _sender.Name));
+            Assert.Empty(actual);
+        }
+        #endregion
 
         //
         // Chat, Emotes and Instant Messages
@@ -1355,7 +1741,9 @@ namespace LibRLV.Tests
         #endregion
 
         #region @sendGesture
+
         [Fact] public void CanSendGesture() => CheckSimpleCommand("sendGesture", m => m.CanSendGesture());
+
         #endregion
 
         #region @emote
@@ -1365,7 +1753,7 @@ namespace LibRLV.Tests
         //       sure it no longer censors emotes on @chat=n
         #endregion
 
-        #region @rediremote
+        #region @rediremote:<channel_number>=<rem/add>
         [Fact]
         public void IsRedirEmote()
         {
@@ -2662,8 +3050,6 @@ namespace LibRLV.Tests
         // Clothing and Attachments
         //
 
-        #region SimpleBooleanFlags
-
         private void CheckSimpleCommand(string cmd, Func<RLVManager, bool> canFunc)
         {
             _rlv.ProcessMessage($"@{cmd}=n", _sender.Id, _sender.Name);
@@ -2674,54 +3060,279 @@ namespace LibRLV.Tests
         }
 
 
-        [Fact] public void CanDefaultWear() => CheckSimpleCommand("defaultWear", m => m.CanDefaultWear());
-        [Fact] public void CanSetGroup() => CheckSimpleCommand("setGroup", m => m.CanSetGroup());
-        [Fact] public void CanSetDebug() => CheckSimpleCommand("setDebug", m => m.CanSetDebug());
-        [Fact] public void CanSetEnv() => CheckSimpleCommand("setEnv", m => m.CanSetEnv());
-        [Fact] public void CanAllowIdle() => CheckSimpleCommand("allowIdle", m => m.CanAllowIdle());
-        [Fact] public void CanInteract() => CheckSimpleCommand("interact", m => m.CanInteract());
-        [Fact] public void CanShowWorldMap() => CheckSimpleCommand("showWorldMap", m => m.CanShowWorldMap());
-        [Fact] public void CanShowMiniMap() => CheckSimpleCommand("showMiniMap", m => m.CanShowMiniMap());
-        [Fact] public void CanShowLoc() => CheckSimpleCommand("showLoc", m => m.CanShowLoc());
-        [Fact] public void CanShowNearby() => CheckSimpleCommand("showNearby", m => m.CanShowNearby());
-        [Fact] public void CanUnsharedWear() => CheckSimpleCommand("unsharedWear", m => m.CanUnsharedWear());
-        [Fact] public void CanUnsharedUnwear() => CheckSimpleCommand("unsharedUnwear", m => m.CanUnsharedUnwear());
-        [Fact] public void CanSharedWear() => CheckSimpleCommand("sharedWear", m => m.CanSharedWear());
-        [Fact] public void CanSharedUnwear() => CheckSimpleCommand("sharedUnwear", m => m.CanSharedUnwear());
+        // @detach=<y/n>
 
+        // @detach:<attach_point_name>=<y/n>
+
+        // @addattach[:<attach_point_name>]=<y/n>
+
+        // @remattach[:<attach_point_name>]=<y/n>
+
+        #region @defaultwear=<y/n>
+        [Fact] public void CanDefaultWear() => CheckSimpleCommand("defaultWear", m => m.CanDefaultWear());
         #endregion
+
+        // @detach[:attachpt]=force @remattach[:attachpt or :uuid]=force
+
+        // @addoutfit[:<part>]=<y/n>
+
+        // @remoutfit[:<part>]=<y/n>
+
+        // @remoutfit[:<part>]=force
+
+        // @getoutfit[:part]=<channel_number>
+
+        // @getattach[:attachpt]=<channel_number>
+
+        // @acceptpermission=<rem/add>
+
+        // @denypermission=<rem/add>
+
+        // @detachme=force
+
+        //
+        // Clothing and Attachments (Shared Folders)
+        //
+
+        #region @unsharedwear=<y/n>
+        [Fact] public void CanUnsharedWear() => CheckSimpleCommand("unsharedWear", m => m.CanUnsharedWear());
+        #endregion
+
+        #region @unsharedunwear=<y/n>
+        [Fact] public void CanUnsharedUnwear() => CheckSimpleCommand("unsharedUnwear", m => m.CanUnsharedUnwear());
+        #endregion
+
+        #region @sharedwear=<y/n>
+        [Fact] public void CanSharedWear() => CheckSimpleCommand("sharedWear", m => m.CanSharedWear());
+        #endregion
+
+        #region @sharedunwear=<y/n>
+        [Fact] public void CanSharedUnwear() => CheckSimpleCommand("sharedUnwear", m => m.CanSharedUnwear());
+        #endregion
+
+        // @getinv[:folder1/.../folderN]=<channel_number>
+
+        // @getinvworn[:folder1/.../folderN]=<channel_number>
+
+        // @findfolder:part1[&&...&&partN]=<channel_number>
+
+        // @findfolders:part1[&&...&&partN][;output_separator]=<channel_number>
+
+        // @attach:<folder1/.../folderN>=force
+
+        // @attachover:<folder1/.../folderN>=force
+
+        // @attachoverorreplace:<folder1/.../folderN>=force
+
+        // @attachall:<folder1/.../folderN>=force
+
+        // @attachallover:<folder1/.../folderN>=force
+
+        // @attachalloverorreplace:<folder1/.../folderN>=force
+
+        // @detach:<folder_name>=force
+
+        // @detachall:<folder1/.../folderN>=force
+
+        // @getpath[:<attachpt> or <clothing_layer> or <uuid>]=<channel_number>
+
+        // @getpathnew[:<attachpt> or <clothing_layer> or <uuid>]=<channel_number>
+
+        // @attachthis[:<attachpt> or <clothing_layer>]=force
+
+        // @attachthisover[:<attachpt> or <clothing_layer>]=force
+
+        // @attachthisoverorreplace[:<attachpt> or <clothing_layer>]=force
+
+        // @attachallthis[:<attachpt> or <clothing_layer>]=force
+
+        // @attachallthisover[:<attachpt> or <clothing_layer>]=force
+
+        // @attachallthisoverorreplace[:<attachpt> or <clothing_layer>]=force
+
+        // @detachthis[:<attachpt> or <clothing_layer> or <uuid>]=force
+
+        // @detachallthis[:<attachpt> or <clothing_layer>]=force
+
+        // @detachthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
+
+        // @detachallthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
+
+        // @attachthis:<layer>|<attachpt>|<path_to_folder>=<y/n>
+
+        // @attachallthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
+
+        // @detachthis_except:<folder>=<rem/add>
+
+        // @detachallthis_except:<folder>=<rem/add>
+
+        // @attachthis_except:<folder>=<rem/add>
+
+        // @attachallthis_except:<folder>=<rem/add>
 
         //
         // Touch
         //
 
-        #region @FarTouch
-        [Fact]
-        public void CanFarTouch()
+        #region  @touchfar @fartouch[:max_distance]=<y/n>
+
+        [Theory]
+        [InlineData("fartouch")]
+        [InlineData("touchfar")]
+        public void CanFarTouch(string command)
         {
-            _rlv.ProcessMessage("@FarTouch:0.9=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@{command}:0.9=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
             Assert.Equal(0.9f, distance);
         }
 
-        [Fact]
-        public void CanFarTouch_Synonym()
+        [Theory]
+        [InlineData("fartouch")]
+        [InlineData("touchfar")]
+        public void CanFarTouch_Synonym(string command)
         {
-            _rlv.ProcessMessage("@TouchFar:0.9=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@{command}:0.9=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
             Assert.Equal(0.9f, distance);
         }
 
-        [Fact]
-        public void CanFarTouch_Default()
+        [Theory]
+        [InlineData("fartouch")]
+        [InlineData("touchfar")]
+        public void CanFarTouch_Default(string command)
         {
-            _rlv.ProcessMessage("@FarTouch=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@{command}=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
             Assert.Equal(1.5f, distance);
         }
+
+        [Theory]
+        [InlineData("fartouch", "fartouch")]
+        [InlineData("fartouch", "touchfar")]
+        [InlineData("touchfar", "touchfar")]
+        [InlineData("touchfar", "fartouch")]
+        public void CanFarTouch_Multiple_Synonyms(string command1, string command2)
+        {
+            _rlv.ProcessMessage($"@{command1}:12.34=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@{command2}:6.78=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanFarTouch(out var actualDistance2));
+
+            _rlv.ProcessMessage($"@{command1}:6.78=y", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanFarTouch(out var actualDistance1));
+
+            Assert.Equal(12.34f, actualDistance1, FloatTolerance);
+            Assert.Equal(6.78f, actualDistance2, FloatTolerance);
+        }
+
+        #endregion
+
+        // @touchall=<y/n>
+
+        // @touchworld=<y/n>
+
+        // @touchworld:<UUID>=<rem/add>
+
+        // @touchthis:<UUID>=<rem/add>
+
+        // @touchme=<rem/add>
+
+        // @touchattach=<y/n>
+
+        // @touchattachself=<y/n>
+
+        // @touchattachother=<y/n>
+
+        // @touchattachother:<UUID>=<y/n>
+
+        // @touchhud[:<UUID>]=<y/n>
+
+        #region @interact=<y/n>
+
+        [Fact] public void CanInteract() => CheckSimpleCommand("interact", m => m.CanInteract());
+
+        #endregion
+
+        //
+        // Location
+        //
+
+        #region  @showworldmap=<y/n>
+        [Fact] public void CanShowWorldMap() => CheckSimpleCommand("showWorldMap", m => m.CanShowWorldMap());
+        #endregion
+
+        #region @showminimap=<y/n>
+        [Fact] public void CanShowMiniMap() => CheckSimpleCommand("showMiniMap", m => m.CanShowMiniMap());
+        #endregion
+
+        #region @showloc=<y/n>
+        [Fact] public void CanShowLoc() => CheckSimpleCommand("showLoc", m => m.CanShowLoc());
+        #endregion
+
+        //
+        // Name Tags and Hovertext
+        //
+
+        // @shownames[:except_uuid]=<y/n>
+
+        // @shownames_sec[:except_uuid]=<y/n>
+
+        // @shownametags=<y/n>
+
+        #region @shownearby=<y/n>
+        [Fact] public void CanShowNearby() => CheckSimpleCommand("showNearby", m => m.CanShowNearby());
+        #endregion
+
+        // @showhovertextall=<y/n>
+
+        // @showhovertext:<UUID>=<y/n>
+
+        // @showhovertexthud=<y/n>
+
+        // @showhovertextworld=<y/n>
+
+        //
+        // Group
+        //
+
+        // @setgroup:<group_name>=force
+
+        #region @setgroup=<y/n>
+        [Fact] public void CanSetGroup() => CheckSimpleCommand("setGroup", m => m.CanSetGroup());
+        #endregion
+
+        // @getgroup=<channel_number>
+
+        //
+        // Viewer Control
+        //
+
+        #region @setdebug=<y/n>
+        [Fact] public void CanSetDebug() => CheckSimpleCommand("setDebug", m => m.CanSetDebug());
+        #endregion
+
+        // @setdebug_<setting>:<value>=force
+
+        // @getdebug_<setting>=<channel_number>
+
+        #region @setenv=<y/n>
+        [Fact] public void CanSetEnv() => CheckSimpleCommand("setEnv", m => m.CanSetEnv());
+        #endregion
+
+        // @setenv_<setting>:<value>=force
+
+        // @getenv_<setting>=<channel_number>
+
+        //
+        // Unofficial Commands
+        //
+
+        #region @allowidle=<y/n>
+        [Fact] public void CanAllowIdle() => CheckSimpleCommand("allowIdle", m => m.CanAllowIdle());
         #endregion
     }
 }

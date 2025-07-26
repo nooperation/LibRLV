@@ -97,6 +97,24 @@ namespace LibRLV
                     return true;
                 }
 
+                case RLVRestrictionType.CamDrawMin:         // HasCamDrawMin
+                case RLVRestrictionType.CamDrawMax:         // HasCamDrawMax
+                {
+                    if (args.Length < 1 || !float.TryParse(args[0], out var val))
+                    {
+                        return false;
+                    }
+
+                    if(val < 0.40f)
+                    {
+                        return false;
+                    }
+
+                    parsedArgs.Add(val);
+
+                    return true;
+                }
+
                 case RLVRestrictionType.CamZoomMax:         // HasCamZoomMax
                 case RLVRestrictionType.CamZoomMin:         // HasCamZoomMin
                 case RLVRestrictionType.SetCamFovMin:       // HasSetCamFovMin
@@ -105,6 +123,7 @@ namespace LibRLV
                 case RLVRestrictionType.SetCamAvDistMax:    // HasSetCamAvDistMax
                 case RLVRestrictionType.CamDistMin:         // HasCamDistMin
                 case RLVRestrictionType.SetCamAvDistMin:    // HasSetCamAvDistMin
+                case RLVRestrictionType.CamDrawAlphaMin:    // HasCamDrawAlphaMin
                 case RLVRestrictionType.CamDrawAlphaMax:    // HasCamDrawAlphaMax
                 case RLVRestrictionType.CamAvDist:          // HasCamAvDist
                 {

@@ -130,6 +130,49 @@ namespace LibRLV
                             response = sitId.ToString();
                         }
                         break;
+                    case RLVDataRequest.GetCamAvDistMin:
+                        if (!_callbacks.TryGetCamAvDistMin(out var camAvDistMin).Result)
+                        {
+                            return false;
+                        }
+                        response = camAvDistMin.ToString();
+                        break;
+                    case RLVDataRequest.GetCamAvDistMax:
+                        if (!_callbacks.TryGetCamAvDistMax(out var camAvDistMax).Result)
+                        {
+                            return false;
+                        }
+                        response = camAvDistMax.ToString();
+                        break;
+                    case RLVDataRequest.GetCamFovMin:
+                        if (!_callbacks.TryGetCamFovMin(out var camFovMin).Result)
+                        {
+                            return false;
+                        }
+                        response = camFovMin.ToString();
+                        break;
+
+                    case RLVDataRequest.GetCamFovMax:
+                        if (!_callbacks.TryGetCamFovMax(out var camFovMax).Result)
+                        {
+                            return false;
+                        }
+                        response = camFovMax.ToString();
+                        break;
+                    case RLVDataRequest.GetCamZoomMin:
+                        if (!_callbacks.TryGetCamZoomMin(out var camZoomMin).Result)
+                        {
+                            return false;
+                        }
+                        response = camZoomMin.ToString();
+                        break;
+                    case RLVDataRequest.GetCamFov:
+                        if (!_callbacks.TryGetCamFov(out var camFov).Result)
+                        {
+                            return false;
+                        }
+                        response = camFov.ToString();
+                        break;
                     case RLVDataRequest.GetOutfit:
                     {
                         if (!Enum.TryParse<WearableType>(rlvMessage.Option, out var part))

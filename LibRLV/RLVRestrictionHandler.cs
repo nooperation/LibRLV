@@ -18,13 +18,16 @@ namespace LibRLV
             { "alwaysrun", RLVRestrictionType.AlwaysRun },
             { "camzoommax", RLVRestrictionType.CamZoomMax },
             { "camzoommin", RLVRestrictionType.CamZoomMin },
+            { "camdrawmin", RLVRestrictionType.CamDrawMin },
+            { "camdrawmax", RLVRestrictionType.CamDrawMax },
             { "setcam_fovmin", RLVRestrictionType.SetCamFovMin },
             { "setcam_fovmax", RLVRestrictionType.SetCamFovMax },
             { "camdistmax", RLVRestrictionType.CamDistMax },
-            { "setcam_avdistmax", RLVRestrictionType.SetCamAvDistMax }, // synonym of camdistmax 
             { "camdistmin", RLVRestrictionType.CamDistMin },
-            { "setcam_avdistmin", RLVRestrictionType.SetCamAvDistMin }, // synonym of camdistmin
+            { "camdrawalphamin", RLVRestrictionType.CamDrawAlphaMin },
             { "camdrawalphamax", RLVRestrictionType.CamDrawAlphaMax },
+            { "setcam_avdistmax", RLVRestrictionType.SetCamAvDistMax }, // synonym of camdistmax
+            { "setcam_avdistmin", RLVRestrictionType.SetCamAvDistMin }, // synonym of camdistmin
             { "camdrawcolor", RLVRestrictionType.CamDrawColor },
             { "camunlock", RLVRestrictionType.CamUnlock },
             { "setcam_unlock", RLVRestrictionType.SetCamUnlock }, // synonym of camunlock
@@ -377,6 +380,8 @@ namespace LibRLV
 
             if (!restrictions.Contains(newRestriction))
             {
+                // TODO: Check newRestriction args to confirm they're within bounds (like camdrawmin must be at least 0.40f)?
+
                 restrictions.Add(newRestriction);
                 RestrictionUpdated?.Invoke(this, new RestrictionUpdatedEventArgs()
                 {
