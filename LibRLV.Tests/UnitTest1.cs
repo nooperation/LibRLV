@@ -1,3 +1,4 @@
+using LibRLV.EventArguments;
 using Moq;
 using OpenMetaverse;
 
@@ -760,12 +761,6 @@ namespace LibRLV.Tests
         [Fact] public void CanSetCamUnlock() => CheckSimpleCommand("setcam_unlock", m => m.CanSetCamUnlock());
         [Fact] public void CanTpLm() => CheckSimpleCommand("tpLm", m => m.CanTpLm());
         [Fact] public void CanTpLoc() => CheckSimpleCommand("tpLoc", m => m.CanTpLoc());
-        [Fact] public void CanStandTp() => CheckSimpleCommand("standTp", m => m.CanStandTp());
-        [Fact] public void CanShowInv() => CheckSimpleCommand("showInv", m => m.CanShowInv());
-        [Fact] public void CanViewNote() => CheckSimpleCommand("viewNote", m => m.CanViewNote());
-        [Fact] public void CanViewScript() => CheckSimpleCommand("viewScript", m => m.CanViewScript());
-        [Fact] public void CanViewTexture() => CheckSimpleCommand("viewTexture", m => m.CanViewTexture());
-        [Fact] public void CanUnsit() => CheckSimpleCommand("unsit", m => m.CanUnsit());
         [Fact] public void CanSit() => CheckSimpleCommand("sit", m => m.CanSit());
         [Fact] public void CanDefaultWear() => CheckSimpleCommand("defaultWear", m => m.CanDefaultWear());
         [Fact] public void CanSetGroup() => CheckSimpleCommand("setGroup", m => m.CanSetGroup());
@@ -1037,74 +1032,6 @@ namespace LibRLV.Tests
 
             Assert.True(_rlv.RLVManager.HasCamAvDist(out var camAvDist));
             Assert.Equal(5f, camAvDist);
-        }
-        #endregion
-
-        #region @CanSitTp
-
-        [Fact]
-        public void CanSitTp_Default()
-        {
-            Assert.False(_rlv.RLVManager.CanSitTp(out var maxDistance));
-            Assert.Equal(1.5f, maxDistance);
-        }
-
-        [Fact]
-        public void CanSitTp_Single()
-        {
-            _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
-            Assert.Equal(2.5f, maxDistance);
-        }
-
-        [Fact]
-        public void CanSitTp_Multiple_SingleSender()
-        {
-            _rlv.ProcessMessage("@SitTp:3.5=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@SitTp:4.5=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
-            Assert.Equal(2.5f, maxDistance);
-        }
-
-        [Fact]
-        public void CanSitTp_Multiple_SingleSender_WithRemoval()
-        {
-            _rlv.ProcessMessage("@SitTp:3.5=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@SitTp:4.5=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
-
-            _rlv.ProcessMessage("@SitTp:8.5=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@SitTp:8.5=y", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
-            Assert.Equal(2.5f, maxDistance);
-        }
-
-        [Fact]
-        public void CanSitTp_Multiple_MultipleSenders()
-        {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
-            var sender3 = new RlvObject("Sender 3", new UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"));
-
-            _rlv.ProcessMessage("@SitTp:3.5=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@SitTp:4.5=n", sender2.Id, sender2.Name);
-            _rlv.ProcessMessage("@SitTp:2.5=n", sender3.Id, sender3.Name);
-
-            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
-            Assert.Equal(2.5f, maxDistance);
-        }
-
-        [Fact]
-        public void CanSitTp_Off()
-        {
-            _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@SitTp:2.5=y", _sender.Id, _sender.Name);
-
-            Assert.False(_rlv.RLVManager.CanSitTp(out var maxDistance));
-            Assert.Equal(1.5f, maxDistance);
         }
         #endregion
 
@@ -1742,6 +1669,7 @@ namespace LibRLV.Tests
 
         #region @startim @startimto
 
+        [Fact]
         public void CanStartIM_Default()
         {
             var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
@@ -1924,7 +1852,6 @@ namespace LibRLV.Tests
 
         #endregion
 
-
         #region @TpLocal
         [Fact]
         public void CanTpLocal_Default()
@@ -2007,6 +1934,618 @@ namespace LibRLV.Tests
             Assert.False(_rlv.RLVManager.CanTPLure(userId2));
         }
 
+        #endregion
+
+        #region @sittp
+
+        [Fact]
+        public void CanSitTp_Default()
+        {
+            Assert.False(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.Equal(1.5f, maxDistance);
+        }
+
+        [Fact]
+        public void CanSitTp_Single()
+        {
+            _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.Equal(2.5f, maxDistance);
+        }
+
+        [Fact]
+        public void CanSitTp_Multiple_SingleSender()
+        {
+            _rlv.ProcessMessage("@SitTp:3.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@SitTp:4.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.Equal(2.5f, maxDistance);
+        }
+
+        [Fact]
+        public void CanSitTp_Multiple_SingleSender_WithRemoval()
+        {
+            _rlv.ProcessMessage("@SitTp:3.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@SitTp:4.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
+
+            _rlv.ProcessMessage("@SitTp:8.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@SitTp:8.5=y", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.Equal(2.5f, maxDistance);
+        }
+
+        [Fact]
+        public void CanSitTp_Multiple_MultipleSenders()
+        {
+            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender3 = new RlvObject("Sender 3", new UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"));
+
+            _rlv.ProcessMessage("@SitTp:3.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@SitTp:4.5=n", sender2.Id, sender2.Name);
+            _rlv.ProcessMessage("@SitTp:2.5=n", sender3.Id, sender3.Name);
+
+            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.Equal(2.5f, maxDistance);
+        }
+
+        [Fact]
+        public void CanSitTp_Off()
+        {
+            _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@SitTp:2.5=y", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.Equal(1.5f, maxDistance);
+        }
+        #endregion
+
+        #region @standtp
+        [Fact] public void CanStandTp() => CheckSimpleCommand("standTp", m => m.CanStandTp());
+        #endregion
+
+        #region @tpto FORCE
+
+        [Fact]
+        public void TpTo_Default()
+        {
+            var raised = Assert.Raises<TpToEventArgs>(
+                attach: n => _rlv.Actions.TpTo += n,
+                detach: n => _rlv.Actions.TpTo -= n,
+                testCode: () => _rlv.ProcessMessage("@tpto:1.5/2.5/3.5=force", _sender.Id, _sender.Name)
+            );
+
+            Assert.Equal(1.5f, raised.Arguments.X, FloatTolerance);
+            Assert.Equal(2.5f, raised.Arguments.Y, FloatTolerance);
+            Assert.Equal(3.5f, raised.Arguments.Z, FloatTolerance);
+            Assert.Null(raised.Arguments.RegionName);
+            Assert.Null(raised.Arguments.Lookat);
+        }
+
+        [Fact]
+        public void TpTo_WithRegion()
+        {
+            var raised = Assert.Raises<TpToEventArgs>(
+                attach: n => _rlv.Actions.TpTo += n,
+                detach: n => _rlv.Actions.TpTo -= n,
+                testCode: () => _rlv.ProcessMessage("@tpto:Region Name/1.5/2.5/3.5=force", _sender.Id, _sender.Name)
+            );
+
+            Assert.Equal(1.5f, raised.Arguments.X, FloatTolerance);
+            Assert.Equal(2.5f, raised.Arguments.Y, FloatTolerance);
+            Assert.Equal(3.5f, raised.Arguments.Z, FloatTolerance);
+            Assert.Equal("Region Name", raised.Arguments.RegionName);
+            Assert.Null(raised.Arguments.Lookat);
+        }
+
+        [Fact]
+        public void TpTo_WithRegionAndLookAt()
+        {
+            var raised = Assert.Raises<TpToEventArgs>(
+                attach: n => _rlv.Actions.TpTo += n,
+                detach: n => _rlv.Actions.TpTo -= n,
+                testCode: () => _rlv.ProcessMessage("@tpto:Region Name/1.5/2.5/3.5;3.1415=force", _sender.Id, _sender.Name)
+            );
+
+            Assert.Equal(1.5f, raised.Arguments.X, FloatTolerance);
+            Assert.Equal(2.5f, raised.Arguments.Y, FloatTolerance);
+            Assert.Equal(3.5f, raised.Arguments.Z, FloatTolerance);
+            Assert.Equal("Region Name", raised.Arguments.RegionName);
+            Assert.NotNull(raised.Arguments.Lookat);
+            Assert.Equal(3.1415f, raised.Arguments.Lookat.Value, FloatTolerance);
+        }
+
+        [Fact]
+        public void TpTo_RestrictedUnsit()
+        {
+            _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
+
+            bool raisedEvent = false;
+            _rlv.Actions.TpTo += (sender, args) =>
+            {
+                raisedEvent = true;
+            };
+
+            Assert.False(_rlv.ProcessMessage("@tpto:1.5/2.5/3.5=force", _sender.Id, _sender.Name));
+            Assert.False(raisedEvent);
+        }
+
+        [Fact]
+        public void TpTo_RestrictedTpLoc()
+        {
+            _rlv.ProcessMessage("@tploc=n", _sender.Id, _sender.Name);
+
+            bool raisedEvent = false;
+            _rlv.Actions.TpTo += (sender, args) =>
+            {
+                raisedEvent = true;
+            };
+
+            Assert.False(_rlv.ProcessMessage("@tpto:1.5/2.5/3.5=force", _sender.Id, _sender.Name));
+            Assert.False(raisedEvent);
+        }
+
+        #endregion
+
+        #region @accepttp
+
+        [Fact]
+        public void CanAutoAcceptTp_Default()
+        {
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            Assert.False(_rlv.RLVManager.IsAutoAcceptTp(userId1));
+            Assert.False(_rlv.RLVManager.IsAutoAcceptTp(userId2));
+            Assert.False(_rlv.RLVManager.IsAutoAcceptTp());
+        }
+
+        [Fact]
+        public void CanAutoAcceptTp_User()
+        {
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage($"@accepttp:{userId1}=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.IsAutoAcceptTp(userId1));
+            Assert.False(_rlv.RLVManager.IsAutoAcceptTp(userId2));
+            Assert.False(_rlv.RLVManager.IsAutoAcceptTp());
+        }
+
+        [Fact]
+        public void CanAutoAcceptTp_All()
+        {
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage($"@accepttp=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.IsAutoAcceptTp(userId1));
+            Assert.True(_rlv.RLVManager.IsAutoAcceptTp(userId2));
+            Assert.True(_rlv.RLVManager.IsAutoAcceptTp());
+        }
+
+        #endregion
+
+        #region @accepttprequest
+
+        [Fact]
+        public void CanAutoAcceptTpRequest_Default()
+        {
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            Assert.False(_rlv.RLVManager.IsAutoAcceptTpRequest(userId1));
+            Assert.False(_rlv.RLVManager.IsAutoAcceptTpRequest(userId2));
+            Assert.False(_rlv.RLVManager.IsAutoAcceptTpRequest());
+        }
+
+        [Fact]
+        public void CanAutoAcceptTpRequest_User()
+        {
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage($"@accepttprequest:{userId1}=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.IsAutoAcceptTpRequest(userId1));
+            Assert.False(_rlv.RLVManager.IsAutoAcceptTpRequest(userId2));
+            Assert.False(_rlv.RLVManager.IsAutoAcceptTpRequest());
+        }
+
+        [Fact]
+        public void CanAutoAcceptTpRequest_All()
+        {
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage($"@accepttprequest=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.IsAutoAcceptTpRequest(userId1));
+            Assert.True(_rlv.RLVManager.IsAutoAcceptTpRequest(userId2));
+            Assert.True(_rlv.RLVManager.IsAutoAcceptTpRequest());
+        }
+
+        #endregion
+
+        #region @tprequest @tprequest_sec
+
+        [Fact]
+        public void CanTpRequest_Default()
+        {
+            Assert.True(_rlv.RLVManager.CanTpRequest(null));
+            Assert.True(_rlv.RLVManager.CanTpRequest(UUID.Random()));
+        }
+
+        [Fact]
+        public void CanTpRequest()
+        {
+            _rlv.ProcessMessage("@tprequest=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanTpRequest(null));
+            Assert.False(_rlv.RLVManager.CanTpRequest(UUID.Random()));
+        }
+
+        [Fact]
+        public void CanTpRequest_Except()
+        {
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage("@tprequest=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@tprequest:{userId1}=add", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanTpRequest(null));
+            Assert.True(_rlv.RLVManager.CanTpRequest(userId1));
+            Assert.False(_rlv.RLVManager.CanTpRequest(userId2));
+        }
+
+        [Fact]
+        public void CanTpRequest_Secure_Default()
+        {
+            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage("@tprequest_sec=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanTpRequest(null));
+            Assert.False(_rlv.RLVManager.CanTpRequest(userId1));
+            Assert.False(_rlv.RLVManager.CanTpRequest(userId2));
+        }
+
+        [Fact]
+        public void CanTpRequest_Secure()
+        {
+            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage("@tprequest_sec=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@tprequest:{userId1}=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@tprequest:{userId2}=add", sender2.Id, sender2.Name);
+
+            Assert.False(_rlv.RLVManager.CanTpRequest(null));
+            Assert.True(_rlv.RLVManager.CanTpRequest(userId1));
+            Assert.False(_rlv.RLVManager.CanTpRequest(userId2));
+        }
+
+        #endregion
+
+        #region @showinv
+        [Fact] public void CanShowInv() => CheckSimpleCommand("showInv", m => m.CanShowInv());
+
+        #endregion
+
+        #region @viewNote
+        [Fact] public void CanViewNote() => CheckSimpleCommand("viewNote", m => m.CanViewNote());
+        #endregion
+
+        #region @viewscript
+        [Fact] public void CanViewScript() => CheckSimpleCommand("viewScript", m => m.CanViewScript());
+        #endregion
+
+        #region @viewtexture
+        [Fact] public void CanViewTexture() => CheckSimpleCommand("viewTexture", m => m.CanViewTexture());
+        #endregion
+
+        #region @edit @editobj @editworld @editattach
+
+        [Fact]
+        public void CanEdit_Default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, null));
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, null));
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
+
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
+        }
+
+        [Fact]
+        public void CanEdit()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+
+            _rlv.ProcessMessage("@edit=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, null));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, null));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
+
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
+        }
+
+        [Fact]
+        public void CanEdit_Exception()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage("@edit=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@edit:{objectId1}=add", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, null));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, null));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
+
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
+
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId2));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId2));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId2));
+        }
+
+        [Fact]
+        public void CanEdit_Specific()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage($"@editobj:{objectId1}=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, null));
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, null));
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
+
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
+
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId2));
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId2));
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId2));
+        }
+
+        [Fact]
+        public void CanEdit_World()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+
+            _rlv.ProcessMessage($"@editworld=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, null));
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, null));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
+
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
+        }
+
+        [Fact]
+        public void CanEdit_Attachment()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+
+            _rlv.ProcessMessage($"@editattach=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, null));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, null));
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
+
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
+            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
+        }
+
+        #endregion
+
+        #region @canrez
+        [Fact] public void CanRez() => CheckSimpleCommand("rez", m => m.CanRez());
+
+        #endregion
+
+        #region @share @share_sec
+
+        [Fact]
+        public void CanShare_Default()
+        {
+            Assert.True(_rlv.RLVManager.CanShare(null));
+            Assert.True(_rlv.RLVManager.CanShare(UUID.Random()));
+        }
+
+        [Fact]
+        public void CanShare()
+        {
+            _rlv.ProcessMessage("@share=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanShare(null));
+            Assert.False(_rlv.RLVManager.CanShare(UUID.Random()));
+        }
+
+        [Fact]
+        public void CanShare_Except()
+        {
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage("@share=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@share:{userId1}=add", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanShare(null));
+            Assert.True(_rlv.RLVManager.CanShare(userId1));
+            Assert.False(_rlv.RLVManager.CanShare(userId2));
+        }
+
+        [Fact]
+        public void CanShare_Secure_Default()
+        {
+            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage("@share_sec=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanShare(null));
+            Assert.False(_rlv.RLVManager.CanShare(userId1));
+            Assert.False(_rlv.RLVManager.CanShare(userId2));
+        }
+
+        [Fact]
+        public void CanShare_Secure()
+        {
+            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage("@share_sec=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@share:{userId1}=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@share:{userId2}=add", sender2.Id, sender2.Name);
+
+            Assert.False(_rlv.RLVManager.CanShare(null));
+            Assert.True(_rlv.RLVManager.CanShare(userId1));
+            Assert.False(_rlv.RLVManager.CanShare(userId2));
+        }
+
+        #endregion
+
+        #region @unsit
+        [Fact] public void CanUnsit() => CheckSimpleCommand("unsit", m => m.CanUnsit());
+        #endregion
+
+        #region @sit FORCE
+        private void SetupSitTarget(UUID objectId, bool isCurrentlySitting)
+        {
+            _callbacks.Setup(e =>
+                e.TryGetSitTarget(objectId, out isCurrentlySitting)
+            ).ReturnsAsync(true);
+        }
+
+        [Fact]
+        public void ForceSit_Default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            SetupSitTarget(objectId1, false);
+
+            var raised = Assert.Raises<SitEventArgs>(
+                attach: n => _rlv.Actions.Sit += n,
+                detach: n => _rlv.Actions.Sit -= n,
+                testCode: () => _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name)
+            );
+
+            Assert.Equal(objectId1, raised.Arguments.Target);
+        }
+
+        [Fact]
+        public void ForceSit_RestrictedUnsit_WhileStanding()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            SetupSitTarget(objectId1, false);
+
+            _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
+
+            var raised = Assert.Raises<SitEventArgs>(
+                attach: n => _rlv.Actions.Sit += n,
+                detach: n => _rlv.Actions.Sit -= n,
+                testCode: () => _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name)
+            );
+
+            Assert.Equal(objectId1, raised.Arguments.Target);
+        }
+
+        [Fact]
+        public void ForceSit_RestrictedUnsit_WhileSeated()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            SetupSitTarget(objectId1, true);
+
+            _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
+
+            bool raisedEvent = false;
+            _rlv.Actions.TpTo += (sender, args) =>
+            {
+                raisedEvent = true;
+            };
+
+            Assert.False(_rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
+            Assert.False(raisedEvent);
+        }
+
+
+        [Fact]
+        public void ForceSit_RestrictedSit()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            SetupSitTarget(objectId1, true);
+
+            _rlv.ProcessMessage("@sit=n", _sender.Id, _sender.Name);
+
+            bool raisedEvent = false;
+            _rlv.Actions.TpTo += (sender, args) =>
+            {
+                raisedEvent = true;
+            };
+
+            Assert.False(_rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
+            Assert.False(raisedEvent);
+        }
+
+        [Fact]
+        public void ForceSit_RestrictedStandTp()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            SetupSitTarget(objectId1, true);
+
+            _rlv.ProcessMessage("@standtp=n", _sender.Id, _sender.Name);
+
+            bool raisedEvent = false;
+            _rlv.Actions.TpTo += (sender, args) =>
+            {
+                raisedEvent = true;
+            };
+
+            Assert.False(_rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
+            Assert.False(raisedEvent);
+        }
+
+        [Fact]
+        public void ForceSit_InvalidObject()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            // SetupSitTarget(objectId1, true); <-- Don't setup sit target for this test
+
+            bool raisedEvent = false;
+            _rlv.Actions.TpTo += (sender, args) =>
+            {
+                raisedEvent = true;
+            };
+
+            Assert.False(_rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
+            Assert.False(raisedEvent);
+        }
         #endregion
     }
 }

@@ -37,8 +37,15 @@ namespace LibRLV
         public event EventHandler<SetSettingEventArgs> SetEnv;
         public event EventHandler<SetSettingEventArgs> SetDebug;
 
-        public RLVActionHandler()
+        // TODO: Swap manager out with an interface once it's been solidified into only useful stuff
+        RLVManager _manager;
+        IRLVCallbacks _callbacks;
+
+        public RLVActionHandler(RLVManager manager, IRLVCallbacks callbacks)
         {
+            _manager = manager;
+            _callbacks = callbacks;
+
             RLVActionHandlers = new Dictionary<string, Func<RLVMessage, bool>>()
             {
                 { "setrot", HandleSetRot },
@@ -179,7 +186,7 @@ namespace LibRLV
 
         private bool HandleSetRot(RLVMessage command)
         {
-            if (!double.TryParse(command.Option, out double angleInRadians))
+            if (!float.TryParse(command.Option, out float angleInRadians))
             {
                 return false;
             }
@@ -196,20 +203,20 @@ namespace LibRLV
                 return false;
             }
 
-            if (!double.TryParse(args[0], out double distance))
+            if (!float.TryParse(args[0], out float distance))
             {
                 return false;
             }
 
-            var factor = 1.0;
-            var deltaInMeters = 0.0;
+            var factor = 1.0f;
+            var deltaInMeters = 0.0f;
 
-            if (args.Length > 1 && !double.TryParse(args[1], out factor))
+            if (args.Length > 1 && !float.TryParse(args[1], out factor))
             {
                 factor = 1;
             }
 
-            if (args.Length > 2 && !double.TryParse(args[2], out deltaInMeters))
+            if (args.Length > 2 && !float.TryParse(args[2], out deltaInMeters))
             {
                 deltaInMeters = 0;
             }
@@ -220,7 +227,7 @@ namespace LibRLV
 
         private bool HandleSetCamFOV(RLVMessage command)
         {
-            if (!double.TryParse(command.Option, out double fov))
+            if (!float.TryParse(command.Option, out float fov))
             {
                 return false;
             }
@@ -236,12 +243,45 @@ namespace LibRLV
                 return false;
             }
 
+            if (!_manager.CanSit())
+            {
+                return false;
+            }
+
+            if (!_callbacks.TryGetSitTarget(sitTarget, out var isCurrentlySitting).Result)
+            {
+                return false;
+            }
+
+            if (isCurrentlySitting)
+            {
+                if (!_manager.CanUnsit())
+                {
+                    return false;
+                }
+
+                if (!_manager.CanStandTp())
+                {
+                    return false;
+                }
+            }
+
             Sit?.Invoke(this, new SitEventArgs(sitTarget));
             return true;
         }
 
         private bool HandleTpTo(RLVMessage command)
         {
+            // @tpto is inhibited by @tploc=n, by @unsit too.
+            if (!_manager.CanTpLoc())
+            {
+                return false;
+            }
+            if (!_manager.CanUnsit())
+            {
+                return false;
+            }
+
             var commandArgs = command.Option.Split(';');
             var locationArgs = commandArgs[0].Split('/');
 
@@ -250,10 +290,10 @@ namespace LibRLV
                 return false;
             }
 
-            double? lookat = null;
+            float? lookat = null;
             if (commandArgs.Length > 1)
             {
-                if (!double.TryParse(commandArgs[1], out double val))
+                if (!float.TryParse(commandArgs[1], out float val))
                 {
                     return false;
                 }
@@ -263,15 +303,15 @@ namespace LibRLV
 
             if (locationArgs.Length == 3)
             {
-                if (!double.TryParse(locationArgs[0], out var x))
+                if (!float.TryParse(locationArgs[0], out var x))
                 {
                     return false;
                 }
-                if (!double.TryParse(locationArgs[1], out var y))
+                if (!float.TryParse(locationArgs[1], out var y))
                 {
                     return false;
                 }
-                if (!double.TryParse(locationArgs[2], out var z))
+                if (!float.TryParse(locationArgs[2], out var z))
                 {
                     return false;
                 }
@@ -283,15 +323,15 @@ namespace LibRLV
             {
                 var regionName = locationArgs[0];
 
-                if (!double.TryParse(locationArgs[1], out var x))
+                if (!float.TryParse(locationArgs[1], out var x))
                 {
                     return false;
                 }
-                if (!double.TryParse(locationArgs[2], out var y))
+                if (!float.TryParse(locationArgs[2], out var y))
                 {
                     return false;
                 }
-                if (!double.TryParse(locationArgs[3], out var z))
+                if (!float.TryParse(locationArgs[3], out var z))
                 {
                     return false;
                 }

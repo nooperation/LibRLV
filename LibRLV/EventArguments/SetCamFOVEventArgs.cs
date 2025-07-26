@@ -4,11 +4,11 @@ namespace LibRLV.EventArguments
 {
     public class SetCamFOVEventArgs : EventArgs
     {
-        public SetCamFOVEventArgs(double fOVInRadians)
+        public SetCamFOVEventArgs(float fOVInRadians)
         {
             this.FOVInRadians = fOVInRadians;
         }
 
-        public double FOVInRadians { get; }
+        public float FOVInRadians { get; }
     }
 }

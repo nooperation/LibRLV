@@ -4,7 +4,7 @@ namespace LibRLV.EventArguments
 {
     public class TpToEventArgs : EventArgs
     {
-        public TpToEventArgs(double x, double y, double z, string regionName, double? lookat)
+        public TpToEventArgs(float x, float y, float z, string regionName, float? lookat)
         {
             this.X = x;
             this.Y = y;
@@ -13,10 +13,10 @@ namespace LibRLV.EventArguments
             this.Lookat = lookat;
         }
 
-        public double X { get; }
-        public double Y { get; }
-        public double Z { get; }
+        public float X { get; }
+        public float Y { get; }
+        public float Z { get; }
         public string RegionName { get; }
-        public double? Lookat { get; }
+        public float? Lookat { get; }
     }
 }

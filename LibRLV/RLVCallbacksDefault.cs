@@ -132,5 +132,12 @@ namespace LibRLV
         {
             return Task.CompletedTask;
         }
+
+        // TODO: Replace this, just temp hack to get the data i need right now for testing
+        public Task<bool> TryGetSitTarget(UUID objectID, out bool isCurrentlySitting)
+        {
+            isCurrentlySitting = false;
+            return Task.FromResult(false);
+        }
     }
 }

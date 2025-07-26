@@ -26,10 +26,10 @@ namespace LibRLV
         {
             Callbacks = callbacks;
             Blacklist = new RLVBlacklist();
-            Actions = new RLVActionHandler();
             Restrictions = new RLVRestrictionHandler(Callbacks);
             Get = new RLVGetHandler(Blacklist, Restrictions, Callbacks);
             RLVManager = new RLVManager(Restrictions, Callbacks);
+            Actions = new RLVActionHandler(RLVManager, Callbacks);
             Enabled = enabled;
         }
 

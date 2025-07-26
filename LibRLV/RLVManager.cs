@@ -542,7 +542,7 @@ namespace LibRLV
             return _restrictionProvider.GetRestrictions(RLVRestrictionType.AcceptPermission).Any();
         }
 
-        public bool IsAutoAcceptTp(UUID userId)
+        public bool IsAutoAcceptTp(UUID? userId = null)
         {
             var restrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.AcceptTp);
             foreach (var restriction in restrictions)
@@ -561,7 +561,7 @@ namespace LibRLV
             return false;
         }
 
-        public bool IsAutoAcceptTpRequest(UUID userId)
+        public bool IsAutoAcceptTpRequest(UUID? userId = null)
         {
             var restrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.AcceptTpRequest);
             foreach (var restriction in restrictions)
@@ -608,7 +608,7 @@ namespace LibRLV
             Attached,
             RezzedInWorld
         }
-        public bool CanEdit(UUID objectId, ObjectLocation objectLocation)
+        public bool CanEdit(ObjectLocation objectLocation, UUID? objectId)
         {
             if (!CanInteract())
             {

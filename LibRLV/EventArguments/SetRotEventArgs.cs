@@ -4,9 +4,9 @@ namespace LibRLV.EventArguments
 {
     public class SetRotEventArgs : EventArgs
     {
-        public double AngleInRadians { get; }
+        public float AngleInRadians { get; }
 
-        public SetRotEventArgs(double angleInRadians)
+        public SetRotEventArgs(float angleInRadians)
         {
             this.AngleInRadians = angleInRadians;
         }

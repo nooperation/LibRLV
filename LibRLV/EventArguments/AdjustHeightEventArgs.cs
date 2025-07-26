@@ -4,15 +4,15 @@ namespace LibRLV.EventArguments
 {
     public class AdjustHeightEventArgs : EventArgs
     {
-        public AdjustHeightEventArgs(double distance, double factor, double? delta)
+        public AdjustHeightEventArgs(float distance, float factor, float? delta)
         {
             this.Distance = distance;
             this.Factor = factor;
             this.Delta = delta;
         }
 
-        public double Distance { get; }
-        public double Factor { get; }
-        public double? Delta { get; }
+        public float Distance { get; }
+        public float Factor { get; }
+        public float? Delta { get; }
     }
 }
