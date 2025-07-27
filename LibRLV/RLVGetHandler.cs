@@ -253,18 +253,12 @@ namespace LibRLV
             else if (rlvMessage.Behavior.StartsWith("getdebug_"))
             {
                 var commandRaw = rlvMessage.Behavior.Substring("getdebug_".Length);
-                if (Enum.TryParse<RLVGetDebugType>(commandRaw, true, out var command))
-                {
-                    response = _callbacks.GetDebugInfoAsync(command).Result;
-                }
+                response = _callbacks.GetDebugInfoAsync(commandRaw).Result;
             }
             else if (rlvMessage.Behavior.StartsWith("getenv_"))
             {
                 var commandRaw = rlvMessage.Behavior.Substring("getenv_".Length);
-                if (Enum.TryParse<RLVGetEnvType>(commandRaw, true, out var command))
-                {
-                    response = _callbacks.GetEnvironmentAsync(command).Result;
-                }
+                response = _callbacks.GetEnvironmentAsync(commandRaw).Result;
             }
 
             if (response != null)

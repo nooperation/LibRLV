@@ -82,26 +82,36 @@ namespace LibRLV
 
         internal bool ProcessActionCommand(RLVMessage command)
         {
-            if (!RLVActionHandlers.TryGetValue(command.Behavior, out var func))
+            if (RLVActionHandlers.TryGetValue(command.Behavior, out var func))
             {
-                return false;
+                return func(command);
+            }
+            else if (command.Behavior.StartsWith("setdebug_"))
+            {
+                return RLVActionHandlers["setdebug_"](command);
+            }
+            else if (command.Behavior.StartsWith("setenv_"))
+            {
+                return RLVActionHandlers["setenv_"](command);
             }
 
-            if (command.Behavior.StartsWith("setdebug_"))
-            {
-                RLVActionHandlers["setdebug_"](command);
-            }
-            if (command.Behavior.StartsWith("setenv_"))
-            {
-                RLVActionHandlers["setenv_"](command);
-            }
-
-            return func(command);
+            return false;
         }
 
         private bool HandleSetDebug(RLVMessage command)
         {
-            var settingName = command.Behavior.Substring(command.Behavior.IndexOf('_'));
+            var separatorIndex = command.Behavior.IndexOf('_');
+            if (separatorIndex == -1)
+            {
+                return false;
+            }
+
+            var settingName = command.Behavior.Substring(separatorIndex + 1);
+            if(settingName.Length == 0)
+            {
+                return false;
+            }
+
             SetDebug?.Invoke(this, new SetSettingEventArgs(settingName, command.Option));
 
             return true;
@@ -109,7 +119,18 @@ namespace LibRLV
 
         private bool HandleSetEnv(RLVMessage command)
         {
-            var settingName = command.Behavior.Substring(command.Behavior.IndexOf('_'));
+            var separatorIndex = command.Behavior.IndexOf('_');
+            if (separatorIndex == -1)
+            {
+                return false;
+            }
+
+            var settingName = command.Behavior.Substring(separatorIndex + 1);
+            if (settingName.Length == 0)
+            {
+                return false;
+            }
+
             SetEnv?.Invoke(this, new SetSettingEventArgs(settingName, command.Option));
 
             return true;

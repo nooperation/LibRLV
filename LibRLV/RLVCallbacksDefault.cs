@@ -19,9 +19,14 @@ namespace LibRLV
             return Task.FromResult(string.Empty);
         }
 
-        public virtual Task<string> GetEnvironmentAsync(RLVGetEnvType command)
+        public virtual Task<string> GetEnvironmentAsync(string settingName)
         {
-            switch (command)
+            if(!Enum.TryParse(settingName, true, out RLVGetEnvType settingType))
+            {
+                return null;
+            }
+
+            switch (settingType)
             {
                 case RLVGetEnvType.Daytime:
                 case RLVGetEnvType.AmbientR:
@@ -105,9 +110,14 @@ namespace LibRLV
             return null;
         }
 
-        public virtual Task<string> GetDebugInfoAsync(RLVGetDebugType command)
+        public virtual Task<string> GetDebugInfoAsync(string settingName)
         {
-            switch (command)
+            if (!Enum.TryParse(settingName, true, out RLVGetDebugType settingType))
+            {
+                return null;
+            }
+
+            switch (settingType)
             {
                 case RLVGetDebugType.AvatarSex:
                 case RLVGetDebugType.RestrainedLoveForbidGiveToRLV:

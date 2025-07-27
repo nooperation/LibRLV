@@ -3802,17 +3802,104 @@ namespace LibRLV.Tests
         [Fact] public void CanSetDebug() => CheckSimpleCommand("setDebug", m => m.CanSetDebug());
         #endregion
 
-        // @setdebug_<setting>:<value>=force
+        #region @setdebug_<setting>:<value>=force
+        [Theory]
+        [InlineData("RenderResolutionDivisor", "RenderResolutionDivisor Success")]
+        [InlineData("Unknown Setting", "Unknown Setting Success")]
+        public void SetDebug_Default(string settingName, string settingValue)
+        {
+            var raised = Assert.Raises<SetSettingEventArgs>(
+                 attach: n => _rlv.Actions.SetDebug += n,
+                 detach: n => _rlv.Actions.SetDebug -= n,
+                 testCode: () => _rlv.ProcessMessage($"@setdebug_{settingName}:{settingValue}=force", _sender.Id, _sender.Name)
+             );
 
-        // @getdebug_<setting>=<channel_number>
+            Assert.Equal(raised.Arguments.SettingName, settingName.ToLower());
+            Assert.Equal(raised.Arguments.SettingValue, settingValue);
+        }
+
+        [Fact]
+        public void SetDebug_Invalid()
+        {
+            var eventRaised = false;
+            _rlv.Actions.SetDebug += (sender, args) =>
+            {
+                eventRaised = true;
+            };
+
+            Assert.False(_rlv.ProcessMessage($"@setdebug_:42=force", _sender.Id, _sender.Name));
+            Assert.False(eventRaised);
+        }
+        #endregion
+
+        #region @getdebug_<setting>=<channel_number>
+        [Theory]
+        [InlineData("RenderResolutionDivisor", "RenderResolutionDivisor Success")]
+        [InlineData("Unknown Setting", "Unknown Setting Success")]
+        public void GetDebug_Default(string settingName, string settingValue)
+        {
+            var actual = _callbacks.RecordReplies();
+
+            _callbacks.Setup(e =>
+                e.GetDebugInfoAsync(settingName.ToLower())
+            ).ReturnsAsync(settingValue);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, settingValue),
+            };
+
+            Assert.True(_rlv.ProcessMessage($"@getdebug_{settingName}=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+        #endregion
 
         #region @setenv=<y/n>
         [Fact] public void CanSetEnv() => CheckSimpleCommand("setEnv", m => m.CanSetEnv());
         #endregion
 
-        // @setenv_<setting>:<value>=force
+        #region @setenv_<setting>:<value>=force
 
-        // @getenv_<setting>=<channel_number>
+        [Theory]
+        [InlineData("Daytime", "Daytime Success")]
+        [InlineData("Unknown Setting", "Unknown Setting Success")]
+        public void SetEnv_Default(string settingName, string settingValue)
+        {
+            var raised = Assert.Raises<SetSettingEventArgs>(
+                 attach: n => _rlv.Actions.SetEnv += n,
+                 detach: n => _rlv.Actions.SetEnv -= n,
+                 testCode: () => _rlv.ProcessMessage($"@setenv_{settingName}:{settingValue}=force", _sender.Id, _sender.Name)
+             );
+
+            Assert.Equal(raised.Arguments.SettingName, settingName.ToLower());
+            Assert.Equal(raised.Arguments.SettingValue, settingValue);
+        }
+
+        #endregion
+
+        #region @getenv_<setting>=<channel_number>
+
+        [Theory]
+        [InlineData("Daytime", "Daytime Success")]
+        [InlineData("Unknown Setting", "Unknown Setting Success")]
+        public void GetEnv_Default(string settingName, string settingValue)
+        {
+            var actual = _callbacks.RecordReplies();
+
+            _callbacks.Setup(e =>
+                e.GetEnvironmentAsync(settingName.ToLower())
+            ).ReturnsAsync(settingValue);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, settingValue),
+            };
+
+            Assert.True(_rlv.ProcessMessage($"@getenv_{settingName}=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        #endregion
 
         //
         // Unofficial Commands
