@@ -531,6 +531,11 @@ namespace LibRLV
             return CheckSecureRestriction(userId, null, RLVRestrictionType.ShowNames, RLVRestrictionType.ShowNamesSec, null);
         }
 
+        public bool CanShowNameTags(UUID? userId)
+        {
+            return CheckSecureRestriction(userId, null, RLVRestrictionType.ShowNameTags, null, null);
+        }
+
         public bool CanTPLure(UUID? userId)
         {
             return CheckSecureRestriction(userId, null, RLVRestrictionType.TpLure, RLVRestrictionType.TpLureSec, null);
@@ -852,7 +857,6 @@ namespace LibRLV
 
         public enum HoverTextLocation
         {
-            Other,
             World,
             Hud
         }

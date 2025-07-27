@@ -60,6 +60,7 @@ namespace LibRLV
                 case RLVRestrictionType.TouchWorld:
                 case RLVRestrictionType.ShowNamesSec:
                 case RLVRestrictionType.ShowNames:
+                case RLVRestrictionType.ShowNameTags:
                 case RLVRestrictionType.AcceptTp:
                 case RLVRestrictionType.AcceptTpRequest:
                     return restriction.Args.Count > 0;
@@ -406,7 +407,7 @@ namespace LibRLV
                 case RLVRestrictionType.TouchHud:           // CanTouchHud
                 case RLVRestrictionType.ShowNames:          // CanShowNames
                 case RLVRestrictionType.ShowNamesSec:       // CanShowNames
-                case RLVRestrictionType.ShowNameTags: // RLVA adds optional UUID
+                case RLVRestrictionType.ShowNameTags:       // CanShowNameTags
                 {
                     // [] [UUID]
                     if (args.Length == 0)

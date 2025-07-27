@@ -3277,23 +3277,215 @@ namespace LibRLV.Tests
         // Name Tags and Hovertext
         //
 
-        // @shownames[:except_uuid]=<y/n>
+        #region @shownames[:except_uuid]=<y/n> @shownames_sec[:except_uuid]=<y/n>
 
-        // @shownames_sec[:except_uuid]=<y/n>
+        [Fact]
+        public void CanShowNames_Default()
+        {
+            Assert.True(_rlv.RLVManager.CanShowNames(null));
+            Assert.True(_rlv.RLVManager.CanShowNames(UUID.Random()));
+        }
 
-        // @shownametags=<y/n>
+        [Fact]
+        public void CanShowNames()
+        {
+            _rlv.ProcessMessage("@shownames=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanShowNames(null));
+            Assert.False(_rlv.RLVManager.CanShowNames(UUID.Random()));
+        }
+
+        [Fact]
+        public void CanShowNames_Except()
+        {
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage("@shownames=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@shownames:{userId1}=add", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanShowNames(null));
+            Assert.True(_rlv.RLVManager.CanShowNames(userId1));
+            Assert.False(_rlv.RLVManager.CanShowNames(userId2));
+        }
+
+        [Fact]
+        public void CanShowNames_Secure_Default()
+        {
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage("@shownames_sec=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanShowNames(null));
+            Assert.False(_rlv.RLVManager.CanShowNames(userId1));
+            Assert.False(_rlv.RLVManager.CanShowNames(userId2));
+        }
+
+        [Fact]
+        public void CanShowNames_Secure()
+        {
+            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage("@shownames_sec=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@shownames:{userId1}=add", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@shownames:{userId2}=add", sender2.Id, sender2.Name);
+
+            Assert.False(_rlv.RLVManager.CanShowNames(null));
+            Assert.True(_rlv.RLVManager.CanShowNames(userId1));
+            Assert.False(_rlv.RLVManager.CanShowNames(userId2));
+        }
+
+        #endregion
+
+        #region @shownametags[:uuid]=<y/n>
+
+        [Fact]
+        public void CanShowNameTags_Default()
+        {
+            Assert.True(_rlv.RLVManager.CanShowNameTags(null));
+            Assert.True(_rlv.RLVManager.CanShowNameTags(UUID.Random()));
+        }
+
+        [Fact]
+        public void CanShowNameTags()
+        {
+            _rlv.ProcessMessage("@shownametags=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanShowNameTags(null));
+            Assert.False(_rlv.RLVManager.CanShowNameTags(UUID.Random()));
+        }
+
+        [Fact]
+        public void CanShowNameTags_Except()
+        {
+            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage("@shownametags=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@shownametags:{userId1}=add", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanShowNameTags(null));
+            Assert.True(_rlv.RLVManager.CanShowNameTags(userId1));
+            Assert.False(_rlv.RLVManager.CanShowNameTags(userId2));
+        }
+
+        #endregion
 
         #region @shownearby=<y/n>
         [Fact] public void CanShowNearby() => CheckSimpleCommand("showNearby", m => m.CanShowNearby());
         #endregion
 
-        // @showhovertextall=<y/n>
+        #region @showhovertextall=<y/n>
 
-        // @showhovertext:<UUID>=<y/n>
+        [Fact]
+        public void CanShowHoverTextAll_Default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
 
-        // @showhovertexthud=<y/n>
+            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+        }
 
-        // @showhovertextworld=<y/n>
+        [Fact]
+        public void CanShowHoverTextAll()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage("@showhovertextall=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+        }
+
+        #endregion
+
+        #region @showhovertext:<UUID>=<y/n>
+
+        [Fact]
+        public void CanShowHoverText_Default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+
+            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+        }
+
+        [Fact]
+        public void CanShowHoverText()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage($"@showhovertext:{objectId1}=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+
+            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
+            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
+        }
+
+        #endregion
+
+        #region @showhovertexthud=<y/n>
+
+        [Fact]
+        public void CanShowHoverTextHud_Default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+
+            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+        }
+
+        [Fact]
+        public void CanShowHoverTextHud()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage($"@showhovertexthud=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+
+            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
+            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
+        }
+
+        #endregion
+
+        #region @showhovertextworld=<y/n>
+
+        [Fact]
+        public void CanShowHoverTextWorld_Default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+
+            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+        }
+
+        [Fact]
+        public void CanShowHoverTextWorld()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage($"@showhovertextworld=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+
+            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
+            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
+        }
+
+        #endregion
 
         //
         // Group
