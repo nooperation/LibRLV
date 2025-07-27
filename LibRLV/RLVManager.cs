@@ -152,6 +152,11 @@ namespace LibRLV
         }
         public bool CanSit()
         {
+            if (!CanInteract())
+            {
+                return false;
+            }
+
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Sit).Any();
         }
         public bool CanDefaultWear()
@@ -729,7 +734,12 @@ namespace LibRLV
 
         public bool CanTouchHud(UUID objectId)
         {
-            return _restrictionProvider
+            if (!CanInteract())
+            {
+                return false;
+            }
+
+            return !_restrictionProvider
                 .GetRestrictions(RLVRestrictionType.TouchHud)
                 .Where(n => n.Args.Count == 0 || (n.Args[0] is UUID restrictedObjectId && restrictedObjectId == objectId))
                 .Any();
@@ -754,10 +764,10 @@ namespace LibRLV
             else
             {
                 // @touchattachother
-                var canTouchOtherAttachments = _restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAttachOther)
+                var isForbiddenFromTouchingOthers = _restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAttachOther)
                     .Where(n => n.Args.Count == 0 || (n.Args[0] is UUID restrictedUserId && restrictedUserId == otherUserId))
                     .Any();
-                if (!canTouchOtherAttachments)
+                if (isForbiddenFromTouchingOthers)
                 {
                     return false;
                 }
@@ -795,7 +805,7 @@ namespace LibRLV
             // @TouchMe
             if (_restrictionProvider
                 .GetRestrictions(RLVRestrictionType.TouchMe)
-                .Where(n => n.Args.Count == 1 && n.Args[0] is UUID allowedObjectId && allowedObjectId == objectId)
+                .Where(n => n.Sender == objectId)
                 .Any())
             {
                 return true;
@@ -813,7 +823,7 @@ namespace LibRLV
             if (location != TouchLocation.Hud)
             {
                 // @TouchAll
-                if (!_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAll).Any())
+                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAll).Any())
                 {
                     return false;
                 }

@@ -3231,29 +3231,255 @@ namespace LibRLV.Tests
 
         #endregion
 
-        // @touchall=<y/n>
+        #region @touchall=<y/n>
 
-        // @touchworld=<y/n>
+        [Fact]
+        public void TouchAll()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new UUID("11111111-1111-4111-8111-111111111111");
 
-        // @touchworld:<UUID>=<rem/add>
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+        }
 
-        // @touchthis:<UUID>=<rem/add>
+        [Fact]
+        public void TouchAll_default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new UUID("11111111-1111-4111-8111-111111111111");
 
-        // @touchme=<rem/add>
+            _rlv.ProcessMessage("@touchall=n", _sender.Id, _sender.Name);
 
-        // @touchattach=<y/n>
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+        }
 
-        // @touchattachself=<y/n>
+        #endregion
 
-        // @touchattachother=<y/n>
+        #region @touchworld=<y/n> @touchworld:<UUID>=<rem/add>
 
-        // @touchattachother:<UUID>=<y/n>
+        [Fact]
+        public void TouchWorld_default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
 
-        // @touchhud[:<UUID>]=<y/n>
+            _rlv.ProcessMessage("@touchworld=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+        }
+
+        [Fact]
+        public void TouchWorld_Exception()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+
+            _rlv.ProcessMessage("@touchworld=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@touchworld:{objectId2}=add", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId2, null, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId2, userId1, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId2, null, 5.0f));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId2, null, null));
+        }
+
+        #endregion
+
+        #region @touchthis:<UUID>=<rem/add>
+
+        [Fact]
+        public void TouchThis_default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+
+            _rlv.ProcessMessage($"@touchthis:{objectId1}=add", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId2, null, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId2, userId1, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId2, null, 5.0f));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId2, null, null));
+        }
+
+        #endregion
+
+        #region @touchme=<rem/add>
+
+        [Fact]
+        public void TouchMe_default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+
+            _rlv.ProcessMessage("@touchall=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@touchme=add", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, _sender.Id, null, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, _sender.Id, userId1, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, _sender.Id, null, 5.0f));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, _sender.Id, null, null));
+        }
+
+        #endregion
+
+        #region @touchattach=<y/n>
+
+        [Fact]
+        public void TouchAttach_default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+
+            _rlv.ProcessMessage("@touchattach=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+        }
+
+        #endregion
+
+        #region @touchattachself=<y/n>
+
+        [Fact]
+        public void TouchAttachSelf_default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+
+            _rlv.ProcessMessage("@touchattachself=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+        }
+
+        #endregion
+
+        #region @touchattachother=<y/n> @touchattachother:<UUID>=<y/n>
+
+        [Fact]
+        public void TouchAttachOther_default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+
+            _rlv.ProcessMessage("@touchattachother=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+        }
+
+        [Fact]
+        public void TouchAttachOther_Specific()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+            var userId2 = new UUID("66666666-6666-4666-8666-666666666666");
+
+            _rlv.ProcessMessage($"@touchattachother:{userId2}=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId2, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+        }
+
+        #endregion
+
+        #region @touchhud[:<UUID>]=<y/n>
+
+        [Fact]
+        public void TouchHud_default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+
+            _rlv.ProcessMessage($"@touchhud=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+        }
+
+        [Fact]
+        public void TouchHud_specific()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+
+            _rlv.ProcessMessage($"@touchhud:{objectId2}=n", _sender.Id, _sender.Name);
+
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId2, null, null));
+        }
+
+        #endregion
 
         #region @interact=<y/n>
 
         [Fact] public void CanInteract() => CheckSimpleCommand("interact", m => m.CanInteract());
+
+        [Fact]
+        public void CanInteract_default()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+
+            _rlv.ProcessMessage($"@interact=n", _sender.Id, _sender.Name);
+
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+
+            Assert.False(_rlv.RLVManager.CanTouchHud(objectId1));
+
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
+
+            Assert.False(_rlv.RLVManager.CanRez());
+
+            Assert.False(_rlv.RLVManager.CanSit());
+        }
 
         #endregion
 
@@ -3491,13 +3717,82 @@ namespace LibRLV.Tests
         // Group
         //
 
-        // @setgroup:<group_name>=force
+        #region @setgroup:<group_name>=force
+
+        [Fact]
+        public void SetGroup_ByName()
+        {
+            var raised = Assert.Raises<SetGroupEventArgs>(
+                 attach: n => _rlv.Actions.SetGroup += n,
+                 detach: n => _rlv.Actions.SetGroup -= n,
+                 testCode: () => _rlv.ProcessMessage("@setgroup:Group Name=force", _sender.Id, _sender.Name)
+            );
+
+            Assert.Equal("Group Name", raised.Arguments.GroupName);
+        }
+
+        [Fact]
+        public void SetGroup_ById()
+        {
+            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+
+            var raised = Assert.Raises<SetGroupEventArgs>(
+                 attach: n => _rlv.Actions.SetGroup += n,
+                 detach: n => _rlv.Actions.SetGroup -= n,
+                 testCode: () => _rlv.ProcessMessage($"@setgroup:{objectId1}=force", _sender.Id, _sender.Name)
+            );
+
+            Assert.Equal(string.Empty, raised.Arguments.GroupName);
+            Assert.Equal(objectId1, raised.Arguments.GroupId);
+        }
+
+        #endregion
 
         #region @setgroup=<y/n>
         [Fact] public void CanSetGroup() => CheckSimpleCommand("setGroup", m => m.CanSetGroup());
         #endregion
 
-        // @getgroup=<channel_number>
+        #region @getgroup=<channel_number>
+
+        [Fact]
+        public void GetGroup_Default()
+        {
+            var actual = _callbacks.RecordReplies();
+            var actualGroupName = "Group Name";
+
+            _callbacks.Setup(e =>
+                e.TryGetGroup(out actualGroupName)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, actualGroupName),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getgroup=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetGroup_NoGroup()
+        {
+            var actual = _callbacks.RecordReplies();
+            var actualGroupName = "";
+
+            _callbacks.Setup(e =>
+                e.TryGetGroup(out actualGroupName)
+            ).ReturnsAsync(false);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "none"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getgroup=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        #endregion
 
         //
         // Viewer Control

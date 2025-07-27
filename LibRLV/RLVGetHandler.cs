@@ -173,6 +173,16 @@ namespace LibRLV
                         }
                         response = camFov.ToString();
                         break;
+                    case RLVDataRequest.GetGroup:
+                        if (!_callbacks.TryGetGroup(out var activeGroupName).Result)
+                        {
+                            response = "none";
+                        }
+                        else
+                        {
+                            response = activeGroupName;
+                        }
+                        break;
                     case RLVDataRequest.GetOutfit:
                     {
                         if (!Enum.TryParse<WearableType>(rlvMessage.Option, out var part))

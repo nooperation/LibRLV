@@ -117,7 +117,15 @@ namespace LibRLV
 
         private bool HandleSetGroup(RLVMessage command)
         {
-            SetGroup?.Invoke(this, new SetGroupEventArgs(command.Option));
+            if (UUID.TryParse(command.Option, out UUID groupId))
+            {
+                SetGroup?.Invoke(this, new SetGroupEventArgs(groupId));
+            }
+            else
+            {
+                SetGroup?.Invoke(this, new SetGroupEventArgs(command.Option));
+            }
+
             return true;
         }
 

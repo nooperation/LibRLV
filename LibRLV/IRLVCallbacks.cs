@@ -22,6 +22,6 @@ namespace LibRLV
         Task<bool> TryGetCamFovMax(out float camFovMax);
         Task<bool> TryGetCamZoomMin(out float camZoomMin);
         Task<bool> TryGetCamFov(out float camFov);
-
+        Task<bool> TryGetGroup(out string activeGroupName);
     }
 }

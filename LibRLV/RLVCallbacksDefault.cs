@@ -181,5 +181,11 @@ namespace LibRLV
             camFov = default;
             return Task.FromResult(false);
         }
+
+        public virtual Task<bool> TryGetGroup(out string activeGroupName)
+        {
+            activeGroupName = "none";
+            return Task.FromResult(false);
+        }
     }
 }
