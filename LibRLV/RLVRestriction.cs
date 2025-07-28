@@ -106,7 +106,7 @@ namespace LibRLV
                         return false;
                     }
 
-                    if(val < 0.40f)
+                    if (val < 0.40f)
                     {
                         return false;
                     }
@@ -265,7 +265,7 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (!Enum.TryParse<AttachmentPoint>(args[0], true, out var val))
+                    if (!RLVCommon.RLVAttachmentPointMap.TryGetValue(args[0], out var val))
                     {
                         return false;
                     }
@@ -288,7 +288,7 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (!Enum.TryParse<AttachmentPoint>(args[0], true, out var val))
+                    if (!RLVCommon.RLVAttachmentPointMap.TryGetValue(args[0], out var val))
                     {
                         return false;
                     }
@@ -311,7 +311,7 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (!Enum.TryParse<WearableType>(args[0], true, out var val))
+                    if (!RLVCommon.RLVWearableTypeMap.TryGetValue(args[0], out var val))
                     {
                         return false;
                     }
@@ -337,12 +337,12 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (Enum.TryParse<WearableType>(args[0], true, out var wearableType))
+                    if (RLVCommon.RLVWearableTypeMap.TryGetValue(args[0], out var wearableType))
                     {
                         parsedArgs.Add(wearableType);
                         return true;
                     }
-                    else if (Enum.TryParse<AttachmentPoint>(args[0], true, out var attachmentPoint))
+                    else if (RLVCommon.RLVAttachmentPointMap.TryGetValue(args[0], out var attachmentPoint))
                     {
                         parsedArgs.Add(attachmentPoint);
                         return true;

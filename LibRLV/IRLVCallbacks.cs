@@ -23,5 +23,6 @@ namespace LibRLV
         Task<bool> TryGetCamZoomMin(out float camZoomMin);
         Task<bool> TryGetCamFov(out float camFov);
         Task<bool> TryGetGroup(out string activeGroupName);
+        Task<bool> TryGetCurrentOutfit(out List<InventoryTree.InventoryItem> currentOutfit);
     }
 }

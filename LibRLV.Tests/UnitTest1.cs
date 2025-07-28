@@ -30,7 +30,6 @@ namespace LibRLV.Tests
             Assert.True(canFunc(_rlv.RLVManager));
         }
 
-
         private class SampleInventoryTree
         {
             public InventoryTree Root { get; set; } = null!;
@@ -153,7 +152,6 @@ namespace LibRLV.Tests
                 WornOn = null,
                 FolderId = hatsTree.Id
             };
-
 
             AccessoriesTree.Items.Add(watch_tattoo);
             AccessoriesTree.Items.Add(glasses_chin);
@@ -3435,16 +3433,335 @@ namespace LibRLV.Tests
 
         // @remoutfit[:<part>]=force
 
-        // @getoutfit[:part]=<channel_number>
+        #region @getoutfit[:part]=<channel_number>
+        [Fact]
+        public void GetOutfit_WearingNothing()
+        {
+            var actual = _callbacks.RecordReplies();
+            var currentOutfit = new List<InventoryTree.InventoryItem>();
 
-        // @getattach[:attachpt]=<channel_number>
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "0000000000000000"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getoutfit=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetOutfit_WearingSomeItems()
+        {
+            var actual = _callbacks.RecordReplies();
+            var currentOutfit = new List<InventoryTree.InventoryItem>()
+            {
+                new InventoryTree.InventoryItem()
+                {
+                    WornOn = WearableType.Socks,
+                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    AttachedTo = null,
+                    Name = $"My Socks",
+                    Id = new UUID($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
+                },
+                new InventoryTree.InventoryItem()
+                {
+                    WornOn = WearableType.Hair,
+                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    AttachedTo = null,
+                    Name = $"My Hair",
+                    Id = new UUID($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
+                },
+            };
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "0000001000010000"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getoutfit=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetOutfit_WearingEverything()
+        {
+            var actual = _callbacks.RecordReplies();
+            var currentOutfit = new List<InventoryTree.InventoryItem>();
+            foreach (var item in Enum.GetValues<WearableType>())
+            {
+                if (item == WearableType.Invalid)
+                {
+                    continue;
+                }
+
+                currentOutfit.Add(new InventoryTree.InventoryItem()
+                {
+                    WornOn = item,
+                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    AttachedTo = null,
+                    Name = $"My {item.ToString()}",
+                    Id = new UUID($"c{(int)item:D7}-cccc-4ccc-8ccc-cccccccccccc")
+                });
+            }
+            ;
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "1111111111111111"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getoutfit=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetOutfit_Specific_Exists()
+        {
+            var actual = _callbacks.RecordReplies();
+            var currentOutfit = new List<InventoryTree.InventoryItem>()
+            {
+                new InventoryTree.InventoryItem()
+                {
+                    WornOn = WearableType.Socks,
+                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    AttachedTo = null,
+                    Name = $"My Socks",
+                    Id = new UUID($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
+                },
+            };
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "1"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getoutfit:socks=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetOutfit_Specific_NotExists()
+        {
+            var actual = _callbacks.RecordReplies();
+            var currentOutfit = new List<InventoryTree.InventoryItem>()
+            {
+                new InventoryTree.InventoryItem()
+                {
+                    WornOn = WearableType.Hair,
+                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    AttachedTo = null,
+                    Name = $"My Hair",
+                    Id = new UUID($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
+                },
+            };
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "0"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getoutfit:socks=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+        #endregion
+
+        // TODO: There's a ton of undocumented RLVa stuff we need to implement, not just these
+        //  getoutfitnames
+        //  getaddoutfitnames
+        //  getremoutfitnames
+        //  getattachnames
+        //  getaddattachnames
+        //  getremattachnames
+
+        #region @getattach[:attachpt]=<channel_number>
+        [Fact]
+        public void GetAttach_WearingNothing()
+        {
+            var actual = _callbacks.RecordReplies();
+            var currentAttach = new List<InventoryTree.InventoryItem>();
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentAttach)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "00000000000000000000000000000000000000000000000000000000"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getattach=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetAttach_WearingSomeItems()
+        {
+            var actual = _callbacks.RecordReplies();
+            var currentAttach = new List<InventoryTree.InventoryItem>()
+            {
+                new InventoryTree.InventoryItem()
+                {
+                    WornOn = null,
+                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    AttachedTo = AttachmentPoint.LeftFoot,
+                    Name = $"My Socks",
+                    Id = new UUID($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
+                },
+                new InventoryTree.InventoryItem()
+                {
+                    WornOn = null,
+                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    AttachedTo = AttachmentPoint.Skull,
+                    Name = $"My Hair",
+                    Id = new UUID($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
+                },
+            };
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentAttach)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "00100001000000000000000000000000000000000000000000000000"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getattach=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetAttach_WearingEverything()
+        {
+            var actual = _callbacks.RecordReplies();
+            var currentAttach = new List<InventoryTree.InventoryItem>();
+            foreach (var item in Enum.GetValues<AttachmentPoint>())
+            {
+                currentAttach.Add(new InventoryTree.InventoryItem()
+                {
+                    WornOn = null,
+                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    AttachedTo = item,
+                    Name = $"My {item.ToString()}",
+                    Id = new UUID($"c{(int)item:D7}-cccc-4ccc-8ccc-cccccccccccc")
+                });
+            }
+            ;
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentAttach)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "11111111111111111111111111111111111111111111111111111111"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getattach=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetAttach_Specific_Exists()
+        {
+            var actual = _callbacks.RecordReplies();
+            var currentAttach = new List<InventoryTree.InventoryItem>()
+            {
+                new InventoryTree.InventoryItem()
+                {
+                    WornOn = null,
+                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    AttachedTo = AttachmentPoint.LeftFoot,
+                    Name = $"My Sock",
+                    Id = new UUID($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
+                },
+            };
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentAttach)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "1"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getattach:left foot=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetAttach_Specific_NotExists()
+        {
+            var actual = _callbacks.RecordReplies();
+            var currentAttach = new List<InventoryTree.InventoryItem>()
+            {
+                new InventoryTree.InventoryItem()
+                {
+                    WornOn = null,
+                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    AttachedTo = AttachmentPoint.Skull,
+                    Name = $"My Hair",
+                    Id = new UUID($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
+                },
+            };
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentAttach)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "0"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getattach:left foot=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+        #endregion
 
         #region @acceptpermission=<rem/add>
-        [Fact] public void AcceptPermission() => CheckSimpleCommand("acceptpermission", m => m.IsAutoAcceptPermissions());
+        [Fact]
+        public void AcceptPermission()
+        {
+            Assert.True(_rlv.ProcessMessage($"@acceptpermission=add", _sender.Id, _sender.Name));
+            Assert.True(_rlv.RLVManager.IsAutoAcceptPermissions());
+
+            Assert.True(_rlv.ProcessMessage($"@acceptpermission=rem", _sender.Id, _sender.Name));
+            Assert.False(_rlv.RLVManager.IsAutoAcceptPermissions());
+        }
         #endregion
 
         #region @denypermission=<rem/add>
-        [Fact] public void DenyPermission() => CheckSimpleCommand("denypermission", m => m.IsAutoDenyPermissions());
+        [Fact]
+        public void DenyPermission()
+        {
+            Assert.True(_rlv.ProcessMessage($"@denypermission=add", _sender.Id, _sender.Name));
+            Assert.True(_rlv.RLVManager.IsAutoDenyPermissions());
+
+            Assert.True(_rlv.ProcessMessage($"@denypermission=rem", _sender.Id, _sender.Name));
+            Assert.False(_rlv.RLVManager.IsAutoDenyPermissions());
+        }
         #endregion
 
         // @detachme=force

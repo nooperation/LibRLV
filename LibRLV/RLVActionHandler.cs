@@ -107,7 +107,7 @@ namespace LibRLV
             }
 
             var settingName = command.Behavior.Substring(separatorIndex + 1);
-            if(settingName.Length == 0)
+            if (settingName.Length == 0)
             {
                 return false;
             }
@@ -199,7 +199,7 @@ namespace LibRLV
 
         private bool HandleRemOutfit(RLVMessage command)
         {
-            if (!Enum.TryParse(command.Option, true, out WearableType part))
+            if (!RLVCommon.RLVWearableTypeMap.TryGetValue(command.Option, out WearableType part))
             {
                 return false;
             }

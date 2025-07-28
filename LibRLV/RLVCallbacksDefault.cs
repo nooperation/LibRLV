@@ -21,7 +21,7 @@ namespace LibRLV
 
         public virtual Task<string> GetEnvironmentAsync(string settingName)
         {
-            if(!Enum.TryParse(settingName, true, out RLVGetEnvType settingType))
+            if (!Enum.TryParse(settingName, true, out RLVGetEnvType settingType))
             {
                 return null;
             }
@@ -195,6 +195,12 @@ namespace LibRLV
         public virtual Task<bool> TryGetGroup(out string activeGroupName)
         {
             activeGroupName = "none";
+            return Task.FromResult(false);
+        }
+
+        public Task<bool> TryGetCurrentOutfit(out List<InventoryTree.InventoryItem> currentOutfit)
+        {
+            currentOutfit = new List<InventoryTree.InventoryItem>();
             return Task.FromResult(false);
         }
     }

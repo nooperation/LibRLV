@@ -5,7 +5,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace LibRLV
 {
@@ -75,6 +74,99 @@ namespace LibRLV
             }
 
             return sb.ToString();
+        }
+
+        private bool ProcessGetOutfit(WearableType? specificType, out string response)
+        {
+            if (!_callbacks.TryGetCurrentOutfit(out var currentOutfit).Result)
+            {
+                response = string.Empty;
+                return false;
+            }
+
+            if (specificType != null)
+            {
+                if (currentOutfit.Where(n => n.WornOn == specificType).Any())
+                {
+                    response = "1";
+                }
+                else
+                {
+                    response = "0";
+                }
+
+                return true;
+            }
+
+            var wornTypes = currentOutfit
+                .Where(n => n.WornOn != null)
+                .Select(n => n.WornOn)
+                .Distinct()
+                .ToDictionary(k => k.Value, v => v.Value);
+
+            var sb = new StringBuilder();
+
+            // gloves,jacket,pants,shirt,shoes,skirt,socks,underpants,undershirt,skin,eyes,hair,shape,alpha,tattoo,physics
+            sb.Append(wornTypes.ContainsKey(WearableType.Gloves) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Jacket) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Pants) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Shirt) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Shoes) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Skirt) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Socks) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Underpants) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Undershirt) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Skin) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Eyes) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Hair) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Shape) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Alpha) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Tattoo) ? "1" : "0");
+            sb.Append(wornTypes.ContainsKey(WearableType.Physics) ? "1" : "0");
+
+            response = sb.ToString();
+            return true;
+        }
+
+        private bool ProcessGetAttach(AttachmentPoint? specificType, out string response)
+        {
+            if (!_callbacks.TryGetCurrentOutfit(out var currentOutfit).Result)
+            {
+                response = string.Empty;
+                return false;
+            }
+
+            if (specificType != null)
+            {
+                if (currentOutfit.Where(n => n.AttachedTo == specificType).Any())
+                {
+                    response = "1";
+                }
+                else
+                {
+                    response = "0";
+                }
+
+                return true;
+            }
+
+            var wornTypes = currentOutfit
+                .Where(n => n.AttachedTo != null)
+                .Select(n => n.AttachedTo)
+                .Distinct()
+                .ToDictionary(k => k.Value, v => v.Value);
+
+            var attachmentPointTypes = Enum.GetValues(typeof(AttachmentPoint));
+            var sb = new StringBuilder(attachmentPointTypes.Length);
+
+            // digit corresponds directly to the value of enum, unlike ProcessGetOutfit
+            foreach (AttachmentPoint attachmentPoint in attachmentPointTypes)
+            {
+                sb.Append(wornTypes.ContainsKey(attachmentPoint) ? '1' : '0');
+            }
+
+            response = sb.ToString();
+            return true;
         }
 
         public bool ProcessGetCommand(RLVMessage rlvMessage, int channel)
@@ -185,20 +277,31 @@ namespace LibRLV
                         break;
                     case RLVDataRequest.GetOutfit:
                     {
-                        if (!Enum.TryParse<WearableType>(rlvMessage.Option, out var part))
+                        WearableType? wearableType = null;
+                        if (RLVCommon.RLVWearableTypeMap.TryGetValue(rlvMessage.Option, out var wearableTypeTemp))
+                        {
+                            wearableType = wearableTypeTemp;
+                        }
+
+                        if (!ProcessGetOutfit(wearableType, out response))
                         {
                             return false;
                         }
-                        args.Add(part);
+
                         break;
                     }
                     case RLVDataRequest.GetAttach:
                     {
-                        if (!Enum.TryParse<AttachmentPoint>(rlvMessage.Option, out var attachmentPoint))
+                        AttachmentPoint? attachmentPointType = null;
+                        if (RLVCommon.RLVAttachmentPointMap.TryGetValue(rlvMessage.Option, out var attachmentPointTemp))
+                        {
+                            attachmentPointType = attachmentPointTemp;
+                        }
+
+                        if (!ProcessGetAttach(attachmentPointType, out response))
                         {
                             return false;
                         }
-                        args.Add(attachmentPoint);
                         break;
                     }
                     case RLVDataRequest.GetInv:
@@ -228,11 +331,11 @@ namespace LibRLV
                         {
                             args.Add(uuid);
                         }
-                        else if (Enum.TryParse<WearableType>(parsedOptions[0], out var wearableType))
+                        else if (RLVCommon.RLVWearableTypeMap.TryGetValue(parsedOptions[0], out var wearableType))
                         {
                             args.Add(wearableType);
                         }
-                        else if (Enum.TryParse<AttachmentPoint>(parsedOptions[0], out var attachmentPoint))
+                        else if (RLVCommon.RLVAttachmentPointMap.TryGetValue(parsedOptions[0], out var attachmentPoint))
                         {
                             args.Add(attachmentPoint);
                         }
