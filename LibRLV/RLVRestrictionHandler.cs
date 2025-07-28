@@ -201,82 +201,6 @@ namespace LibRLV
 
         public bool IsPermissiveMode { get; set; }
 
-        private RLVRestrictionType GetSecureRestriction(RLVRestrictionType restrictionType)
-        {
-            switch (restrictionType)
-            {
-                case RLVRestrictionType.RecvChat:
-                    return RLVRestrictionType.RecvChatSec;
-                case RLVRestrictionType.RecvEmoteFrom:
-                    return RLVRestrictionType.RecvEmoteSec;
-                case RLVRestrictionType.SendChannel:
-                    return RLVRestrictionType.SendChannelSec;
-                case RLVRestrictionType.SendIm:
-                    return RLVRestrictionType.SendImSec;
-                case RLVRestrictionType.RecvIm:
-                    return RLVRestrictionType.RecvImSec;
-                case RLVRestrictionType.TpLure:
-                    return RLVRestrictionType.TpLureSec;
-                case RLVRestrictionType.TpRequest:
-                    return RLVRestrictionType.TpRequestSec;
-                case RLVRestrictionType.Share:
-                    return RLVRestrictionType.ShareSec;
-                case RLVRestrictionType.ShowNames:
-                    return RLVRestrictionType.ShowNamesSec;
-            }
-
-            return restrictionType;
-        }
-
-        private bool IsSecureRestriction(RLVRestrictionType restrictionType)
-        {
-            switch (restrictionType)
-            {
-                case RLVRestrictionType.RecvChatSec:
-                case RLVRestrictionType.RecvEmoteSec:
-                case RLVRestrictionType.SendChannelSec:
-                case RLVRestrictionType.SendImSec:
-                case RLVRestrictionType.RecvImSec:
-                case RLVRestrictionType.TpLureSec:
-                case RLVRestrictionType.TpRequestSec:
-                case RLVRestrictionType.ShareSec:
-                case RLVRestrictionType.ShowNamesSec:
-                    return true;
-            }
-
-            return false;
-        }
-
-        private RLVRestrictionType GetInsecureRestriction(RLVRestrictionType restrictionType)
-        {
-            if (!IsPermissiveMode)
-            {
-                switch (restrictionType)
-                {
-                    case RLVRestrictionType.RecvChatSec:
-                        return RLVRestrictionType.RecvChat;
-                    case RLVRestrictionType.RecvEmoteSec:
-                        return RLVRestrictionType.RecvEmoteFrom;
-                    case RLVRestrictionType.SendChannelSec:
-                        return RLVRestrictionType.SendChannel;
-                    case RLVRestrictionType.SendImSec:
-                        return RLVRestrictionType.SendIm;
-                    case RLVRestrictionType.RecvImSec:
-                        return RLVRestrictionType.RecvIm;
-                    case RLVRestrictionType.TpLureSec:
-                        return RLVRestrictionType.TpLure;
-                    case RLVRestrictionType.TpRequestSec:
-                        return RLVRestrictionType.TpRequest;
-                    case RLVRestrictionType.ShareSec:
-                        return RLVRestrictionType.Share;
-                    case RLVRestrictionType.ShowNamesSec:
-                        return RLVRestrictionType.ShowNames;
-                }
-            }
-
-            return restrictionType;
-        }
-
         public ImmutableList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType, UUID? sender = null)
         {
             restrictionType = RLVRestriction.GetRealRestriction(restrictionType);
@@ -288,7 +212,6 @@ namespace LibRLV
 
             return restrictions.ToImmutableList();
         }
-
 
         public ImmutableList<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", UUID? senderFilter = null)
         {
@@ -528,11 +451,11 @@ namespace LibRLV
             }
             else if (restriction.Behavior == RLVRestrictionType.DetachAllThisExcept || restriction.Behavior == RLVRestrictionType.DetachThisExcept)
             {
-                existingLockedFolder.AttachExceptions.Add(restriction);
+                existingLockedFolder.DetachExceptions.Add(restriction);
             }
             else if (restriction.Behavior == RLVRestrictionType.AttachAllThisExcept || restriction.Behavior == RLVRestrictionType.AttachThisExcept)
             {
-                existingLockedFolder.DetachExceptions.Add(restriction);
+                existingLockedFolder.AttachExceptions.Add(restriction);
             }
 
             if (restriction.Behavior == RLVRestrictionType.DetachAllThis ||

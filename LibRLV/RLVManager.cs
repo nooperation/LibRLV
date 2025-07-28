@@ -958,6 +958,8 @@ namespace LibRLV
 
         public bool CanDetach(UUID itemId, UUID folderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
+            // TODO: Does RLVa support attachment 'groups' like "head, torso, arms, legs, hud"?
+
             // @remoutfit[:<part>]=<y/n>
             if (wearableType != null && !CanDetachWearable(wearableType))
             {

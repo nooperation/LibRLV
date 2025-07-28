@@ -30,6 +30,152 @@ namespace LibRLV.Tests
             Assert.True(canFunc(_rlv.RLVManager));
         }
 
+
+        private class SampleInventoryTree
+        {
+            public InventoryTree Root { get; set; } = null!;
+            public InventoryTree.InventoryItem Root_Clothing_Hats_FancyHat_AttachChin { get; set; } = null!;
+            public InventoryTree.InventoryItem Root_Clothing_Hats_PartyHat_AttachGroin { get; set; } = null!;
+            public InventoryTree.InventoryItem Root_Clothing_BusinessPants_AttachGroin { get; set; } = null!;
+            public InventoryTree.InventoryItem Root_Clothing_RetroPants_WornPants { get; set; } = null!;
+            public InventoryTree.InventoryItem Root_Clothing_HappyShirt_AttachChest { get; set; } = null!;
+            public InventoryTree.InventoryItem Root_Accessories_Glasses_AttachChin { get; set; } = null!;
+            public InventoryTree.InventoryItem Root_Accessories_Watch_WornTattoo { get; set; } = null!;
+        }
+        private SampleInventoryTree BuildInventoryTree()
+        {
+            // #RLV
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants (attached to 'groin')
+            //  |    |= Happy Shirt (attached to 'chest')
+            //  |    |= Retro Pants (worn on 'pants')
+            //  |    \-Hats
+            //  |        |= Fancy Hat (attached to 'chin')
+            //  |        \= Party Hat (attached to 'groin')
+            //   \-Accessories
+            //        |= Watch (worn on 'tattoo')
+            //        \= Glasses (attached to 'chin')
+
+            var root = new InventoryTree()
+            {
+                Id = new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Name = "#RLV",
+                Parent = null,
+                Children = new List<InventoryTree>(),
+                Items = new List<InventoryTree.InventoryItem>(),
+            };
+
+            var clothingTree = new InventoryTree()
+            {
+                Id = new UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
+                Name = "Clothing",
+                Parent = root,
+                Children = new List<InventoryTree>(),
+                Items = new List<InventoryTree.InventoryItem>(),
+
+            };
+            root.Children.Add(clothingTree);
+
+            var hatsTree = new InventoryTree
+            {
+                Id = new UUID("dddddddd-dddd-4ddd-8ddd-dddddddddddd"),
+                Name = "Hats",
+                Parent = root,
+                Children = new List<InventoryTree>(),
+                Items = new List<InventoryTree.InventoryItem>(),
+            };
+            clothingTree.Children.Add(hatsTree);
+
+            var AccessoriesTree = new InventoryTree
+            {
+                Id = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                Name = "Accessories",
+                Parent = root,
+                Children = new List<InventoryTree>(),
+                Items = new List<InventoryTree.InventoryItem>(),
+            };
+            root.Children.Add(AccessoriesTree);
+
+            var watch_tattoo = new InventoryTree.InventoryItem()
+            {
+                Id = new UUID("c0000000-cccc-4ccc-8ccc-cccccccccccc"),
+                Name = "Watch",
+                AttachedTo = null,
+                WornOn = WearableType.Tattoo,
+                FolderId = AccessoriesTree.Id
+            };
+            var glasses_chin = new InventoryTree.InventoryItem()
+            {
+                Id = new UUID("c1111111-cccc-4ccc-8ccc-cccccccccccc"),
+                Name = "Glasses",
+                AttachedTo = AttachmentPoint.Chin,
+                WornOn = null,
+                FolderId = AccessoriesTree.Id
+            };
+            var businessPants_groin = new InventoryTree.InventoryItem()
+            {
+                Id = new UUID("b0000000-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
+                Name = "Business Pants",
+                AttachedTo = AttachmentPoint.Groin,
+                WornOn = null,
+                FolderId = clothingTree.Id
+            };
+            var happyShirt_chest = new InventoryTree.InventoryItem()
+            {
+                Id = new UUID("b1111111-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
+                Name = "Happy Shirt",
+                AttachedTo = AttachmentPoint.Chest,
+                WornOn = null,
+                FolderId = clothingTree.Id
+            };
+            var retroPants_pants = new InventoryTree.InventoryItem()
+            {
+                Id = new UUID("b2222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
+                Name = "Retro Pants",
+                AttachedTo = null,
+                WornOn = WearableType.Pants,
+                FolderId = clothingTree.Id
+            };
+            var partyHat_groin = new InventoryTree.InventoryItem()
+            {
+                Id = new UUID("d0000000-dddd-4ddd-8ddd-dddddddddddd"),
+                Name = "Party Hat",
+                AttachedTo = AttachmentPoint.Groin,
+                WornOn = null,
+                FolderId = hatsTree.Id
+            };
+            var fancyHat_chin = new InventoryTree.InventoryItem()
+            {
+                Id = new UUID("d1111111-dddd-4ddd-8ddd-dddddddddddd"),
+                Name = "Fancy Hat",
+                AttachedTo = AttachmentPoint.Chin,
+                WornOn = null,
+                FolderId = hatsTree.Id
+            };
+
+
+            AccessoriesTree.Items.Add(watch_tattoo);
+            AccessoriesTree.Items.Add(glasses_chin);
+            clothingTree.Items.Add(businessPants_groin);
+            clothingTree.Items.Add(happyShirt_chest);
+            clothingTree.Items.Add(retroPants_pants);
+            hatsTree.Items.Add(partyHat_groin);
+            hatsTree.Items.Add(fancyHat_chin);
+
+            return new SampleInventoryTree()
+            {
+                Root = root,
+                Root_Clothing_Hats_PartyHat_AttachGroin = partyHat_groin,
+                Root_Clothing_Hats_FancyHat_AttachChin = fancyHat_chin,
+                Root_Accessories_Glasses_AttachChin = glasses_chin,
+                Root_Clothing_BusinessPants_AttachGroin = businessPants_groin,
+                Root_Clothing_HappyShirt_AttachChest = happyShirt_chest,
+                Root_Clothing_RetroPants_WornPants = retroPants_pants,
+                Root_Accessories_Watch_WornTattoo = watch_tattoo
+            };
+        }
+
         #region General
         [Theory]
         [InlineData("@versionnew=1234", RLV.RLVVersion)]
@@ -3210,154 +3356,7 @@ namespace LibRLV.Tests
 
         // @detachallthis[:<attachpt> or <clothing_layer>]=force
 
-
-
         #region @detachthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
-
-        private class SampleInventoryTree
-        {
-            public InventoryTree Root { get; set; } = null!;
-            public InventoryTree.InventoryItem Root_Clothing_Hats_FancyHat_AttachChin { get; set; } = null!;
-            public InventoryTree.InventoryItem Root_Clothing_Hats_PartyHat_AttachGroin { get; set; } = null!;
-            public InventoryTree.InventoryItem Root_Clothing_BusinessPants_AttachGroin { get; set; } = null!;
-            public InventoryTree.InventoryItem Root_Clothing_RetroPants_WornPants { get; set; } = null!;
-            public InventoryTree.InventoryItem Root_Clothing_HappyShirt_AttachChest { get; set; } = null!;
-            public InventoryTree.InventoryItem Root_Accessories_Glasses_AttachChin { get; set; } = null!;
-            public InventoryTree.InventoryItem Root_Accessories_Watch_WornTattoo { get; set; } = null!;
-        }
-        private SampleInventoryTree BuildInventoryTree()
-        {
-            // #RLV
-            //  |
-            //  |- Clothing
-            //  |    |= Business Pants (attached to 'groin')
-            //  |    |= Happy Shirt (attached to 'chest')
-            //  |    |= Retro Pants (worn on 'pants')
-            //  |    \-Hats
-            //  |        |= Fancy Hat (attached to 'chin')
-            //  |        \= Party Hat (attached to 'groin')
-            //   \-Accessories
-            //        |= Watch (worn on 'tattoo')
-            //        \= Glasses (attached to 'chin')
-
-            var root = new InventoryTree()
-            {
-                Id = new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Name = "#RLV",
-                Parent = null,
-                Children = new List<InventoryTree>(),
-                Items = new List<InventoryTree.InventoryItem>(),
-            };
-
-            var clothingTree = new InventoryTree()
-            {
-                Id = new UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
-                Name = "Clothing",
-                Parent = root,
-                Children = new List<InventoryTree>(),
-                Items = new List<InventoryTree.InventoryItem>(),
-
-            };
-            root.Children.Add(clothingTree);
-
-            var hatsTree = new InventoryTree
-            {
-                Id = new UUID("dddddddd-dddd-4ddd-8ddd-dddddddddddd"),
-                Name = "Hats",
-                Parent = root,
-                Children = new List<InventoryTree>(),
-                Items = new List<InventoryTree.InventoryItem>(),
-            };
-            clothingTree.Children.Add(hatsTree);
-
-            var AccessoriesTree = new InventoryTree
-            {
-                Id = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
-                Name = "Accessories",
-                Parent = root,
-                Children = new List<InventoryTree>(),
-                Items = new List<InventoryTree.InventoryItem>(),
-            };
-            root.Children.Add(AccessoriesTree);
-
-            var watch_tattoo = new InventoryTree.InventoryItem()
-            {
-                Id = new UUID("c0000000-cccc-4ccc-8ccc-cccccccccccc"),
-                Name = "Watch",
-                AttachedTo = null,
-                WornOn = WearableType.Tattoo,
-                FolderId = AccessoriesTree.Id
-            };
-            var glasses_chin = new InventoryTree.InventoryItem()
-            {
-                Id = new UUID("c1111111-cccc-4ccc-8ccc-cccccccccccc"),
-                Name = "Glasses",
-                AttachedTo = AttachmentPoint.Chin,
-                WornOn = null,
-                FolderId = AccessoriesTree.Id
-            };
-            var businessPants_groin = new InventoryTree.InventoryItem()
-            {
-                Id = new UUID("b0000000-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
-                Name = "Business Pants",
-                AttachedTo = AttachmentPoint.Groin,
-                WornOn = null,
-                FolderId = clothingTree.Id
-            };
-            var happyShirt_chest = new InventoryTree.InventoryItem()
-            {
-                Id = new UUID("b1111111-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
-                Name = "Happy Shirt",
-                AttachedTo = AttachmentPoint.Chest,
-                WornOn = null,
-                FolderId = clothingTree.Id
-            };
-            var retroPants_pants = new InventoryTree.InventoryItem()
-            {
-                Id = new UUID("b2222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
-                Name = "Retro Pants",
-                AttachedTo = null,
-                WornOn = WearableType.Pants,
-                FolderId = clothingTree.Id
-            };
-            var partyHat_groin = new InventoryTree.InventoryItem()
-            {
-                Id = new UUID("d0000000-dddd-4ddd-8ddd-dddddddddddd"),
-                Name = "Party Hat",
-                AttachedTo = AttachmentPoint.Groin,
-                WornOn = null,
-                FolderId = hatsTree.Id
-            };
-            var fancyHat_chin = new InventoryTree.InventoryItem()
-            {
-                Id = new UUID("d1111111-dddd-4ddd-8ddd-dddddddddddd"),
-                Name = "Fancy Hat",
-                AttachedTo = AttachmentPoint.Chin,
-                WornOn = null,
-                FolderId = hatsTree.Id
-            };
-
-
-            AccessoriesTree.Items.Add(watch_tattoo);
-            AccessoriesTree.Items.Add(glasses_chin);
-            clothingTree.Items.Add(businessPants_groin);
-            clothingTree.Items.Add(happyShirt_chest);
-            clothingTree.Items.Add(retroPants_pants);
-            hatsTree.Items.Add(partyHat_groin);
-            hatsTree.Items.Add(fancyHat_chin);
-
-            return new SampleInventoryTree()
-            {
-                Root = root,
-                Root_Clothing_Hats_PartyHat_AttachGroin = partyHat_groin,
-                Root_Clothing_Hats_FancyHat_AttachChin = fancyHat_chin,
-                Root_Accessories_Glasses_AttachChin = glasses_chin,
-                Root_Clothing_BusinessPants_AttachGroin = businessPants_groin,
-                Root_Clothing_HappyShirt_AttachChest = happyShirt_chest,
-                Root_Clothing_RetroPants_WornPants = retroPants_pants,
-                Root_Accessories_Watch_WornTattoo = watch_tattoo
-            };
-        }
 
         [Fact]
         public void DetachThis()
@@ -3718,9 +3717,119 @@ namespace LibRLV.Tests
 
         #endregion
 
-        // @detachthis_except:<folder>=<rem/add>
+        #region @detachthis_except:<folder>=<rem/add>
 
-        // @detachallthis_except:<folder>=<rem/add>
+        [Fact]
+        public void DetachAllThis_Recursive_Except()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(_rlv.ProcessMessage($"@detachthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants ()  - Locked, but folder has exception
+            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt () - Locked, but folder has exception
+            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants () - Locked, but folder has exception
+            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        #endregion
+
+        #region @detachallthis_except:<folder>=<rem/add>
+
+        [Fact]
+        public void DetachAllThis_Recursive_ExceptAll()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(_rlv.ProcessMessage($"@detachallthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat () - Parent folder locked recursively, but has exception
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat () - Parent folder locked recursively, but has exception
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants (LOCKED)
+            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt (LOCKED)
+            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants (LOCKED)
+            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        [Fact]
+        public void DetachAllThis_Recursive_ExceptAll_Recursive()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(_rlv.ProcessMessage($"@detachallthis_except:Clothing=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat () - Parent folder locked recursively, but parent has recursive exception
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat () - Parent folder locked recursively, but parent has recursive exception
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants ()  - Locked, but folder has exception
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt () - Locked, but folder has exception
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants () - Locked, but folder has exception
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        #endregion
+
 
         // @attachthis:<layer>|<attachpt>|<path_to_folder>=<y/n>
 
