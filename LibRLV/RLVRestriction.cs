@@ -320,11 +320,13 @@ namespace LibRLV
                     return true;
                 }
 
+
                 case RLVRestrictionType.DetachThis:         // CanDetach
                 case RLVRestrictionType.DetachAllThis:      // CanDetach
+                case RLVRestrictionType.AttachThis:
                 case RLVRestrictionType.AttachAllThis:
                 {
-                    // [] || [uuid | layer | attachpt | string]
+                    // [] || [layer | attachpt | string]
                     if (args.Length == 0)
                     {
                         return true;
@@ -335,38 +337,7 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (UUID.TryParse(args[0], out var uuid))
-                    {
-                        parsedArgs.Add(uuid);
-                    }
-                    else if (Enum.TryParse<WearableType>(args[0], true, out var wearableType))
-                    {
-                        parsedArgs.Add(wearableType);
-                        return true;
-                    }
-                    else if (Enum.TryParse<AttachmentPoint>(args[0], true, out var attachmentPoint))
-                    {
-                        parsedArgs.Add(attachmentPoint);
-                        return true;
-                    }
-
-                    parsedArgs.Add(args[0]);
-                    return true;
-                }
-
-                case RLVRestrictionType.AttachThis:
-                {
-                    // [uuid | layer | attachpt | string]
-                    if (args.Length != 1)
-                    {
-                        return false;
-                    }
-
-                    if (UUID.TryParse(args[0], out var uuid))
-                    {
-                        parsedArgs.Add(uuid);
-                    }
-                    else if (Enum.TryParse<WearableType>(args[0], true, out var wearableType))
+                    if (Enum.TryParse<WearableType>(args[0], true, out var wearableType))
                     {
                         parsedArgs.Add(wearableType);
                         return true;

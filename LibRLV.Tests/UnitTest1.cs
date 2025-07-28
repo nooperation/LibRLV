@@ -3268,7 +3268,47 @@ namespace LibRLV.Tests
 
         // @addattach[:<attach_point_name>]=<y/n>
 
-        // @remattach[:<attach_point_name>]=<y/n>
+        #region @remattach[:<attach_point_name>]=<y/n>
+
+        [Fact]
+        public void RemAttach()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@remattach=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Fancy Hat
+            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants
+            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+        }
+
+        [Fact]
+        public void RemAttach_Specific()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@remattach:groin=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Fancy Hat
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants
+            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+        }
+
+        #endregion
 
         #region @defaultwear=<y/n>
         [Fact] public void CanDefaultWear() => CheckSimpleCommand("defaultWear", m => m.CanDefaultWear());
@@ -3278,7 +3318,45 @@ namespace LibRLV.Tests
 
         // @addoutfit[:<part>]=<y/n>
 
-        // @remoutfit[:<part>]=<y/n>
+        #region @remoutfit[:<part>]=<y/n>
+        [Fact]
+        public void RemOutfit()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@remoutfit=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+
+            // #RLV/Clothing/Retro Pants
+            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Watch
+            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        [Fact]
+        public void RemOutfit_part()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@remoutfit:pants=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+
+            // #RLV/Clothing/Retro Pants
+            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Watch
+            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+        #endregion
 
         // @remoutfit[:<part>]=force
 
@@ -3368,8 +3446,6 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            // This should lock the #RLV/Clothing/Hats folder because the Party hat is issuing the command, which is in the Hats folder.
-            //   Hats can no longer be detached.
             Assert.True(_rlv.ProcessMessage("@detachthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
@@ -3553,8 +3629,6 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            // This should lock the #RLV/Clothing/Hats folder because the Party hat is issuing the command, which is in the Hats folder.
-            //   Hats can no longer be detached.
             Assert.True(_rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
@@ -3830,14 +3904,473 @@ namespace LibRLV.Tests
 
         #endregion
 
+        #region @attachthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
+        [Fact]
+        public void AttachThis()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
 
-        // @attachthis:<layer>|<attachpt>|<path_to_folder>=<y/n>
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
 
-        // @attachallthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
+            Assert.True(_rlv.ProcessMessage("@attachthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
-        // @attachthis_except:<folder>=<rem/add>
+            // #RLV/Clothing/Hats/Party Hat (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
-        // @attachallthis_except:<folder>=<rem/add>
+            // #RLV/Clothing/Hats/Fancy Hat (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        [Fact]
+        public void AttachThis_NotRecursive()
+        {
+            // TryGetRlvInventoryTree
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            // This should lock the #RLV/Clothing folder because the Business Pants are issuing the command, which is in the Clothing folder.
+            //   Business Pants cannot be attached, but hats are still attachable.
+            Assert.True(_rlv.ProcessMessage("@attachthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        [Fact]
+        public void AttachThis_ByPath()
+        {
+            // TryGetRlvInventoryTree
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            // This should lock the Hats folder, all hats are no longer attachable
+            Assert.True(_rlv.ProcessMessage("@attachthis:Clothing/Hats=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        [Fact]
+        public void AttachThis_ByAttachmentPoint()
+        {
+            // TryGetRlvInventoryTree
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            // This should lock the Hats folder, all hats are no longer attachable
+            Assert.True(_rlv.ProcessMessage("@attachthis:groin=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - folder was locked because PartyHat (groin)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants (LOCKED) - folder was locked because BusinessPants (groin)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        [Fact]
+        public void AttachThis_ByWornLayer()
+        {
+            // TryGetRlvInventoryTree
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            // This should lock the Hats folder, all hats are no longer attachable
+            Assert.True(_rlv.ProcessMessage("@attachthis:tattoo=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses (LOCKED) - folder was locked from Watch (tattoo)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+        #endregion
+
+        #region @attachallthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
+
+        [Fact]
+        public void AttachAllThis()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        [Fact]
+        public void AttachAllThis_Recursive()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        [Fact]
+        public void AttachAllThis_Recursive_Path()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@attachallthis:Clothing=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        [Fact]
+        public void AttachAllThis_Recursive_Worn()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@attachallthis:pants=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants (LOCKED) - Folder locked due to RetroPants being worn as 'pants'
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt (LOCKED) - Folder locked due to RetroPants being worn as 'pants'
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        [Fact]
+        public void AttachAllThis_Recursive_Attached()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@attachallthis:chest=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants (LOCKED) - Folder locked due to HappyShirt attachment of 'chest'
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants (LOCKED) - Folder locked due to HappyShirt attachment of 'chest'
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        #endregion
+
+        #region @attachthis_except:<folder>=<rem/add>
+
+        [Fact]
+        public void AttachAllThis_Recursive_Except()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(_rlv.ProcessMessage($"@attachthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants ()  - Locked, but folder has exception
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt () - Locked, but folder has exception
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants () - Locked, but folder has exception
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        #endregion
+
+        #region @attachallthis_except:<folder>=<rem/add>
+
+        [Fact]
+        public void AttachAllThis_Recursive_ExceptAll()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(_rlv.ProcessMessage($"@attachallthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat () - Parent folder locked recursively, but has exception
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat () - Parent folder locked recursively, but has exception
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants (LOCKED)
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        [Fact]
+        public void AttachAllThis_Recursive_ExceptAll_Recursive()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(_rlv.ProcessMessage($"@attachallthis_except:Clothing=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Party Hat () - Parent folder locked recursively, but parent has recursive exception
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+
+            // #RLV/Clothing/Hats/Fancy Hat () - Parent folder locked recursively, but parent has recursive exception
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants ()  - Locked, but folder has exception
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+
+            // #RLV/Clothing/Happy Shirt () - Locked, but folder has exception
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+
+            // #RLV/Clothing/Retro Pants () - Locked, but folder has exception
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Glasses ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+
+            // #RLV/Accessories/Watch ()
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        #endregion
 
         //
         // Touch

@@ -907,6 +907,16 @@ namespace LibRLV
             return true;
         }
 
+        public bool CanAttach(InventoryTree.InventoryItem item, bool isShared)
+        {
+            return CanAttach(
+                item.Id,
+                item.FolderId,
+                isShared,
+                item.AttachedTo,
+                item.WornOn
+            );
+        }
         public bool CanAttach(UUID objectId, UUID objectFolderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
             if (wearableType != null && !CanAttachWearable(wearableType))
@@ -955,7 +965,6 @@ namespace LibRLV
                 item.WornOn
             );
         }
-
         public bool CanDetach(UUID itemId, UUID folderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
             // TODO: Does RLVa support attachment 'groups' like "head, torso, arms, legs, hud"?
