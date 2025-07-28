@@ -3266,10 +3266,47 @@ namespace LibRLV.Tests
 
         #endregion
 
-        // @addattach[:<attach_point_name>]=<y/n>
+        #region @addattach[:<attach_point_name>]=<y/n>
+        [Fact]
+        public void AddAttach()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@addattach=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Fancy Hat
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+        }
+
+        [Fact]
+        public void AddAttach_Specific()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@addattach:groin=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+
+            // #RLV/Clothing/Hats/Fancy Hat
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+
+            // #RLV/Clothing/Business Pants
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+        }
+        #endregion
 
         #region @remattach[:<attach_point_name>]=<y/n>
-
         [Fact]
         public void RemAttach()
         {
@@ -3316,7 +3353,45 @@ namespace LibRLV.Tests
 
         // @detach[:attachpt]=force @remattach[:attachpt or :uuid]=force
 
-        // @addoutfit[:<part>]=<y/n>
+        #region @addoutfit[:<part>]=<y/n>
+        [Fact]
+        public void AddOutfit()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@addoutfit=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+
+            // #RLV/Clothing/Retro Pants
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Watch
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+
+        [Fact]
+        public void AddOutfit_part()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            Assert.True(_rlv.ProcessMessage("@addoutfit:pants=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+
+            // #RLV/Clothing/Retro Pants
+            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+
+            // #RLV/Accessories/Watch
+            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+        }
+        #endregion
 
         #region @remoutfit[:<part>]=<y/n>
         [Fact]
@@ -3364,9 +3439,13 @@ namespace LibRLV.Tests
 
         // @getattach[:attachpt]=<channel_number>
 
-        // @acceptpermission=<rem/add>
+        #region @acceptpermission=<rem/add>
+        [Fact] public void AcceptPermission() => CheckSimpleCommand("acceptpermission", m => m.IsAutoAcceptPermissions());
+        #endregion
 
-        // @denypermission=<rem/add>
+        #region @denypermission=<rem/add>
+        [Fact] public void DenyPermission() => CheckSimpleCommand("denypermission", m => m.IsAutoDenyPermissions());
+        #endregion
 
         // @detachme=force
 
