@@ -945,7 +945,18 @@ namespace LibRLV
             return true;
         }
 
-        public bool CanDetach(UUID objectId, UUID objectFolderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        public bool CanDetach(InventoryTree.InventoryItem item, bool isShared)
+        {
+            return CanDetach(
+                item.Id,
+                item.FolderId,
+                isShared,
+                item.AttachedTo,
+                item.WornOn
+            );
+        }
+
+        public bool CanDetach(UUID itemId, UUID folderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
             // @remoutfit[:<part>]=<y/n>
             if (wearableType != null && !CanDetachWearable(wearableType))
@@ -982,7 +993,7 @@ namespace LibRLV
                     return false;
                 }
 
-                if (_restrictionProvider.TryGetLockedFolder(objectFolderId, out var lockedFolder))
+                if (_restrictionProvider.TryGetLockedFolder(folderId, out var lockedFolder))
                 {
                     if (!lockedFolder.CanDetach)
                     {
@@ -997,7 +1008,6 @@ namespace LibRLV
                     return false;
                 }
             }
-
 
             return true;
         }

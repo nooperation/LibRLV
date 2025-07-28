@@ -254,7 +254,12 @@ namespace LibRLV
 
                 case RLVRestrictionType.Detach:             // CanDetach
                 {
-                    // [AttachmentPoint]
+                    // [] | [AttachmentPoint]
+                    if (args.Length == 0)
+                    {
+                        return true;
+                    }
+
                     if (args.Length != 1)
                     {
                         return false;

@@ -352,24 +352,6 @@ namespace LibRLV
             NotifyRestrictionChange(restriction, false);
         }
 
-        private static bool IsFolderLockCommand(RLVRestrictionType restrictionType)
-        {
-            switch (restrictionType)
-            {
-                case RLVRestrictionType.DetachThis:
-                case RLVRestrictionType.DetachAllThis:
-                case RLVRestrictionType.AttachThis:
-                case RLVRestrictionType.AttachAllThis:
-                case RLVRestrictionType.DetachThisExcept:
-                case RLVRestrictionType.DetachAllThisExcept:
-                case RLVRestrictionType.AttachThisExcept:
-                case RLVRestrictionType.AttachAllThisExcept:
-                    return true;
-            }
-
-            return false;
-        }
-
         private void AddRestriction(RLVRestriction newRestriction)
         {
             if (!_currentRestrictions.TryGetValue(newRestriction.Behavior, out var restrictions))
@@ -702,11 +684,34 @@ namespace LibRLV
             return ProcessFolderRestrictions(restriction, sharedFolder, sharedFolderMap);
         }
 
+        private bool TryGetItem(UUID itemId, Dictionary<UUID, InventoryTree> sharedFolderMap, out InventoryTree.InventoryItem outItem)
+        {
+            foreach (var folder in sharedFolderMap.Values)
+            {
+                foreach (var item in folder.Items)
+                {
+                    if (item.Id == itemId)
+                    {
+                        outItem = item;
+                        return true;
+                    }
+                }
+            }
+
+            outItem = null;
+            return false;
+        }
+
         private bool ProcessFolderRestrictions(RLVRestriction restriction, InventoryTree sharedFolder, Dictionary<UUID, InventoryTree> sharedFolderMap)
         {
             if (restriction.Args.Count == 0)
             {
-                if (!sharedFolderMap.TryGetValue(restriction.Sender, out var folder))
+                if (!TryGetItem(restriction.Sender, sharedFolderMap, out var item))
+                {
+                    return false;
+                }
+
+                if (!sharedFolderMap.TryGetValue(item.FolderId, out var folder))
                 {
                     return false;
                 }
