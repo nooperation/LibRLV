@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace LibRLV
 {
@@ -88,6 +86,7 @@ namespace LibRLV
             {"left hind foot", AttachmentPoint.LeftHindFoot},
             {"right hind foot", AttachmentPoint.RightHindFoot},
         }.ToImmutableDictionary();
+
 
         public static List<object> ParseOptions(string options)
         {

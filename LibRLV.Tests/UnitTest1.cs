@@ -80,7 +80,7 @@ namespace LibRLV.Tests
             {
                 Id = new UUID("dddddddd-dddd-4ddd-8ddd-dddddddddddd"),
                 Name = "Hats",
-                Parent = root,
+                Parent = clothingTree,
                 Children = new List<InventoryTree>(),
                 Items = new List<InventoryTree.InventoryItem>(),
             };
@@ -3794,6 +3794,131 @@ namespace LibRLV.Tests
 
         // @findfolders:part1[&&...&&partN][;output_separator]=<channel_number>
 
+        #region @getpath @getpathnew[:<attachpt> or <clothing_layer> or <uuid>]=<channel_number>
+
+        [Fact]
+        public void GetPathNew_BySender()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "Clothing/Hats"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getpathnew=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetPathNew_ByUUID()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "Accessories"),
+            };
+
+            Assert.True(_rlv.ProcessMessage($"@getpathnew:{sampleTree.Root_Accessories_Glasses_AttachChin.Id}=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetPathNew_ByUUID_Unknown()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
+            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
+            sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = null;
+            sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = null;
+            sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = null;
+            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
+            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, ""),
+            };
+
+            Assert.True(_rlv.ProcessMessage($"@getpathnew:BADBADBA-DBAD-4BAD-8BAD-BADBADBADBAD=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetPathNew_ByAttach()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = AttachmentPoint.Groin;
+            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
+            sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = AttachmentPoint.Default;
+            sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = AttachmentPoint.Chin;
+            sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = AttachmentPoint.Groin;
+            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
+            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "Accessories,Clothing/Hats"),
+            };
+
+            Assert.True(_rlv.ProcessMessage($"@getpathnew:groin=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetPathNew_ByWorn()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
+            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.WornOn = WearableType.Pants;
+            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = WearableType.Tattoo;
+            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Pants;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "Accessories,Clothing/Hats"),
+            };
+
+            Assert.True(_rlv.ProcessMessage($"@getpathnew:pants=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        #endregion
+
         // @attach:<folder1/.../folderN>=force
 
         // @attachover:<folder1/.../folderN>=force
@@ -3806,14 +3931,6 @@ namespace LibRLV.Tests
 
         // @attachalloverorreplace:<folder1/.../folderN>=force
 
-        // @detach:<folder_name>=force
-
-        // @detachall:<folder1/.../folderN>=force
-
-        // @getpath[:<attachpt> or <clothing_layer> or <uuid>]=<channel_number>
-
-        // @getpathnew[:<attachpt> or <clothing_layer> or <uuid>]=<channel_number>
-
         // @attachthis[:<attachpt> or <clothing_layer>]=force
 
         // @attachthisover[:<attachpt> or <clothing_layer>]=force
@@ -3825,6 +3942,10 @@ namespace LibRLV.Tests
         // @attachallthisover[:<attachpt> or <clothing_layer>]=force
 
         // @attachallthisoverorreplace[:<attachpt> or <clothing_layer>]=force
+
+        // @detach:<folder_name>=force
+
+        // @detachall:<folder1/.../folderN>=force
 
         // @detachthis[:<attachpt> or <clothing_layer> or <uuid>]=force
 

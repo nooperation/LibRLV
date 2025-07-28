@@ -317,34 +317,38 @@ namespace LibRLV
                     case RLVDataRequest.GetPath:
                     case RLVDataRequest.GetPathNew:
                     {
-                        // [uuid | layer | attachpt ]
+                        // [] | [uuid | layer | attachpt ]
 
                         var result = new List<object>();
-                        var parsedOptions = rlvMessage.Option.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                        var parsedOptions = rlvMessage.Option.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
 
-                        if (parsedOptions.Length != 1)
+                        if (parsedOptions.Count > 1)
                         {
                             return false;
                         }
 
-                        if (UUID.TryParse(parsedOptions[0], out var uuid))
+                        if (parsedOptions.Count == 0)
                         {
-                            args.Add(uuid);
+                            response = HandleGetPath(name == RLVDataRequest.GetPath, rlvMessage.Sender, null, null);
+                        }
+                        else if (UUID.TryParse(parsedOptions[0], out var uuid))
+                        {
+                            response = HandleGetPath(name == RLVDataRequest.GetPath, uuid, null, null);
                         }
                         else if (RLVCommon.RLVWearableTypeMap.TryGetValue(parsedOptions[0], out var wearableType))
                         {
-                            args.Add(wearableType);
+                            response = HandleGetPath(name == RLVDataRequest.GetPath, null, null, wearableType);
                         }
                         else if (RLVCommon.RLVAttachmentPointMap.TryGetValue(parsedOptions[0], out var attachmentPoint))
                         {
-                            args.Add(attachmentPoint);
+                            response = HandleGetPath(name == RLVDataRequest.GetPath, null, attachmentPoint, null);
                         }
                         else
                         {
                             return false;
                         }
 
-                        return true;
+                        break;
                     }
                 }
 
@@ -371,6 +375,93 @@ namespace LibRLV
             }
 
             return false;
+        }
+
+        private string HandleGetPath(bool limitToOneResult, UUID? itemId, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        {
+            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            {
+                return string.Empty;
+            }
+
+            var inventoryMap = new InventoryMap(sharedFolder);
+            var folders = new List<InventoryTree>();
+
+            if (itemId != null)
+            {
+                if (!inventoryMap.Items.TryGetValue(itemId.Value, out var item))
+                {
+                    return "";
+                }
+
+                if (!inventoryMap.Folders.TryGetValue(item.FolderId, out var folder))
+                {
+                    return "";
+                }
+
+                folders.Add(folder);
+            }
+            else if (attachmentPoint != null)
+            {
+                var folderIds = inventoryMap.Items.Values
+                    .Where(n => n.AttachedTo == attachmentPoint)
+                    .Select(n => n.FolderId)
+                    .Distinct()
+                    .ToList();
+
+                var foundFolders = inventoryMap
+                    .Folders
+                    .Where(n => folderIds.Contains(n.Key))
+                    .Select(n => n.Value);
+
+                if (limitToOneResult)
+                {
+                    folders.Add(foundFolders.First());
+                }
+                else
+                {
+                    folders.AddRange(foundFolders);
+                }
+            }
+            else if (wearableType != null)
+            {
+                var folderIds = inventoryMap.Items.Values
+                    .Where(n => n.WornOn == wearableType)
+                    .Select(n => n.FolderId)
+                    .Distinct()
+                    .ToList();
+
+                var foundFolders = inventoryMap
+                    .Folders
+                    .Where(n => folderIds.Contains(n.Key))
+                    .Select(n => n.Value);
+
+                if (limitToOneResult)
+                {
+                    folders.Add(foundFolders.First());
+                }
+                else
+                {
+                    folders.AddRange(foundFolders);
+                }
+            }
+
+            var sb = new StringBuilder();
+            foreach (var folder in folders.OrderBy(n => n.Name))
+            {
+                if (sb.Length > 0)
+                {
+                    sb.Append(",");
+                }
+
+                var path = inventoryMap.BuildPathToFolder(folder.Id);
+                if (path != null)
+                {
+                    sb.Append(path);
+                }
+            }
+
+            return sb.ToString();
         }
 
         internal bool ProcessInstantMessageCommand(string message, UUID senderId, string senderName)

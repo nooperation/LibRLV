@@ -354,26 +354,6 @@ namespace LibRLV
             return true;
         }
 
-        private bool BuildInventoryMap(InventoryTree tree, Dictionary<UUID, InventoryTree> outTree)
-        {
-            if (outTree.ContainsKey(tree.Id))
-            {
-                return false;
-            }
-
-            outTree[tree.Id] = tree;
-
-            foreach (var child in tree.Children)
-            {
-                if (!BuildInventoryMap(child, outTree))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
         public static bool TryGetFolderFromPath(string path, InventoryTree root, out InventoryTree foundFolder)
         {
             var splitPath = path.Split('/');
@@ -415,7 +395,7 @@ namespace LibRLV
             }
         }
 
-        private static List<InventoryTree> GetFoldersForItems(Dictionary<UUID, InventoryTree> rootMap, List<InventoryTree.InventoryItem> items)
+        private static List<InventoryTree> GetFoldersForItems(IDictionary<UUID, InventoryTree> rootMap, List<InventoryTree.InventoryItem> items)
         {
             var result = new Dictionary<UUID, InventoryTree>();
 
@@ -491,38 +471,34 @@ namespace LibRLV
 
             LockedFolders.Clear();
 
-            var sharedFolderMap = new Dictionary<UUID, InventoryTree>();
-            if (!BuildInventoryMap(sharedFolder, sharedFolderMap))
-            {
-                return;
-            }
+            var inventoryMap = new InventoryMap(sharedFolder);
 
             if (_currentRestrictions.TryGetValue(RLVRestrictionType.DetachThis, out var detachThisRestrictions))
             {
                 foreach (var restriction in detachThisRestrictions)
                 {
-                    ProcessFolderRestrictions(restriction, sharedFolder, sharedFolderMap);
+                    ProcessFolderRestrictions(restriction, sharedFolder, inventoryMap.Folders);
                 }
             }
             if (_currentRestrictions.TryGetValue(RLVRestrictionType.DetachAllThis, out var detachAllThisRestrictions))
             {
                 foreach (var restriction in detachAllThisRestrictions)
                 {
-                    ProcessFolderRestrictions(restriction, sharedFolder, sharedFolderMap);
+                    ProcessFolderRestrictions(restriction, sharedFolder, inventoryMap.Folders);
                 }
             }
             if (_currentRestrictions.TryGetValue(RLVRestrictionType.AttachThis, out var attachThisRestrictions))
             {
                 foreach (var restriction in attachThisRestrictions)
                 {
-                    ProcessFolderRestrictions(restriction, sharedFolder, sharedFolderMap);
+                    ProcessFolderRestrictions(restriction, sharedFolder, inventoryMap.Folders);
                 }
             }
             if (_currentRestrictions.TryGetValue(RLVRestrictionType.AttachAllThis, out var attachAllThisRestrictions))
             {
                 foreach (var restriction in attachAllThisRestrictions)
                 {
-                    ProcessFolderRestrictions(restriction, sharedFolder, sharedFolderMap);
+                    ProcessFolderRestrictions(restriction, sharedFolder, inventoryMap.Folders);
                 }
             }
 
@@ -598,16 +574,11 @@ namespace LibRLV
                 return false;
             }
 
-            var sharedFolderMap = new Dictionary<UUID, InventoryTree>();
-            if (!BuildInventoryMap(sharedFolder, sharedFolderMap))
-            {
-                return false;
-            }
-
-            return ProcessFolderRestrictions(restriction, sharedFolder, sharedFolderMap);
+            var inventoryMap = new InventoryMap(sharedFolder);
+            return ProcessFolderRestrictions(restriction, sharedFolder, inventoryMap.Folders);
         }
 
-        private bool TryGetItem(UUID itemId, Dictionary<UUID, InventoryTree> sharedFolderMap, out InventoryTree.InventoryItem outItem)
+        private bool TryGetItem(UUID itemId, IDictionary<UUID, InventoryTree> sharedFolderMap, out InventoryTree.InventoryItem outItem)
         {
             foreach (var folder in sharedFolderMap.Values)
             {
@@ -625,7 +596,7 @@ namespace LibRLV
             return false;
         }
 
-        private bool ProcessFolderRestrictions(RLVRestriction restriction, InventoryTree sharedFolder, Dictionary<UUID, InventoryTree> sharedFolderMap)
+        private bool ProcessFolderRestrictions(RLVRestriction restriction, InventoryTree sharedFolder, IDictionary<UUID, InventoryTree> sharedFolderMap)
         {
             if (restriction.Args.Count == 0)
             {
