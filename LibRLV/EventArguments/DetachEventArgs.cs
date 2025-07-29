@@ -1,17 +1,16 @@
 ﻿using OpenMetaverse;
 using System;
+using System.Collections.Generic;
 
 namespace LibRLV.EventArguments
 {
     public class DetachEventArgs : EventArgs
     {
-        public DetachEventArgs(UUID? itemID, string attachPointName)
+        public DetachEventArgs(List<UUID> itemIds)
         {
-            this.ItemID = itemID;
-            this.AttachPointName = attachPointName;
+            this.ItemIds = itemIds;
         }
 
-        public UUID? ItemID { get; }
-        public string AttachPointName { get; }
+        public List<UUID> ItemIds { get; set; }
     }
 }

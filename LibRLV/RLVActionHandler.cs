@@ -3,6 +3,8 @@ using OpenMetaverse;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
+using static LibRLV.InventoryTree;
 
 namespace LibRLV
 {
@@ -164,14 +166,59 @@ namespace LibRLV
 
         private bool HandleDetach(RLVMessage command)
         {
-            // TODO: Look into whatever the "(nostrip)" tag is - restriction applied here?
-            if (UUID.TryParse(command.Option, out UUID uuid))
+            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
             {
-                Detach?.Invoke(this, new DetachEventArgs(uuid, null));
+                return false;
+            }
+
+            UUID? uuid = null;
+            if (UUID.TryParse(command.Option, out var uuidTemp))
+            {
+                uuid = uuidTemp;
+            }
+
+            AttachmentPoint? attachmentPoint = null;
+            if (RLVCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPointTemp))
+            {
+                attachmentPoint = attachmentPointTemp;
+            }
+
+            bool ShouldDetach(InventoryItem item)
+            {
+                if (item.AttachedTo == null)
+                {
+                    return false;
+                }
+
+                // TODO: Look into whatever the "(nostrip)" tag is - restriction applied here?
+                // TODO: What restrictions do I need to pay attention to?
+
+                if (uuid != null)
+                {
+                    return item.Id == uuid.Value;
+                }
+
+                if (attachmentPoint != null)
+                {
+                    return item.AttachedTo == attachmentPoint.Value;
+                }
+
                 return true;
             }
 
-            Detach?.Invoke(this, new DetachEventArgs(null, command.Option));
+            var inventoryMap = new InventoryMap(sharedFolder);
+
+            var itemsToDetach = inventoryMap.Items
+                .Where(n => ShouldDetach(n.Value))
+                .Select(n => n.Value)
+                .ToList();
+
+            var itemIdsToDetach = itemsToDetach
+                .Select(n => n.Id)
+                .Distinct()
+                .ToList();
+
+            Detach?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
             return true;
         }
 
