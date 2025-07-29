@@ -65,8 +65,8 @@ namespace LibRLV
                 { "attachall", n => HandleInventoryThing(n, AttachAll)},
                 { "attachallover", n => HandleInventoryThing(n, AttachAll)},
                 { "attachalloverorreplace", n => HandleInventoryThing(n, AttachAllOverOrReplace)},
-                { "detach", HandleDetach},
-                { "remattach", HandleDetach},
+                { "detach", HandleRemAttach},
+                { "remattach", HandleRemAttach},
                 { "detachall", n => HandleInventoryThing(n, DetachAll)},
                 { "attachthis", n => HandleAttachmentThing(n, AttachThis)},
                 { "attachthisover", n => HandleAttachmentThing(n, AttachThisOver)},
@@ -164,12 +164,55 @@ namespace LibRLV
             return true;
         }
 
-        private bool HandleDetach(RLVMessage command)
+        private bool CanRemAttachItem(InventoryItem item, InventoryMap inventoryMap, UUID? uuid, AttachmentPoint? attachmentPoint)
+        {
+            if (item.AttachedTo == null)
+            {
+                return false;
+            }
+
+            if (item.Name.ToLower().Contains("nostrip"))
+            {
+                return false;
+            }
+
+            if (!inventoryMap.Folders.TryGetValue(item.FolderId, out var folder))
+            {
+                while (folder != null)
+                {
+                    if (folder.Name.Contains("nostrip"))
+                    {
+                        return false;
+                    }
+                    folder = folder.Parent;
+                }
+            }
+
+            if (!_manager.CanDetach(item, true))
+            {
+                return false;
+            }
+
+            if (uuid != null)
+            {
+                return item.Id == uuid.Value;
+            }
+
+            if (attachmentPoint != null)
+            {
+                return item.AttachedTo == attachmentPoint.Value;
+            }
+
+            return true;
+        }
+
+        private bool HandleRemAttach(RLVMessage command)
         {
             if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
             {
                 return false;
             }
+            var inventoryMap = new InventoryMap(sharedFolder);
 
             UUID? uuid = null;
             if (UUID.TryParse(command.Option, out var uuidTemp))
@@ -183,33 +226,8 @@ namespace LibRLV
                 attachmentPoint = attachmentPointTemp;
             }
 
-            bool ShouldDetach(InventoryItem item)
-            {
-                if (item.AttachedTo == null)
-                {
-                    return false;
-                }
-
-                // TODO: Look into whatever the "(nostrip)" tag is - restriction applied here?
-                // TODO: What restrictions do I need to pay attention to?
-
-                if (uuid != null)
-                {
-                    return item.Id == uuid.Value;
-                }
-
-                if (attachmentPoint != null)
-                {
-                    return item.AttachedTo == attachmentPoint.Value;
-                }
-
-                return true;
-            }
-
-            var inventoryMap = new InventoryMap(sharedFolder);
-
             var itemsToDetach = inventoryMap.Items
-                .Where(n => ShouldDetach(n.Value))
+                .Where(n => CanRemAttachItem(n.Value, inventoryMap, uuid, attachmentPoint))
                 .Select(n => n.Value)
                 .ToList();
 

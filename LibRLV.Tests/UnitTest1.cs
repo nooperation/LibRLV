@@ -3376,10 +3376,13 @@ namespace LibRLV.Tests
         #endregion
 
         #region @detach[:attachpt]=force @remattach[:attachpt or :uuid]=force
+        // TODO: Test (nostrip) locked items
+        // TODO: Test @detach=n items
+
         [Theory]
         [InlineData("@detach=force")]
         [InlineData("@remattach=force")]
-        public void DetachForce_RemoveAllAttachments(string command)
+        public void RemAttach_RemoveAllAttachments(string command)
         {
             var sampleTree = BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3409,7 +3412,7 @@ namespace LibRLV.Tests
         [Theory]
         [InlineData("@detach:groin=force")]
         [InlineData("@remattach:groin=force")]
-        public void DetachForce_RemoveAttachmentPoint(string command)
+        public void RemAttach_RemoveAttachmentPoint(string command)
         {
             var sampleTree = BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3436,7 +3439,7 @@ namespace LibRLV.Tests
         [Theory]
         [InlineData("@detach:skull=force")]
         [InlineData("@remattach:skull=force")]
-        public void DetachForce_RemoveNone(string command)
+        public void RemAttach_RemoveNone(string command)
         {
             var sampleTree = BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3461,7 +3464,7 @@ namespace LibRLV.Tests
         [Theory]
         [InlineData("detach")]
         [InlineData("remattach")]
-        public void DetachForce_RemoveByUUID(string command)
+        public void RemAttach_RemoveByUUID(string command)
         {
             var sampleTree = BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
