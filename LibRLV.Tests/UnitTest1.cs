@@ -3375,10 +3375,7 @@ namespace LibRLV.Tests
         [Fact] public void CanDefaultWear() => CheckSimpleCommand("defaultWear", m => m.CanDefaultWear());
         #endregion
 
-        #region @detach[:attachpt]=force @remattach[:attachpt or :uuid]=force
-        // TODO: Test (nostrip) locked items
-        // TODO: Test @detach=n items
-
+        #region @detach[:<folder|attachpt|uuid>]=force @remattach[:<folder|attachpt|uuid>]=force
         [Theory]
         [InlineData("@detach=force")]
         [InlineData("@remattach=force")]
@@ -3404,6 +3401,33 @@ namespace LibRLV.Tests
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
                 sampleTree.Root_Accessories_Glasses_AttachChin.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Theory]
+        [InlineData("@detach:Clothing/Hats=force")]
+        [InlineData("@remattach:Clothing/Hats=force")]
+        public void RemAttach_ByFolder(string command)
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
+            );
+
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
+                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
             }.Order();
 
             Assert.Equal(expected, raised.Arguments.ItemIds.Order());
@@ -3568,7 +3592,112 @@ namespace LibRLV.Tests
         }
         #endregion
 
-        // @remoutfit[:<part>]=force
+        #region @remoutfit[:<folder|layer>]=force
+        [Fact]
+        public void RemOutfitForce()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            // skin, shape, eyes and hair cannot be removed
+            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
+            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.WornOn = WearableType.Skin;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<RemOutfitEventArgs>(
+                 attach: n => _rlv.Actions.RemOutfit += n,
+                 detach: n => _rlv.Actions.RemOutfit -= n,
+                 testCode: () => _rlv.ProcessMessage("@remoutfit=force", _sender.Id, _sender.Name)
+            );
+
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+                sampleTree.Root_Accessories_Watch_WornTattoo.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Fact]
+        public void RemOutfitForce_Folder()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
+            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.WornOn = WearableType.Tattoo;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<RemOutfitEventArgs>(
+                 attach: n => _rlv.Actions.RemOutfit += n,
+                 detach: n => _rlv.Actions.RemOutfit -= n,
+                 testCode: () => _rlv.ProcessMessage("@remoutfit:Clothing/Hats=force", _sender.Id, _sender.Name)
+            );
+
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Fact]
+        public void RemOutfitForce_Specific()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<RemOutfitEventArgs>(
+                 attach: n => _rlv.Actions.RemOutfit += n,
+                 detach: n => _rlv.Actions.RemOutfit -= n,
+                 testCode: () => _rlv.ProcessMessage("@remoutfit:tattoo=force", _sender.Id, _sender.Name)
+            );
+
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Accessories_Watch_WornTattoo.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Fact]
+        public void RemOutfitForce_BodyPart_Specific()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Skin;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<RemOutfitEventArgs>(
+                 attach: n => _rlv.Actions.RemOutfit += n,
+                 detach: n => _rlv.Actions.RemOutfit -= n,
+                 testCode: () => _rlv.ProcessMessage("@remoutfit:skin=force", _sender.Id, _sender.Name)
+            );
+
+            var expected = new List<UUID>()
+            {
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+        #endregion
 
         #region @getoutfit[:part]=<channel_number>
         [Fact]

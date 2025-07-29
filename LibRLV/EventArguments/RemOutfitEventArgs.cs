@@ -1,15 +1,16 @@
 ﻿using OpenMetaverse;
 using System;
+using System.Collections.Generic;
 
 namespace LibRLV.EventArguments
 {
     public class RemOutfitEventArgs : EventArgs
     {
-        public RemOutfitEventArgs(WearableType part)
+        public RemOutfitEventArgs(List<UUID> itemIds)
         {
-            this.Part = part;
+            this.ItemIds = itemIds;
         }
 
-        public WearableType Part { get; }
+        public List<UUID> ItemIds { get; set; }
     }
 }

@@ -164,13 +164,8 @@ namespace LibRLV
             return true;
         }
 
-        private bool CanRemAttachItem(InventoryItem item, InventoryMap inventoryMap, UUID? uuid, AttachmentPoint? attachmentPoint)
+        private bool CanRemAttachItem(InventoryItem item, InventoryMap inventoryMap)
         {
-            if (item.AttachedTo == null)
-            {
-                return false;
-            }
-
             if (item.Name.ToLower().Contains("nostrip"))
             {
                 return false;
@@ -193,19 +188,16 @@ namespace LibRLV
                 return false;
             }
 
-            if (uuid != null)
+            if (item.WornOn == WearableType.Skin || item.WornOn == WearableType.Shape || item.WornOn == WearableType.Eyes || item.WornOn == WearableType.Hair)
             {
-                return item.Id == uuid.Value;
-            }
-
-            if (attachmentPoint != null)
-            {
-                return item.AttachedTo == attachmentPoint.Value;
+                return false;
             }
 
             return true;
         }
 
+        // @remattach[:<folder|attachpt|uuid>]=force
+        // TODO: Add support for Attachment groups (RLVa)
         private bool HandleRemAttach(RLVMessage command)
         {
             if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
@@ -215,19 +207,34 @@ namespace LibRLV
             var inventoryMap = new InventoryMap(sharedFolder);
 
             UUID? uuid = null;
+            AttachmentPoint? attachmentPoint = null;
+            UUID? folderId = null;
+
             if (UUID.TryParse(command.Option, out var uuidTemp))
             {
                 uuid = uuidTemp;
             }
-
-            AttachmentPoint? attachmentPoint = null;
-            if (RLVCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPointTemp))
+            else if (RLVCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPointTemp))
             {
                 attachmentPoint = attachmentPointTemp;
             }
+            else if (inventoryMap.TryGetFolderFromPath(command.Option, out var folderTemp))
+            {
+                folderId = folderTemp.Id;
+            }
+            else if (command.Option.Length > 0)
+            {
+                return false;
+            }
 
             var itemsToDetach = inventoryMap.Items
-                .Where(n => CanRemAttachItem(n.Value, inventoryMap, uuid, attachmentPoint))
+                .Where(n =>
+                    n.Value.AttachedTo != null &&
+                    (uuid == null || n.Value.Id == uuid) &&
+                    (attachmentPoint == null || n.Value.AttachedTo == attachmentPoint) &&
+                    (folderId == null || n.Value.FolderId == folderId) &&
+                    CanRemAttachItem(n.Value, inventoryMap)
+                )
                 .Select(n => n.Value)
                 .ToList();
 
@@ -237,6 +244,51 @@ namespace LibRLV
                 .ToList();
 
             Detach?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
+            return true;
+        }
+
+        // @remoutfit[:<folder|layer>]=force
+        // TODO: Add support for Attachment groups (RLVa)
+        private bool HandleRemOutfit(RLVMessage command)
+        {
+            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            {
+                return false;
+            }
+            var inventoryMap = new InventoryMap(sharedFolder);
+
+            UUID? folderId = null;
+            WearableType? wearableType = null;
+
+            if (RLVCommon.RLVWearableTypeMap.TryGetValue(command.Option, out var wearableTypeTemp))
+            {
+                wearableType = wearableTypeTemp;
+            }
+            else if (inventoryMap.TryGetFolderFromPath(command.Option, out var folder))
+            {
+                folderId = folder.Id;
+            }
+            else if (command.Option.Length != 0)
+            {
+                return false;
+            }
+
+            var itemsToDetach = inventoryMap.Items
+                .Where(n =>
+                    n.Value.WornOn != null &&
+                    (folderId == null || n.Value.FolderId == folderId) &&
+                    (wearableType == null || n.Value.WornOn == wearableType) &&
+                    CanRemAttachItem(n.Value, inventoryMap)
+                )
+                .Select(n => n.Value)
+                .ToList();
+
+            var itemIdsToDetach = itemsToDetach
+                .Select(n => n.Id)
+                .Distinct()
+                .ToList();
+
+            RemOutfit?.Invoke(this, new RemOutfitEventArgs(itemIdsToDetach));
             return true;
         }
 
@@ -259,26 +311,6 @@ namespace LibRLV
             }
 
             SitGround?.Invoke(this, new EventArgs());
-            return true;
-        }
-
-        private bool HandleRemOutfit(RLVMessage command)
-        {
-            if (!RLVCommon.RLVWearableTypeMap.TryGetValue(command.Option, out WearableType part))
-            {
-                return false;
-            }
-
-            if (part == WearableType.Skin ||
-               part == WearableType.Shape ||
-               part == WearableType.Eyes ||
-               part == WearableType.Hair ||
-               part == WearableType.Invalid)
-            {
-                return false;
-            }
-
-            RemOutfit?.Invoke(this, new RemOutfitEventArgs(part));
             return true;
         }
 
