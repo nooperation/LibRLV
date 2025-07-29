@@ -404,7 +404,7 @@ namespace LibRLV
             {
                 foreach (var child in folder.Children)
                 {
-                    GetInvWornInfo_Internal(folder, recursive, ref totalItems, ref totalItemsWorn);
+                    GetInvWornInfo_Internal(child, recursive, ref totalItems, ref totalItemsWorn);
                 }
             }
         }
