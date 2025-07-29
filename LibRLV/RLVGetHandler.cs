@@ -311,11 +311,22 @@ namespace LibRLV
                         response = HandleGetInvWorn(rlvMessage.Option);
                         break;
                     case RLVDataRequest.FindFolder:
-                        args.Add(rlvMessage.Option);
-                        break;
                     case RLVDataRequest.FindFolders:
-                        args.AddRange(rlvMessage.Option.Split(';'));
+                    {
+                        var findFolderParts = rlvMessage.Option.Split(';');
+                        var separator = ",";
+                        var searchTerms = findFolderParts[0]
+                            .Split(new[] { "&&" }, StringSplitOptions.RemoveEmptyEntries)
+                            .ToList();
+
+                        if (findFolderParts.Length > 1)
+                        {
+                            separator = findFolderParts[1];
+                        }
+
+                        response = HandleFindFolders(name == RLVDataRequest.FindFolder, searchTerms, separator);
                         break;
+                    }
                     case RLVDataRequest.GetPath:
                     case RLVDataRequest.GetPathNew:
                     {
@@ -495,6 +506,55 @@ namespace LibRLV
             }
 
             var result = string.Join(",", resultItems);
+            return result;
+        }
+
+        private void SearchFoldersForName(InventoryTree root, bool stopOnFirstResult, List<string> searchTerms, List<InventoryTree> outFoundFolders)
+        {
+            if (searchTerms.All(n => root.Name.Contains(n)))
+            {
+                outFoundFolders.Add(root);
+
+                if (stopOnFirstResult)
+                {
+                    return;
+                }
+            }
+
+            foreach (var child in root.Children)
+            {
+                if (child.Name.StartsWith(".") || child.Name.StartsWith("~"))
+                {
+                    continue;
+                }
+
+                SearchFoldersForName(child, stopOnFirstResult, searchTerms, outFoundFolders);
+                if (stopOnFirstResult && outFoundFolders.Count > 0)
+                {
+                    return;
+                }
+            }
+        }
+
+        private string HandleFindFolders(bool stopOnFirstResult, List<string> searchTerms, string separator = ",")
+        {
+            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            {
+                return string.Empty;
+            }
+
+            var inventoryMap = new InventoryMap(sharedFolder);
+
+            var foundFolders = new List<InventoryTree>();
+            SearchFoldersForName(sharedFolder, stopOnFirstResult, searchTerms, foundFolders);
+
+            // TODO: Just add full path to the InventoryTree so we don't have to calculate it every time?
+            var foundFolderPaths = foundFolders
+                .Select(n => inventoryMap.BuildPathToFolder(n.Id))
+                .ToList();
+
+            var result = string.Join(separator, foundFolderPaths);
+
             return result;
         }
 

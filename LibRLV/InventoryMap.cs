@@ -30,7 +30,7 @@ namespace LibRLV
             foreach (var part in parts)
             {
                 iter = iter.Children.FirstOrDefault(n => n.Name == part);
-                if(iter == null)
+                if (iter == null)
                 {
                     folder = null;
                     return false;

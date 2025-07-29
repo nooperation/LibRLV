@@ -110,7 +110,7 @@ namespace LibRLV.Tests
                 Children = new List<InventoryTree>(),
                 Items = new List<InventoryTree.InventoryItem>(),
             };
-            clothingTree.Children.Add(hatsTree);
+            root.Children.Add(privateTree);
 
             var AccessoriesTree = new InventoryTree
             {
@@ -4132,9 +4132,164 @@ namespace LibRLV.Tests
         }
         #endregion
 
-        // @findfolder:part1[&&...&&partN]=<channel_number>
+        #region @findfolder:part1[&&...&&partN]=<channel_number>
+        [Fact]
+        public void FindFolder_MultipleTerms()
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants (attached to 'groin')
+            //  |    |= Happy Shirt (attached to 'chest')
+            //  |    |= Retro Pants (worn on 'pants')
+            //  |    \-Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached to 'chin')
+            //  |        \= Party Hat (attached to 'groin')
+            //   \-Accessories
+            //        |= Watch (worn on 'tattoo')
+            //        \= Glasses (attached to 'chin')
 
-        // @findfolders:part1[&&...&&partN][;output_separator]=<channel_number>
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "Clothing/Hats/Sub Hats"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@findfolder:at&&ub=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+        [Fact]
+        public void FindFolder_SearchOrder()
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants (attached to 'groin')
+            //  |    |= Happy Shirt (attached to 'chest')
+            //  |    |= Retro Pants (worn on 'pants')
+            //  |    \-Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached to 'chin')
+            //  |        \= Party Hat (attached to 'groin')
+            //   \-Accessories
+            //        |= Watch (worn on 'tattoo')
+            //        \= Glasses (attached to 'chin')
+
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "Clothing/Hats"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@findfolder:at=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+        #endregion
+
+        #region @findfolders:part1[&&...&&partN][;output_separator]=<channel_number>
+        [Fact]
+        public void FindFolders()
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants (attached to 'groin')
+            //  |    |= Happy Shirt (attached to 'chest')
+            //  |    |= Retro Pants (worn on 'pants')
+            //  |    \-Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached to 'chin')
+            //  |        \= Party Hat (attached to 'groin')
+            //   \-Accessories
+            //        |= Watch (worn on 'tattoo')
+            //        \= Glasses (attached to 'chin')
+
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "Clothing/Hats,Clothing/Hats/Sub Hats"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@findfolders:at=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void FindFolders_Separator()
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants (attached to 'groin')
+            //  |    |= Happy Shirt (attached to 'chest')
+            //  |    |= Retro Pants (worn on 'pants')
+            //  |    \-Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached to 'chin')
+            //  |        \= Party Hat (attached to 'groin')
+            //   \-Accessories
+            //        |= Watch (worn on 'tattoo')
+            //        \= Glasses (attached to 'chin')
+
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "Clothing/Hats AND Clothing/Hats/Sub Hats"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@findfolders:at; AND =1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+        #endregion
 
         #region @getpath @getpathnew[:<attachpt> or <clothing_layer> or <uuid>]=<channel_number>
 
