@@ -305,8 +305,10 @@ namespace LibRLV
                         break;
                     }
                     case RLVDataRequest.GetInv:
+                        response = HandleGetInv(rlvMessage.Option);
+                        break;
                     case RLVDataRequest.GetInvWorn:
-                        args.Add(rlvMessage.Option);
+                        response = HandleGetInvWorn(rlvMessage.Option);
                         break;
                     case RLVDataRequest.FindFolder:
                         args.Add(rlvMessage.Option);
@@ -375,6 +377,152 @@ namespace LibRLV
             }
 
             return false;
+        }
+
+        private class InvWornInfoContainer
+        {
+            public string FolderName { get; set; }
+            public string CountIndicator { get; set; }
+
+            public InvWornInfoContainer(string folderName, string countIndicator)
+            {
+                this.FolderName = folderName;
+                this.CountIndicator = countIndicator;
+            }
+
+            public override string ToString()
+            {
+                return $"{FolderName}|{CountIndicator}";
+            }
+        }
+        private void GetInvWornInfo_Internal(InventoryTree folder, bool recursive, ref int totalItems, ref int totalItemsWorn)
+        {
+            totalItemsWorn += folder.Items.Count(n => n.AttachedTo != null || n.WornOn != null);
+            totalItems += folder.Items.Count;
+
+            if (recursive)
+            {
+                foreach (var child in folder.Children)
+                {
+                    GetInvWornInfo_Internal(folder, recursive, ref totalItems, ref totalItemsWorn);
+                }
+            }
+        }
+        private string GetInvWornInfo(InventoryTree folder)
+        {
+            // 0 : No item is present in that folder
+            // 1 : Some items are present in that folder, but none of them is worn
+            // 2 : Some items are present in that folder, and some of them are worn
+            // 3 : Some items are present in that folder, and all of them are worn
+
+            var totalItemsWorn = 0;
+            var totalItems = 0;
+            GetInvWornInfo_Internal(folder, false, ref totalItems, ref totalItemsWorn);
+
+            var result = "";
+            if (totalItems == 0)
+            {
+                result += "0";
+            }
+            else if (totalItemsWorn == 0)
+            {
+                result += "1";
+            }
+            else if (totalItems != totalItemsWorn)
+            {
+                result += "2";
+            }
+            else
+            {
+                result += "3";
+            }
+
+            var totalItemsWornRecursive = 0;
+            var totalItemsRecursive = 0;
+            GetInvWornInfo_Internal(folder, true, ref totalItemsRecursive, ref totalItemsWornRecursive);
+
+            if (totalItemsRecursive == 0)
+            {
+                result += "0";
+            }
+            else if (totalItemsWornRecursive == 0)
+            {
+                result += "1";
+            }
+            else if (totalItemsRecursive != totalItemsWornRecursive)
+            {
+                result += "2";
+            }
+            else
+            {
+                result += "3";
+            }
+
+            return result;
+        }
+
+        private string HandleGetInvWorn(string args)
+        {
+            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            {
+                return string.Empty;
+            }
+
+            var inventoryMap = new InventoryMap(sharedFolder);
+            var folders = new List<InventoryTree>();
+
+            var target = sharedFolder;
+            if (args.Length != 0)
+            {
+                if (!inventoryMap.TryGetFolderFromPath(args, out target))
+                {
+                    return string.Empty;
+                }
+            }
+
+            var resultItems = new List<InvWornInfoContainer>
+            {
+                new InvWornInfoContainer("", GetInvWornInfo(target))
+            };
+
+            var foldersInInv = target.Children
+                .Where(n => !n.Name.StartsWith("."));
+
+            foreach (var folder in foldersInInv)
+            {
+                var weirdItemCountThing = GetInvWornInfo(folder);
+                resultItems.Add(new InvWornInfoContainer(folder.Name, weirdItemCountThing));
+            }
+
+            var result = string.Join(",", resultItems);
+            return result;
+        }
+
+        private string HandleGetInv(string args)
+        {
+            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            {
+                return string.Empty;
+            }
+
+            var inventoryMap = new InventoryMap(sharedFolder);
+            var folders = new List<InventoryTree>();
+
+            var target = sharedFolder;
+            if (args.Length != 0)
+            {
+                if (!inventoryMap.TryGetFolderFromPath(args, out target))
+                {
+                    return string.Empty;
+                }
+            }
+
+            var foldersNamesInInv = target.Children
+                .Where(n => !n.Name.StartsWith("."))
+                .Select(n => n.Name);
+
+            var result = string.Join(",", foldersNamesInInv);
+            return result;
         }
 
         private string HandleGetPath(bool limitToOneResult, UUID? itemId, AttachmentPoint? attachmentPoint, WearableType? wearableType)

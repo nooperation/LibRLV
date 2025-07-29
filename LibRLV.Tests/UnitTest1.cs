@@ -45,11 +45,17 @@ namespace LibRLV.Tests
         {
             // #RLV
             //  |
+            //  |- .private
+            //  |
             //  |- Clothing
             //  |    |= Business Pants (attached to 'groin')
             //  |    |= Happy Shirt (attached to 'chest')
             //  |    |= Retro Pants (worn on 'pants')
             //  |    \-Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
             //  |        |= Fancy Hat (attached to 'chin')
             //  |        \= Party Hat (attached to 'groin')
             //   \-Accessories
@@ -81,6 +87,26 @@ namespace LibRLV.Tests
                 Id = new UUID("dddddddd-dddd-4ddd-8ddd-dddddddddddd"),
                 Name = "Hats",
                 Parent = clothingTree,
+                Children = new List<InventoryTree>(),
+                Items = new List<InventoryTree.InventoryItem>(),
+            };
+            clothingTree.Children.Add(hatsTree);
+
+            var subHatsTree = new InventoryTree
+            {
+                Id = new UUID("ffffffff-0000-4000-8000-000000000000"),
+                Name = "Sub Hats",
+                Parent = hatsTree,
+                Children = new List<InventoryTree>(),
+                Items = new List<InventoryTree.InventoryItem>(),
+            };
+            hatsTree.Children.Add(subHatsTree);
+
+            var privateTree = new InventoryTree
+            {
+                Id = new UUID("eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"),
+                Name = ".private",
+                Parent = root,
                 Children = new List<InventoryTree>(),
                 Items = new List<InventoryTree.InventoryItem>(),
             };
@@ -3786,7 +3812,87 @@ namespace LibRLV.Tests
         [Fact] public void CanSharedUnwear() => CheckSimpleCommand("sharedUnwear", m => m.CanSharedUnwear());
         #endregion
 
-        // @getinv[:folder1/.../folderN]=<channel_number>
+        #region @getinv[:folder1/.../folderN]=<channel_number>
+        [Fact]
+        public void GetInv()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "Clothing,Accessories"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getinv=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetInv_Subfolder()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "Sub Hats"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getinv:Clothing/Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetInv_Empty()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, ""),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getinv:Clothing/Hats/Sub Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetInv_Invalid()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, ""),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getinv:Invalid Folder=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.Equal(expected, actual);
+        }
+        #endregion
 
         // @getinvworn[:folder1/.../folderN]=<channel_number>
 

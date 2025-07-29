@@ -1,6 +1,7 @@
 ﻿using OpenMetaverse;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace LibRLV
 {
@@ -8,6 +9,7 @@ namespace LibRLV
     {
         public ImmutableDictionary<UUID, InventoryTree.InventoryItem> Items { get; }
         public ImmutableDictionary<UUID, InventoryTree> Folders { get; }
+        public InventoryTree Root { get; }
 
         public InventoryMap(InventoryTree root)
         {
@@ -15,8 +17,28 @@ namespace LibRLV
             var foldersTemp = new Dictionary<UUID, InventoryTree>();
             CreateInventoryMap(root, foldersTemp, itemsTemp);
 
+            Root = root;
             Items = itemsTemp.ToImmutableDictionary();
             Folders = foldersTemp.ToImmutableDictionary();
+        }
+
+        public bool TryGetFolderFromPath(string path, out InventoryTree folder)
+        {
+            var parts = path.Split('/');
+
+            var iter = Root;
+            foreach (var part in parts)
+            {
+                iter = iter.Children.FirstOrDefault(n => n.Name == part);
+                if(iter == null)
+                {
+                    folder = null;
+                    return false;
+                }
+            }
+
+            folder = iter;
+            return true;
         }
 
         public string BuildPathToFolder(UUID folderId)
