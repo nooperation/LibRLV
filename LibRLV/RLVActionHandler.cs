@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text.RegularExpressions;
 using static LibRLV.InventoryTree;
 
 namespace LibRLV
@@ -69,12 +68,12 @@ namespace LibRLV
                 { "detach", HandleRemAttach},
                 { "remattach", HandleRemAttach},
                 { "detachall", n => HandleInventoryThing(n, DetachAll)},
-                { "attachthis", n => HandleAttachmentThing(n, AttachThis)},
-                { "attachthisover", n => HandleAttachmentThing(n, AttachThisOver)},
-                { "attachthisoverorreplace", n => HandleAttachmentThing(n, AttachThisOverOrReplace)},
-                { "attachallthis", n => HandleAttachmentThing(n, AttachAllThis)},
-                { "attachallthisover", n => HandleAttachmentThing(n, AttachAllThisOver)},
-                { "attachallthisoverorreplace", n => HandleAttachmentThing(n, AttachAllThisOverOrReplace)},
+                { "attachthis", n => HandleAttachThis(n, true, false)},
+                { "attachthisover", n => HandleAttachThis(n, false, false)},
+                { "attachthisoverorreplace", n => HandleAttachThis(n, true, false)},
+                { "attachallthis", n => HandleAttachThis(n, true, true)},
+                { "attachallthisover", n => HandleAttachThis(n, false, true)},
+                { "attachallthisoverorreplace", n => HandleAttachThis(n, true, true)},
                 { "detachthis", n => HandleAttachmentThing(n, DetachThis)},
                 { "detachallthis", n => HandleAttachmentThing(n, DetachAllThis)},
                 { "setgroup", HandleSetGroup},
@@ -212,21 +211,27 @@ namespace LibRLV
 
             foreach (var item in folder.Items)
             {
-                if (item.Name.StartsWith("."))
+                if (item.AttachedTo != null || item.WornOn != null)
                 {
                     continue;
                 }
 
-                if (folderAttachmentPoint != null)
+                if (item.Name.StartsWith("."))
                 {
-                    itemsToAttach.Add(new AttachmentEventArgs.AttachmentRequest(item.Id, folderAttachmentPoint.Value, replaceExistingAttachments));
                     continue;
                 }
 
                 if (RLVCommon.TryGetAttachmentPointFromItemName(item.Name, out var attachmentPoint))
                 {
                     itemsToAttach.Add(new AttachmentEventArgs.AttachmentRequest(item.Id, attachmentPoint, replaceExistingAttachments));
-                    continue;
+                }
+                else if (folderAttachmentPoint != null)
+                {
+                    itemsToAttach.Add(new AttachmentEventArgs.AttachmentRequest(item.Id, folderAttachmentPoint.Value, replaceExistingAttachments));
+                }
+                else
+                {
+                    itemsToAttach.Add(new AttachmentEventArgs.AttachmentRequest(item.Id, AttachmentPoint.Default, replaceExistingAttachments));
                 }
             }
 
@@ -261,6 +266,157 @@ namespace LibRLV
 
             var itemsToAttach = new List<AttachmentEventArgs.AttachmentRequest>();
             CollectItemsToAttach(folder, replaceExistingAttachments, recursive, itemsToAttach);
+
+            Attach?.Invoke(this, new AttachmentEventArgs(itemsToAttach));
+            return true;
+        }
+
+        // TODO: This is copy-pasted from RLVGetHandler::HandleGetPath - This logic needs to be shared somewhere
+        private class FolderPaths
+        {
+            public InventoryTree Folder { get; set; }
+            public string SharedPath { get; set; }
+        }
+        private List<FolderPaths> GetPath_Internal(bool limitToOneResult, UUID? itemId, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        {
+            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            {
+                return new List<FolderPaths>();
+            }
+
+            var inventoryMap = new InventoryMap(sharedFolder);
+            var folders = new List<FolderPaths>();
+
+            if (itemId != null)
+            {
+                if (!inventoryMap.Items.TryGetValue(itemId.Value, out var item))
+                {
+                    return new List<FolderPaths>();
+                }
+
+                if (!inventoryMap.Folders.TryGetValue(item.FolderId, out var folder))
+                {
+                    return new List<FolderPaths>();
+                }
+
+                folders.Add(new FolderPaths()
+                {
+                    Folder = folder,
+                    SharedPath = ""
+                });
+            }
+            else if (attachmentPoint != null)
+            {
+                var folderIds = inventoryMap.Items.Values
+                    .Where(n => n.AttachedTo == attachmentPoint)
+                    .Select(n => n.FolderId)
+                    .Distinct()
+                    .ToList();
+
+                var foundFolders = inventoryMap
+                    .Folders
+                    .Where(n => folderIds.Contains(n.Key))
+                    .Select(n => n.Value);
+
+                if (limitToOneResult)
+                {
+                    var foundFolder = foundFolders.FirstOrDefault();
+                    if (foundFolder != null)
+                    {
+                        folders.Add(new FolderPaths()
+                        {
+                            Folder = foundFolder,
+                            SharedPath = ""
+                        });
+                    }
+                }
+                else
+                {
+                    folders.AddRange(foundFolders.Select(n => new FolderPaths()
+                    {
+                        Folder = n,
+                        SharedPath = ""
+                    }));
+                }
+            }
+            else if (wearableType != null)
+            {
+                var folderIds = inventoryMap.Items.Values
+                    .Where(n => n.WornOn == wearableType)
+                    .Select(n => n.FolderId)
+                    .Distinct()
+                    .ToList();
+
+                var foundFolders = inventoryMap
+                    .Folders
+                    .Where(n => folderIds.Contains(n.Key))
+                    .Select(n => n.Value);
+
+                if (limitToOneResult)
+                {
+                    var foundFolder = foundFolders.FirstOrDefault();
+                    if (foundFolder != null)
+                    {
+                        folders.Add(new FolderPaths()
+                        {
+                            Folder = foundFolder,
+                            SharedPath = ""
+                        });
+                    }
+                }
+                else
+                {
+                    folders.AddRange(foundFolders.Select(n => new FolderPaths()
+                    {
+                        Folder = n,
+                        SharedPath = ""
+                    }));
+                }
+            }
+
+            foreach (var item in folders)
+            {
+                item.SharedPath = inventoryMap.BuildPathToFolder(item.Folder.Id);
+            }
+
+            return folders;
+        }
+
+        private bool HandleAttachThis(RLVMessage command, bool replaceExistingAttachments, bool recursive)
+        {
+            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            {
+                return false;
+            }
+            var inventoryMap = new InventoryMap(sharedFolder);
+            var folderPaths = new List<InventoryTree>();
+
+            if (RLVCommon.RLVWearableTypeMap.TryGetValue(command.Option, out var wearableType))
+            {
+                var parts = GetPath_Internal(false, null, null, wearableType);
+                folderPaths.AddRange(parts.Select(n => n.Folder));
+            }
+            if (RLVCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
+            {
+                var parts = GetPath_Internal(false, null, attachmentPoint, null);
+                folderPaths.AddRange(parts.Select(n => n.Folder));
+            }
+            else if (inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
+            {
+                folderPaths.Add(folder);
+            }
+            else if (command.Option.Length == 0)
+            {
+                var parts = GetPath_Internal(false, command.Sender, null, null);
+                folderPaths.AddRange(parts.Select(n => n.Folder));
+            }
+
+            var itemsToAttach = new List<AttachmentEventArgs.AttachmentRequest>();
+
+            foreach (var item in folderPaths)
+            {
+                CollectItemsToAttach(item, replaceExistingAttachments, recursive, itemsToAttach);
+            }
 
             Attach?.Invoke(this, new AttachmentEventArgs(itemsToAttach));
             return true;
