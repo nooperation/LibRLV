@@ -63,9 +63,9 @@ namespace LibRLV
                 { "attach", n => HandleAttach(n, true, false)},
                 { "attachover", n => HandleAttach(n, false, false)},
                 { "attachoverorreplace", n => HandleAttach(n, true, false)},
-                { "attachall", n => HandleInventoryThing(n, AttachAll)},
-                { "attachallover", n => HandleInventoryThing(n, AttachAll)},
-                { "attachalloverorreplace", n => HandleInventoryThing(n, AttachAllOverOrReplace)},
+                { "attachall", n => HandleAttach(n, true, true)},
+                { "attachallover", n => HandleAttach(n, false, true)},
+                { "attachalloverorreplace", n => HandleAttach(n, true, true)},
                 { "detach", HandleRemAttach},
                 { "remattach", HandleRemAttach},
                 { "detachall", n => HandleInventoryThing(n, DetachAll)},
@@ -197,19 +197,12 @@ namespace LibRLV
             return true;
         }
 
-        // @attach:[folder]=force
-        private bool HandleAttach(RLVMessage command, bool replaceExistingAttachments, bool recursive)
+        private void CollectItemsToAttach(InventoryTree folder, bool replaceExistingAttachments, bool recursive, List<AttachmentEventArgs.AttachmentRequest> itemsToAttach)
         {
-            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            AttachmentPoint? folderAttachmentPoint = null;
+            if (RLVCommon.TryGetAttachmentPointFromItemName(folder.Name, out var attachmentPointTemp))
             {
-                return false;
-            }
-            var inventoryMap = new InventoryMap(sharedFolder);
-
-            if (!inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
-            {
-                Attach?.Invoke(this, new AttachmentEventArgs(new List<AttachmentEventArgs.AttachmentRequest>()));
-                return false;
+                folderAttachmentPoint = attachmentPointTemp;
             }
 
             if (folder.Name.StartsWith("+"))
@@ -217,13 +210,6 @@ namespace LibRLV
                 replaceExistingAttachments = false;
             }
 
-            AttachmentPoint? folderAttachmentPoint = null;
-            if (RLVCommon.TryGetAttachmentPointFromItemName(folder.Name, out var attachmentPointTemp))
-            {
-                folderAttachmentPoint = attachmentPointTemp;
-            }
-
-            var itemsToAttach = new List<AttachmentEventArgs.AttachmentRequest>();
             foreach (var item in folder.Items)
             {
                 if (item.Name.StartsWith("."))
@@ -243,6 +229,38 @@ namespace LibRLV
                     continue;
                 }
             }
+
+            if (recursive)
+            {
+                foreach (var child in folder.Children)
+                {
+                    if (child.Name.StartsWith("."))
+                    {
+                        continue;
+                    }
+
+                    CollectItemsToAttach(child, replaceExistingAttachments, recursive, itemsToAttach);
+                }
+            }
+        }
+
+        // @attach:[folder]=force
+        private bool HandleAttach(RLVMessage command, bool replaceExistingAttachments, bool recursive)
+        {
+            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            {
+                return false;
+            }
+            var inventoryMap = new InventoryMap(sharedFolder);
+
+            if (!inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
+            {
+                Attach?.Invoke(this, new AttachmentEventArgs(new List<AttachmentEventArgs.AttachmentRequest>()));
+                return false;
+            }
+
+            var itemsToAttach = new List<AttachmentEventArgs.AttachmentRequest>();
+            CollectItemsToAttach(folder, replaceExistingAttachments, recursive, itemsToAttach);
 
             Attach?.Invoke(this, new AttachmentEventArgs(itemsToAttach));
             return true;
