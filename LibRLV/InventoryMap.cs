@@ -22,13 +22,19 @@ namespace LibRLV
             Folders = foldersTemp.ToImmutableDictionary();
         }
 
-        public bool TryGetFolderFromPath(string path, out InventoryTree folder)
+        public bool TryGetFolderFromPath(string path, bool skipPrivateFolders, out InventoryTree folder)
         {
             var parts = path.Split('/');
 
             var iter = Root;
             foreach (var part in parts)
             {
+                if (skipPrivateFolders && part.StartsWith("."))
+                {
+                    folder = null;
+                    return false;
+                }
+
                 iter = iter.Children.FirstOrDefault(n => n.Name == part);
                 if (iter == null)
                 {

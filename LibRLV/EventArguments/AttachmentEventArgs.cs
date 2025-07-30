@@ -1,25 +1,43 @@
 ﻿using OpenMetaverse;
 using System;
+using System.Collections.Generic;
 
 namespace LibRLV.EventArguments
 {
     public class AttachmentEventArgs : EventArgs
     {
-        public AttachmentEventArgs(string attachmentPointOrClothingLayer)
+        public class AttachmentRequest
         {
-            if (UUID.TryParse(attachmentPointOrClothingLayer, out UUID uuid))
+            public UUID ItemId { get; set; }
+            public AttachmentPoint AttachmentPoint { get; set; }
+            public bool ReplaceExistingAttachments { get; set; }
+
+            public AttachmentRequest(UUID itemId, AttachmentPoint attachmentPoint, bool replaceExistingAttachments)
             {
-                this.ItemId = uuid;
-                this.AttachmentPointOrClothingLayer = null;
+                this.ItemId = itemId;
+                this.AttachmentPoint = attachmentPoint;
+                this.ReplaceExistingAttachments = replaceExistingAttachments;
             }
-            else
+
+            public override bool Equals(object obj)
             {
-                this.ItemId = null;
-                this.AttachmentPointOrClothingLayer = attachmentPointOrClothingLayer;
+                return obj is AttachmentRequest request &&
+                       this.ItemId.Equals(request.ItemId) &&
+                       this.AttachmentPoint == request.AttachmentPoint &&
+                       this.ReplaceExistingAttachments == request.ReplaceExistingAttachments;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(this.ItemId, this.AttachmentPoint, this.ReplaceExistingAttachments);
             }
         }
 
-        public UUID? ItemId { get; }
-        public string AttachmentPointOrClothingLayer { get; }
+        public AttachmentEventArgs(List<AttachmentRequest> itemsToAttach)
+        {
+            this.ItemsToAttach = itemsToAttach;
+        }
+
+        public List<AttachmentRequest> ItemsToAttach { get; set; }
     }
 }

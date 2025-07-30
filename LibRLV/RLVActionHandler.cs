@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.RegularExpressions;
 using static LibRLV.InventoryTree;
 
 namespace LibRLV
@@ -21,7 +22,7 @@ namespace LibRLV
         public event EventHandler SitGround;
         public event EventHandler<RemOutfitEventArgs> RemOutfit;
         public event EventHandler DetachMe;
-        public event EventHandler<InventoryPathEventArgs> Attach;
+        public event EventHandler<AttachmentEventArgs> Attach;
         public event EventHandler<InventoryPathEventArgs> AttachOver;
         public event EventHandler<InventoryPathEventArgs> AttachAll;
         public event EventHandler<InventoryPathEventArgs> AttachAllOverOrReplace;
@@ -59,9 +60,9 @@ namespace LibRLV
                 { "sitground", HandleSitGround},
                 { "remoutfit", HandleRemOutfit},
                 { "detachme", HandleDetachMe},
-                { "attach", n => HandleInventoryThing(n, Attach)},
-                { "attachover", n => HandleInventoryThing(n, AttachOver)},
-                { "attachoverorreplace", n => HandleInventoryThing(n, AttachOver)},
+                { "attach", n => HandleAttach(n, true, false)},
+                { "attachover", n => HandleAttach(n, false, false)},
+                { "attachoverorreplace", n => HandleAttach(n, true, false)},
                 { "attachall", n => HandleInventoryThing(n, AttachAll)},
                 { "attachallover", n => HandleInventoryThing(n, AttachAll)},
                 { "attachalloverorreplace", n => HandleInventoryThing(n, AttachAllOverOrReplace)},
@@ -160,13 +161,13 @@ namespace LibRLV
 
         private bool HandleAttachmentThing(RLVMessage command, EventHandler<AttachmentEventArgs> handler)
         {
-            handler?.Invoke(this, new AttachmentEventArgs(command.Option));
+            //handler?.Invoke(this, new AttachmentEventArgs(command.Option));
             return true;
         }
 
-        private bool CanRemAttachItem(InventoryItem item, InventoryMap inventoryMap)
+        private bool CanRemAttachItem(InventoryItem item, InventoryMap inventoryMap, bool enforceNostrip)
         {
-            if (item.Name.ToLower().Contains("nostrip"))
+            if (enforceNostrip && item.Name.ToLower().Contains("nostrip"))
             {
                 return false;
             }
@@ -175,7 +176,7 @@ namespace LibRLV
             {
                 while (folder != null)
                 {
-                    if (folder.Name.Contains("nostrip"))
+                    if (enforceNostrip && folder.Name.Contains("nostrip"))
                     {
                         return false;
                     }
@@ -193,6 +194,57 @@ namespace LibRLV
                 return false;
             }
 
+            return true;
+        }
+
+        // @attach:[folder]=force
+        private bool HandleAttach(RLVMessage command, bool replaceExistingAttachments, bool recursive)
+        {
+            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            {
+                return false;
+            }
+            var inventoryMap = new InventoryMap(sharedFolder);
+
+            if (!inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
+            {
+                Attach?.Invoke(this, new AttachmentEventArgs(new List<AttachmentEventArgs.AttachmentRequest>()));
+                return false;
+            }
+
+            if (folder.Name.StartsWith("+"))
+            {
+                replaceExistingAttachments = false;
+            }
+
+            AttachmentPoint? folderAttachmentPoint = null;
+            if (RLVCommon.TryGetAttachmentPointFromItemName(folder.Name, out var attachmentPointTemp))
+            {
+                folderAttachmentPoint = attachmentPointTemp;
+            }
+
+            var itemsToAttach = new List<AttachmentEventArgs.AttachmentRequest>();
+            foreach (var item in folder.Items)
+            {
+                if (item.Name.StartsWith("."))
+                {
+                    continue;
+                }
+
+                if (folderAttachmentPoint != null)
+                {
+                    itemsToAttach.Add(new AttachmentEventArgs.AttachmentRequest(item.Id, folderAttachmentPoint.Value, replaceExistingAttachments));
+                    continue;
+                }
+
+                if (RLVCommon.TryGetAttachmentPointFromItemName(item.Name, out var attachmentPoint))
+                {
+                    itemsToAttach.Add(new AttachmentEventArgs.AttachmentRequest(item.Id, attachmentPoint, replaceExistingAttachments));
+                    continue;
+                }
+            }
+
+            Attach?.Invoke(this, new AttachmentEventArgs(itemsToAttach));
             return true;
         }
 
@@ -218,7 +270,7 @@ namespace LibRLV
             {
                 attachmentPoint = attachmentPointTemp;
             }
-            else if (inventoryMap.TryGetFolderFromPath(command.Option, out var folderTemp))
+            else if (inventoryMap.TryGetFolderFromPath(command.Option, true, out var folderTemp))
             {
                 folderId = folderTemp.Id;
             }
@@ -233,7 +285,7 @@ namespace LibRLV
                     (uuid == null || n.Value.Id == uuid) &&
                     (attachmentPoint == null || n.Value.AttachedTo == attachmentPoint) &&
                     (folderId == null || n.Value.FolderId == folderId) &&
-                    CanRemAttachItem(n.Value, inventoryMap)
+                    CanRemAttachItem(n.Value, inventoryMap, true)
                 )
                 .Select(n => n.Value)
                 .ToList();
@@ -242,6 +294,28 @@ namespace LibRLV
                 .Select(n => n.Id)
                 .Distinct()
                 .ToList();
+
+            Detach?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
+            return true;
+        }
+
+        // @detachme=force
+        private bool HandleDetachMe(RLVMessage command)
+        {
+            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            {
+                return false;
+            }
+            var inventoryMap = new InventoryMap(sharedFolder);
+
+            var itemIdsToDetach = new List<UUID>();
+            if (inventoryMap.Items.TryGetValue(command.Sender, out var sender))
+            {
+                if (CanRemAttachItem(sender, inventoryMap, false))
+                {
+                    itemIdsToDetach.Add(sender.Id);
+                }
+            }
 
             Detach?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
             return true;
@@ -264,7 +338,7 @@ namespace LibRLV
             {
                 wearableType = wearableTypeTemp;
             }
-            else if (inventoryMap.TryGetFolderFromPath(command.Option, out var folder))
+            else if (inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
             {
                 folderId = folder.Id;
             }
@@ -278,7 +352,7 @@ namespace LibRLV
                     n.Value.WornOn != null &&
                     (folderId == null || n.Value.FolderId == folderId) &&
                     (wearableType == null || n.Value.WornOn == wearableType) &&
-                    CanRemAttachItem(n.Value, inventoryMap)
+                    CanRemAttachItem(n.Value, inventoryMap, true)
                 )
                 .Select(n => n.Value)
                 .ToList();
@@ -311,12 +385,6 @@ namespace LibRLV
             }
 
             SitGround?.Invoke(this, new EventArgs());
-            return true;
-        }
-
-        private bool HandleDetachMe(RLVMessage command)
-        {
-            DetachMe?.Invoke(this, new EventArgs());
             return true;
         }
 

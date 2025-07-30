@@ -485,7 +485,7 @@ namespace LibRLV
             var target = sharedFolder;
             if (args.Length != 0)
             {
-                if (!inventoryMap.TryGetFolderFromPath(args, out target))
+                if (!inventoryMap.TryGetFolderFromPath(args, true, out target))
                 {
                     return string.Empty;
                 }
@@ -571,7 +571,7 @@ namespace LibRLV
             var target = sharedFolder;
             if (args.Length != 0)
             {
-                if (!inventoryMap.TryGetFolderFromPath(args, out target))
+                if (!inventoryMap.TryGetFolderFromPath(args, true, out target))
                 {
                     return string.Empty;
                 }

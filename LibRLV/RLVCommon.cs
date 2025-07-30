@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace LibRLV
 {
@@ -70,6 +72,7 @@ namespace LibRLV
             {"bottom right", AttachmentPoint.HUDBottomRight},
             {"neck", AttachmentPoint.Neck},
             {"root", AttachmentPoint.Root},
+            {"avatar center", AttachmentPoint.Root}, // RLV hack
             {"left ring finger", AttachmentPoint.LeftHandRing},
             {"right ring finger", AttachmentPoint.RightHandRing},
             {"tail base", AttachmentPoint.TailBase},
@@ -86,7 +89,6 @@ namespace LibRLV
             {"left hind foot", AttachmentPoint.LeftHindFoot},
             {"right hind foot", AttachmentPoint.RightHindFoot},
         }.ToImmutableDictionary();
-
 
         public static List<object> ParseOptions(string options)
         {
@@ -127,6 +129,32 @@ namespace LibRLV
             }
 
             return result;
+        }
+
+        private static readonly Regex _attachmentPointTagRegex = new Regex(@"\((?<tag>[^\)]+)\)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        public static bool TryGetAttachmentPointFromItemName(string itemName, out AttachmentPoint attachmentPoint)
+        {
+            // TODO: There's a lot of odd logic in the original RLV method for finding the attachment point.
+            //       I'm not doing any of that outside of "Use the exact matching tag. if multiple tags exist, use
+            //       the tag near the end of the string"
+
+            var attachmentPointTag = _attachmentPointTagRegex
+                .Matches(itemName.ToLower())
+                .Cast<Match>()
+                .Where(n => n.Success && n.Groups["tag"].Success)
+                .Select(n => n.Groups["tag"].Value)
+                .ToList();
+
+            for (int i = attachmentPointTag.Count - 1; i >= 0; i--)
+            {
+                if (RLVAttachmentPointMap.TryGetValue(attachmentPointTag[i], out attachmentPoint))
+                {
+                    return true;
+                }
+            }
+
+            attachmentPoint = AttachmentPoint.Default;
+            return false;
         }
     }
 }
