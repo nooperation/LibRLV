@@ -14,6 +14,7 @@ namespace LibRLV
             { "notify", RLVRestrictionType.Notify }, // Not a restriction - move to internal use
             { "permissive", RLVRestrictionType.Permissive }, // Not a restriction - exception to a restriction will be ignored if it is not issued by the same object that issued the restriction
             { "fly", RLVRestrictionType.Fly },
+            { "jump", RLVRestrictionType.Jump },
             { "temprun", RLVRestrictionType.TempRun },
             { "alwaysrun", RLVRestrictionType.AlwaysRun },
             { "camzoommax", RLVRestrictionType.CamZoomMax },

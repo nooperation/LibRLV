@@ -5,6 +5,7 @@
         Notify,
         Permissive,
         Fly,
+        Jump,
         TempRun,
         AlwaysRun,
         CamZoomMax,

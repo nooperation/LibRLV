@@ -80,6 +80,11 @@ namespace LibRLV
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Fly).Any();
         }
+
+        public bool CanJump()
+        {
+            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Jump).Any();
+        }
         public bool CanTempRun()
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.TempRun).Any();

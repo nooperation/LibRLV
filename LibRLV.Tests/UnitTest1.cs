@@ -21,6 +21,64 @@ namespace LibRLV.Tests
             _rlv = new RLV(_callbacks.Object, true);
         }
 
+        #region RLVA
+        //
+        // RLVA stuff to implement
+        //
+
+        // @getattachnames[:<grp>]=<channel>
+        // @getaddattachnames[:<grp>]=<channel>
+        // @getremattachnames[:<grp>]=<channel>
+        // @getoutfitnames=<channel>
+        // @getaddoutfitnames=<channel>
+        // @getremoutfitnames=<channel>
+
+        // @fly:[true|false]=force
+
+        // @setcam_eyeoffset[:<vector3>]=force,
+        // @setcam_eyeoffsetscale[:<float>]=force
+        // @setcam_focusoffset[:<vector3>]=force
+        // @setcam_focus:<uuid>[;<dist>[;<direction>]]=force
+        // @setcam_mode[:<option>]=force
+
+        // @setcam_focusoffset:<vector3>=n|y
+        // @setcam_eyeoffset:<vector3>=n|y
+        // @setcam_eyeoffsetscale:<float>=n|y
+        // @setcam_mouselook=n|y
+        // @setcam=n|y
+
+        // @getcam_avdist=<channel>
+        // @getcam_textures=<channel>
+
+
+        // @setoverlay_tween:[<alpha>];[<tint>];<duration>=force
+        // @setoverlay=n|y
+        // @setoverlay_touch=n
+        // @setsphere=n|y
+
+        // @getcommand[:<behaviour>[;<type>[;<separator>]]]=<channel>
+        // @getheightoffset=<channel>
+
+        // @buy=n|y
+        // @pay=n|y
+
+        // @showself=n|y
+        // @showselfhead=n|y 
+        // @viewtransparent=n|y
+        // @viewwireframe=n|y
+
+
+        // Probably don't care about/not going to touch:
+        //  @bhvr=n|y
+        //  @bhvr:<uuid>=n|y
+        //  @bhvr[:<uuid>]=n|y
+        //  @bhvr:<modifier>=n|y
+        //  @bhvr:<global modifier>=n|y
+        //  @bhvr:<local modifier>=force
+        //  @bhvr:<modifier>=force
+        #endregion
+
+
         #region Utilities
         private void CheckSimpleCommand(string cmd, Func<RLVManager, bool> canFunc)
         {
@@ -949,6 +1007,14 @@ namespace LibRLV.Tests
         public void CanFly()
         {
             CheckSimpleCommand("fly", m => m.CanFly());
+        }
+        #endregion
+
+        #region @jump (RLVa)
+        [Fact]
+        public void CanJump()
+        {
+            CheckSimpleCommand("jump", m => m.CanJump());
         }
         #endregion
 
@@ -3118,7 +3184,7 @@ namespace LibRLV.Tests
         }
         #endregion
 
-        #region @sit FORCE
+        #region @sit:<uuid>=force
         private void SetObjectExists(UUID objectId, bool isCurrentlySitting)
         {
             _callbacks.Setup(e =>
@@ -3305,6 +3371,7 @@ namespace LibRLV.Tests
         [Fact]
         public void ForceSitGround()
         {
+            // TODO: Check reaction
             Assert.True(_rlv.ProcessMessage("@sitground=force", _sender.Id, _sender.Name));
         }
 
@@ -3812,12 +3879,6 @@ namespace LibRLV.Tests
         #endregion
 
         // TODO: There's a ton of undocumented RLVa stuff we need to implement, not just these
-        //  getoutfitnames
-        //  getaddoutfitnames
-        //  getremoutfitnames
-        //  getattachnames
-        //  getaddattachnames
-        //  getremattachnames
 
         #region @getattach[:attachpt]=<channel_number>
         [Fact]
@@ -7539,7 +7600,7 @@ namespace LibRLV.Tests
         #endregion
 
         #region @shownametags[:uuid]=<y/n>
-
+        // TODO: Add distance to option
         [Fact]
         public void CanShowNameTags_Default()
         {
@@ -7693,7 +7754,7 @@ namespace LibRLV.Tests
         // Group
         //
 
-        #region @setgroup:<group_name>=force
+        #region @setgroup:<uuid|group_name>[;<role>]=force
 
         [Fact]
         public void SetGroup_ByName()
@@ -7705,6 +7766,22 @@ namespace LibRLV.Tests
             );
 
             Assert.Equal("Group Name", raised.Arguments.GroupName);
+            Assert.Equal(UUID.Zero, raised.Arguments.GroupId);
+            Assert.Equal(string.Empty, raised.Arguments.Role);
+        }
+
+        [Fact]
+        public void SetGroup_ByNameAndRole()
+        {
+            var raised = Assert.Raises<SetGroupEventArgs>(
+                 attach: n => _rlv.Actions.SetGroup += n,
+                 detach: n => _rlv.Actions.SetGroup -= n,
+                 testCode: () => _rlv.ProcessMessage("@setgroup:Group Name;Admin Role=force", _sender.Id, _sender.Name)
+            );
+
+            Assert.Equal("Group Name", raised.Arguments.GroupName);
+            Assert.Equal("Admin Role", raised.Arguments.Role);
+            Assert.Equal(UUID.Zero, raised.Arguments.GroupId);
         }
 
         [Fact]
@@ -7720,6 +7797,7 @@ namespace LibRLV.Tests
 
             Assert.Equal(string.Empty, raised.Arguments.GroupName);
             Assert.Equal(objectId1, raised.Arguments.GroupId);
+            Assert.Equal(string.Empty, raised.Arguments.Role);
         }
 
         #endregion

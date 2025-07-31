@@ -59,18 +59,6 @@ namespace LibRLV
                 { "sitground", HandleSitGround},
                 { "remoutfit", HandleRemOutfit},
                 { "detachme", HandleDetachMe},
-                { "attach", n => HandleAttach(n, true, false)},
-                { "attachover", n => HandleAttach(n, false, false)},
-                { "attachoverorreplace", n => HandleAttach(n, true, false)},
-                { "attachall", n => HandleAttach(n, true, true)},
-                { "attachallover", n => HandleAttach(n, false, true)},
-                { "attachalloverorreplace", n => HandleAttach(n, true, true)},
-                { "attachthis", n => HandleAttachThis(n, true, false)},
-                { "attachthisover", n => HandleAttachThis(n, false, false)},
-                { "attachthisoverorreplace", n => HandleAttachThis(n, true, false)},
-                { "attachallthis", n => HandleAttachThis(n, true, true)},
-                { "attachallthisover", n => HandleAttachThis(n, false, true)},
-                { "attachallthisoverorreplace", n => HandleAttachThis(n, true, true)},
                 { "remattach", HandleRemAttach},
                 { "detach", HandleRemAttach},
                 { "detachall", n => HandleDetachAll(n)},
@@ -79,6 +67,33 @@ namespace LibRLV
                 { "setgroup", HandleSetGroup},
                 { "setdebug_", HandleSetDebug},
                 { "setenv_", HandleSetEnv},
+
+                { "attach", n => HandleAttach(n, true, false)},
+                { "attachall", n => HandleAttach(n, true, true)},
+                { "attachover", n => HandleAttach(n, false, false)},
+                { "attachallover", n => HandleAttach(n, false, true)},
+                { "attachthis", n => HandleAttachThis(n, true, false)},
+                { "attachallthis", n => HandleAttachThis(n, true, true)},
+                { "attachthisover", n => HandleAttachThis(n, false, false)},
+                { "attachallthisover", n => HandleAttachThis(n, false, true)},
+
+                // addoutfit* -> attach* (These are all aliases of their corresponding attach command)
+                { "addoutfit", n => HandleAttach(n, true, false)},
+                { "addoutfitall", n => HandleAttach(n, true, true)},
+                { "addoutfitover", n => HandleAttach(n, false, false)},
+                { "addoutfitallover", n => HandleAttach(n, false, true)},
+                { "addoutfitthis", n => HandleAttachThis(n, true, false)},
+                { "addoutfitallthis", n => HandleAttachThis(n, true, true)},
+                { "addoutfitthisover", n => HandleAttachThis(n, false, false)},
+                { "addoutfitallthisover", n => HandleAttachThis(n, false, true)},
+
+                // *overorreplace -> *  (These are all aliases of their corresponding attach command)
+                { "attachoverorreplace", n => HandleAttach(n, true, false)},
+                { "attachalloverorreplace", n => HandleAttach(n, true, true)},
+                { "attachthisoverorreplace", n => HandleAttachThis(n, true, false)},
+                { "attachallthisoverorreplace", n => HandleAttachThis(n, true, true)},
+
+
             }.ToImmutableDictionary();
         }
 
@@ -140,13 +155,25 @@ namespace LibRLV
 
         private bool HandleSetGroup(RLVMessage command)
         {
-            if (UUID.TryParse(command.Option, out var groupId))
+            var argParts = command.Option.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (argParts.Length == 0)
             {
-                SetGroup?.Invoke(this, new SetGroupEventArgs(groupId));
+                return false;
+            }
+
+            var groupRole = string.Empty;
+            if (argParts.Length > 1)
+            {
+                groupRole = argParts[1];
+            }
+
+            if (UUID.TryParse(argParts[0], out var groupId))
+            {
+                SetGroup?.Invoke(this, new SetGroupEventArgs(groupId, groupRole));
             }
             else
             {
-                SetGroup?.Invoke(this, new SetGroupEventArgs(command.Option));
+                SetGroup?.Invoke(this, new SetGroupEventArgs(argParts[0], groupRole));
             }
 
             return true;

@@ -442,6 +442,7 @@ namespace LibRLV
                 case RLVRestrictionType.TpRequestSec:       // CanTpRequest
                 case RLVRestrictionType.ShareSec:           // CanShare
                 case RLVRestrictionType.Fly:                // CanFly
+                case RLVRestrictionType.Jump:               // CanJump
                 case RLVRestrictionType.TempRun:            // CanTempRun
                 case RLVRestrictionType.AlwaysRun:          // CanAlwaysRun
                 case RLVRestrictionType.CamUnlock:          // CanCamUnlock
