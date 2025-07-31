@@ -5135,8 +5135,144 @@ namespace LibRLV.Tests
             Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
         }
 
-        [Fact]
-        public void AttachThis_AttachPoint()
+        [Theory]
+        [InlineData("attachthis")]
+        [InlineData("attachthisoverorreplace")]
+        [InlineData("attachthisover")]
+        public void AttachThis_FolderNameSpecifiesToAddInsteadOfReplace(string command)
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
+            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
+            sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = null;
+            sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = null;
+            sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = null;
+            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
+            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
+
+            sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name = "Business Pants (groin)";
+            sampleTree.Root_Clothing_HappyShirt_AttachChest.Name = "Happy Shirt (Spine)";
+            sampleTree.Root_Clothing_RetroPants_WornPants.Name = "Worn Pants";
+
+            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
+            clothingFolder.Name = "+clothing";
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<AttachmentEventArgs>(
+                 attach: n => _rlv.Actions.Attach += n,
+                 detach: n => _rlv.Actions.Attach -= n,
+                 testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name)
+            );
+
+            // Attach everything in #RLV/+clothing because that's where the source item (business pants) is calling @attachthis
+            //   from, but use 'add-to' logic instead of 'replace' logic
+            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            {
+                new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, AttachmentPoint.Groin, false),
+                new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, AttachmentPoint.Spine, false),
+                new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, AttachmentPoint.Default, false),
+            }.OrderBy(n => n.ItemId);
+
+            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+        }
+
+        [Theory]
+        [InlineData("attachthis", true)]
+        [InlineData("attachthisoverorreplace", true)]
+        [InlineData("attachthisover", false)]
+        public void AttachThis_FolderNameSpecifiesAttachmentPoint(string command, bool replaceExistingAttachments)
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
+            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
+            sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = null;
+            sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = null;
+            sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = null;
+            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
+            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
+
+            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name = "Fancy Hat (chin)";
+            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat";
+
+            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
+            var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
+            hatsFolder.Name = "(skull) hats";
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<AttachmentEventArgs>(
+                 attach: n => _rlv.Actions.Attach += n,
+                 detach: n => _rlv.Actions.Attach -= n,
+                 testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name)
+            );
+
+            // Attach everything in #RLV/Clothing/+Hats because that's where the source item (fancy hat) is calling @attachthis
+            //   from, but attach "party hat" to the skull because it doesn't specify an attachment point but the folder name does
+            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            {
+                new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Chin, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, AttachmentPoint.Skull, replaceExistingAttachments),
+            }.OrderBy(n => n.ItemId);
+
+            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+        }
+
+        [Theory]
+        [InlineData("attachthis")]
+        [InlineData("attachthisoverorreplace")]
+        [InlineData("attachthisover")]
+        public void AttachThis_FromHiddenSubfolder(string command)
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
+            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
+            sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = null;
+            sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = null;
+            sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = null;
+            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
+            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
+
+            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name = "Fancy Hat (chin)";
+            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (Spine)";
+
+            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
+            var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
+            hatsFolder.Name = ".hats";
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<AttachmentEventArgs>(
+                 attach: n => _rlv.Actions.Attach += n,
+                 detach: n => _rlv.Actions.Attach -= n,
+                 testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name)
+            );
+
+            // Nothing from ./Clothing/.Hats is worn because it's private, even though the sender exists in this folder
+            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            {
+            }.OrderBy(n => n.ItemId);
+
+            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+        }
+
+        [Theory]
+        [InlineData("attachthis", true)]
+        [InlineData("attachthisoverorreplace", true)]
+        [InlineData("attachthisover", false)]
+        public void AttachThis_AttachPoint(string command, bool replaceExistingAttachments)
         {
             // #RLV
             //  |
@@ -5185,7 +5321,7 @@ namespace LibRLV.Tests
             var raised = Assert.Raises<AttachmentEventArgs>(
                  attach: n => _rlv.Actions.Attach += n,
                  detach: n => _rlv.Actions.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@attachthis:spine=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name)
+                 testCode: () => _rlv.ProcessMessage($"@{command}:spine=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name)
             );
 
             // Attach happy shirt because it's in the same folder as our business pants (attached to spine).
@@ -5194,16 +5330,74 @@ namespace LibRLV.Tests
             // Don't attach BusinessPants or PartyHat because they are already attached
             var expected = new List<AttachmentEventArgs.AttachmentRequest>()
             {
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_RetroPants_WornPants.Id, AttachmentPoint.Default, true),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, AttachmentPoint.Chest, true),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Chin, true),
+                new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, AttachmentPoint.Default, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, AttachmentPoint.Chest, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Chin, replaceExistingAttachments),
             }.OrderBy(n => n.ItemId);
 
             Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
         }
 
+        [Theory]
+        [InlineData("attachthis", true)]
+        [InlineData("attachthisoverorreplace", true)]
+        [InlineData("attachthisover", false)]
+        public void AttachThis_WearableType(string command, bool replaceExistingAttachments)
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants (attached to 'groin')
+            //  |    |= Happy Shirt (attached to 'chest')
+            //  |    |= Retro Pants (worn on 'pants')
+            //  |    \-Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached to 'chin')
+            //  |        \= Party Hat (attached to 'groin')
+            //   \-Accessories
+            //        |= Watch (worn on 'tattoo')
+            //        \= Glasses (attached to 'chin')
 
-        // @attachthisoverorreplace @attachthisover[:<attachpt> or <clothing_layer>]=force
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
+            sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = null;
+            sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = null;
+            sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = null;
+            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
+
+            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Tattoo;
+            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = WearableType.Tattoo;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<AttachmentEventArgs>(
+                 attach: n => _rlv.Actions.Attach += n,
+                 detach: n => _rlv.Actions.Attach -= n,
+                 testCode: () => _rlv.ProcessMessage($"@{command}:tattoo=force", _sender.Id, _sender.Name)
+            );
+
+            // We are currently wearing Tattoo items in "./Clothing" and "./Accessories". Wear everything from these two folders
+            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            {
+                new(sampleTree.Root_Accessories_Glasses_AttachChin.Id, AttachmentPoint.Default, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, AttachmentPoint.Default, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, AttachmentPoint.Default, replaceExistingAttachments),
+            }.OrderBy(n => n.ItemId);
+
+            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+        }
+        #endregion
+
+        // 
 
         // @attachallthisoverorreplace @attachallthis[:<attachpt> or <clothing_layer>]=force
 

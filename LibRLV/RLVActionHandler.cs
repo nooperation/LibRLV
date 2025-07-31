@@ -198,6 +198,11 @@ namespace LibRLV
 
         private void CollectItemsToAttach(InventoryTree folder, bool replaceExistingAttachments, bool recursive, List<AttachmentEventArgs.AttachmentRequest> itemsToAttach)
         {
+            if (folder.Name.StartsWith("."))
+            {
+                return;
+            }
+
             AttachmentPoint? folderAttachmentPoint = null;
             if (RLVCommon.TryGetAttachmentPointFromItemName(folder.Name, out var attachmentPointTemp))
             {
