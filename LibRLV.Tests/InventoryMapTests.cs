@@ -1,4 +1,6 @@
-﻿namespace LibRLV.Tests
+﻿using OpenMetaverse;
+
+namespace LibRLV.Tests
 {
     public class InventoryMapTests
     {
@@ -51,6 +53,75 @@
             var inventoryMap = new InventoryMap(sharedFolder);
 
             Assert.True(inventoryMap.TryGetFolderFromPath("Clo/thing/Hats", true, out var foundFolder));
+            Assert.Equal(foundFolder, hatsFolder);
+        }
+
+        [Fact]
+        public void TryGetFolderFromPath_FolderNameContainsForwardSlashes()
+        {
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
+            clothingFolder.Name = "/Clo//thing//";
+
+            var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
+            hatsFolder.Name = "//h/ats/";
+
+            var inventoryMap = new InventoryMap(sharedFolder);
+
+            Assert.True(inventoryMap.TryGetFolderFromPath($"{clothingFolder.Name}/{hatsFolder.Name}", true, out var foundFolder));
+            Assert.Equal(foundFolder, hatsFolder);
+        }
+
+
+        [Fact]
+        public void TryGetFolderFromPath_ContendingFoldersWithSlashes()
+        {
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            var contendingTree1 = new InventoryTree
+            {
+                Id = new UUID("12345678-1ddd-4ddd-8ddd-dddddddddddd"),
+                Name = "Clothing",
+                Parent = sharedFolder,
+                Children = [],
+                Items = [],
+            };
+            var contendingTree3 = new InventoryTree
+            {
+                Id = new UUID("12345678-123d-4ddd-8ddd-dddddddddddd"),
+                Name = "+Clothing///",
+                Parent = sharedFolder,
+                Children = [],
+                Items = [],
+            };
+            var contendingTree4 = new InventoryTree
+            {
+                Id = new UUID("12345678-123d-4ddd-8ddd-dddddddddddd"),
+                Name = "+Clothing///",
+                Parent = sharedFolder,
+                Children = [],
+                Items = [],
+            };
+
+            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
+            clothingFolder.Name = "Clothing///";
+
+            sharedFolder.Children.RemoveAt(0);
+            sharedFolder.Children.Add(contendingTree1);
+            sharedFolder.Children.Add(contendingTree3);
+            sharedFolder.Children.Add(clothingFolder);
+            sharedFolder.Children.Add(contendingTree4);
+
+            var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
+            hatsFolder.Name = "//h/ats/";
+
+            var inventoryMap = new InventoryMap(sharedFolder);
+
+            // We prefer the exact match of "Clothing///" over the not so exact match of "+Clothing///" since it's exactly what we're searching for
+            Assert.True(inventoryMap.TryGetFolderFromPath($"{clothingFolder.Name}/{hatsFolder.Name}", true, out var foundFolder));
             Assert.Equal(foundFolder, hatsFolder);
         }
 
@@ -112,7 +183,7 @@
             var inventoryMap = new InventoryMap(sharedFolder);
 
             Assert.True(inventoryMap.TryGetFolderFromPath(".Clothing", false, out var foundFolder));
-            Assert.Equal(foundFolder, clothingFolder);
+            Assert.Equal(clothingFolder, foundFolder);
         }
 
         #endregion

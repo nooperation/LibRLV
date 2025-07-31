@@ -4384,6 +4384,7 @@ namespace LibRLV.Tests
 
             var expected = new List<(int Channel, string Text)>
             {
+                (1234, ""),
             };
 
             Assert.True(_rlv.ProcessMessage("@findfolder:at=1234", _sender.Id, _sender.Name));
