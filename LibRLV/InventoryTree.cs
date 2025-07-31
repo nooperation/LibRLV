@@ -15,6 +15,7 @@ namespace LibRLV
             }
 
             public UUID Id { get; set; }
+            public InventoryTree Folder { get; set; }
             public UUID FolderId { get; set; }
             public string Name { get; set; }
             public WearableType? WornOn { get; set; }

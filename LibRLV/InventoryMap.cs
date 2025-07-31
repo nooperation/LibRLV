@@ -35,12 +35,25 @@ namespace LibRLV
                     return false;
                 }
 
-                iter = iter.Children.FirstOrDefault(n => n.Name == part);
-                if (iter == null)
+                var newIter = iter.Children.FirstOrDefault(n => n.Name == part);
+                if (newIter == null)
+                {
+                    newIter = iter
+                        .Children
+                        .Where(n => (
+                            n.Name.StartsWith("~") ||
+                            n.Name.StartsWith(".") ||
+                            n.Name.StartsWith("+")) && n.Name.Substring(1) == part)
+                        .FirstOrDefault();
+                }
+
+                if (newIter == null)
                 {
                     folder = null;
                     return false;
                 }
+
+                iter = newIter;
             }
 
             folder = iter;

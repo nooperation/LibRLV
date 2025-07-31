@@ -89,182 +89,7 @@ namespace LibRLV.Tests
             Assert.True(canFunc(_rlv.RLVManager));
         }
 
-        private class SampleInventoryTree
-        {
-            public InventoryTree Root { get; set; } = null!;
-            public InventoryTree.InventoryItem Root_Clothing_Hats_FancyHat_AttachChin { get; set; } = null!;
-            public InventoryTree.InventoryItem Root_Clothing_Hats_PartyHat_AttachGroin { get; set; } = null!;
-            public InventoryTree.InventoryItem Root_Clothing_BusinessPants_AttachGroin { get; set; } = null!;
-            public InventoryTree.InventoryItem Root_Clothing_RetroPants_WornPants { get; set; } = null!;
-            public InventoryTree.InventoryItem Root_Clothing_HappyShirt_AttachChest { get; set; } = null!;
-            public InventoryTree.InventoryItem Root_Accessories_Glasses_AttachChin { get; set; } = null!;
-            public InventoryTree.InventoryItem Root_Accessories_Watch_WornTattoo { get; set; } = null!;
-        }
-        private static SampleInventoryTree BuildInventoryTree()
-        {
-            // #RLV
-            //  |
-            //  |- .private
-            //  |
-            //  |- Clothing
-            //  |    |= Business Pants (attached to 'groin')
-            //  |    |= Happy Shirt (attached to 'chest')
-            //  |    |= Retro Pants (worn on 'pants')
-            //  |    \-Hats
-            //  |        |
-            //  |        |- Sub Hats
-            //  |        |    \ (Empty)
-            //  |        |
-            //  |        |= Fancy Hat (attached to 'chin')
-            //  |        \= Party Hat (attached to 'groin')
-            //   \-Accessories
-            //        |= Watch (worn on 'tattoo')
-            //        \= Glasses (attached to 'chin')
 
-            var root = new InventoryTree()
-            {
-                Id = new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Name = "#RLV",
-                Parent = null,
-                Children = [],
-                Items = [],
-            };
-
-            var clothingTree = new InventoryTree()
-            {
-                Id = new UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
-                Name = "Clothing",
-                Parent = root,
-                Children = [],
-                Items = [],
-
-            };
-            root.Children.Add(clothingTree);
-
-            var hatsTree = new InventoryTree
-            {
-                Id = new UUID("dddddddd-dddd-4ddd-8ddd-dddddddddddd"),
-                Name = "Hats",
-                Parent = clothingTree,
-                Children = [],
-                Items = [],
-            };
-            clothingTree.Children.Add(hatsTree);
-
-            var subHatsTree = new InventoryTree
-            {
-                Id = new UUID("ffffffff-0000-4000-8000-000000000000"),
-                Name = "Sub Hats",
-                Parent = hatsTree,
-                Children = [],
-                Items = [],
-            };
-            hatsTree.Children.Add(subHatsTree);
-
-            var privateTree = new InventoryTree
-            {
-                Id = new UUID("eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"),
-                Name = ".private",
-                Parent = root,
-                Children = [],
-                Items = [],
-            };
-            root.Children.Add(privateTree);
-
-            var AccessoriesTree = new InventoryTree
-            {
-                Id = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
-                Name = "Accessories",
-                Parent = root,
-                Children = [],
-                Items = [],
-            };
-            root.Children.Add(AccessoriesTree);
-
-            var watch_tattoo = new InventoryTree.InventoryItem()
-            {
-                Id = new UUID("c0000000-cccc-4ccc-8ccc-cccccccccccc"),
-                Name = "Watch",
-                Type = InventoryTree.InventoryItem.ItemType.Wearable,
-                AttachedTo = null,
-                WornOn = WearableType.Tattoo,
-                FolderId = AccessoriesTree.Id
-            };
-            var glasses_chin = new InventoryTree.InventoryItem()
-            {
-                Id = new UUID("c1111111-cccc-4ccc-8ccc-cccccccccccc"),
-                Name = "Glasses",
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
-                AttachedTo = AttachmentPoint.Chin,
-                WornOn = null,
-                FolderId = AccessoriesTree.Id
-            };
-            var businessPants_groin = new InventoryTree.InventoryItem()
-            {
-                Id = new UUID("b0000000-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
-                Name = "Business Pants",
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
-                AttachedTo = AttachmentPoint.Groin,
-                WornOn = null,
-                FolderId = clothingTree.Id
-            };
-            var happyShirt_chest = new InventoryTree.InventoryItem()
-            {
-                Id = new UUID("b1111111-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
-                Name = "Happy Shirt",
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
-                AttachedTo = AttachmentPoint.Chest,
-                WornOn = null,
-                FolderId = clothingTree.Id
-            };
-            var retroPants_pants = new InventoryTree.InventoryItem()
-            {
-                Id = new UUID("b2222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
-                Name = "Retro Pants",
-                Type = InventoryTree.InventoryItem.ItemType.Wearable,
-                AttachedTo = null,
-                WornOn = WearableType.Pants,
-                FolderId = clothingTree.Id
-            };
-            var partyHat_groin = new InventoryTree.InventoryItem()
-            {
-                Id = new UUID("d0000000-dddd-4ddd-8ddd-dddddddddddd"),
-                Name = "Party Hat",
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
-                AttachedTo = AttachmentPoint.Groin,
-                WornOn = null,
-                FolderId = hatsTree.Id
-            };
-            var fancyHat_chin = new InventoryTree.InventoryItem()
-            {
-                Id = new UUID("d1111111-dddd-4ddd-8ddd-dddddddddddd"),
-                Name = "Fancy Hat",
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
-                AttachedTo = AttachmentPoint.Chin,
-                WornOn = null,
-                FolderId = hatsTree.Id
-            };
-
-            AccessoriesTree.Items.Add(watch_tattoo);
-            AccessoriesTree.Items.Add(glasses_chin);
-            clothingTree.Items.Add(businessPants_groin);
-            clothingTree.Items.Add(happyShirt_chest);
-            clothingTree.Items.Add(retroPants_pants);
-            hatsTree.Items.Add(partyHat_groin);
-            hatsTree.Items.Add(fancyHat_chin);
-
-            return new SampleInventoryTree()
-            {
-                Root = root,
-                Root_Clothing_Hats_PartyHat_AttachGroin = partyHat_groin,
-                Root_Clothing_Hats_FancyHat_AttachChin = fancyHat_chin,
-                Root_Accessories_Glasses_AttachChin = glasses_chin,
-                Root_Clothing_BusinessPants_AttachGroin = businessPants_groin,
-                Root_Clothing_HappyShirt_AttachChest = happyShirt_chest,
-                Root_Clothing_RetroPants_WornPants = retroPants_pants,
-                Root_Accessories_Watch_WornTattoo = watch_tattoo
-            };
-        }
         #endregion
 
         #region General
@@ -3454,7 +3279,7 @@ namespace LibRLV.Tests
         [Fact]
         public void AddAttach()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -3473,7 +3298,7 @@ namespace LibRLV.Tests
         [Fact]
         public void AddAttach_Specific()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -3494,7 +3319,7 @@ namespace LibRLV.Tests
         [Fact]
         public void RemAttach()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -3513,7 +3338,7 @@ namespace LibRLV.Tests
         [Fact]
         public void RemAttach_Specific()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -3543,7 +3368,7 @@ namespace LibRLV.Tests
         [Fact]
         public void AddOutfit()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -3562,7 +3387,7 @@ namespace LibRLV.Tests
         [Fact]
         public void AddOutfit_part()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -3583,7 +3408,7 @@ namespace LibRLV.Tests
         [Fact]
         public void RemOutfit()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -3602,7 +3427,7 @@ namespace LibRLV.Tests
         [Fact]
         public void RemOutfit_part()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -3623,7 +3448,7 @@ namespace LibRLV.Tests
         [Fact]
         public void RemOutfitForce()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             // skin, shape, eyes and hair cannot be removed
@@ -3652,7 +3477,7 @@ namespace LibRLV.Tests
         [Fact]
         public void RemOutfitForce_Folder()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
@@ -3679,7 +3504,7 @@ namespace LibRLV.Tests
         [Fact]
         public void RemOutfitForce_Specific()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -3703,7 +3528,7 @@ namespace LibRLV.Tests
         [Fact]
         public void RemOutfitForce_BodyPart_Specific()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Skin;
@@ -4055,7 +3880,7 @@ namespace LibRLV.Tests
         [Fact]
         public void DetachMeForce()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -4079,7 +3904,7 @@ namespace LibRLV.Tests
         [Fact]
         public void DetachMeForce_IgnoreNoStrip()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "nostrip Party Hat";
@@ -4144,7 +3969,7 @@ namespace LibRLV.Tests
         public void GetInv()
         {
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -4164,7 +3989,7 @@ namespace LibRLV.Tests
         public void GetInv_Subfolder()
         {
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -4184,7 +4009,7 @@ namespace LibRLV.Tests
         public void GetInv_Empty()
         {
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -4204,7 +4029,7 @@ namespace LibRLV.Tests
         public void GetInv_Invalid()
         {
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -4250,7 +4075,7 @@ namespace LibRLV.Tests
             // 3: Some items are present in that folder, and all of them are worn
             //
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -4294,7 +4119,7 @@ namespace LibRLV.Tests
             // 3: Some items are present in that folder, and all of them are worn
             //
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -4346,7 +4171,7 @@ namespace LibRLV.Tests
             // 3: Some items are present in that folder, and all of them are worn
             //
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -4398,7 +4223,7 @@ namespace LibRLV.Tests
             // 3: Some items are present in that folder, and all of them are worn
             //
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -4442,7 +4267,7 @@ namespace LibRLV.Tests
             // 3: Some items are present in that folder, and all of them are worn
             //
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -4483,7 +4308,7 @@ namespace LibRLV.Tests
             //        \= Glasses (attached to 'chin')
 
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -4501,27 +4326,8 @@ namespace LibRLV.Tests
         [Fact]
         public void FindFolder_SearchOrder()
         {
-            // #RLV
-            //  |
-            //  |- .private
-            //  |
-            //  |- Clothing
-            //  |    |= Business Pants (attached to 'groin')
-            //  |    |= Happy Shirt (attached to 'chest')
-            //  |    |= Retro Pants (worn on 'pants')
-            //  |    \-Hats
-            //  |        |
-            //  |        |- Sub Hats
-            //  |        |    \ (Empty)
-            //  |        |
-            //  |        |= Fancy Hat (attached to 'chin')
-            //  |        \= Party Hat (attached to 'groin')
-            //   \-Accessories
-            //        |= Watch (worn on 'tattoo')
-            //        \= Glasses (attached to 'chin')
-
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -4531,6 +4337,53 @@ namespace LibRLV.Tests
             var expected = new List<(int Channel, string Text)>
             {
                 (1234, "Clothing/Hats"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@findfolder:at=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void FindFolder_IgnorePrivate()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
+            var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
+            hatsFolder.Name = ".Hats";
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, ""),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@findfolder:at=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void FindFolder_IgnoreTildePrefix()
+        {
+            var actual = _callbacks.RecordReplies();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
+            var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
+            hatsFolder.Name = "~Hats";
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
             };
 
             Assert.True(_rlv.ProcessMessage("@findfolder:at=1234", _sender.Id, _sender.Name));
@@ -4562,7 +4415,7 @@ namespace LibRLV.Tests
             //        \= Glasses (attached to 'chin')
 
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -4601,7 +4454,7 @@ namespace LibRLV.Tests
             //        \= Glasses (attached to 'chin')
 
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -4624,7 +4477,7 @@ namespace LibRLV.Tests
         public void GetPathNew_BySender()
         {
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -4644,7 +4497,7 @@ namespace LibRLV.Tests
         public void GetPathNew_ByUUID()
         {
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -4664,7 +4517,7 @@ namespace LibRLV.Tests
         public void GetPathNew_ByUUID_Unknown()
         {
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -4692,7 +4545,7 @@ namespace LibRLV.Tests
         public void GetPathNew_ByAttach()
         {
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = AttachmentPoint.Groin;
@@ -4720,7 +4573,7 @@ namespace LibRLV.Tests
         public void GetPathNew_ByWorn()
         {
             var actual = _callbacks.RecordReplies();
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -4750,7 +4603,7 @@ namespace LibRLV.Tests
         [InlineData("attachover", false)]
         public void AttachForce(string command, bool replaceExistingAttachments)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -4790,7 +4643,7 @@ namespace LibRLV.Tests
         [InlineData("attachover", false)]
         public void AttachForce_WithClothing(string command, bool replaceExistingAttachments)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = null;
@@ -4825,7 +4678,7 @@ namespace LibRLV.Tests
         [InlineData("attachover")]
         public void AttachForce_AlreadyAttached(string command)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = AttachmentPoint.Groin;
@@ -4856,7 +4709,7 @@ namespace LibRLV.Tests
         [InlineData("attachover", false)]
         public void AttachForce_PositionFromFolderName(string command, bool replaceExistingAttachments)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -4901,7 +4754,7 @@ namespace LibRLV.Tests
         [InlineData("attachover")]
         public void AttachForce_FolderNameSpecifiesToAddInsteadOfReplace(string command)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -4945,7 +4798,7 @@ namespace LibRLV.Tests
         [InlineData("attachover")]
         public void AttachForce_AttachPrivateParentFolder(string command)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -4990,7 +4843,7 @@ namespace LibRLV.Tests
         [InlineData("attachallover", false)]
         public void AttachForce_Recursive(string command, bool replaceExistingAttachments)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -5034,7 +4887,7 @@ namespace LibRLV.Tests
         [InlineData("attachallover", false)]
         public void AttachForce_Recursive_WithHiddenSubfolder(string command, bool replaceExistingAttachments)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -5081,7 +4934,7 @@ namespace LibRLV.Tests
         [InlineData("attachallover", false)]
         public void AttachForce_Recursive_FolderNameSpecifiesToAddInsteadOfReplace(string command, bool replaceExistingAttachments)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -5133,7 +4986,7 @@ namespace LibRLV.Tests
         [InlineData("attachthisover", false)]
         public void AttachThis_Default(string command, bool replaceExistingAttachments)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -5173,7 +5026,7 @@ namespace LibRLV.Tests
         [InlineData("attachthisover")]
         public void AttachThis_FolderNameSpecifiesToAddInsteadOfReplace(string command)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -5219,7 +5072,7 @@ namespace LibRLV.Tests
         [InlineData("attachthisover", false)]
         public void AttachThis_FolderNameSpecifiesAttachmentPoint(string command, bool replaceExistingAttachments)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -5264,7 +5117,7 @@ namespace LibRLV.Tests
         [InlineData("attachthisover")]
         public void AttachThis_FromHiddenSubfolder(string command)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -5325,7 +5178,7 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo')
             //        \= Glasses (attached to 'chin')
 
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
@@ -5395,7 +5248,7 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo')
             //        \= Glasses (attached to 'chin')
 
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
@@ -5436,7 +5289,7 @@ namespace LibRLV.Tests
         [InlineData("attachallthisover", false)]
         public void AttachAllThisForce_Recursive(string command, bool replaceExistingAttachments)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -5480,7 +5333,7 @@ namespace LibRLV.Tests
         [InlineData("attachallthisover", false)]
         public void AttachAllThisForce_Recursive_WithHiddenSubfolder(string command, bool replaceExistingAttachments)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -5527,7 +5380,7 @@ namespace LibRLV.Tests
         [InlineData("attachallthisover", false)]
         public void AttachAllThisForce_Recursive_FolderNameSpecifiesToAddInsteadOfReplace(string command, bool replaceExistingAttachments)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
@@ -5595,7 +5448,7 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo')
             //        \= Glasses (attached to 'chin')
 
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
@@ -5665,7 +5518,7 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo')
             //        \= Glasses (attached to 'chin')
 
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
@@ -5716,7 +5569,7 @@ namespace LibRLV.Tests
         [InlineData("@remattach=force")]
         public void RemAttach_RemoveAllAttachments(string command)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -5747,7 +5600,7 @@ namespace LibRLV.Tests
         [InlineData("@remattach:Clothing/Hats=force")]
         public void RemAttach_ByFolder(string command)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -5774,7 +5627,7 @@ namespace LibRLV.Tests
         [InlineData("@remattach:groin=force")]
         public void RemAttach_RemoveAttachmentPoint(string command)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -5801,7 +5654,7 @@ namespace LibRLV.Tests
         [InlineData("@remattach:skull=force")]
         public void RemAttach_RemoveNone(string command)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -5826,7 +5679,7 @@ namespace LibRLV.Tests
         [InlineData("remattach")]
         public void RemAttach_RemoveByUUID(string command)
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -5852,7 +5705,7 @@ namespace LibRLV.Tests
         [Fact]
         public void DetachAllForce_Recursive()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -5883,7 +5736,7 @@ namespace LibRLV.Tests
         [Fact]
         public void DetachThisForce_Default()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -5929,7 +5782,7 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo')
             //        \= Glasses (attached to 'chin') <--- Modified to be attached to chest
 
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = AttachmentPoint.Chest;
@@ -5979,7 +5832,7 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo')  <--- Modified to be worn on pants
             //        \= Glasses (attached to 'chin')
 
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Pants;
@@ -6029,7 +5882,7 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo') <--- Modified to be worn on pants
             //        \= Glasses (attached to 'chin')
 
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
@@ -6062,7 +5915,7 @@ namespace LibRLV.Tests
         [Fact]
         public void DetachAllThisForce_Default()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6110,7 +5963,7 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo')
             //        \= Glasses (attached to 'chin') <--- Modified to be attached to chest
 
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = AttachmentPoint.Chest;
@@ -6163,7 +6016,7 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo')  <--- Modified to be worn on pants
             //        \= Glasses (attached to 'chin')
 
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Pants;
@@ -6215,7 +6068,7 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo')  <--- Modified to be worn on pants
             //        \= Glasses (attached to 'chin')
 
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
@@ -6254,7 +6107,7 @@ namespace LibRLV.Tests
         [Fact]
         public void DetachThis()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6289,7 +6142,7 @@ namespace LibRLV.Tests
         public void DetachThis_NotRecursive()
         {
             // TryGetRlvInventoryTree
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6326,7 +6179,7 @@ namespace LibRLV.Tests
         public void DetachThis_ByPath()
         {
             // TryGetRlvInventoryTree
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6362,7 +6215,7 @@ namespace LibRLV.Tests
         public void DetachThis_ByAttachmentPoint()
         {
             // TryGetRlvInventoryTree
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6398,7 +6251,7 @@ namespace LibRLV.Tests
         public void DetachThis_ByWornLayer()
         {
             // TryGetRlvInventoryTree
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6437,7 +6290,7 @@ namespace LibRLV.Tests
         [Fact]
         public void DetachAllThis()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6471,7 +6324,7 @@ namespace LibRLV.Tests
         [Fact]
         public void DetachAllThis_Recursive()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6505,7 +6358,7 @@ namespace LibRLV.Tests
         [Fact]
         public void DetachAllThis_Recursive_Path()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6539,7 +6392,7 @@ namespace LibRLV.Tests
         [Fact]
         public void DetachAllThis_Recursive_Worn()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6573,7 +6426,7 @@ namespace LibRLV.Tests
         [Fact]
         public void DetachAllThis_Recursive_Attached()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6611,7 +6464,7 @@ namespace LibRLV.Tests
         [Fact]
         public void DetachAllThis_Recursive_Except()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6650,7 +6503,7 @@ namespace LibRLV.Tests
         [Fact]
         public void DetachAllThis_Recursive_ExceptAll()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6685,7 +6538,7 @@ namespace LibRLV.Tests
         [Fact]
         public void DetachAllThis_Recursive_ExceptAll_Recursive()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6723,7 +6576,7 @@ namespace LibRLV.Tests
         [Fact]
         public void AttachThis()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6758,7 +6611,7 @@ namespace LibRLV.Tests
         public void AttachThis_NotRecursive()
         {
             // TryGetRlvInventoryTree
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6795,7 +6648,7 @@ namespace LibRLV.Tests
         public void AttachThis_ByPath()
         {
             // TryGetRlvInventoryTree
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6831,7 +6684,7 @@ namespace LibRLV.Tests
         public void AttachThis_ByAttachmentPoint()
         {
             // TryGetRlvInventoryTree
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6867,7 +6720,7 @@ namespace LibRLV.Tests
         public void AttachThis_ByWornLayer()
         {
             // TryGetRlvInventoryTree
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6905,7 +6758,7 @@ namespace LibRLV.Tests
         [Fact]
         public void AttachAllThis()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6939,7 +6792,7 @@ namespace LibRLV.Tests
         [Fact]
         public void AttachAllThis_Recursive()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -6973,7 +6826,7 @@ namespace LibRLV.Tests
         [Fact]
         public void AttachAllThis_Recursive_Path()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -7007,7 +6860,7 @@ namespace LibRLV.Tests
         [Fact]
         public void AttachAllThis_Recursive_Worn()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -7041,7 +6894,7 @@ namespace LibRLV.Tests
         [Fact]
         public void AttachAllThis_Recursive_Attached()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -7079,7 +6932,7 @@ namespace LibRLV.Tests
         [Fact]
         public void AttachAllThis_Recursive_Except()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -7118,7 +6971,7 @@ namespace LibRLV.Tests
         [Fact]
         public void AttachAllThis_Recursive_ExceptAll()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
@@ -7153,7 +7006,7 @@ namespace LibRLV.Tests
         [Fact]
         public void AttachAllThis_Recursive_ExceptAll_Recursive()
         {
-            var sampleTree = BuildInventoryTree();
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
