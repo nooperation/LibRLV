@@ -20,21 +20,8 @@ namespace LibRLV
         public event EventHandler Unsit;
         public event EventHandler SitGround;
         public event EventHandler<RemOutfitEventArgs> RemOutfit;
-        public event EventHandler DetachMe;
         public event EventHandler<AttachmentEventArgs> Attach;
-        public event EventHandler<InventoryPathEventArgs> AttachOver;
-        public event EventHandler<InventoryPathEventArgs> AttachAll;
-        public event EventHandler<InventoryPathEventArgs> AttachAllOverOrReplace;
         public event EventHandler<DetachEventArgs> Detach;
-        public event EventHandler<InventoryPathEventArgs> DetachAll;
-        public event EventHandler<AttachmentEventArgs> AttachThis;
-        public event EventHandler<AttachmentEventArgs> AttachThisOver;
-        public event EventHandler<AttachmentEventArgs> AttachThisOverOrReplace;
-        public event EventHandler<AttachmentEventArgs> AttachAllThis;
-        public event EventHandler<AttachmentEventArgs> AttachAllThisOver;
-        public event EventHandler<AttachmentEventArgs> AttachAllThisOverOrReplace;
-        public event EventHandler<AttachmentEventArgs> DetachThis;
-        public event EventHandler<AttachmentEventArgs> DetachAllThis;
         public event EventHandler<SetGroupEventArgs> SetGroup;
         public event EventHandler<SetSettingEventArgs> SetEnv;
         public event EventHandler<SetSettingEventArgs> SetDebug;
@@ -176,18 +163,6 @@ namespace LibRLV
                 SetGroup?.Invoke(this, new SetGroupEventArgs(argParts[0], groupRole));
             }
 
-            return true;
-        }
-
-        private bool HandleInventoryThing(RLVMessage command, EventHandler<InventoryPathEventArgs> handler)
-        {
-            handler?.Invoke(this, new InventoryPathEventArgs(command.Option));
-            return true;
-        }
-
-        private bool HandleAttachmentThing(RLVMessage command, EventHandler<AttachmentEventArgs> handler)
-        {
-            //handler?.Invoke(this, new AttachmentEventArgs(command.Option));
             return true;
         }
 

@@ -100,7 +100,7 @@ namespace LibRLV.Tests
             public InventoryTree.InventoryItem Root_Accessories_Glasses_AttachChin { get; set; } = null!;
             public InventoryTree.InventoryItem Root_Accessories_Watch_WornTattoo { get; set; } = null!;
         }
-        private SampleInventoryTree BuildInventoryTree()
+        private static SampleInventoryTree BuildInventoryTree()
         {
             // #RLV
             //  |
@@ -683,8 +683,8 @@ namespace LibRLV.Tests
             var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportWornItemChange(wornItem.Id, UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Attached);
-            _rlv.RLVManager.ReportWornItemChange(wornItem.Id, UUID.Random(), true, WearableType.Tattoo, RLVManager.WornItemChange.Attached);
+            _rlv.RLVManager.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Attached);
+            _rlv.RLVManager.ReportWornItemChange(UUID.Random(), true, WearableType.Tattoo, RLVManager.WornItemChange.Attached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -705,7 +705,7 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@addoutfit:skin=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportWornItemChange(wornItem.Id, UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Attached);
+            _rlv.RLVManager.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Attached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -723,8 +723,8 @@ namespace LibRLV.Tests
             var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportWornItemChange(wornItem.Id, UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Detached);
-            _rlv.RLVManager.ReportWornItemChange(wornItem.Id, UUID.Random(), true, WearableType.Tattoo, RLVManager.WornItemChange.Detached);
+            _rlv.RLVManager.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Detached);
+            _rlv.RLVManager.ReportWornItemChange(UUID.Random(), true, WearableType.Tattoo, RLVManager.WornItemChange.Detached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -745,7 +745,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@remoutfit:skin=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
 
-            _rlv.RLVManager.ReportWornItemChange(wornItem.Id, UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Detached);
+            _rlv.RLVManager.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Detached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -763,8 +763,8 @@ namespace LibRLV.Tests
             var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportAttachedItemChange(wornItem.Id, UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Attached);
-            _rlv.RLVManager.ReportAttachedItemChange(wornItem.Id, UUID.Random(), true, AttachmentPoint.Skull, RLVManager.AttachedItemChange.Attached);
+            _rlv.RLVManager.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Attached);
+            _rlv.RLVManager.ReportAttachedItemChange(UUID.Random(), true, AttachmentPoint.Skull, RLVManager.AttachedItemChange.Attached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -785,7 +785,7 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@addattach:chest=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportAttachedItemChange(wornItem.Id, UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Attached);
+            _rlv.RLVManager.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Attached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -803,8 +803,8 @@ namespace LibRLV.Tests
             var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportAttachedItemChange(wornItem.Id, UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Detached);
-            _rlv.RLVManager.ReportAttachedItemChange(wornItem.Id, UUID.Random(), true, AttachmentPoint.Skull, RLVManager.AttachedItemChange.Detached);
+            _rlv.RLVManager.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Detached);
+            _rlv.RLVManager.ReportAttachedItemChange(UUID.Random(), true, AttachmentPoint.Skull, RLVManager.AttachedItemChange.Detached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -824,7 +824,7 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@remattach:chest=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportAttachedItemChange(wornItem.Id, UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Detached);
+            _rlv.RLVManager.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Detached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -3399,13 +3399,13 @@ namespace LibRLV.Tests
 
             var folderId1 = new UUID("99999999-9999-4999-8999-999999999999");
 
-            Assert.True(_rlv.RLVManager.CanDetach(objectId1, folderId1, false, null, null));
-            Assert.True(_rlv.RLVManager.CanDetach(objectId1, folderId1, false, AttachmentPoint.Chest, null));
-            Assert.True(_rlv.RLVManager.CanDetach(objectId1, folderId1, false, null, WearableType.Shirt));
+            Assert.True(_rlv.RLVManager.CanDetach(folderId1, false, null, null));
+            Assert.True(_rlv.RLVManager.CanDetach(folderId1, false, AttachmentPoint.Chest, null));
+            Assert.True(_rlv.RLVManager.CanDetach(folderId1, false, null, WearableType.Shirt));
 
-            Assert.True(_rlv.RLVManager.CanDetach(objectId1, folderId1, true, null, null));
-            Assert.True(_rlv.RLVManager.CanDetach(objectId1, folderId1, true, AttachmentPoint.Chest, null));
-            Assert.True(_rlv.RLVManager.CanDetach(objectId1, folderId1, true, null, WearableType.Shirt));
+            Assert.True(_rlv.RLVManager.CanDetach(folderId1, true, null, null));
+            Assert.True(_rlv.RLVManager.CanDetach(folderId1, true, AttachmentPoint.Chest, null));
+            Assert.True(_rlv.RLVManager.CanDetach(folderId1, true, null, WearableType.Shirt));
         }
 
         [Fact]
@@ -3418,13 +3418,13 @@ namespace LibRLV.Tests
 
             Assert.True(_rlv.ProcessMessage("@detach=n", _sender.Id, _sender.Name));
 
-            Assert.False(_rlv.RLVManager.CanDetach(objectId1, folderId1, false, null, null));
-            Assert.False(_rlv.RLVManager.CanDetach(objectId1, folderId1, false, AttachmentPoint.Chest, null));
-            Assert.False(_rlv.RLVManager.CanDetach(objectId1, folderId1, false, null, WearableType.Shirt));
+            Assert.False(_rlv.RLVManager.CanDetach(folderId1, false, null, null));
+            Assert.False(_rlv.RLVManager.CanDetach(folderId1, false, AttachmentPoint.Chest, null));
+            Assert.False(_rlv.RLVManager.CanDetach(folderId1, false, null, WearableType.Shirt));
 
-            Assert.False(_rlv.RLVManager.CanDetach(objectId1, folderId1, true, null, null));
-            Assert.False(_rlv.RLVManager.CanDetach(objectId1, folderId1, true, AttachmentPoint.Chest, null));
-            Assert.False(_rlv.RLVManager.CanDetach(objectId1, folderId1, true, null, WearableType.Shirt));
+            Assert.False(_rlv.RLVManager.CanDetach(folderId1, true, null, null));
+            Assert.False(_rlv.RLVManager.CanDetach(folderId1, true, AttachmentPoint.Chest, null));
+            Assert.False(_rlv.RLVManager.CanDetach(folderId1, true, null, WearableType.Shirt));
         }
 
         [Fact]
@@ -3437,15 +3437,15 @@ namespace LibRLV.Tests
 
             Assert.True(_rlv.ProcessMessage("@detach:skull=n", _sender.Id, _sender.Name));
 
-            Assert.True(_rlv.RLVManager.CanDetach(objectId1, folderId1, false, null, null));
-            Assert.True(_rlv.RLVManager.CanDetach(objectId1, folderId1, false, AttachmentPoint.Chest, null));
-            Assert.False(_rlv.RLVManager.CanDetach(objectId1, folderId1, false, AttachmentPoint.Skull, null));
-            Assert.True(_rlv.RLVManager.CanDetach(objectId1, folderId1, false, null, WearableType.Shirt));
+            Assert.True(_rlv.RLVManager.CanDetach(folderId1, false, null, null));
+            Assert.True(_rlv.RLVManager.CanDetach(folderId1, false, AttachmentPoint.Chest, null));
+            Assert.False(_rlv.RLVManager.CanDetach(folderId1, false, AttachmentPoint.Skull, null));
+            Assert.True(_rlv.RLVManager.CanDetach(folderId1, false, null, WearableType.Shirt));
 
-            Assert.True(_rlv.RLVManager.CanDetach(objectId1, folderId1, true, null, null));
-            Assert.True(_rlv.RLVManager.CanDetach(objectId1, folderId1, true, AttachmentPoint.Chest, null));
-            Assert.False(_rlv.RLVManager.CanDetach(objectId1, folderId1, true, AttachmentPoint.Skull, null));
-            Assert.True(_rlv.RLVManager.CanDetach(objectId1, folderId1, true, null, WearableType.Shirt));
+            Assert.True(_rlv.RLVManager.CanDetach(folderId1, true, null, null));
+            Assert.True(_rlv.RLVManager.CanDetach(folderId1, true, AttachmentPoint.Chest, null));
+            Assert.False(_rlv.RLVManager.CanDetach(folderId1, true, AttachmentPoint.Skull, null));
+            Assert.True(_rlv.RLVManager.CanDetach(folderId1, true, null, WearableType.Shirt));
         }
 
         #endregion
@@ -7584,7 +7584,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShowNames_Secure()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender2 = new RlvObject("Sender 2", new UUID("22222222-2222-4222-8222-222222222222"));
             var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
             var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
 

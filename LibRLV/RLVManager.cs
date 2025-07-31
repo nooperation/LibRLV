@@ -913,14 +913,13 @@ namespace LibRLV
         public bool CanAttach(InventoryTree.InventoryItem item, bool isShared)
         {
             return CanAttach(
-                item.Id,
                 item.FolderId,
                 isShared,
                 item.AttachedTo,
                 item.WornOn
             );
         }
-        public bool CanAttach(UUID objectId, UUID objectFolderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        public bool CanAttach(UUID objectFolderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
             if (wearableType != null && !CanAttachWearable(wearableType))
             {
@@ -961,14 +960,13 @@ namespace LibRLV
         public bool CanDetach(InventoryTree.InventoryItem item, bool isShared)
         {
             return CanDetach(
-                item.Id,
                 item.FolderId,
                 isShared,
                 item.AttachedTo,
                 item.WornOn
             );
         }
-        public bool CanDetach(UUID itemId, UUID folderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        public bool CanDetach(UUID folderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
             // @remoutfit[:<part>]=<y/n>
             if (wearableType != null && !CanDetachWearable(wearableType))
@@ -1092,13 +1090,13 @@ namespace LibRLV
             Attached = 1,
             Detached = 2
         }
-        public void ReportWornItemChange(UUID objectId, UUID objectFolderId, bool isShared, WearableType wearableType, WornItemChange changeType)
+        public void ReportWornItemChange(UUID objectFolderId, bool isShared, WearableType wearableType, WornItemChange changeType)
         {
             var notificationText = "";
 
             if (changeType == WornItemChange.Attached)
             {
-                var isLegal = CanAttach(objectId, objectFolderId, isShared, null, wearableType);
+                var isLegal = CanAttach(objectFolderId, isShared, null, wearableType);
 
                 if (isLegal)
                 {
@@ -1111,7 +1109,7 @@ namespace LibRLV
             }
             else if (changeType == WornItemChange.Detached)
             {
-                var isLegal = CanDetach(objectId, objectFolderId, isShared, null, wearableType);
+                var isLegal = CanDetach(objectFolderId, isShared, null, wearableType);
 
                 if (isLegal)
                 {
@@ -1135,13 +1133,13 @@ namespace LibRLV
             Attached = 1,
             Detached = 2
         }
-        public void ReportAttachedItemChange(UUID objectId, UUID objectFolderId, bool isShared, AttachmentPoint attachmentPoint, AttachedItemChange changeType)
+        public void ReportAttachedItemChange(UUID objectFolderId, bool isShared, AttachmentPoint attachmentPoint, AttachedItemChange changeType)
         {
             var notificationText = "";
 
             if (changeType == AttachedItemChange.Attached)
             {
-                var isLegal = CanAttach(objectId, objectFolderId, isShared, attachmentPoint, null);
+                var isLegal = CanAttach(objectFolderId, isShared, attachmentPoint, null);
 
                 if (isLegal)
                 {
@@ -1154,7 +1152,7 @@ namespace LibRLV
             }
             else if (changeType == AttachedItemChange.Detached)
             {
-                var isLegal = CanDetach(objectId, objectFolderId, isShared, attachmentPoint, null);
+                var isLegal = CanDetach(objectFolderId, isShared, attachmentPoint, null);
 
                 if (isLegal)
                 {
