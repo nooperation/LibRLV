@@ -6,11 +6,11 @@ namespace LibRLV.EventArguments
     {
         public TpToEventArgs(float x, float y, float z, string regionName, float? lookat)
         {
-            this.X = x;
-            this.Y = y;
-            this.Z = z;
-            this.RegionName = regionName;
-            this.Lookat = lookat;
+            X = x;
+            Y = y;
+            Z = z;
+            RegionName = regionName;
+            Lookat = lookat;
         }
 
         public float X { get; }

@@ -1,7 +1,6 @@
-﻿using OpenMetaverse;
-using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Threading;
+using OpenMetaverse;
 
 namespace LibRLV
 {
@@ -37,7 +36,7 @@ namespace LibRLV
         {
             if (Blacklist.IsBlacklisted(rlvMessage.Behavior))
             {
-                if (int.TryParse(rlvMessage.Param, out int channel))
+                if (int.TryParse(rlvMessage.Param, out var channel))
                 {
                     Callbacks.SendReplyAsync(channel, "", CancellationToken.None);
                 }
@@ -57,7 +56,7 @@ namespace LibRLV
             {
                 return Restrictions.ProcessRestrictionCommand(rlvMessage, rlvMessage.Option, rlvMessage.Param == "n" || rlvMessage.Param == "add");
             }
-            else if (int.TryParse(rlvMessage.Param, out int channel))
+            else if (int.TryParse(rlvMessage.Param, out var channel))
             {
                 if (channel == 0)
                 {

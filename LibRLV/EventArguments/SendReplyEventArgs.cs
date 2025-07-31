@@ -6,8 +6,8 @@ namespace LibRLV.EventArguments
     {
         public SendReplyEventArgs(int channel, string reply)
         {
-            this.Channel = channel;
-            this.Reply = reply;
+            Channel = channel;
+            Reply = reply;
         }
 
         public int Channel { get; set; }

@@ -1,8 +1,6 @@
 ﻿using LibRLV;
 using LibRLV.EventArguments;
 using OpenMetaverse;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace TempClient
 {
@@ -70,7 +68,7 @@ namespace TempClient
                 Id = new UUID(Guid.NewGuid()),
                 Name = "#RLV",
                 Parent = null,
-                Children = new List<InventoryTree>()
+                Children = []
             };
 
             var sub1 = new InventoryTree()
@@ -78,8 +76,8 @@ namespace TempClient
                 Id = new UUID(Guid.NewGuid()),
                 Name = "Sub1",
                 Parent = tree,
-                Children = new List<InventoryTree>()
-            }; 
+                Children = []
+            };
             tree.Children.Add(sub1);
 
             var foo = new InventoryTree
@@ -87,7 +85,7 @@ namespace TempClient
                 Id = new UUID(Guid.NewGuid()),
                 Name = "Foo",
                 Parent = tree,
-                Children = new List<InventoryTree>()
+                Children = []
             };
             tree.Children.Add(foo);
 
@@ -96,7 +94,7 @@ namespace TempClient
                 Id = new UUID(Guid.NewGuid()),
                 Name = "Bar",
                 Parent = foo,
-                Children = new List<InventoryTree>()
+                Children = []
             };
             foo.Children.Add(bar);
 
@@ -106,7 +104,7 @@ namespace TempClient
             var object2 = new RlvObject("Second");
 
             rlv.ProcessMessage("@detachallthis:Foo=n", object1.Id, "Locker9000");
-            if(!rlv.Restrictions.TryGetLockedFolder(foo.Id, out var lockedFolder))
+            if (!rlv.Restrictions.TryGetLockedFolder(foo.Id, out var lockedFolder))
             {
                 Console.WriteLine("Failed");
             }
@@ -138,7 +136,7 @@ namespace TempClient
             //rlv.ProcessMessage("@accepttprequest=rem", object1.Id, object1.Name);
             //
             //rlv.RLVManager.GetCamDrawColor
-        } 
+        }
 
         private void Restrictions_RestrictionUpdated(object? sender, RestrictionUpdatedEventArgs e)
         {
@@ -150,7 +148,7 @@ namespace TempClient
             Console.WriteLine($"Tp To: {e.X}/{e.Y}/{e.Z} Region={e.RegionName} Lookat={e.Lookat}");
         }
 
-        static void Main()
+        private static void Main()
         {
             _ = new Program();
         }

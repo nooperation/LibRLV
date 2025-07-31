@@ -1,8 +1,8 @@
-﻿using OpenMetaverse;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using OpenMetaverse;
 
 namespace LibRLV
 {
@@ -10,11 +10,11 @@ namespace LibRLV
     {
         public RLVRestriction(RLVRestrictionType behavior, UUID sender, string senderName, ICollection<object> args)
         {
-            this.Behavior = GetRealRestriction(behavior);
-            this.OriginalBehavior = behavior;
-            this.Sender = sender;
-            this.SenderName = senderName;
-            this.Args = args.ToImmutableList();
+            Behavior = GetRealRestriction(behavior);
+            OriginalBehavior = behavior;
+            Sender = sender;
+            SenderName = senderName;
+            Args = args.ToImmutableList();
         }
 
         public RLVRestrictionType Behavior { get; }
@@ -396,7 +396,7 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (!UUID.TryParse(args[0], out UUID uuid))
+                    if (!UUID.TryParse(args[0], out var uuid))
                     {
                         return false;
                     }
@@ -418,7 +418,7 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (!UUID.TryParse(args[0], out UUID uuid))
+                    if (!UUID.TryParse(args[0], out var uuid))
                     {
                         return false;
                     }
@@ -496,16 +496,16 @@ namespace LibRLV
         public override bool Equals(object obj)
         {
             return obj is RLVRestriction restriction &&
-                   this.Behavior == restriction.Behavior &&
-                   this.Sender.Equals(restriction.Sender) &&
+                   Behavior == restriction.Behavior &&
+                   Sender.Equals(restriction.Sender) &&
                    Args.SequenceEqual(restriction.Args);
         }
 
         public override int GetHashCode()
         {
             var hashCode = new HashCode();
-            hashCode.Add(this.Behavior);
-            hashCode.Add(this.Sender);
+            hashCode.Add(Behavior);
+            hashCode.Add(Sender);
             foreach (var item in Args)
             {
                 hashCode.Add(item);

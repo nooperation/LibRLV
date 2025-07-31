@@ -1,5 +1,5 @@
-﻿using OpenMetaverse;
-using System;
+﻿using System;
+using OpenMetaverse;
 
 namespace LibRLV.EventArguments
 {
@@ -7,7 +7,7 @@ namespace LibRLV.EventArguments
     {
         public SitEventArgs(UUID? target)
         {
-            this.Target = target;
+            Target = target;
         }
 
         public UUID? Target { get; }

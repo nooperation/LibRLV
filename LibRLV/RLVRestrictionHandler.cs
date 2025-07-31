@@ -1,9 +1,9 @@
-﻿using LibRLV.EventArguments;
-using OpenMetaverse;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using LibRLV.EventArguments;
+using OpenMetaverse;
 
 namespace LibRLV
 {
@@ -144,7 +144,7 @@ namespace LibRLV
 
         public RLVRestrictionHandler(IRLVCallbacks callbacks)
         {
-            this._callbacks = callbacks;
+            _callbacks = callbacks;
         }
 
         private void NotifyRestrictionChange(RLVRestriction restriction, bool wasAdded)
@@ -401,7 +401,7 @@ namespace LibRLV
 
             foreach (var item in items)
             {
-                if (!rootMap.TryGetValue(item.FolderId, out InventoryTree folder))
+                if (!rootMap.TryGetValue(item.FolderId, out var folder))
                 {
                     continue;
                 }

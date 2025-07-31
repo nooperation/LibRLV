@@ -6,7 +6,7 @@ namespace LibRLV.EventArguments
     {
         public InventoryPathEventArgs(string inventoryPath)
         {
-            this.InventoryPath = inventoryPath;
+            InventoryPath = inventoryPath;
         }
 
         public string InventoryPath { get; }

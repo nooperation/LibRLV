@@ -67,8 +67,8 @@ namespace LibRLV.Tests
                 Id = new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 Name = "#RLV",
                 Parent = null,
-                Children = new List<InventoryTree>(),
-                Items = new List<InventoryTree.InventoryItem>(),
+                Children = [],
+                Items = [],
             };
 
             var clothingTree = new InventoryTree()
@@ -76,8 +76,8 @@ namespace LibRLV.Tests
                 Id = new UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
                 Name = "Clothing",
                 Parent = root,
-                Children = new List<InventoryTree>(),
-                Items = new List<InventoryTree.InventoryItem>(),
+                Children = [],
+                Items = [],
 
             };
             root.Children.Add(clothingTree);
@@ -87,8 +87,8 @@ namespace LibRLV.Tests
                 Id = new UUID("dddddddd-dddd-4ddd-8ddd-dddddddddddd"),
                 Name = "Hats",
                 Parent = clothingTree,
-                Children = new List<InventoryTree>(),
-                Items = new List<InventoryTree.InventoryItem>(),
+                Children = [],
+                Items = [],
             };
             clothingTree.Children.Add(hatsTree);
 
@@ -97,8 +97,8 @@ namespace LibRLV.Tests
                 Id = new UUID("ffffffff-0000-4000-8000-000000000000"),
                 Name = "Sub Hats",
                 Parent = hatsTree,
-                Children = new List<InventoryTree>(),
-                Items = new List<InventoryTree.InventoryItem>(),
+                Children = [],
+                Items = [],
             };
             hatsTree.Children.Add(subHatsTree);
 
@@ -107,8 +107,8 @@ namespace LibRLV.Tests
                 Id = new UUID("eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"),
                 Name = ".private",
                 Parent = root,
-                Children = new List<InventoryTree>(),
-                Items = new List<InventoryTree.InventoryItem>(),
+                Children = [],
+                Items = [],
             };
             root.Children.Add(privateTree);
 
@@ -117,8 +117,8 @@ namespace LibRLV.Tests
                 Id = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                 Name = "Accessories",
                 Parent = root,
-                Children = new List<InventoryTree>(),
-                Items = new List<InventoryTree.InventoryItem>(),
+                Children = [],
+                Items = [],
             };
             root.Children.Add(AccessoriesTree);
 
@@ -943,15 +943,27 @@ namespace LibRLV.Tests
         //
 
         #region @fly
-        [Fact] public void CanFly() => CheckSimpleCommand("fly", m => m.CanFly());
+        [Fact]
+        public void CanFly()
+        {
+            CheckSimpleCommand("fly", m => m.CanFly());
+        }
         #endregion
 
         #region @temprun
-        [Fact] public void CanTempRun() => CheckSimpleCommand("tempRun", m => m.CanTempRun());
+        [Fact]
+        public void CanTempRun()
+        {
+            CheckSimpleCommand("tempRun", m => m.CanTempRun());
+        }
         #endregion
 
         #region @alwaysrun
-        [Fact] public void CanAlwaysRun() => CheckSimpleCommand("alwaysRun", m => m.CanAlwaysRun());
+        [Fact]
+        public void CanAlwaysRun()
+        {
+            CheckSimpleCommand("alwaysRun", m => m.CanAlwaysRun());
+        }
         #endregion
 
         #region @setrot:<angle_in_radians>=force
@@ -1199,7 +1211,7 @@ namespace LibRLV.Tests
         [Fact]
         public void SetCamFov_Restricted()
         {
-            bool raisedEvent = false;
+            var raisedEvent = false;
             _rlv.Actions.SetCamFOV += (sender, args) =>
             {
                 raisedEvent = true;
@@ -1214,7 +1226,7 @@ namespace LibRLV.Tests
         [Fact]
         public void SetCamFov_Restricted_Synonym()
         {
-            bool raisedEvent = false;
+            var raisedEvent = false;
             _rlv.Actions.SetCamFOV += (sender, args) =>
             {
                 raisedEvent = true;
@@ -1396,11 +1408,19 @@ namespace LibRLV.Tests
         #endregion
 
         #region @camunlock
-        [Fact] public void CanSetCamUnlock() => CheckSimpleCommand("setcam_unlock", m => !m.IsCamLocked());
+        [Fact]
+        public void CanSetCamUnlock()
+        {
+            CheckSimpleCommand("setcam_unlock", m => !m.IsCamLocked());
+        }
         #endregion
 
         #region @setcam_unlock
-        [Fact] public void CanCamUnlock() => CheckSimpleCommand("camunlock", m => !m.IsCamLocked());
+        [Fact]
+        public void CanCamUnlock()
+        {
+            CheckSimpleCommand("camunlock", m => !m.IsCamLocked());
+        }
         #endregion
 
         #region @camavdist
@@ -1687,19 +1707,35 @@ namespace LibRLV.Tests
         //
 
         #region @sendChat
-        [Fact] public void CanSendChat() => CheckSimpleCommand("sendChat", m => m.CanSendChat());
+        [Fact]
+        public void CanSendChat()
+        {
+            CheckSimpleCommand("sendChat", m => m.CanSendChat());
+        }
         #endregion
 
         #region @chatshout
-        [Fact] public void CanChatShout() => CheckSimpleCommand("chatShout", m => m.CanChatShout());
+        [Fact]
+        public void CanChatShout()
+        {
+            CheckSimpleCommand("chatShout", m => m.CanChatShout());
+        }
         #endregion
 
         #region @chatnormal
-        [Fact] public void CanChatNormal() => CheckSimpleCommand("chatNormal", m => m.CanChatNormal());
+        [Fact]
+        public void CanChatNormal()
+        {
+            CheckSimpleCommand("chatNormal", m => m.CanChatNormal());
+        }
         #endregion
 
         #region @chatwhisper
-        [Fact] public void CanChatWhisper() => CheckSimpleCommand("chatWhisper", m => m.CanChatWhisper());
+        [Fact]
+        public void CanChatWhisper()
+        {
+            CheckSimpleCommand("chatWhisper", m => m.CanChatWhisper());
+        }
         #endregion
 
         #region @redirchat
@@ -1928,12 +1964,20 @@ namespace LibRLV.Tests
 
         #region @sendGesture
 
-        [Fact] public void CanSendGesture() => CheckSimpleCommand("sendGesture", m => m.CanSendGesture());
+        [Fact]
+        public void CanSendGesture()
+        {
+            CheckSimpleCommand("sendGesture", m => m.CanSendGesture());
+        }
 
         #endregion
 
         #region @emote
-        [Fact] public void CanEmote() => CheckSimpleCommand("emote", m => m.CanEmote());
+        [Fact]
+        public void CanEmote()
+        {
+            CheckSimpleCommand("emote", m => m.CanEmote());
+        }
 
         // TODO: Check 'ProcessChat' funcationality (not yet created, but the function doesn't exist yet) to make
         //       sure it no longer censors emotes on @chat=n
@@ -2457,11 +2501,19 @@ namespace LibRLV.Tests
         #endregion
 
         #region @tplm
-        [Fact] public void CanTpLm() => CheckSimpleCommand("tpLm", m => m.CanTpLm());
+        [Fact]
+        public void CanTpLm()
+        {
+            CheckSimpleCommand("tpLm", m => m.CanTpLm());
+        }
         #endregion
 
         #region @tploc
-        [Fact] public void CanTpLoc() => CheckSimpleCommand("tpLoc", m => m.CanTpLoc());
+        [Fact]
+        public void CanTpLoc()
+        {
+            CheckSimpleCommand("tpLoc", m => m.CanTpLoc());
+        }
         #endregion
 
         #region @tplure @tplure_sec 
@@ -2597,7 +2649,11 @@ namespace LibRLV.Tests
         #endregion
 
         #region @standtp
-        [Fact] public void CanStandTp() => CheckSimpleCommand("standTp", m => m.CanStandTp());
+        [Fact]
+        public void CanStandTp()
+        {
+            CheckSimpleCommand("standTp", m => m.CanStandTp());
+        }
         #endregion
 
         #region @tpto:<region_name>/<X_local>/<Y_local>/<Z_local>[;lookat]=force
@@ -2656,7 +2712,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
-            bool raisedEvent = false;
+            var raisedEvent = false;
             _rlv.Actions.TpTo += (sender, args) =>
             {
                 raisedEvent = true;
@@ -2671,7 +2727,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@tploc=n", _sender.Id, _sender.Name);
 
-            bool raisedEvent = false;
+            var raisedEvent = false;
             _rlv.Actions.TpTo += (sender, args) =>
             {
                 raisedEvent = true;
@@ -2834,20 +2890,36 @@ namespace LibRLV.Tests
         //
 
         #region @showinv
-        [Fact] public void CanShowInv() => CheckSimpleCommand("showInv", m => m.CanShowInv());
+        [Fact]
+        public void CanShowInv()
+        {
+            CheckSimpleCommand("showInv", m => m.CanShowInv());
+        }
 
         #endregion
 
         #region @viewNote
-        [Fact] public void CanViewNote() => CheckSimpleCommand("viewNote", m => m.CanViewNote());
+        [Fact]
+        public void CanViewNote()
+        {
+            CheckSimpleCommand("viewNote", m => m.CanViewNote());
+        }
         #endregion
 
         #region @viewscript
-        [Fact] public void CanViewScript() => CheckSimpleCommand("viewScript", m => m.CanViewScript());
+        [Fact]
+        public void CanViewScript()
+        {
+            CheckSimpleCommand("viewScript", m => m.CanViewScript());
+        }
         #endregion
 
         #region @viewtexture
-        [Fact] public void CanViewTexture() => CheckSimpleCommand("viewTexture", m => m.CanViewTexture());
+        [Fact]
+        public void CanViewTexture()
+        {
+            CheckSimpleCommand("viewTexture", m => m.CanViewTexture());
+        }
         #endregion
 
         #region @edit @editobj @editworld @editattach
@@ -2960,7 +3032,11 @@ namespace LibRLV.Tests
         #endregion
 
         #region @canrez
-        [Fact] public void CanRez() => CheckSimpleCommand("rez", m => m.CanRez());
+        [Fact]
+        public void CanRez()
+        {
+            CheckSimpleCommand("rez", m => m.CanRez());
+        }
 
         #endregion
 
@@ -3033,7 +3109,11 @@ namespace LibRLV.Tests
         //
 
         #region @unsit
-        [Fact] public void CanUnsit() => CheckSimpleCommand("unsit", m => m.CanUnsit());
+        [Fact]
+        public void CanUnsit()
+        {
+            CheckSimpleCommand("unsit", m => m.CanUnsit());
+        }
         #endregion
 
         #region @sit FORCE
@@ -3091,7 +3171,7 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
-            bool raisedEvent = false;
+            var raisedEvent = false;
             _rlv.Actions.TpTo += (sender, args) =>
             {
                 raisedEvent = true;
@@ -3110,7 +3190,7 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@sit=n", _sender.Id, _sender.Name);
 
-            bool raisedEvent = false;
+            var raisedEvent = false;
             _rlv.Actions.TpTo += (sender, args) =>
             {
                 raisedEvent = true;
@@ -3128,7 +3208,7 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@standtp=n", _sender.Id, _sender.Name);
 
-            bool raisedEvent = false;
+            var raisedEvent = false;
             _rlv.Actions.TpTo += (sender, args) =>
             {
                 raisedEvent = true;
@@ -3144,7 +3224,7 @@ namespace LibRLV.Tests
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
             // SetupSitTarget(objectId1, true); <-- Don't setup sit target for this test
 
-            bool raisedEvent = false;
+            var raisedEvent = false;
             _rlv.Actions.TpTo += (sender, args) =>
             {
                 raisedEvent = true;
@@ -3211,7 +3291,11 @@ namespace LibRLV.Tests
         #endregion
 
         #region @sit
-        [Fact] public void CanSit() => CheckSimpleCommand("sit", m => m.CanSit());
+        [Fact]
+        public void CanSit()
+        {
+            CheckSimpleCommand("sit", m => m.CanSit());
+        }
         #endregion
 
         #region @sitground=force
@@ -3379,7 +3463,11 @@ namespace LibRLV.Tests
         #endregion
 
         #region @defaultwear=<y/n>
-        [Fact] public void CanDefaultWear() => CheckSimpleCommand("defaultWear", m => m.CanDefaultWear());
+        [Fact]
+        public void CanDefaultWear()
+        {
+            CheckSimpleCommand("defaultWear", m => m.CanDefaultWear());
+        }
         #endregion
 
         #region @detach[:<folder|attachpt|uuid>]=force @remattach[:<folder|attachpt|uuid>]=force
@@ -3732,7 +3820,7 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
             var currentOutfit = new List<InventoryTree.InventoryItem>()
             {
-                new InventoryTree.InventoryItem()
+                new()
                 {
                     WornOn = WearableType.Socks,
                     FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
@@ -3740,7 +3828,7 @@ namespace LibRLV.Tests
                     Name = $"My Socks",
                     Id = new UUID($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
                 },
-                new InventoryTree.InventoryItem()
+                new()
                 {
                     WornOn = WearableType.Hair,
                     FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
@@ -3780,7 +3868,7 @@ namespace LibRLV.Tests
                     WornOn = item,
                     FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     AttachedTo = null,
-                    Name = $"My {item.ToString()}",
+                    Name = $"My {item}",
                     Id = new UUID($"c{(int)item:D7}-cccc-4ccc-8ccc-cccccccccccc")
                 });
             }
@@ -3805,7 +3893,7 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
             var currentOutfit = new List<InventoryTree.InventoryItem>()
             {
-                new InventoryTree.InventoryItem()
+                new()
                 {
                     WornOn = WearableType.Socks,
                     FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
@@ -3834,7 +3922,7 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
             var currentOutfit = new List<InventoryTree.InventoryItem>()
             {
-                new InventoryTree.InventoryItem()
+                new()
                 {
                     WornOn = WearableType.Hair,
                     FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
@@ -3892,7 +3980,7 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
             var currentAttach = new List<InventoryTree.InventoryItem>()
             {
-                new InventoryTree.InventoryItem()
+                new()
                 {
                     WornOn = null,
                     FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
@@ -3900,7 +3988,7 @@ namespace LibRLV.Tests
                     Name = $"My Socks",
                     Id = new UUID($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
                 },
-                new InventoryTree.InventoryItem()
+                new()
                 {
                     WornOn = null,
                     FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
@@ -3935,7 +4023,7 @@ namespace LibRLV.Tests
                     WornOn = null,
                     FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     AttachedTo = item,
-                    Name = $"My {item.ToString()}",
+                    Name = $"My {item}",
                     Id = new UUID($"c{(int)item:D7}-cccc-4ccc-8ccc-cccccccccccc")
                 });
             }
@@ -3960,7 +4048,7 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
             var currentAttach = new List<InventoryTree.InventoryItem>()
             {
-                new InventoryTree.InventoryItem()
+                new()
                 {
                     WornOn = null,
                     FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
@@ -3989,7 +4077,7 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
             var currentAttach = new List<InventoryTree.InventoryItem>()
             {
-                new InventoryTree.InventoryItem()
+                new()
                 {
                     WornOn = null,
                     FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
@@ -4094,19 +4182,35 @@ namespace LibRLV.Tests
         //
 
         #region @unsharedwear=<y/n>
-        [Fact] public void CanUnsharedWear() => CheckSimpleCommand("unsharedWear", m => m.CanUnsharedWear());
+        [Fact]
+        public void CanUnsharedWear()
+        {
+            CheckSimpleCommand("unsharedWear", m => m.CanUnsharedWear());
+        }
         #endregion
 
         #region @unsharedunwear=<y/n>
-        [Fact] public void CanUnsharedUnwear() => CheckSimpleCommand("unsharedUnwear", m => m.CanUnsharedUnwear());
+        [Fact]
+        public void CanUnsharedUnwear()
+        {
+            CheckSimpleCommand("unsharedUnwear", m => m.CanUnsharedUnwear());
+        }
         #endregion
 
         #region @sharedwear=<y/n>
-        [Fact] public void CanSharedWear() => CheckSimpleCommand("sharedWear", m => m.CanSharedWear());
+        [Fact]
+        public void CanSharedWear()
+        {
+            CheckSimpleCommand("sharedWear", m => m.CanSharedWear());
+        }
         #endregion
 
         #region @sharedunwear=<y/n>
-        [Fact] public void CanSharedUnwear() => CheckSimpleCommand("sharedUnwear", m => m.CanSharedUnwear());
+        [Fact]
+        public void CanSharedUnwear()
+        {
+            CheckSimpleCommand("sharedUnwear", m => m.CanSharedUnwear());
+        }
         #endregion
 
         #region @getinv[:folder1/.../folderN]=<channel_number>
@@ -4747,8 +4851,8 @@ namespace LibRLV.Tests
             // Attach everything in the Clothing/Hats folder
             var expected = new List<AttachmentEventArgs.AttachmentRequest>()
             {
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Chin, replaceExistingAttachments),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, AttachmentPoint.Spine, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Chin, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, AttachmentPoint.Spine, replaceExistingAttachments),
             }.OrderBy(n => n.ItemId);
 
             Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
@@ -4781,9 +4885,9 @@ namespace LibRLV.Tests
             // Attach everything in the Clothing folder. Make sure clothing types (WearableType) are also included
             var expected = new List<AttachmentEventArgs.AttachmentRequest>()
             {
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, AttachmentPoint.Default, replaceExistingAttachments),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, AttachmentPoint.Chest, replaceExistingAttachments),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_RetroPants_WornPants.Id, AttachmentPoint.Default, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, AttachmentPoint.Default, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, AttachmentPoint.Chest, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, AttachmentPoint.Default, replaceExistingAttachments),
             }.OrderBy(n => n.ItemId);
 
             Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
@@ -4858,8 +4962,8 @@ namespace LibRLV.Tests
             //  specifies a different attachment point such as "Fancy Hat (skull)".
             var expected = new List<AttachmentEventArgs.AttachmentRequest>()
             {
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Skull, replaceExistingAttachments),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, AttachmentPoint.Spine, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Skull, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, AttachmentPoint.Spine, replaceExistingAttachments),
             }.OrderBy(n => n.ItemId);
 
             Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
@@ -4902,8 +5006,8 @@ namespace LibRLV.Tests
             // Attach everything inside of the Clothing/Hats folder, but force 'add to' logic due to the + prefix on the hats folder
             var expected = new List<AttachmentEventArgs.AttachmentRequest>()
             {
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Chin, false),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, AttachmentPoint.Spine, false),
+                new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Chin, false),
+                new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, AttachmentPoint.Spine, false),
             }.OrderBy(n => n.ItemId);
 
             Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
@@ -4988,11 +5092,11 @@ namespace LibRLV.Tests
             // Attach everything inside of of the Clothing folder, and all of its subfolders recursively
             var expected = new List<AttachmentEventArgs.AttachmentRequest>()
             {
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_RetroPants_WornPants.Id, AttachmentPoint.Default, replaceExistingAttachments),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, AttachmentPoint.Default, replaceExistingAttachments),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, AttachmentPoint.Pelvis, replaceExistingAttachments),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Chin, replaceExistingAttachments),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, AttachmentPoint.Spine, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, AttachmentPoint.Default, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, AttachmentPoint.Default, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, AttachmentPoint.Pelvis, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Chin, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, AttachmentPoint.Spine, replaceExistingAttachments),
             }.OrderBy(n => n.ItemId);
 
             Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
@@ -5037,9 +5141,9 @@ namespace LibRLV.Tests
             //   which means it will be ignored
             var expected = new List<AttachmentEventArgs.AttachmentRequest>()
             {
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_RetroPants_WornPants.Id, AttachmentPoint.Default, replaceExistingAttachments),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, AttachmentPoint.Default, replaceExistingAttachments),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, AttachmentPoint.Pelvis, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, AttachmentPoint.Default, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, AttachmentPoint.Default, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, AttachmentPoint.Pelvis, replaceExistingAttachments),
             }.OrderBy(n => n.ItemId);
 
             Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
@@ -5084,11 +5188,11 @@ namespace LibRLV.Tests
             //   which means it will use 'add to' logic instead of 'replace' logic when attaching
             var expected = new List<AttachmentEventArgs.AttachmentRequest>()
             {
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, AttachmentPoint.Default, replaceExistingAttachments),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_RetroPants_WornPants.Id, AttachmentPoint.Default, replaceExistingAttachments),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, AttachmentPoint.Pelvis, replaceExistingAttachments),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Chin, false),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, AttachmentPoint.Spine, false),
+                new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, AttachmentPoint.Default, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, AttachmentPoint.Default, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, AttachmentPoint.Pelvis, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Chin, false),
+                new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, AttachmentPoint.Spine, false),
             }.OrderBy(n => n.ItemId);
 
             Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
@@ -5125,14 +5229,14 @@ namespace LibRLV.Tests
             var raised = Assert.Raises<AttachmentEventArgs>(
                  attach: n => _rlv.Actions.Attach += n,
                  detach: n => _rlv.Actions.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@attachthis=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name)
+                 testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name)
             );
 
             // Attach everything in #RLV/Clothing/Hats because that's where the source item (fancy hat) is calling @attachthis from
             var expected = new List<AttachmentEventArgs.AttachmentRequest>()
             {
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Chin, true),
-                new AttachmentEventArgs.AttachmentRequest(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, AttachmentPoint.Spine, true),
+                new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, AttachmentPoint.Chin, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, AttachmentPoint.Spine, replaceExistingAttachments),
             }.OrderBy(n => n.ItemId);
 
             Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
@@ -6639,7 +6743,11 @@ namespace LibRLV.Tests
 
         #region @interact=<y/n>
 
-        [Fact] public void CanInteract() => CheckSimpleCommand("interact", m => m.CanInteract());
+        [Fact]
+        public void CanInteract()
+        {
+            CheckSimpleCommand("interact", m => m.CanInteract());
+        }
 
         [Fact]
         public void CanInteract_default()
@@ -6672,15 +6780,27 @@ namespace LibRLV.Tests
         //
 
         #region  @showworldmap=<y/n>
-        [Fact] public void CanShowWorldMap() => CheckSimpleCommand("showWorldMap", m => m.CanShowWorldMap());
+        [Fact]
+        public void CanShowWorldMap()
+        {
+            CheckSimpleCommand("showWorldMap", m => m.CanShowWorldMap());
+        }
         #endregion
 
         #region @showminimap=<y/n>
-        [Fact] public void CanShowMiniMap() => CheckSimpleCommand("showMiniMap", m => m.CanShowMiniMap());
+        [Fact]
+        public void CanShowMiniMap()
+        {
+            CheckSimpleCommand("showMiniMap", m => m.CanShowMiniMap());
+        }
         #endregion
 
         #region @showloc=<y/n>
-        [Fact] public void CanShowLoc() => CheckSimpleCommand("showLoc", m => m.CanShowLoc());
+        [Fact]
+        public void CanShowLoc()
+        {
+            CheckSimpleCommand("showLoc", m => m.CanShowLoc());
+        }
         #endregion
 
         //
@@ -6785,7 +6905,11 @@ namespace LibRLV.Tests
         #endregion
 
         #region @shownearby=<y/n>
-        [Fact] public void CanShowNearby() => CheckSimpleCommand("showNearby", m => m.CanShowNearby());
+        [Fact]
+        public void CanShowNearby()
+        {
+            CheckSimpleCommand("showNearby", m => m.CanShowNearby());
+        }
         #endregion
 
         #region @showhovertextall=<y/n>
@@ -6933,7 +7057,11 @@ namespace LibRLV.Tests
         #endregion
 
         #region @setgroup=<y/n>
-        [Fact] public void CanSetGroup() => CheckSimpleCommand("setGroup", m => m.CanSetGroup());
+        [Fact]
+        public void CanSetGroup()
+        {
+            CheckSimpleCommand("setGroup", m => m.CanSetGroup());
+        }
         #endregion
 
         #region @getgroup=<channel_number>
@@ -6983,7 +7111,11 @@ namespace LibRLV.Tests
         //
 
         #region @setdebug=<y/n>
-        [Fact] public void CanSetDebug() => CheckSimpleCommand("setDebug", m => m.CanSetDebug());
+        [Fact]
+        public void CanSetDebug()
+        {
+            CheckSimpleCommand("setDebug", m => m.CanSetDebug());
+        }
         #endregion
 
         #region @setdebug_<setting>:<value>=force
@@ -7039,7 +7171,11 @@ namespace LibRLV.Tests
         #endregion
 
         #region @setenv=<y/n>
-        [Fact] public void CanSetEnv() => CheckSimpleCommand("setEnv", m => m.CanSetEnv());
+        [Fact]
+        public void CanSetEnv()
+        {
+            CheckSimpleCommand("setEnv", m => m.CanSetEnv());
+        }
         #endregion
 
         #region @setenv_<setting>:<value>=force
@@ -7090,7 +7226,11 @@ namespace LibRLV.Tests
         //
 
         #region @allowidle=<y/n>
-        [Fact] public void CanAllowIdle() => CheckSimpleCommand("allowIdle", m => m.CanAllowIdle());
+        [Fact]
+        public void CanAllowIdle()
+        {
+            CheckSimpleCommand("allowIdle", m => m.CanAllowIdle());
+        }
         #endregion
     }
 }

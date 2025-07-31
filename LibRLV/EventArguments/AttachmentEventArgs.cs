@@ -1,6 +1,6 @@
-﻿using OpenMetaverse;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using OpenMetaverse;
 
 namespace LibRLV.EventArguments
 {
@@ -14,28 +14,28 @@ namespace LibRLV.EventArguments
 
             public AttachmentRequest(UUID itemId, AttachmentPoint attachmentPoint, bool replaceExistingAttachments)
             {
-                this.ItemId = itemId;
-                this.AttachmentPoint = attachmentPoint;
-                this.ReplaceExistingAttachments = replaceExistingAttachments;
+                ItemId = itemId;
+                AttachmentPoint = attachmentPoint;
+                ReplaceExistingAttachments = replaceExistingAttachments;
             }
 
             public override bool Equals(object obj)
             {
                 return obj is AttachmentRequest request &&
-                       this.ItemId.Equals(request.ItemId) &&
-                       this.AttachmentPoint == request.AttachmentPoint &&
-                       this.ReplaceExistingAttachments == request.ReplaceExistingAttachments;
+                       ItemId.Equals(request.ItemId) &&
+                       AttachmentPoint == request.AttachmentPoint &&
+                       ReplaceExistingAttachments == request.ReplaceExistingAttachments;
             }
 
             public override int GetHashCode()
             {
-                return HashCode.Combine(this.ItemId, this.AttachmentPoint, this.ReplaceExistingAttachments);
+                return HashCode.Combine(ItemId, AttachmentPoint, ReplaceExistingAttachments);
             }
         }
 
         public AttachmentEventArgs(List<AttachmentRequest> itemsToAttach)
         {
-            this.ItemsToAttach = itemsToAttach;
+            ItemsToAttach = itemsToAttach;
         }
 
         public List<AttachmentRequest> ItemsToAttach { get; set; }

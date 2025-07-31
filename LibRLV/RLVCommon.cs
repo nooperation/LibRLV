@@ -1,9 +1,9 @@
-﻿using OpenMetaverse;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text.RegularExpressions;
+using OpenMetaverse;
 
 namespace LibRLV
 {
@@ -112,12 +112,12 @@ namespace LibRLV
                     result.Add(floatValue);
                     continue;
                 }
-                else if (RLVWearableTypeMap.TryGetValue(arg, out WearableType part) && part != WearableType.Invalid)
+                else if (RLVWearableTypeMap.TryGetValue(arg, out var part) && part != WearableType.Invalid)
                 {
                     result.Add(part);
                     continue;
                 }
-                else if (RLVAttachmentPointMap.TryGetValue(arg, out AttachmentPoint attachmentPoint))
+                else if (RLVAttachmentPointMap.TryGetValue(arg, out var attachmentPoint))
                 {
                     result.Add(attachmentPoint);
                     continue;
@@ -145,7 +145,7 @@ namespace LibRLV
                 .Select(n => n.Groups["tag"].Value)
                 .ToList();
 
-            for (int i = attachmentPointTag.Count - 1; i >= 0; i--)
+            for (var i = attachmentPointTag.Count - 1; i >= 0; i--)
             {
                 if (RLVAttachmentPointMap.TryGetValue(attachmentPointTag[i], out attachmentPoint))
                 {

@@ -6,8 +6,8 @@ namespace LibRLV.EventArguments
     {
         public SetSettingEventArgs(string settingName, string settingValue)
         {
-            this.SettingName = settingName;
-            this.SettingValue = settingValue;
+            SettingName = settingName;
+            SettingValue = settingValue;
         }
 
         public string SettingName { get; }

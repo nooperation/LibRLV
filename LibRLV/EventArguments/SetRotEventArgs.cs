@@ -8,7 +8,7 @@ namespace LibRLV.EventArguments
 
         public SetRotEventArgs(float angleInRadians)
         {
-            this.AngleInRadians = angleInRadians;
+            AngleInRadians = angleInRadians;
         }
     }
 }

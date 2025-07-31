@@ -1,9 +1,9 @@
-﻿using LibRLV.EventArguments;
-using OpenMetaverse;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using LibRLV.EventArguments;
+using OpenMetaverse;
 using static LibRLV.InventoryTree;
 
 namespace LibRLV
@@ -40,8 +40,8 @@ namespace LibRLV
         public event EventHandler<SetSettingEventArgs> SetDebug;
 
         // TODO: Swap manager out with an interface once it's been solidified into only useful stuff
-        RLVManager _manager;
-        IRLVCallbacks _callbacks;
+        private readonly RLVManager _manager;
+        private readonly IRLVCallbacks _callbacks;
 
         public RLVActionHandler(RLVManager manager, IRLVCallbacks callbacks)
         {
@@ -140,7 +140,7 @@ namespace LibRLV
 
         private bool HandleSetGroup(RLVMessage command)
         {
-            if (UUID.TryParse(command.Option, out UUID groupId))
+            if (UUID.TryParse(command.Option, out var groupId))
             {
                 SetGroup?.Invoke(this, new SetGroupEventArgs(groupId));
             }
@@ -569,7 +569,7 @@ namespace LibRLV
 
         private bool HandleSetRot(RLVMessage command)
         {
-            if (!float.TryParse(command.Option, out float angleInRadians))
+            if (!float.TryParse(command.Option, out var angleInRadians))
             {
                 return false;
             }
@@ -586,7 +586,7 @@ namespace LibRLV
                 return false;
             }
 
-            if (!float.TryParse(args[0], out float distance))
+            if (!float.TryParse(args[0], out var distance))
             {
                 return false;
             }
@@ -615,7 +615,7 @@ namespace LibRLV
                 return false;
             }
 
-            if (!float.TryParse(command.Option, out float fov))
+            if (!float.TryParse(command.Option, out var fov))
             {
                 return false;
             }
@@ -626,7 +626,7 @@ namespace LibRLV
 
         private bool HandleSit(RLVMessage command)
         {
-            if (command.Option != string.Empty && !UUID.TryParse(command.Option, out UUID sitTarget))
+            if (command.Option != string.Empty && !UUID.TryParse(command.Option, out var sitTarget))
             {
                 return false;
             }
@@ -681,7 +681,7 @@ namespace LibRLV
             float? lookat = null;
             if (commandArgs.Length > 1)
             {
-                if (!float.TryParse(commandArgs[1], out float val))
+                if (!float.TryParse(commandArgs[1], out var val))
                 {
                     return false;
                 }

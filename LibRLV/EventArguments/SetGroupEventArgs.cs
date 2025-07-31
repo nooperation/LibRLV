@@ -1,5 +1,5 @@
-﻿using OpenMetaverse;
-using System;
+﻿using System;
+using OpenMetaverse;
 
 namespace LibRLV.EventArguments
 {
@@ -7,13 +7,13 @@ namespace LibRLV.EventArguments
     {
         public SetGroupEventArgs(string groupName)
         {
-            this.GroupName = groupName;
-            this.GroupId = UUID.Zero;
+            GroupName = groupName;
+            GroupId = UUID.Zero;
         }
         public SetGroupEventArgs(UUID groupID)
         {
-            this.GroupName = string.Empty;
-            this.GroupId = groupID;
+            GroupName = string.Empty;
+            GroupId = groupID;
         }
 
         public string GroupName { get; }

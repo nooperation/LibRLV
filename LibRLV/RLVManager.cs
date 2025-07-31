@@ -1,16 +1,14 @@
-﻿using OpenMetaverse;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using static LibRLV.RLVManager;
+using OpenMetaverse;
 
 namespace LibRLV
 {
     public class RLVManager
     {
-        IRestrictionProvider _restrictionProvider;
-        IRLVCallbacks _callbacks;
+        private readonly IRestrictionProvider _restrictionProvider;
+        private readonly IRLVCallbacks _callbacks;
 
         public RLVManager(IRestrictionProvider restrictionProvider, IRLVCallbacks callbacks)
         {

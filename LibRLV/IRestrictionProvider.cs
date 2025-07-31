@@ -1,6 +1,5 @@
-﻿using OpenMetaverse;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
+using OpenMetaverse;
 
 namespace LibRLV
 {

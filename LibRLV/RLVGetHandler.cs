@@ -1,10 +1,10 @@
-﻿using OpenMetaverse;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using OpenMetaverse;
 
 namespace LibRLV
 {
@@ -397,8 +397,8 @@ namespace LibRLV
 
             public InvWornInfoContainer(string folderName, string countIndicator)
             {
-                this.FolderName = folderName;
-                this.CountIndicator = countIndicator;
+                FolderName = folderName;
+                CountIndicator = countIndicator;
             }
 
             public override string ToString()
