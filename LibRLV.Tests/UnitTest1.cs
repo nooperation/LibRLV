@@ -5097,9 +5097,12 @@ namespace LibRLV.Tests
         #endregion
 
 
-        // @attachthis[:<attachpt> or <clothing_layer> or <uuid>]=force
-        [Fact]
-        public void AttachThis_Default()
+        #region @attachthisoverorreplace @attachthisover @attachthis[:<attachpt> or <clothing_layer> or <uuid>]=force
+        [Theory]
+        [InlineData("attachthis", true)]
+        [InlineData("attachthisoverorreplace", true)]
+        [InlineData("attachthisover", false)]
+        public void AttachThis_Default(string command, bool replaceExistingAttachments)
         {
             var sampleTree = BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
