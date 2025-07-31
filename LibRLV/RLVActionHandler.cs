@@ -65,17 +65,17 @@ namespace LibRLV
                 { "attachall", n => HandleAttach(n, true, true)},
                 { "attachallover", n => HandleAttach(n, false, true)},
                 { "attachalloverorreplace", n => HandleAttach(n, true, true)},
-                { "detach", HandleRemAttach},
-                { "remattach", HandleRemAttach},
-                { "detachall", n => HandleInventoryThing(n, DetachAll)},
                 { "attachthis", n => HandleAttachThis(n, true, false)},
                 { "attachthisover", n => HandleAttachThis(n, false, false)},
                 { "attachthisoverorreplace", n => HandleAttachThis(n, true, false)},
                 { "attachallthis", n => HandleAttachThis(n, true, true)},
                 { "attachallthisover", n => HandleAttachThis(n, false, true)},
                 { "attachallthisoverorreplace", n => HandleAttachThis(n, true, true)},
-                { "detachthis", n => HandleAttachmentThing(n, DetachThis)},
-                { "detachallthis", n => HandleAttachmentThing(n, DetachAllThis)},
+                { "remattach", HandleRemAttach},
+                { "detach", HandleRemAttach},
+                { "detachall", n => HandleDetachAll(n)},
+                { "detachthis", n => HandleDetachThis(n, false)},
+                { "detachallthis", n => HandleDetachThis(n, true)},
                 { "setgroup", HandleSetGroup},
                 { "setdebug_", HandleSetDebug},
                 { "setenv_", HandleSetEnv},
@@ -166,6 +166,16 @@ namespace LibRLV
 
         private bool CanRemAttachItem(InventoryItem item, InventoryMap inventoryMap, bool enforceNostrip)
         {
+            if (item.WornOn == null && item.AttachedTo == null)
+            {
+                return false;
+            }
+
+            if (item.Name.StartsWith("."))
+            {
+                return false;
+            }
+
             if (enforceNostrip && item.Name.ToLower().Contains("nostrip"))
             {
                 return false;
@@ -427,6 +437,38 @@ namespace LibRLV
             return true;
         }
 
+
+        private void CollectItemsToDetach(InventoryTree folder, InventoryMap inventoryMap, bool recursive, List<UUID> itemsToDetach)
+        {
+            if (folder.Name.StartsWith("."))
+            {
+                return;
+            }
+
+            foreach (var item in folder.Items)
+            {
+                if (!CanRemAttachItem(item, inventoryMap, true))
+                {
+                    continue;
+                }
+
+                itemsToDetach.Add(item.Id);
+            }
+
+            if (recursive)
+            {
+                foreach (var child in folder.Children)
+                {
+                    if (child.Name.StartsWith("."))
+                    {
+                        continue;
+                    }
+
+                    CollectItemsToDetach(child, inventoryMap, recursive, itemsToDetach);
+                }
+            }
+        }
+
         // @remattach[:<folder|attachpt|uuid>]=force
         // TODO: Add support for Attachment groups (RLVa)
         private bool HandleRemAttach(RLVMessage command)
@@ -437,42 +479,117 @@ namespace LibRLV
             }
             var inventoryMap = new InventoryMap(sharedFolder);
 
-            UUID? uuid = null;
-            AttachmentPoint? attachmentPoint = null;
-            UUID? folderId = null;
+            var itemIdsToDetach = new List<UUID>();
 
-            if (UUID.TryParse(command.Option, out var uuidTemp))
+            if (UUID.TryParse(command.Option, out var uuid))
             {
-                uuid = uuidTemp;
+                if (inventoryMap.Items.TryGetValue(uuid, out var item))
+                {
+                    if (CanRemAttachItem(item, inventoryMap, true))
+                    {
+                        itemIdsToDetach.Add(uuid);
+                    }
+                }
             }
-            else if (RLVCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPointTemp))
+            else if (inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
             {
-                attachmentPoint = attachmentPointTemp;
+                CollectItemsToDetach(folder, inventoryMap, false, itemIdsToDetach);
             }
-            else if (inventoryMap.TryGetFolderFromPath(command.Option, true, out var folderTemp))
+            else if (RLVCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
             {
-                folderId = folderTemp.Id;
+                itemIdsToDetach = inventoryMap.Items
+                    .Where(n =>
+                        n.Value.AttachedTo == attachmentPoint &&
+                        CanRemAttachItem(n.Value, inventoryMap, true)
+                    )
+                    .Select(n => n.Value.Id)
+                    .Distinct()
+                    .ToList();
             }
-            else if (command.Option.Length > 0)
+            else if (command.Option.Length == 0)
+            {
+                // Everything attachable will be detached (excludes clothing/wearable types)
+                itemIdsToDetach = inventoryMap.Items
+                    .Where(n =>
+                        n.Value.AttachedTo != null && CanRemAttachItem(n.Value, inventoryMap, true)
+                    )
+                    .Select(n => n.Value.Id)
+                    .Distinct()
+                    .ToList();
+            }
+            else
             {
                 return false;
             }
 
-            var itemsToDetach = inventoryMap.Items
-                .Where(n =>
-                    n.Value.AttachedTo != null &&
-                    (uuid == null || n.Value.Id == uuid) &&
-                    (attachmentPoint == null || n.Value.AttachedTo == attachmentPoint) &&
-                    (folderId == null || n.Value.FolderId == folderId) &&
-                    CanRemAttachItem(n.Value, inventoryMap, true)
-                )
-                .Select(n => n.Value)
-                .ToList();
+            Detach?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
+            return true;
+        }
 
-            var itemIdsToDetach = itemsToDetach
-                .Select(n => n.Id)
-                .Distinct()
-                .ToList();
+        private bool HandleDetachAll(RLVMessage command)
+        {
+            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            {
+                return false;
+            }
+            var inventoryMap = new InventoryMap(sharedFolder);
+
+            if (!inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
+            {
+                return false;
+            }
+
+            var itemIdsToDetach = new List<UUID>();
+            CollectItemsToDetach(folder, inventoryMap, true, itemIdsToDetach);
+
+            Detach?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
+            return true;
+        }
+
+        private bool HandleDetachThis(RLVMessage command, bool recursive)
+        {
+            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            {
+                return false;
+            }
+            var inventoryMap = new InventoryMap(sharedFolder);
+            var folderPaths = new List<InventoryTree>();
+
+            if (UUID.TryParse(command.Option, out var uuid))
+            {
+                if (inventoryMap.Items.TryGetValue(uuid, out var item))
+                {
+                    if (inventoryMap.Folders.TryGetValue(item.FolderId, out var folder))
+                    {
+                        folderPaths.Add(folder);
+                    }
+                }
+            }
+            else if (RLVCommon.RLVWearableTypeMap.TryGetValue(command.Option, out var wearableType))
+            {
+                var parts = GetPath_Internal(false, null, null, wearableType);
+                folderPaths.AddRange(parts.Select(n => n.Folder));
+            }
+            else if (RLVCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
+            {
+                var parts = GetPath_Internal(false, null, attachmentPoint, null);
+                folderPaths.AddRange(parts.Select(n => n.Folder));
+            }
+            else if (inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
+            {
+                folderPaths.Add(folder);
+            }
+            else if (command.Option.Length == 0)
+            {
+                var parts = GetPath_Internal(false, command.Sender, null, null);
+                folderPaths.AddRange(parts.Select(n => n.Folder));
+            }
+
+            var itemIdsToDetach = new List<UUID>();
+            foreach (var item in folderPaths)
+            {
+                CollectItemsToDetach(item, inventoryMap, recursive, itemIdsToDetach);
+            }
 
             Detach?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
             return true;

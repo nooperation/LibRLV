@@ -3472,143 +3472,6 @@ namespace LibRLV.Tests
         }
         #endregion
 
-        #region @detach[:<folder|attachpt|uuid>]=force @remattach[:<folder|attachpt|uuid>]=force
-        [Theory]
-        [InlineData("@detach=force")]
-        [InlineData("@remattach=force")]
-        public void RemAttach_RemoveAllAttachments(string command)
-        {
-            var sampleTree = BuildInventoryTree();
-            var sharedFolder = sampleTree.Root;
-
-            _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
-
-            var raised = Assert.Raises<DetachEventArgs>(
-                 attach: n => _rlv.Actions.Detach += n,
-                 detach: n => _rlv.Actions.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
-            );
-
-            var expected = new List<UUID>()
-            {
-                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
-                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
-                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
-                sampleTree.Root_Accessories_Glasses_AttachChin.Id,
-            }.Order();
-
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
-        }
-
-        [Theory]
-        [InlineData("@detach:Clothing/Hats=force")]
-        [InlineData("@remattach:Clothing/Hats=force")]
-        public void RemAttach_ByFolder(string command)
-        {
-            var sampleTree = BuildInventoryTree();
-            var sharedFolder = sampleTree.Root;
-
-            _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
-
-            var raised = Assert.Raises<DetachEventArgs>(
-                 attach: n => _rlv.Actions.Detach += n,
-                 detach: n => _rlv.Actions.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
-            );
-
-            var expected = new List<UUID>()
-            {
-                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
-            }.Order();
-
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
-        }
-
-        [Theory]
-        [InlineData("@detach:groin=force")]
-        [InlineData("@remattach:groin=force")]
-        public void RemAttach_RemoveAttachmentPoint(string command)
-        {
-            var sampleTree = BuildInventoryTree();
-            var sharedFolder = sampleTree.Root;
-
-            _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
-
-            var raised = Assert.Raises<DetachEventArgs>(
-                 attach: n => _rlv.Actions.Detach += n,
-                 detach: n => _rlv.Actions.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
-            );
-
-            var expected = new List<UUID>()
-            {
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
-                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
-            }.Order();
-
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
-        }
-
-        [Theory]
-        [InlineData("@detach:skull=force")]
-        [InlineData("@remattach:skull=force")]
-        public void RemAttach_RemoveNone(string command)
-        {
-            var sampleTree = BuildInventoryTree();
-            var sharedFolder = sampleTree.Root;
-
-            _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
-
-            var raised = Assert.Raises<DetachEventArgs>(
-                 attach: n => _rlv.Actions.Detach += n,
-                 detach: n => _rlv.Actions.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
-            );
-
-            var expected = new List<UUID>()
-            {
-            };
-
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
-        }
-
-        [Theory]
-        [InlineData("detach")]
-        [InlineData("remattach")]
-        public void RemAttach_RemoveByUUID(string command)
-        {
-            var sampleTree = BuildInventoryTree();
-            var sharedFolder = sampleTree.Root;
-
-            _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
-
-            var raised = Assert.Raises<DetachEventArgs>(
-                 attach: n => _rlv.Actions.Detach += n,
-                 detach: n => _rlv.Actions.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id}=force", _sender.Id, _sender.Name)
-            );
-
-            var expected = new List<UUID>()
-            {
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id
-            };
-
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
-        }
-        #endregion
-
         #region @addoutfit[:<part>]=<y/n>
         [Fact]
         public void AddOutfit()
@@ -5786,15 +5649,544 @@ namespace LibRLV.Tests
         }
         #endregion
 
+        #region @detach @remattach[:<folder|attachpt|uuid>]=force
+        [Theory]
+        [InlineData("@detach=force")]
+        [InlineData("@remattach=force")]
+        public void RemAttach_RemoveAllAttachments(string command)
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
+            );
+
+            // Remove everything except for clothing despite what you would think. Just how things go.
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
+                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
+                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
+                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
+                 sampleTree.Root_Accessories_Glasses_AttachChin.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Theory]
+        [InlineData("@detach:Clothing/Hats=force")]
+        [InlineData("@remattach:Clothing/Hats=force")]
+        public void RemAttach_ByFolder(string command)
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
+            );
+
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
+                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Theory]
+        [InlineData("@detach:groin=force")]
+        [InlineData("@remattach:groin=force")]
+        public void RemAttach_RemoveAttachmentPoint(string command)
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
+            );
+
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
+                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Theory]
+        [InlineData("@detach:skull=force")]
+        [InlineData("@remattach:skull=force")]
+        public void RemAttach_RemoveNone(string command)
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
+            );
+
+            var expected = new List<UUID>()
+            {
+            };
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Theory]
+        [InlineData("detach")]
+        [InlineData("remattach")]
+        public void RemAttach_RemoveByUUID(string command)
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id}=force", _sender.Id, _sender.Name)
+            );
+
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id
+            };
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+        #endregion
+
+        #region @detachall:<folder1/.../folderN>=force
+        [Fact]
+        public void DetachAllForce_Recursive()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage("@detachall:Clothing=force", _sender.Id, _sender.Name)
+            );
+
+            // Everything under the clothing folder, and all of its subfolders will be removed
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
+                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
+                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
+                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
+                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+        #endregion
+
+        #region @detachthis[:<attachpt> or <clothing_layer> or <uuid>]=force
+        [Fact]
+        public void DetachThisForce_Default()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage("@detachthis=force", sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, sampleTree.Root_Clothing_HappyShirt_AttachChest.Name)
+            );
+
+            // Everything under the clothing folder will be detached because happyshirt exists in the clothing folder
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
+                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
+                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Fact]
+        public void DetachThisForce_ByAttachmentPoint()
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants (attached to 'groin')
+            //  |    |= Happy Shirt (attached to 'chest')
+            //  |    |= Retro Pants (worn on 'pants')
+            //  |    \-Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached to 'chin')
+            //  |        \= Party Hat (attached to 'groin')
+            //   \-Accessories
+            //        |= Watch (worn on 'tattoo')
+            //        \= Glasses (attached to 'chin') <--- Modified to be attached to chest
+
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = AttachmentPoint.Chest;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage("@detachthis:chest=force", _sender.Id, _sender.Name)
+            );
+
+            // Everything under the clothing and accessories folder will be detached, not recursive
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
+                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
+                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+                sampleTree.Root_Accessories_Watch_WornTattoo.Id,
+                sampleTree.Root_Accessories_Glasses_AttachChin.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Fact]
+        public void DetachThisForce_ByWearableType()
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants (attached to 'groin')
+            //  |    |= Happy Shirt (attached to 'chest')
+            //  |    |= Retro Pants (worn on 'pants')
+            //  |    \-Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached to 'chin')
+            //  |        \= Party Hat (attached to 'groin')
+            //   \-Accessories
+            //        |= Watch (worn on 'tattoo')  <--- Modified to be worn on pants
+            //        \= Glasses (attached to 'chin')
+
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Pants;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage("@detachthis:pants=force", _sender.Id, _sender.Name)
+            );
+
+            // Everything under the clothing and accessories folder will be detached, not recursive
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
+                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
+                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+                sampleTree.Root_Accessories_Watch_WornTattoo.Id,
+                sampleTree.Root_Accessories_Glasses_AttachChin.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Fact]
+        public void DetachThisForce_ByWearableType_PrivateFolder()
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing                 <--- Modified to be .Clothing
+            //  |    |= Business Pants (attached to 'groin')
+            //  |    |= Happy Shirt (attached to 'chest')
+            //  |    |= Retro Pants (worn on 'pants')
+            //  |    \-Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached to 'chin')
+            //  |        \= Party Hat (attached to 'groin')
+            //   \-Accessories
+            //        |= Watch (worn on 'tattoo') <--- Modified to be worn on pants
+            //        \= Glasses (attached to 'chin')
+
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
+            clothingFolder.Name = ".clothing";
+
+            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Pants;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage("@detachthis:pants=force", _sender.Id, _sender.Name)
+            );
+
+            // Only accessories will be removed even though pants exist in our clothing folder. The clothing folder is private ".clothing"
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Accessories_Watch_WornTattoo.Id,
+                sampleTree.Root_Accessories_Glasses_AttachChin.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+        #endregion
+
+        #region @detachallthis[:<attachpt> or <clothing_layer>]=force
+        [Fact]
+        public void DetachAllThisForce_Default()
+        {
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage("@detachallthis=force", sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, sampleTree.Root_Clothing_HappyShirt_AttachChest.Name)
+            );
+
+            // Everything under the clothing folder (and its subfolders recursively) will be detached because happyshirt exists in the clothing folder
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
+                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
+                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
+                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Fact]
+        public void DetachThisAllForce_ByAttachmentPoint()
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants (attached to 'groin')
+            //  |    |= Happy Shirt (attached to 'chest')
+            //  |    |= Retro Pants (worn on 'pants')
+            //  |    \-Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached to 'chin')
+            //  |        \= Party Hat (attached to 'groin')
+            //   \-Accessories
+            //        |= Watch (worn on 'tattoo')
+            //        \= Glasses (attached to 'chin') <--- Modified to be attached to chest
+
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = AttachmentPoint.Chest;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage("@detachallthis:chest=force", _sender.Id, _sender.Name)
+            );
+
+            // Everything under the clothing and accessories folder will be detached, and their subfolders recursively
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
+                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
+                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
+                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
+                sampleTree.Root_Accessories_Watch_WornTattoo.Id,
+                sampleTree.Root_Accessories_Glasses_AttachChin.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
 
 
-        // @detach:<folder_name>=force
+        [Fact]
+        public void DetachAllThisForce_ByWearableType()
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants (attached to 'groin')
+            //  |    |= Happy Shirt (attached to 'chest')
+            //  |    |= Retro Pants (worn on 'pants')
+            //  |    \-Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached to 'chin')
+            //  |        \= Party Hat (attached to 'groin')
+            //   \-Accessories
+            //        |= Watch (worn on 'tattoo')  <--- Modified to be worn on pants
+            //        \= Glasses (attached to 'chin')
 
-        // @detachall:<folder1/.../folderN>=force
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
 
-        // @detachthis[:<attachpt> or <clothing_layer> or <uuid>]=force
+            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Pants;
 
-        // @detachallthis[:<attachpt> or <clothing_layer>]=force
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage("@detachallthis:pants=force", _sender.Id, _sender.Name)
+            );
+
+            // Everything under the clothing and accessories folder will be detached, recursive
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
+                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
+                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
+                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
+                sampleTree.Root_Accessories_Watch_WornTattoo.Id,
+                sampleTree.Root_Accessories_Glasses_AttachChin.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Fact]
+        public void DetachAllThisForce_ByWearableType_PrivateFolder()
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants (attached to 'groin')
+            //  |    |= Happy Shirt (attached to 'chest')
+            //  |    |= Retro Pants (worn on 'pants')
+            //  |    \-Hats                     <--- Modified to be .Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached to 'chin')
+            //  |        \= Party Hat (attached to 'groin')
+            //   \-Accessories
+            //        |= Watch (worn on 'tattoo')  <--- Modified to be worn on pants
+            //        \= Glasses (attached to 'chin')
+
+            var sampleTree = BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
+            var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
+            hatsFolder.Name = ".hats";
+
+            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Pants;
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage("@detachallthis:pants=force", _sender.Id, _sender.Name)
+            );
+
+            // Everything under the clothing and accessories folder will be detached, recursive.
+            //   Hats will be excluded because they are in a private folder ".hats"
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
+                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
+                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+                sampleTree.Root_Accessories_Watch_WornTattoo.Id,
+                sampleTree.Root_Accessories_Glasses_AttachChin.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+        #endregion
 
         #region @detachthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
 
