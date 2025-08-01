@@ -8,14 +8,14 @@ using OpenMetaverse;
 
 namespace LibRLV
 {
-    public class RLVGetHandler
+    public class RLVGetRequestHandler
     {
         private readonly ImmutableDictionary<string, RLVDataRequest> RLVDataRequestToNameMap;
         private readonly IRestrictionProvider _restrictions;
         private readonly IBlacklistProvider _blacklist;
         private readonly IRLVCallbacks _callbacks;
 
-        internal RLVGetHandler(IBlacklistProvider blacklist, IRestrictionProvider restrictions, IRLVCallbacks callbacks)
+        internal RLVGetRequestHandler(IBlacklistProvider blacklist, IRestrictionProvider restrictions, IRLVCallbacks callbacks)
         {
             _restrictions = restrictions;
             _blacklist = blacklist;

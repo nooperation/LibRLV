@@ -83,10 +83,10 @@ namespace LibRLV.Tests
         private void CheckSimpleCommand(string cmd, Func<RLVManager, bool> canFunc)
         {
             _rlv.ProcessMessage($"@{cmd}=n", _sender.Id, _sender.Name);
-            Assert.False(canFunc(_rlv.RLVManager));
+            Assert.False(canFunc(_rlv.Restrictions));
 
             _rlv.ProcessMessage($"@{cmd}=y", _sender.Id, _sender.Name);
-            Assert.True(canFunc(_rlv.RLVManager));
+            Assert.True(canFunc(_rlv.Restrictions));
         }
 
 
@@ -411,9 +411,9 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportInventoryOffer("#RLV/~MyCuffs", RLVManager.InventoryOfferAction.Accepted);
-            _rlv.RLVManager.ReportInventoryOffer("Objects/New Folder (3)", RLVManager.InventoryOfferAction.Accepted);
-            _rlv.RLVManager.ReportInventoryOffer("#RLV/Foo/Bar", RLVManager.InventoryOfferAction.Denied);
+            _rlv.ReportInventoryOffer("#RLV/~MyCuffs", RLV.InventoryOfferAction.Accepted);
+            _rlv.ReportInventoryOffer("Objects/New Folder (3)", RLV.InventoryOfferAction.Accepted);
+            _rlv.ReportInventoryOffer("#RLV/Foo/Bar", RLV.InventoryOfferAction.Denied);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -434,10 +434,10 @@ namespace LibRLV.Tests
             var sitTarget = UUID.Random();
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportSit(RLVManager.SitType.Sit, sitTarget, 1.0f);
-            _rlv.RLVManager.ReportSit(RLVManager.SitType.Stand, sitTarget, 0);
-            _rlv.RLVManager.ReportSit(RLVManager.SitType.Sit, null, null);
-            _rlv.RLVManager.ReportSit(RLVManager.SitType.Stand, null, null);
+            _rlv.ReportSit(RLV.SitType.Sit, sitTarget, 1.0f);
+            _rlv.ReportSit(RLV.SitType.Stand, sitTarget, 0);
+            _rlv.ReportSit(RLV.SitType.Sit, null, null);
+            _rlv.ReportSit(RLV.SitType.Stand, null, null);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -462,10 +462,10 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
 
-            _rlv.RLVManager.ReportSit(RLVManager.SitType.Sit, sitTarget, 1.0f);
-            _rlv.RLVManager.ReportSit(RLVManager.SitType.Stand, sitTarget, 1.0f);
-            _rlv.RLVManager.ReportSit(RLVManager.SitType.Sit, null, null);
-            _rlv.RLVManager.ReportSit(RLVManager.SitType.Stand, null, null);
+            _rlv.ReportSit(RLV.SitType.Sit, sitTarget, 1.0f);
+            _rlv.ReportSit(RLV.SitType.Stand, sitTarget, 1.0f);
+            _rlv.ReportSit(RLV.SitType.Sit, null, null);
+            _rlv.ReportSit(RLV.SitType.Stand, null, null);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -489,7 +489,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@sittp=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
 
-            _rlv.RLVManager.ReportSit(RLVManager.SitType.Sit, sitTarget, 100.0f);
+            _rlv.ReportSit(RLV.SitType.Sit, sitTarget, 100.0f);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -508,8 +508,8 @@ namespace LibRLV.Tests
             var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Attached);
-            _rlv.RLVManager.ReportWornItemChange(UUID.Random(), true, WearableType.Tattoo, RLVManager.WornItemChange.Attached);
+            _rlv.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLV.WornItemChange.Attached);
+            _rlv.ReportWornItemChange(UUID.Random(), true, WearableType.Tattoo, RLV.WornItemChange.Attached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -530,7 +530,7 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@addoutfit:skin=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Attached);
+            _rlv.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLV.WornItemChange.Attached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -548,8 +548,8 @@ namespace LibRLV.Tests
             var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Detached);
-            _rlv.RLVManager.ReportWornItemChange(UUID.Random(), true, WearableType.Tattoo, RLVManager.WornItemChange.Detached);
+            _rlv.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLV.WornItemChange.Detached);
+            _rlv.ReportWornItemChange(UUID.Random(), true, WearableType.Tattoo, RLV.WornItemChange.Detached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -570,7 +570,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@remoutfit:skin=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
 
-            _rlv.RLVManager.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLVManager.WornItemChange.Detached);
+            _rlv.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLV.WornItemChange.Detached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -588,8 +588,8 @@ namespace LibRLV.Tests
             var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Attached);
-            _rlv.RLVManager.ReportAttachedItemChange(UUID.Random(), true, AttachmentPoint.Skull, RLVManager.AttachedItemChange.Attached);
+            _rlv.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLV.AttachedItemChange.Attached);
+            _rlv.ReportAttachedItemChange(UUID.Random(), true, AttachmentPoint.Skull, RLV.AttachedItemChange.Attached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -610,7 +610,7 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@addattach:chest=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Attached);
+            _rlv.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLV.AttachedItemChange.Attached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -628,8 +628,8 @@ namespace LibRLV.Tests
             var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Detached);
-            _rlv.RLVManager.ReportAttachedItemChange(UUID.Random(), true, AttachmentPoint.Skull, RLVManager.AttachedItemChange.Detached);
+            _rlv.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLV.AttachedItemChange.Detached);
+            _rlv.ReportAttachedItemChange(UUID.Random(), true, AttachmentPoint.Skull, RLV.AttachedItemChange.Detached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -649,7 +649,7 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@remattach:chest=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLVManager.AttachedItemChange.Detached);
+            _rlv.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLV.AttachedItemChange.Detached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -667,7 +667,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@permissive=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.IsPermissive());
+            Assert.False(_rlv.Restrictions.IsPermissive());
         }
 
         [Fact]
@@ -676,7 +676,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@permissive=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@permissive=y", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.IsPermissive());
+            Assert.True(_rlv.Restrictions.IsPermissive());
         }
         #endregion
 
@@ -692,7 +692,7 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@clear", _sender.Id, _sender.Name);
 
-            var restrictions = _rlv.Restrictions.GetRestrictions();
+            var restrictions = _rlv.RestrictionsHandler.GetRestrictions();
             Assert.Empty(restrictions);
         }
 
@@ -708,10 +708,10 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@clear", sender2.Id, sender2.Name);
 
-            Assert.False(_rlv.RLVManager.CanTpLoc());
-            Assert.False(_rlv.RLVManager.CanTpLm());
-            Assert.True(_rlv.RLVManager.CanUnsit());
-            Assert.True(_rlv.RLVManager.CanFly());
+            Assert.False(_rlv.Restrictions.CanTpLoc());
+            Assert.False(_rlv.Restrictions.CanTpLm());
+            Assert.True(_rlv.Restrictions.CanUnsit());
+            Assert.True(_rlv.Restrictions.CanFly());
         }
 
         [Fact]
@@ -724,10 +724,10 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@clear=tp", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanTpLoc());
-            Assert.True(_rlv.RLVManager.CanTpLm());
-            Assert.False(_rlv.RLVManager.CanUnsit());
-            Assert.False(_rlv.RLVManager.CanFly());
+            Assert.True(_rlv.Restrictions.CanTpLoc());
+            Assert.True(_rlv.Restrictions.CanTpLm());
+            Assert.False(_rlv.Restrictions.CanUnsit());
+            Assert.False(_rlv.Restrictions.CanFly());
         }
         #endregion
 
@@ -913,7 +913,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CamZoomMin_Default()
         {
-            Assert.False(_rlv.RLVManager.HasCamZoomMin(out var camZoomMin));
+            Assert.False(_rlv.Restrictions.HasCamZoomMin(out var camZoomMin));
             Assert.Equal(default, camZoomMin);
         }
 
@@ -922,7 +922,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamZoomMin:1.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamZoomMin(out var camZoomMin));
+            Assert.True(_rlv.Restrictions.HasCamZoomMin(out var camZoomMin));
             Assert.Equal(1.5f, camZoomMin);
         }
 
@@ -933,7 +933,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMin:4.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamZoomMin:1.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamZoomMin(out var camZoomMin));
+            Assert.True(_rlv.Restrictions.HasCamZoomMin(out var camZoomMin));
             Assert.Equal(4.5f, camZoomMin);
         }
 
@@ -947,7 +947,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMin:8.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamZoomMin:8.5=y", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamZoomMin(out var camZoomMin));
+            Assert.True(_rlv.Restrictions.HasCamZoomMin(out var camZoomMin));
             Assert.Equal(4.5f, camZoomMin);
         }
 
@@ -961,7 +961,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMin:4.5=n", sender2.Id, sender2.Name);
             _rlv.ProcessMessage("@CamZoomMin:1.5=n", sender3.Id, sender3.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamZoomMin(out var camZoomMin));
+            Assert.True(_rlv.Restrictions.HasCamZoomMin(out var camZoomMin));
             Assert.Equal(4.5f, camZoomMin);
         }
 
@@ -971,7 +971,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMin:1.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamZoomMin:1.5=y", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.HasCamZoomMin(out var camZoomMin));
+            Assert.False(_rlv.Restrictions.HasCamZoomMin(out var camZoomMin));
             Assert.Equal(default, camZoomMin);
         }
         #endregion
@@ -980,7 +980,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CamZoomMax_Default()
         {
-            Assert.False(_rlv.RLVManager.HasCamZoomMax(out var camZoomMax));
+            Assert.False(_rlv.Restrictions.HasCamZoomMax(out var camZoomMax));
             Assert.Equal(default, camZoomMax);
         }
 
@@ -989,7 +989,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamZoomMax:1.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamZoomMax(out var camZoomMax));
+            Assert.True(_rlv.Restrictions.HasCamZoomMax(out var camZoomMax));
             Assert.Equal(1.5f, camZoomMax);
         }
 
@@ -1000,7 +1000,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMax:4.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamZoomMax:1.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamZoomMax(out var camZoomMax));
+            Assert.True(_rlv.Restrictions.HasCamZoomMax(out var camZoomMax));
             Assert.Equal(1.5f, camZoomMax);
         }
 
@@ -1014,7 +1014,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMax:0.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamZoomMax:0.5=y", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamZoomMax(out var camZoomMax));
+            Assert.True(_rlv.Restrictions.HasCamZoomMax(out var camZoomMax));
             Assert.Equal(1.5f, camZoomMax);
         }
 
@@ -1028,7 +1028,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMax:4.5=n", sender2.Id, sender2.Name);
             _rlv.ProcessMessage("@CamZoomMax:1.5=n", sender3.Id, sender3.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamZoomMax(out var camZoomMax));
+            Assert.True(_rlv.Restrictions.HasCamZoomMax(out var camZoomMax));
             Assert.Equal(1.5f, camZoomMax);
         }
 
@@ -1038,7 +1038,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMax:1.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamZoomMax:1.5=y", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.HasCamZoomMax(out var camZoomMax));
+            Assert.False(_rlv.Restrictions.HasCamZoomMax(out var camZoomMax));
             Assert.Equal(default, camZoomMax);
         }
 
@@ -1050,7 +1050,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamZoomMin:0.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamZoomMin(out var camZoomMin));
+            Assert.True(_rlv.Restrictions.HasCamZoomMin(out var camZoomMin));
             Assert.Equal(0.5f, camZoomMin);
         }
         #endregion
@@ -1061,7 +1061,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamZoomMax:1.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamZoomMax(out var camZoomMax));
+            Assert.True(_rlv.Restrictions.HasCamZoomMax(out var camZoomMax));
             Assert.Equal(1.5f, camZoomMax);
         }
         #endregion
@@ -1072,7 +1072,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@setcam_fovmin:15=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasSetCamFovMin(out var setCamFovMin));
+            Assert.True(_rlv.Restrictions.HasSetCamFovMin(out var setCamFovMin));
             Assert.Equal(15f, setCamFovMin);
         }
         #endregion
@@ -1083,7 +1083,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@setcam_fovmax:45=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasSetCamFovMax(out var setCamFovMax));
+            Assert.True(_rlv.Restrictions.HasSetCamFovMax(out var setCamFovMax));
             Assert.Equal(45f, setCamFovMax);
         }
         #endregion
@@ -1138,7 +1138,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@setcam_avdistmax:30=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasSetCamAvDistMax(out var setCamAvDistMax));
+            Assert.True(_rlv.Restrictions.HasSetCamAvDistMax(out var setCamAvDistMax));
             Assert.Equal(30f, setCamAvDistMax);
         }
         [Fact]
@@ -1146,7 +1146,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@camdistmax:30=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasSetCamAvDistMax(out var setCamAvDistMax));
+            Assert.True(_rlv.Restrictions.HasSetCamAvDistMax(out var setCamAvDistMax));
             Assert.Equal(30f, setCamAvDistMax);
         }
         #endregion
@@ -1157,7 +1157,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@setcam_avdistmin:0.3=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasSetCamAvDistMin(out var setCamAvDistMin));
+            Assert.True(_rlv.Restrictions.HasSetCamAvDistMin(out var setCamAvDistMin));
             Assert.Equal(0.3f, setCamAvDistMin);
         }
 
@@ -1166,7 +1166,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@camdistmin:0.3=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasSetCamAvDistMin(out var setCamAvDistMin));
+            Assert.True(_rlv.Restrictions.HasSetCamAvDistMin(out var setCamAvDistMin));
             Assert.Equal(0.3f, setCamAvDistMin);
         }
         #endregion
@@ -1177,7 +1177,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamDrawAlphaMax:0.9=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamDrawAlphaMax(out var camDrawAlphaMax));
+            Assert.True(_rlv.Restrictions.HasCamDrawAlphaMax(out var camDrawAlphaMax));
             Assert.Equal(0.9f, camDrawAlphaMax);
         }
         #endregion
@@ -1189,7 +1189,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@camdrawmin:1.75=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamDrawMin(out var camDrawMin));
+            Assert.True(_rlv.Restrictions.HasCamDrawMin(out var camDrawMin));
             Assert.Equal(1.75f, camDrawMin);
         }
 
@@ -1197,7 +1197,7 @@ namespace LibRLV.Tests
         public void CamDrawMin_Small()
         {
             Assert.False(_rlv.ProcessMessage("@camdrawmin:0.15=n", _sender.Id, _sender.Name));
-            Assert.False(_rlv.RLVManager.HasCamDrawMin(out var camDrawMin));
+            Assert.False(_rlv.Restrictions.HasCamDrawMin(out var camDrawMin));
         }
 
         #endregion
@@ -1209,7 +1209,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@camdrawmax:1.75=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamDrawMax(out var camDrawMax));
+            Assert.True(_rlv.Restrictions.HasCamDrawMax(out var camDrawMax));
             Assert.Equal(1.75f, camDrawMax);
         }
 
@@ -1217,7 +1217,7 @@ namespace LibRLV.Tests
         public void CamDrawMax_Small()
         {
             Assert.False(_rlv.ProcessMessage("@camdrawmax:0.15=n", _sender.Id, _sender.Name));
-            Assert.False(_rlv.RLVManager.HasCamDrawMax(out var camDrawMax));
+            Assert.False(_rlv.Restrictions.HasCamDrawMax(out var camDrawMax));
         }
 
         #endregion
@@ -1229,7 +1229,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@camdrawalphamin:1.75=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamDrawAlphaMin(out var camDrawAlphaMin));
+            Assert.True(_rlv.Restrictions.HasCamDrawAlphaMin(out var camDrawAlphaMin));
             Assert.Equal(1.75f, camDrawAlphaMin);
         }
 
@@ -1242,7 +1242,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamDrawColor:0.1;0.2;0.3=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamDrawColor(out var color));
+            Assert.True(_rlv.Restrictions.HasCamDrawColor(out var color));
 
             Assert.Equal(0.1f, color.X, FloatTolerance);
             Assert.Equal(0.2f, color.Y, FloatTolerance);
@@ -1252,7 +1252,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CamDrawColor_Default()
         {
-            Assert.False(_rlv.RLVManager.HasCamDrawColor(out var color));
+            Assert.False(_rlv.Restrictions.HasCamDrawColor(out var color));
         }
 
         [Fact]
@@ -1260,7 +1260,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamDrawColor:5;6;7=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamDrawColor(out var color));
+            Assert.True(_rlv.Restrictions.HasCamDrawColor(out var color));
             Assert.Equal(1.0f, color.X, FloatTolerance);
             Assert.Equal(1.0f, color.Y, FloatTolerance);
             Assert.Equal(1.0f, color.Z, FloatTolerance);
@@ -1271,7 +1271,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamDrawColor:-5;-6;-7=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamDrawColor(out var color));
+            Assert.True(_rlv.Restrictions.HasCamDrawColor(out var color));
             Assert.Equal(0.0f, color.X, FloatTolerance);
             Assert.Equal(0.0f, color.Y, FloatTolerance);
             Assert.Equal(0.0f, color.Z, FloatTolerance);
@@ -1283,7 +1283,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamDrawColor:0.1;0.2;0.3=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamDrawColor:0.1;0.2;0.3=y", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.HasCamDrawColor(out var color));
+            Assert.False(_rlv.Restrictions.HasCamDrawColor(out var color));
         }
 
         [Fact]
@@ -1292,7 +1292,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamDrawColor:0.1;0.2;0.3=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamDrawColor:0.2;0.3;0.6=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamDrawColor(out var color));
+            Assert.True(_rlv.Restrictions.HasCamDrawColor(out var color));
             Assert.Equal(0.15f, color.X, FloatTolerance);
             Assert.Equal(0.25f, color.Y, FloatTolerance);
             Assert.Equal(0.45f, color.Z, FloatTolerance);
@@ -1322,7 +1322,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamAvDist:5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasCamAvDist(out var camAvDist));
+            Assert.True(_rlv.Restrictions.HasCamAvDist(out var camAvDist));
             Assert.Equal(5f, camAvDist);
         }
         #endregion
@@ -1336,7 +1336,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage($"@{command}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasSetCamtextures(out var actualTextureId));
+            Assert.True(_rlv.Restrictions.HasSetCamtextures(out var actualTextureId));
 
             Assert.Equal(UUID.Zero, actualTextureId);
         }
@@ -1350,7 +1350,7 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@{command}:{textureId1}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasSetCamtextures(out var actualTextureId));
+            Assert.True(_rlv.Restrictions.HasSetCamtextures(out var actualTextureId));
 
             Assert.Equal(textureId1, actualTextureId);
         }
@@ -1368,11 +1368,11 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@{command1}:{textureId1}=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@{command2}:{textureId2}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasSetCamtextures(out var actualTextureId2));
+            Assert.True(_rlv.Restrictions.HasSetCamtextures(out var actualTextureId2));
 
             _rlv.ProcessMessage($"@{command1}:{textureId2}=y", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.HasSetCamtextures(out var actualTextureId1));
+            Assert.True(_rlv.Restrictions.HasSetCamtextures(out var actualTextureId1));
 
             Assert.Equal(textureId2, actualTextureId2);
             Assert.Equal(textureId1, actualTextureId1);
@@ -1638,7 +1638,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.IsRedirChat(out var channels));
+            Assert.True(_rlv.Restrictions.IsRedirChat(out var channels));
 
             var expected = new List<int>
             {
@@ -1654,7 +1654,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@redirchat:1234=rem", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.IsRedirChat(out var channels));
+            Assert.False(_rlv.Restrictions.IsRedirChat(out var channels));
         }
 
         [Fact]
@@ -1663,7 +1663,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@redirchat:12345=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.IsRedirChat(out var channels));
+            Assert.True(_rlv.Restrictions.IsRedirChat(out var channels));
 
             var expected = new List<int>
             {
@@ -1680,9 +1680,9 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
 
             _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportSendPublicMessage("Hello World");
+            _rlv.ReportSendPublicMessage("Hello World");
 
-            Assert.True(_rlv.RLVManager.IsRedirChat(out var channels));
+            Assert.True(_rlv.Restrictions.IsRedirChat(out var channels));
             var expected = new List<(int Channel, string Text)>
             {
                 (1234, "Hello World"),
@@ -1699,8 +1699,8 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@redirchat:5678=add", _sender.Id, _sender.Name);
 
-            _rlv.RLVManager.ReportSendPublicMessage("Hello World");
-            _rlv.RLVManager.IsRedirChat(out var channels);
+            _rlv.ReportSendPublicMessage("Hello World");
+            _rlv.Restrictions.IsRedirChat(out var channels);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1718,9 +1718,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
 
-            _rlv.RLVManager.ReportSendPublicMessage("/me says Hello World");
+            _rlv.ReportSendPublicMessage("/me says Hello World");
 
-            Assert.True(_rlv.RLVManager.IsRedirChat(out var channels));
+            Assert.True(_rlv.Restrictions.IsRedirChat(out var channels));
             Assert.Empty(actual);
         }
 
@@ -1731,10 +1731,10 @@ namespace LibRLV.Tests
         [Fact]
         public void CanRecvChat_Default()
         {
-            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", null));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", UUID.Random()));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", null));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", UUID.Random()));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", null));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", UUID.Random()));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", null));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", UUID.Random()));
         }
 
         [Fact]
@@ -1743,10 +1743,10 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@recvchat=n", _sender.Id, _sender.Name);
             var userId = UUID.Random();
 
-            Assert.False(_rlv.RLVManager.CanReceiveChat("Hello world", null));
-            Assert.False(_rlv.RLVManager.CanReceiveChat("Hello world", userId));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", null));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId));
+            Assert.False(_rlv.Restrictions.CanReceiveChat("Hello world", null));
+            Assert.False(_rlv.Restrictions.CanReceiveChat("Hello world", userId));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", null));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId));
         }
 
         [Fact]
@@ -1757,10 +1757,10 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@recvchat=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvchat:{userId}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanReceiveChat("Hello world", null));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", null));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId));
+            Assert.False(_rlv.Restrictions.CanReceiveChat("Hello world", null));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", null));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId));
         }
 
         [Fact]
@@ -1775,9 +1775,9 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@recvchat:{userId1}=add", sender2.Id, sender2.Name);
             _rlv.ProcessMessage($"@recvchat:{userId2}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanReceiveChat("Hello world", null));
-            Assert.False(_rlv.RLVManager.CanReceiveChat("Hello world", userId1));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId2));
+            Assert.False(_rlv.Restrictions.CanReceiveChat("Hello world", null));
+            Assert.False(_rlv.Restrictions.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId2));
         }
 
         [Fact]
@@ -1786,10 +1786,10 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@recvemote=n", _sender.Id, _sender.Name);
             var userId = UUID.Random();
 
-            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", null));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId));
-            Assert.False(_rlv.RLVManager.CanReceiveChat("/me says Hello world", null));
-            Assert.False(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", null));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId));
+            Assert.False(_rlv.Restrictions.CanReceiveChat("/me says Hello world", null));
+            Assert.False(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId));
         }
 
         [Fact]
@@ -1800,10 +1800,10 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@recvemotefrom:{userId1}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId1));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId2));
-            Assert.False(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId1));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId2));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId2));
+            Assert.False(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId1));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId2));
         }
 
         [Fact]
@@ -1815,10 +1815,10 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@recvemote=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvemote:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId1));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId2));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId1));
-            Assert.False(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId2));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId2));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId1));
+            Assert.False(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId2));
         }
 
         [Fact]
@@ -1833,10 +1833,10 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@recvemote:{userId1}=add", sender2.Id, sender2.Name);
             _rlv.ProcessMessage($"@recvemote:{userId2}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId1));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId2));
-            Assert.False(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId1));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId2));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId2));
+            Assert.False(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId1));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId2));
         }
 
         [Fact]
@@ -1847,10 +1847,10 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@recvchatfrom:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanReceiveChat("Hello world", userId1));
-            Assert.True(_rlv.RLVManager.CanReceiveChat("/me says Hello world", userId1));
+            Assert.False(_rlv.Restrictions.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId1));
 
-            Assert.True(_rlv.RLVManager.CanReceiveChat("Hello world", userId2));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId2));
         }
 
         #endregion
@@ -1882,7 +1882,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
+            Assert.True(_rlv.Restrictions.IsRedirEmote(out var channels));
 
             var expected = new List<int>
             {
@@ -1898,7 +1898,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@rediremote:1234=rem", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.IsRedirEmote(out var channels));
+            Assert.False(_rlv.Restrictions.IsRedirEmote(out var channels));
         }
 
         [Fact]
@@ -1907,7 +1907,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@rediremote:12345=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
+            Assert.True(_rlv.Restrictions.IsRedirEmote(out var channels));
 
             var expected = new List<int>
             {
@@ -1924,9 +1924,9 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
 
             _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportSendPublicMessage("/me says Hello World");
+            _rlv.ReportSendPublicMessage("/me says Hello World");
 
-            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
+            Assert.True(_rlv.Restrictions.IsRedirEmote(out var channels));
             var expected = new List<(int Channel, string Text)>
             {
                 (1234, "/me says Hello World"),
@@ -1943,8 +1943,8 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@rediremote:5678=n", _sender.Id, _sender.Name);
 
-            _rlv.RLVManager.ReportSendPublicMessage("/me says Hello World");
-            _rlv.RLVManager.IsRedirEmote(out var channels);
+            _rlv.ReportSendPublicMessage("/me says Hello World");
+            _rlv.Restrictions.IsRedirEmote(out var channels);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1961,9 +1961,9 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
 
             _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
-            _rlv.RLVManager.ReportSendPublicMessage("Hello World");
+            _rlv.ReportSendPublicMessage("Hello World");
 
-            Assert.True(_rlv.RLVManager.IsRedirEmote(out var channels));
+            Assert.True(_rlv.Restrictions.IsRedirEmote(out var channels));
             Assert.Empty(actual);
         }
 
@@ -1974,9 +1974,9 @@ namespace LibRLV.Tests
         [Fact]
         public void CanChat_Default()
         {
-            Assert.True(_rlv.RLVManager.CanChat(0, "Hello"));
-            Assert.True(_rlv.RLVManager.CanChat(0, "/me says Hello"));
-            Assert.True(_rlv.RLVManager.CanChat(5, "Hello"));
+            Assert.True(_rlv.Restrictions.CanChat(0, "Hello"));
+            Assert.True(_rlv.Restrictions.CanChat(0, "/me says Hello"));
+            Assert.True(_rlv.Restrictions.CanChat(5, "Hello"));
         }
 
         [Fact]
@@ -1985,23 +1985,23 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@sendchat=n", _sender.Id, _sender.Name);
 
             // No public chat allowed unless it starts with '/'
-            Assert.False(_rlv.RLVManager.CanChat(0, "Hello"));
+            Assert.False(_rlv.Restrictions.CanChat(0, "Hello"));
 
             // Emotes and other messages starting with / are allowed
-            Assert.True(_rlv.RLVManager.CanChat(0, "/me says Hello"));
-            Assert.True(_rlv.RLVManager.CanChat(0, "/ something?"));
+            Assert.True(_rlv.Restrictions.CanChat(0, "/me says Hello"));
+            Assert.True(_rlv.Restrictions.CanChat(0, "/ something?"));
 
             // Messages containing ()"-*=_^ are prohibited
-            Assert.False(_rlv.RLVManager.CanChat(0, "/me says Hello ^_^"));
+            Assert.False(_rlv.Restrictions.CanChat(0, "/me says Hello ^_^"));
 
             // Private channels are not impacted
-            Assert.True(_rlv.RLVManager.CanChat(5, "Hello"));
+            Assert.True(_rlv.Restrictions.CanChat(5, "Hello"));
         }
 
         [Fact]
         public void CanSendChannel_Default()
         {
-            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
+            Assert.True(_rlv.Restrictions.CanChat(123, "Hello world"));
         }
 
         [Fact]
@@ -2009,7 +2009,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@sendchannel=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanChat(123, "Hello world"));
+            Assert.False(_rlv.Restrictions.CanChat(123, "Hello world"));
         }
 
         [Fact]
@@ -2018,7 +2018,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@sendchannel=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@sendchannel:123=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
+            Assert.True(_rlv.Restrictions.CanChat(123, "Hello world"));
         }
 
         [Fact]
@@ -2033,8 +2033,8 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@sendchannel:123=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@sendchannel:456=n", sender2.Id, sender2.Name);
 
-            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
-            Assert.False(_rlv.RLVManager.CanChat(456, "Hello world"));
+            Assert.True(_rlv.Restrictions.CanChat(123, "Hello world"));
+            Assert.False(_rlv.Restrictions.CanChat(456, "Hello world"));
         }
 
         [Fact]
@@ -2042,8 +2042,8 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@sendchannel_except:456=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanChat(123, "Hello world"));
-            Assert.False(_rlv.RLVManager.CanChat(456, "Hello world"));
+            Assert.True(_rlv.Restrictions.CanChat(123, "Hello world"));
+            Assert.False(_rlv.Restrictions.CanChat(456, "Hello world"));
         }
 
         #endregion
@@ -2055,8 +2055,8 @@ namespace LibRLV.Tests
         {
             var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.RLVManager.CanSendIM("Hello", userId1));
-            Assert.True(_rlv.RLVManager.CanSendIM("Hello", userId1, "Group Name"));
+            Assert.True(_rlv.Restrictions.CanSendIM("Hello", userId1));
+            Assert.True(_rlv.Restrictions.CanSendIM("Hello", userId1, "Group Name"));
         }
 
         [Fact]
@@ -2066,8 +2066,8 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanSendIM("Hello", userId1));
-            Assert.False(_rlv.RLVManager.CanSendIM("Hello", userId1, "Group Name"));
+            Assert.False(_rlv.Restrictions.CanSendIM("Hello", userId1));
+            Assert.False(_rlv.Restrictions.CanSendIM("Hello", userId1, "Group Name"));
         }
 
         [Fact]
@@ -2078,7 +2078,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", userId1));
+            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", userId1));
         }
 
         [Fact]
@@ -2089,7 +2089,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:Group Name=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "Group Name"));
+            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "Group Name"));
         }
 
         [Fact]
@@ -2100,7 +2100,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:allgroups=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "Group name"));
+            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "Group name"));
         }
 
         [Fact]
@@ -2115,8 +2115,8 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@sendim:{userId1}=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:{userId2}=add", sender2.Id, sender2.Name);
 
-            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", userId1));
-            Assert.False(_rlv.RLVManager.CanSendIM("Hello world", userId2));
+            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", userId1));
+            Assert.False(_rlv.Restrictions.CanSendIM("Hello world", userId2));
         }
 
         [Fact]
@@ -2130,8 +2130,8 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@sendim:Group Name=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:allgroups=add", sender2.Id, sender2.Name);
 
-            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "Group Name"));
-            Assert.False(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "Another Group"));
+            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "Group Name"));
+            Assert.False(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "Another Group"));
         }
 
         [Fact]
@@ -2142,8 +2142,8 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@sendim_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:allgroups=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "Group Name"));
-            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "Another Group"));
+            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "Group Name"));
+            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "Another Group"));
         }
 
         [Fact]
@@ -2154,8 +2154,8 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@sendimto:{userId1}=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanSendIM("Hello world", userId1));
-            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", userId2));
+            Assert.False(_rlv.Restrictions.CanSendIM("Hello world", userId1));
+            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", userId2));
         }
 
         [Fact]
@@ -2166,8 +2166,8 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@sendimto:First Group=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "First Group"));
-            Assert.True(_rlv.RLVManager.CanSendIM("Hello world", groupId2, "Second Group"));
+            Assert.False(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "First Group"));
+            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", groupId2, "Second Group"));
         }
 
         [Fact]
@@ -2178,8 +2178,8 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@sendimto:allgroups=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanSendIM("Hello world", groupId1, "First Group"));
-            Assert.False(_rlv.RLVManager.CanSendIM("Hello world", groupId2, "Second Group"));
+            Assert.False(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "First Group"));
+            Assert.False(_rlv.Restrictions.CanSendIM("Hello world", groupId2, "Second Group"));
         }
 
         #endregion
@@ -2191,8 +2191,8 @@ namespace LibRLV.Tests
         {
             var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.RLVManager.CanStartIM(null));
-            Assert.True(_rlv.RLVManager.CanStartIM(userId1));
+            Assert.True(_rlv.Restrictions.CanStartIM(null));
+            Assert.True(_rlv.Restrictions.CanStartIM(userId1));
         }
 
         [Fact]
@@ -2202,8 +2202,8 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@startim=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanStartIM(null));
-            Assert.False(_rlv.RLVManager.CanStartIM(userId1));
+            Assert.False(_rlv.Restrictions.CanStartIM(null));
+            Assert.False(_rlv.Restrictions.CanStartIM(userId1));
         }
 
         [Fact]
@@ -2215,8 +2215,8 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@startim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@startim:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanStartIM(userId1));
-            Assert.False(_rlv.RLVManager.CanStartIM(userId2));
+            Assert.True(_rlv.Restrictions.CanStartIM(userId1));
+            Assert.False(_rlv.Restrictions.CanStartIM(userId2));
         }
 
         [Fact]
@@ -2227,8 +2227,8 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@startimto:{userId2}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanStartIM(userId1));
-            Assert.False(_rlv.RLVManager.CanStartIM(userId2));
+            Assert.True(_rlv.Restrictions.CanStartIM(userId1));
+            Assert.False(_rlv.Restrictions.CanStartIM(userId2));
         }
 
         #endregion
@@ -2240,8 +2240,8 @@ namespace LibRLV.Tests
         {
             var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.RLVManager.CanReceiveIM("Hello", userId1));
-            Assert.True(_rlv.RLVManager.CanReceiveIM("Hello", userId1, "Group Name"));
+            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello", userId1));
+            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello", userId1, "Group Name"));
         }
 
         [Fact]
@@ -2251,8 +2251,8 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@recvim=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanReceiveIM("Hello", userId1));
-            Assert.False(_rlv.RLVManager.CanReceiveIM("Hello", userId1, "Group Name"));
+            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello", userId1));
+            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello", userId1, "Group Name"));
         }
 
         [Fact]
@@ -2263,7 +2263,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@recvim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanReceiveIM("Hello world", userId1));
+            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", userId1));
         }
 
         [Fact]
@@ -2274,7 +2274,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@recvim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:Group Name=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanReceiveIM("Hello world", groupId1, "Group Name"));
+            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "Group Name"));
         }
 
         [Fact]
@@ -2285,7 +2285,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@recvim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:allgroups=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanReceiveIM("Hello world", groupId1, "Group name"));
+            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "Group name"));
         }
 
         [Fact]
@@ -2300,8 +2300,8 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@recvim:{userId1}=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:{userId2}=add", sender2.Id, sender2.Name);
 
-            Assert.True(_rlv.RLVManager.CanReceiveIM("Hello world", userId1));
-            Assert.False(_rlv.RLVManager.CanReceiveIM("Hello world", userId2));
+            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", userId1));
+            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello world", userId2));
         }
 
         [Fact]
@@ -2315,8 +2315,8 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@recvim:Group Name=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:allgroups=add", sender2.Id, sender2.Name);
 
-            Assert.True(_rlv.RLVManager.CanReceiveIM("Hello world", groupId1, "Group Name"));
-            Assert.False(_rlv.RLVManager.CanReceiveIM("Hello world", groupId1, "Another Group"));
+            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "Group Name"));
+            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "Another Group"));
         }
 
         [Fact]
@@ -2327,8 +2327,8 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@recvim_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:allgroups=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanReceiveIM("Hello world", groupId1, "Group Name"));
-            Assert.True(_rlv.RLVManager.CanReceiveIM("Hello world", groupId1, "Another Group"));
+            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "Group Name"));
+            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "Another Group"));
         }
 
         [Fact]
@@ -2339,8 +2339,8 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@recvimfrom:{userId1}=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanReceiveIM("Hello world", userId1));
-            Assert.True(_rlv.RLVManager.CanReceiveIM("Hello world", userId2));
+            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello world", userId1));
+            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", userId2));
         }
 
         [Fact]
@@ -2351,8 +2351,8 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@recvimfrom:First Group=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanReceiveIM("Hello world", groupId1, "First Group"));
-            Assert.True(_rlv.RLVManager.CanReceiveIM("Hello world", groupId2, "Second Group"));
+            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "First Group"));
+            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", groupId2, "Second Group"));
         }
 
         [Fact]
@@ -2363,8 +2363,8 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@recvimfrom:allgroups=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanReceiveIM("Hello world", groupId1, "First Group"));
-            Assert.False(_rlv.RLVManager.CanReceiveIM("Hello world", groupId2, "Second Group"));
+            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "First Group"));
+            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello world", groupId2, "Second Group"));
         }
 
         #endregion
@@ -2379,7 +2379,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@TpLocal=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanTpLocal(out var distance));
+            Assert.True(_rlv.Restrictions.CanTpLocal(out var distance));
             Assert.Equal(0.0f, distance, FloatTolerance);
         }
 
@@ -2388,7 +2388,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@TpLocal:0.9=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanTpLocal(out var distance));
+            Assert.True(_rlv.Restrictions.CanTpLocal(out var distance));
             Assert.Equal(0.9f, distance, FloatTolerance);
         }
         #endregion
@@ -2414,8 +2414,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanTpLure_Default()
         {
-            Assert.True(_rlv.RLVManager.CanTPLure(null));
-            Assert.True(_rlv.RLVManager.CanTPLure(UUID.Random()));
+            Assert.True(_rlv.Restrictions.CanTPLure(null));
+            Assert.True(_rlv.Restrictions.CanTPLure(UUID.Random()));
         }
 
         [Fact]
@@ -2423,8 +2423,8 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@tplure=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanTPLure(null));
-            Assert.False(_rlv.RLVManager.CanTPLure(UUID.Random()));
+            Assert.False(_rlv.Restrictions.CanTPLure(null));
+            Assert.False(_rlv.Restrictions.CanTPLure(UUID.Random()));
         }
 
         [Fact]
@@ -2436,9 +2436,9 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@tplure=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@tplure:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanTPLure(null));
-            Assert.True(_rlv.RLVManager.CanTPLure(userId1));
-            Assert.False(_rlv.RLVManager.CanTPLure(userId2));
+            Assert.False(_rlv.Restrictions.CanTPLure(null));
+            Assert.True(_rlv.Restrictions.CanTPLure(userId1));
+            Assert.False(_rlv.Restrictions.CanTPLure(userId2));
         }
 
         [Fact]
@@ -2450,9 +2450,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@tplure_sec=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanTPLure(null));
-            Assert.False(_rlv.RLVManager.CanTPLure(userId1));
-            Assert.False(_rlv.RLVManager.CanTPLure(userId2));
+            Assert.False(_rlv.Restrictions.CanTPLure(null));
+            Assert.False(_rlv.Restrictions.CanTPLure(userId1));
+            Assert.False(_rlv.Restrictions.CanTPLure(userId2));
         }
 
         [Fact]
@@ -2466,9 +2466,9 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@tplure:{userId1}=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@tplure:{userId2}=add", sender2.Id, sender2.Name);
 
-            Assert.False(_rlv.RLVManager.CanTPLure(null));
-            Assert.True(_rlv.RLVManager.CanTPLure(userId1));
-            Assert.False(_rlv.RLVManager.CanTPLure(userId2));
+            Assert.False(_rlv.Restrictions.CanTPLure(null));
+            Assert.True(_rlv.Restrictions.CanTPLure(userId1));
+            Assert.False(_rlv.Restrictions.CanTPLure(userId2));
         }
 
         #endregion
@@ -2478,7 +2478,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSitTp_Default()
         {
-            Assert.False(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.False(_rlv.Restrictions.CanSitTp(out var maxDistance));
             Assert.Equal(1.5f, maxDistance);
         }
 
@@ -2487,7 +2487,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.True(_rlv.Restrictions.CanSitTp(out var maxDistance));
             Assert.Equal(2.5f, maxDistance);
         }
 
@@ -2498,7 +2498,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@SitTp:4.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.True(_rlv.Restrictions.CanSitTp(out var maxDistance));
             Assert.Equal(2.5f, maxDistance);
         }
 
@@ -2512,7 +2512,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@SitTp:8.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@SitTp:8.5=y", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.True(_rlv.Restrictions.CanSitTp(out var maxDistance));
             Assert.Equal(2.5f, maxDistance);
         }
 
@@ -2526,7 +2526,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@SitTp:4.5=n", sender2.Id, sender2.Name);
             _rlv.ProcessMessage("@SitTp:2.5=n", sender3.Id, sender3.Name);
 
-            Assert.True(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.True(_rlv.Restrictions.CanSitTp(out var maxDistance));
             Assert.Equal(2.5f, maxDistance);
         }
 
@@ -2536,7 +2536,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@SitTp:2.5=y", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanSitTp(out var maxDistance));
+            Assert.False(_rlv.Restrictions.CanSitTp(out var maxDistance));
             Assert.Equal(1.5f, maxDistance);
         }
         #endregion
@@ -2640,9 +2640,9 @@ namespace LibRLV.Tests
             var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
             var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
 
-            Assert.False(_rlv.RLVManager.IsAutoAcceptTp(userId1));
-            Assert.False(_rlv.RLVManager.IsAutoAcceptTp(userId2));
-            Assert.False(_rlv.RLVManager.IsAutoAcceptTp());
+            Assert.False(_rlv.Restrictions.IsAutoAcceptTp(userId1));
+            Assert.False(_rlv.Restrictions.IsAutoAcceptTp(userId2));
+            Assert.False(_rlv.Restrictions.IsAutoAcceptTp());
         }
 
         [Fact]
@@ -2653,9 +2653,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@accepttp:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.IsAutoAcceptTp(userId1));
-            Assert.False(_rlv.RLVManager.IsAutoAcceptTp(userId2));
-            Assert.False(_rlv.RLVManager.IsAutoAcceptTp());
+            Assert.True(_rlv.Restrictions.IsAutoAcceptTp(userId1));
+            Assert.False(_rlv.Restrictions.IsAutoAcceptTp(userId2));
+            Assert.False(_rlv.Restrictions.IsAutoAcceptTp());
         }
 
         [Fact]
@@ -2666,9 +2666,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@accepttp=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.IsAutoAcceptTp(userId1));
-            Assert.True(_rlv.RLVManager.IsAutoAcceptTp(userId2));
-            Assert.True(_rlv.RLVManager.IsAutoAcceptTp());
+            Assert.True(_rlv.Restrictions.IsAutoAcceptTp(userId1));
+            Assert.True(_rlv.Restrictions.IsAutoAcceptTp(userId2));
+            Assert.True(_rlv.Restrictions.IsAutoAcceptTp());
         }
 
         #endregion
@@ -2681,9 +2681,9 @@ namespace LibRLV.Tests
             var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
             var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
 
-            Assert.False(_rlv.RLVManager.IsAutoAcceptTpRequest(userId1));
-            Assert.False(_rlv.RLVManager.IsAutoAcceptTpRequest(userId2));
-            Assert.False(_rlv.RLVManager.IsAutoAcceptTpRequest());
+            Assert.False(_rlv.Restrictions.IsAutoAcceptTpRequest(userId1));
+            Assert.False(_rlv.Restrictions.IsAutoAcceptTpRequest(userId2));
+            Assert.False(_rlv.Restrictions.IsAutoAcceptTpRequest());
         }
 
         [Fact]
@@ -2694,9 +2694,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@accepttprequest:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.IsAutoAcceptTpRequest(userId1));
-            Assert.False(_rlv.RLVManager.IsAutoAcceptTpRequest(userId2));
-            Assert.False(_rlv.RLVManager.IsAutoAcceptTpRequest());
+            Assert.True(_rlv.Restrictions.IsAutoAcceptTpRequest(userId1));
+            Assert.False(_rlv.Restrictions.IsAutoAcceptTpRequest(userId2));
+            Assert.False(_rlv.Restrictions.IsAutoAcceptTpRequest());
         }
 
         [Fact]
@@ -2707,9 +2707,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@accepttprequest=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.IsAutoAcceptTpRequest(userId1));
-            Assert.True(_rlv.RLVManager.IsAutoAcceptTpRequest(userId2));
-            Assert.True(_rlv.RLVManager.IsAutoAcceptTpRequest());
+            Assert.True(_rlv.Restrictions.IsAutoAcceptTpRequest(userId1));
+            Assert.True(_rlv.Restrictions.IsAutoAcceptTpRequest(userId2));
+            Assert.True(_rlv.Restrictions.IsAutoAcceptTpRequest());
         }
 
         #endregion
@@ -2719,8 +2719,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanTpRequest_Default()
         {
-            Assert.True(_rlv.RLVManager.CanTpRequest(null));
-            Assert.True(_rlv.RLVManager.CanTpRequest(UUID.Random()));
+            Assert.True(_rlv.Restrictions.CanTpRequest(null));
+            Assert.True(_rlv.Restrictions.CanTpRequest(UUID.Random()));
         }
 
         [Fact]
@@ -2728,8 +2728,8 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@tprequest=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanTpRequest(null));
-            Assert.False(_rlv.RLVManager.CanTpRequest(UUID.Random()));
+            Assert.False(_rlv.Restrictions.CanTpRequest(null));
+            Assert.False(_rlv.Restrictions.CanTpRequest(UUID.Random()));
         }
 
         [Fact]
@@ -2741,9 +2741,9 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@tprequest=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@tprequest:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanTpRequest(null));
-            Assert.True(_rlv.RLVManager.CanTpRequest(userId1));
-            Assert.False(_rlv.RLVManager.CanTpRequest(userId2));
+            Assert.False(_rlv.Restrictions.CanTpRequest(null));
+            Assert.True(_rlv.Restrictions.CanTpRequest(userId1));
+            Assert.False(_rlv.Restrictions.CanTpRequest(userId2));
         }
 
         [Fact]
@@ -2755,9 +2755,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@tprequest_sec=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanTpRequest(null));
-            Assert.False(_rlv.RLVManager.CanTpRequest(userId1));
-            Assert.False(_rlv.RLVManager.CanTpRequest(userId2));
+            Assert.False(_rlv.Restrictions.CanTpRequest(null));
+            Assert.False(_rlv.Restrictions.CanTpRequest(userId1));
+            Assert.False(_rlv.Restrictions.CanTpRequest(userId2));
         }
 
         [Fact]
@@ -2771,9 +2771,9 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@tprequest:{userId1}=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@tprequest:{userId2}=add", sender2.Id, sender2.Name);
 
-            Assert.False(_rlv.RLVManager.CanTpRequest(null));
-            Assert.True(_rlv.RLVManager.CanTpRequest(userId1));
-            Assert.False(_rlv.RLVManager.CanTpRequest(userId2));
+            Assert.False(_rlv.Restrictions.CanTpRequest(null));
+            Assert.True(_rlv.Restrictions.CanTpRequest(userId1));
+            Assert.False(_rlv.Restrictions.CanTpRequest(userId2));
         }
 
         #endregion
@@ -2822,13 +2822,13 @@ namespace LibRLV.Tests
         {
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, null));
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, null));
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, null));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, null));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
 
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
         }
 
         [Fact]
@@ -2838,13 +2838,13 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@edit=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, null));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, null));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, null));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, null));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
 
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
         }
 
         [Fact]
@@ -2856,17 +2856,17 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@edit=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@edit:{objectId1}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, null));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, null));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, null));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, null));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
 
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
 
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId2));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId2));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId2));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, objectId2));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, objectId2));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId2));
         }
 
         [Fact]
@@ -2877,17 +2877,17 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@editobj:{objectId1}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, null));
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, null));
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, null));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, null));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
 
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
 
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId2));
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId2));
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId2));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, objectId2));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, objectId2));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId2));
         }
 
         [Fact]
@@ -2897,13 +2897,13 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@editworld=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, null));
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, null));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, null));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, null));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
 
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
         }
 
         [Fact]
@@ -2913,13 +2913,13 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@editattach=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, null));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, null));
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, null));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, null));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, null));
 
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
-            Assert.True(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
+            Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
         }
 
         #endregion
@@ -2938,8 +2938,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShare_Default()
         {
-            Assert.True(_rlv.RLVManager.CanShare(null));
-            Assert.True(_rlv.RLVManager.CanShare(UUID.Random()));
+            Assert.True(_rlv.Restrictions.CanShare(null));
+            Assert.True(_rlv.Restrictions.CanShare(UUID.Random()));
         }
 
         [Fact]
@@ -2947,8 +2947,8 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@share=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanShare(null));
-            Assert.False(_rlv.RLVManager.CanShare(UUID.Random()));
+            Assert.False(_rlv.Restrictions.CanShare(null));
+            Assert.False(_rlv.Restrictions.CanShare(UUID.Random()));
         }
 
         [Fact]
@@ -2960,9 +2960,9 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@share=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@share:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanShare(null));
-            Assert.True(_rlv.RLVManager.CanShare(userId1));
-            Assert.False(_rlv.RLVManager.CanShare(userId2));
+            Assert.False(_rlv.Restrictions.CanShare(null));
+            Assert.True(_rlv.Restrictions.CanShare(userId1));
+            Assert.False(_rlv.Restrictions.CanShare(userId2));
         }
 
         [Fact]
@@ -2974,9 +2974,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@share_sec=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanShare(null));
-            Assert.False(_rlv.RLVManager.CanShare(userId1));
-            Assert.False(_rlv.RLVManager.CanShare(userId2));
+            Assert.False(_rlv.Restrictions.CanShare(null));
+            Assert.False(_rlv.Restrictions.CanShare(userId1));
+            Assert.False(_rlv.Restrictions.CanShare(userId2));
         }
 
         [Fact]
@@ -2990,9 +2990,9 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@share:{userId1}=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@share:{userId2}=add", sender2.Id, sender2.Name);
 
-            Assert.False(_rlv.RLVManager.CanShare(null));
-            Assert.True(_rlv.RLVManager.CanShare(userId1));
-            Assert.False(_rlv.RLVManager.CanShare(userId2));
+            Assert.False(_rlv.Restrictions.CanShare(null));
+            Assert.True(_rlv.Restrictions.CanShare(userId1));
+            Assert.False(_rlv.Restrictions.CanShare(userId2));
         }
 
         #endregion
@@ -3224,13 +3224,13 @@ namespace LibRLV.Tests
 
             var folderId1 = new UUID("99999999-9999-4999-8999-999999999999");
 
-            Assert.True(_rlv.RLVManager.CanDetach(folderId1, false, null, null));
-            Assert.True(_rlv.RLVManager.CanDetach(folderId1, false, AttachmentPoint.Chest, null));
-            Assert.True(_rlv.RLVManager.CanDetach(folderId1, false, null, WearableType.Shirt));
+            Assert.True(_rlv.Restrictions.CanDetach(folderId1, false, null, null));
+            Assert.True(_rlv.Restrictions.CanDetach(folderId1, false, AttachmentPoint.Chest, null));
+            Assert.True(_rlv.Restrictions.CanDetach(folderId1, false, null, WearableType.Shirt));
 
-            Assert.True(_rlv.RLVManager.CanDetach(folderId1, true, null, null));
-            Assert.True(_rlv.RLVManager.CanDetach(folderId1, true, AttachmentPoint.Chest, null));
-            Assert.True(_rlv.RLVManager.CanDetach(folderId1, true, null, WearableType.Shirt));
+            Assert.True(_rlv.Restrictions.CanDetach(folderId1, true, null, null));
+            Assert.True(_rlv.Restrictions.CanDetach(folderId1, true, AttachmentPoint.Chest, null));
+            Assert.True(_rlv.Restrictions.CanDetach(folderId1, true, null, WearableType.Shirt));
         }
 
         [Fact]
@@ -3243,13 +3243,13 @@ namespace LibRLV.Tests
 
             Assert.True(_rlv.ProcessMessage("@detach=n", _sender.Id, _sender.Name));
 
-            Assert.False(_rlv.RLVManager.CanDetach(folderId1, false, null, null));
-            Assert.False(_rlv.RLVManager.CanDetach(folderId1, false, AttachmentPoint.Chest, null));
-            Assert.False(_rlv.RLVManager.CanDetach(folderId1, false, null, WearableType.Shirt));
+            Assert.False(_rlv.Restrictions.CanDetach(folderId1, false, null, null));
+            Assert.False(_rlv.Restrictions.CanDetach(folderId1, false, AttachmentPoint.Chest, null));
+            Assert.False(_rlv.Restrictions.CanDetach(folderId1, false, null, WearableType.Shirt));
 
-            Assert.False(_rlv.RLVManager.CanDetach(folderId1, true, null, null));
-            Assert.False(_rlv.RLVManager.CanDetach(folderId1, true, AttachmentPoint.Chest, null));
-            Assert.False(_rlv.RLVManager.CanDetach(folderId1, true, null, WearableType.Shirt));
+            Assert.False(_rlv.Restrictions.CanDetach(folderId1, true, null, null));
+            Assert.False(_rlv.Restrictions.CanDetach(folderId1, true, AttachmentPoint.Chest, null));
+            Assert.False(_rlv.Restrictions.CanDetach(folderId1, true, null, WearableType.Shirt));
         }
 
         [Fact]
@@ -3262,15 +3262,15 @@ namespace LibRLV.Tests
 
             Assert.True(_rlv.ProcessMessage("@detach:skull=n", _sender.Id, _sender.Name));
 
-            Assert.True(_rlv.RLVManager.CanDetach(folderId1, false, null, null));
-            Assert.True(_rlv.RLVManager.CanDetach(folderId1, false, AttachmentPoint.Chest, null));
-            Assert.False(_rlv.RLVManager.CanDetach(folderId1, false, AttachmentPoint.Skull, null));
-            Assert.True(_rlv.RLVManager.CanDetach(folderId1, false, null, WearableType.Shirt));
+            Assert.True(_rlv.Restrictions.CanDetach(folderId1, false, null, null));
+            Assert.True(_rlv.Restrictions.CanDetach(folderId1, false, AttachmentPoint.Chest, null));
+            Assert.False(_rlv.Restrictions.CanDetach(folderId1, false, AttachmentPoint.Skull, null));
+            Assert.True(_rlv.Restrictions.CanDetach(folderId1, false, null, WearableType.Shirt));
 
-            Assert.True(_rlv.RLVManager.CanDetach(folderId1, true, null, null));
-            Assert.True(_rlv.RLVManager.CanDetach(folderId1, true, AttachmentPoint.Chest, null));
-            Assert.False(_rlv.RLVManager.CanDetach(folderId1, true, AttachmentPoint.Skull, null));
-            Assert.True(_rlv.RLVManager.CanDetach(folderId1, true, null, WearableType.Shirt));
+            Assert.True(_rlv.Restrictions.CanDetach(folderId1, true, null, null));
+            Assert.True(_rlv.Restrictions.CanDetach(folderId1, true, AttachmentPoint.Chest, null));
+            Assert.False(_rlv.Restrictions.CanDetach(folderId1, true, AttachmentPoint.Skull, null));
+            Assert.True(_rlv.Restrictions.CanDetach(folderId1, true, null, WearableType.Shirt));
         }
 
         #endregion
@@ -3289,10 +3289,10 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@addattach=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Fancy Hat
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
         }
 
         [Fact]
@@ -3308,10 +3308,10 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@addattach:groin=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Fancy Hat
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
         }
         #endregion
 
@@ -3329,10 +3329,10 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@remattach=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Fancy Hat
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
         }
 
         [Fact]
@@ -3348,10 +3348,10 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@remattach:groin=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Fancy Hat
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
         }
 
         #endregion
@@ -3378,10 +3378,10 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@addoutfit=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Retro Pants
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Watch
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -3397,10 +3397,10 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@addoutfit:pants=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Retro Pants
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Watch
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
         #endregion
 
@@ -3418,10 +3418,10 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@remoutfit=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Retro Pants
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Watch
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -3437,10 +3437,10 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@remoutfit:pants=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Retro Pants
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Watch
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
         #endregion
 
@@ -4064,10 +4064,10 @@ namespace LibRLV.Tests
         public void AcceptPermission()
         {
             Assert.True(_rlv.ProcessMessage($"@acceptpermission=add", _sender.Id, _sender.Name));
-            Assert.True(_rlv.RLVManager.IsAutoAcceptPermissions());
+            Assert.True(_rlv.Restrictions.IsAutoAcceptPermissions());
 
             Assert.True(_rlv.ProcessMessage($"@acceptpermission=rem", _sender.Id, _sender.Name));
-            Assert.False(_rlv.RLVManager.IsAutoAcceptPermissions());
+            Assert.False(_rlv.Restrictions.IsAutoAcceptPermissions());
         }
         #endregion
 
@@ -4076,10 +4076,10 @@ namespace LibRLV.Tests
         public void DenyPermission()
         {
             Assert.True(_rlv.ProcessMessage($"@denypermission=add", _sender.Id, _sender.Name));
-            Assert.True(_rlv.RLVManager.IsAutoDenyPermissions());
+            Assert.True(_rlv.Restrictions.IsAutoDenyPermissions());
 
             Assert.True(_rlv.ProcessMessage($"@denypermission=rem", _sender.Id, _sender.Name));
-            Assert.False(_rlv.RLVManager.IsAutoDenyPermissions());
+            Assert.False(_rlv.Restrictions.IsAutoDenyPermissions());
         }
         #endregion
 
@@ -6443,25 +6443,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@detachthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -6480,25 +6480,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@detachthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -6516,25 +6516,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@detachthis:Clothing/Hats=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -6552,25 +6552,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@detachthis:groin=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - folder was locked because PartyHat (groin)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED) - folder was locked because BusinessPants (groin)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -6588,25 +6588,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@detachthis:tattoo=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses (LOCKED) - folder was locked from Watch (tattoo)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         #endregion
@@ -6626,25 +6626,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -6660,25 +6660,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -6694,25 +6694,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@detachallthis:Clothing=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -6728,25 +6728,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@detachallthis:pants=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED) - Folder locked due to RetroPants being worn as 'pants'
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED) - Folder locked due to RetroPants being worn as 'pants'
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -6762,25 +6762,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@detachallthis:chest=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED) - Folder locked due to HappyShirt attachment of 'chest'
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED) - Folder locked due to HappyShirt attachment of 'chest'
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         #endregion
@@ -6801,25 +6801,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage($"@detachthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants ()  - Locked, but folder has exception
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt () - Locked, but folder has exception
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants () - Locked, but folder has exception
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         #endregion
@@ -6840,25 +6840,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage($"@detachallthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat () - Parent folder locked recursively, but has exception
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat () - Parent folder locked recursively, but has exception
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -6875,25 +6875,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage($"@detachallthis_except:Clothing=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat () - Parent folder locked recursively, but parent has recursive exception
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat () - Parent folder locked recursively, but parent has recursive exception
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants ()  - Locked, but folder has exception
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt () - Locked, but folder has exception
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants () - Locked, but folder has exception
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         #endregion
@@ -6912,25 +6912,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@attachthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -6949,25 +6949,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@attachthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -6985,25 +6985,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@attachthis:Clothing/Hats=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -7021,25 +7021,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@attachthis:groin=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - folder was locked because PartyHat (groin)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED) - folder was locked because BusinessPants (groin)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -7057,25 +7057,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@attachthis:tattoo=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses (LOCKED) - folder was locked from Watch (tattoo)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
         #endregion
 
@@ -7094,25 +7094,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -7128,25 +7128,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -7162,25 +7162,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@attachallthis:Clothing=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -7196,25 +7196,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@attachallthis:pants=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED) - Folder locked due to RetroPants being worn as 'pants'
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED) - Folder locked due to RetroPants being worn as 'pants'
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -7230,25 +7230,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage("@attachallthis:chest=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED) - Folder locked due to HappyShirt attachment of 'chest'
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED) - Folder locked due to HappyShirt attachment of 'chest'
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         #endregion
@@ -7269,25 +7269,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage($"@attachthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - Parent folder locked recursively
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants ()  - Locked, but folder has exception
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt () - Locked, but folder has exception
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants () - Locked, but folder has exception
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         #endregion
@@ -7308,25 +7308,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage($"@attachallthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat () - Parent folder locked recursively, but has exception
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat () - Parent folder locked recursively, but has exception
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED)
-            Assert.False(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         [Fact]
@@ -7343,25 +7343,25 @@ namespace LibRLV.Tests
             Assert.True(_rlv.ProcessMessage($"@attachallthis_except:Clothing=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat () - Parent folder locked recursively, but parent has recursive exception
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
 
             // #RLV/Clothing/Hats/Fancy Hat () - Parent folder locked recursively, but parent has recursive exception
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
 
             // #RLV/Clothing/Business Pants ()  - Locked, but folder has exception
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
 
             // #RLV/Clothing/Happy Shirt () - Locked, but folder has exception
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
 
             // #RLV/Clothing/Retro Pants () - Locked, but folder has exception
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.RLVManager.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Restrictions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
         }
 
         #endregion
@@ -7379,7 +7379,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage($"@{command}:0.9=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
+            Assert.True(_rlv.Restrictions.CanFarTouch(out var distance));
             Assert.Equal(0.9f, distance);
         }
 
@@ -7390,7 +7390,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage($"@{command}:0.9=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
+            Assert.True(_rlv.Restrictions.CanFarTouch(out var distance));
             Assert.Equal(0.9f, distance);
         }
 
@@ -7401,7 +7401,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage($"@{command}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanFarTouch(out var distance));
+            Assert.True(_rlv.Restrictions.CanFarTouch(out var distance));
             Assert.Equal(1.5f, distance);
         }
 
@@ -7415,11 +7415,11 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@{command1}:12.34=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@{command2}:6.78=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanFarTouch(out var actualDistance2));
+            Assert.True(_rlv.Restrictions.CanFarTouch(out var actualDistance2));
 
             _rlv.ProcessMessage($"@{command1}:6.78=y", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanFarTouch(out var actualDistance1));
+            Assert.True(_rlv.Restrictions.CanFarTouch(out var actualDistance1));
 
             Assert.Equal(12.34f, actualDistance1, FloatTolerance);
             Assert.Equal(6.78f, actualDistance2, FloatTolerance);
@@ -7435,10 +7435,10 @@ namespace LibRLV.Tests
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
             var userId1 = new UUID("11111111-1111-4111-8111-111111111111");
 
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
         }
 
         [Fact]
@@ -7449,10 +7449,10 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@touchall=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
         }
 
         #endregion
@@ -7468,10 +7468,10 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@touchworld=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
         }
 
         [Fact]
@@ -7484,15 +7484,15 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@touchworld=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@touchworld:{objectId2}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
 
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId2, null, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId2, userId1, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId2, null, 5.0f));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId2, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId2, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId2, userId1, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId2, null, 5.0f));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId2, null, null));
         }
 
         #endregion
@@ -7508,15 +7508,15 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@touchthis:{objectId1}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
 
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId2, null, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId2, userId1, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId2, null, 5.0f));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId2, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId2, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId2, userId1, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId2, null, 5.0f));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId2, null, null));
         }
 
         #endregion
@@ -7532,15 +7532,15 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@touchall=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@touchme=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
 
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, _sender.Id, null, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, _sender.Id, userId1, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, _sender.Id, null, 5.0f));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, _sender.Id, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, _sender.Id, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, _sender.Id, userId1, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, _sender.Id, null, 5.0f));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, _sender.Id, null, null));
         }
 
         #endregion
@@ -7555,10 +7555,10 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@touchattach=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
         }
 
         #endregion
@@ -7573,10 +7573,10 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@touchattachself=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
         }
 
         #endregion
@@ -7591,10 +7591,10 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@touchattachother=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
         }
 
         [Fact]
@@ -7606,11 +7606,11 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@touchattachother:{userId2}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId2, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId2, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
         }
 
         #endregion
@@ -7625,10 +7625,10 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@touchhud=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
         }
 
         [Fact]
@@ -7640,11 +7640,11 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@touchhud:{objectId2}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.True(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId2, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId2, null, null));
         }
 
         #endregion
@@ -7665,18 +7665,18 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@interact=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.False(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
 
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
-            Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.False(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
 
-            Assert.False(_rlv.RLVManager.CanRez());
+            Assert.False(_rlv.Restrictions.CanRez());
 
-            Assert.False(_rlv.RLVManager.CanSit());
+            Assert.False(_rlv.Restrictions.CanSit());
         }
 
         #endregion
@@ -7718,8 +7718,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShowNames_Default()
         {
-            Assert.True(_rlv.RLVManager.CanShowNames(null));
-            Assert.True(_rlv.RLVManager.CanShowNames(UUID.Random()));
+            Assert.True(_rlv.Restrictions.CanShowNames(null));
+            Assert.True(_rlv.Restrictions.CanShowNames(UUID.Random()));
         }
 
         [Fact]
@@ -7727,8 +7727,8 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@shownames=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanShowNames(null));
-            Assert.False(_rlv.RLVManager.CanShowNames(UUID.Random()));
+            Assert.False(_rlv.Restrictions.CanShowNames(null));
+            Assert.False(_rlv.Restrictions.CanShowNames(UUID.Random()));
         }
 
         [Fact]
@@ -7740,9 +7740,9 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@shownames=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@shownames:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanShowNames(null));
-            Assert.True(_rlv.RLVManager.CanShowNames(userId1));
-            Assert.False(_rlv.RLVManager.CanShowNames(userId2));
+            Assert.False(_rlv.Restrictions.CanShowNames(null));
+            Assert.True(_rlv.Restrictions.CanShowNames(userId1));
+            Assert.False(_rlv.Restrictions.CanShowNames(userId2));
         }
 
         [Fact]
@@ -7753,9 +7753,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@shownames_sec=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanShowNames(null));
-            Assert.False(_rlv.RLVManager.CanShowNames(userId1));
-            Assert.False(_rlv.RLVManager.CanShowNames(userId2));
+            Assert.False(_rlv.Restrictions.CanShowNames(null));
+            Assert.False(_rlv.Restrictions.CanShowNames(userId1));
+            Assert.False(_rlv.Restrictions.CanShowNames(userId2));
         }
 
         [Fact]
@@ -7769,9 +7769,9 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@shownames:{userId1}=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@shownames:{userId2}=add", sender2.Id, sender2.Name);
 
-            Assert.False(_rlv.RLVManager.CanShowNames(null));
-            Assert.True(_rlv.RLVManager.CanShowNames(userId1));
-            Assert.False(_rlv.RLVManager.CanShowNames(userId2));
+            Assert.False(_rlv.Restrictions.CanShowNames(null));
+            Assert.True(_rlv.Restrictions.CanShowNames(userId1));
+            Assert.False(_rlv.Restrictions.CanShowNames(userId2));
         }
 
         #endregion
@@ -7781,8 +7781,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShowNameTags_Default()
         {
-            Assert.True(_rlv.RLVManager.CanShowNameTags(null));
-            Assert.True(_rlv.RLVManager.CanShowNameTags(UUID.Random()));
+            Assert.True(_rlv.Restrictions.CanShowNameTags(null));
+            Assert.True(_rlv.Restrictions.CanShowNameTags(UUID.Random()));
         }
 
         [Fact]
@@ -7790,8 +7790,8 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@shownametags=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanShowNameTags(null));
-            Assert.False(_rlv.RLVManager.CanShowNameTags(UUID.Random()));
+            Assert.False(_rlv.Restrictions.CanShowNameTags(null));
+            Assert.False(_rlv.Restrictions.CanShowNameTags(UUID.Random()));
         }
 
         [Fact]
@@ -7803,9 +7803,9 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@shownametags=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@shownametags:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanShowNameTags(null));
-            Assert.True(_rlv.RLVManager.CanShowNameTags(userId1));
-            Assert.False(_rlv.RLVManager.CanShowNameTags(userId2));
+            Assert.False(_rlv.Restrictions.CanShowNameTags(null));
+            Assert.True(_rlv.Restrictions.CanShowNameTags(userId1));
+            Assert.False(_rlv.Restrictions.CanShowNameTags(userId2));
         }
 
         #endregion
@@ -7825,8 +7825,8 @@ namespace LibRLV.Tests
         {
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
         }
 
         [Fact]
@@ -7837,8 +7837,8 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@showhovertextall=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.False(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.False(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
         }
 
         #endregion
@@ -7850,8 +7850,8 @@ namespace LibRLV.Tests
         {
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
         }
 
         [Fact]
@@ -7862,11 +7862,11 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@showhovertext:{objectId1}=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.False(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.False(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
 
-            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
-            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
+            Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
+            Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
         }
 
         #endregion
@@ -7878,8 +7878,8 @@ namespace LibRLV.Tests
         {
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
         }
 
         [Fact]
@@ -7890,11 +7890,11 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@showhovertexthud=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.False(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
 
-            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
-            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
+            Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
+            Assert.False(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
         }
 
         #endregion
@@ -7906,8 +7906,8 @@ namespace LibRLV.Tests
         {
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
         }
 
         [Fact]
@@ -7918,11 +7918,11 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@showhovertextworld=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.False(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
 
-            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
-            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
+            Assert.False(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
+            Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
         }
 
         #endregion

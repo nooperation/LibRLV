@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibRLV", "LibRLV\LibRLV.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibRLV.Tests", "LibRLV.Tests\LibRLV.Tests.csproj", "{695B9BE1-3E51-4FDB-BEEE-1F9DC8DFD669}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TempClient", "TempClient\TempClient.csproj", "{6E715B8F-8196-4100-BCF1-269A5975E3B9}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{695B9BE1-3E51-4FDB-BEEE-1F9DC8DFD669}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{695B9BE1-3E51-4FDB-BEEE-1F9DC8DFD669}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{695B9BE1-3E51-4FDB-BEEE-1F9DC8DFD669}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6E715B8F-8196-4100-BCF1-269A5975E3B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6E715B8F-8196-4100-BCF1-269A5975E3B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6E715B8F-8196-4100-BCF1-269A5975E3B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6E715B8F-8196-4100-BCF1-269A5975E3B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

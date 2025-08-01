@@ -12,23 +12,23 @@ namespace LibRLV
         public bool Enabled { get; set; }
         public bool EnableInstantMessageProcessing { get; set; }
 
-        public RLVBlacklist Blacklist { get; }
         public RLVActionHandler Actions { get; }
-        public RLVGetHandler Get { get; }
-        public RLVRestrictionHandler Restrictions { get; }
-        public IRLVCallbacks Callbacks { get; }
-        public RLVManager RLVManager { get; }
+        public RLVRestrictionHandler RestrictionsHandler { get; }
+        public RLVManager Restrictions { get; }
+        public RLVBlacklist Blacklist { get; }
 
+        internal IRLVCallbacks Callbacks { get; }
+        internal RLVGetRequestHandler GetRequestHandler { get; }
         private readonly Regex RLVRegexPattern = new Regex(@"(?<behavior>[^:=]+)(:(?<option>[^=]*))?=(?<param>.+)", RegexOptions.Compiled);
 
         public RLV(IRLVCallbacks callbacks, bool enabled)
         {
             Callbacks = callbacks;
             Blacklist = new RLVBlacklist();
-            Restrictions = new RLVRestrictionHandler(Callbacks);
-            Get = new RLVGetHandler(Blacklist, Restrictions, Callbacks);
-            RLVManager = new RLVManager(Restrictions, Callbacks);
-            Actions = new RLVActionHandler(RLVManager, Callbacks);
+            RestrictionsHandler = new RLVRestrictionHandler(Callbacks);
+            GetRequestHandler = new RLVGetRequestHandler(Blacklist, RestrictionsHandler, Callbacks);
+            Restrictions = new RLVManager(RestrictionsHandler);
+            Actions = new RLVActionHandler(Restrictions, Callbacks);
             Enabled = enabled;
         }
 
@@ -46,7 +46,7 @@ namespace LibRLV
 
             if (rlvMessage.Behavior == "clear")
             {
-                return Restrictions.ProcessClearCommand(rlvMessage);
+                return RestrictionsHandler.ProcessClearCommand(rlvMessage);
             }
             else if (rlvMessage.Param == "force")
             {
@@ -54,7 +54,7 @@ namespace LibRLV
             }
             else if (rlvMessage.Param == "y" || rlvMessage.Param == "n" || rlvMessage.Param == "add" || rlvMessage.Param == "rem")
             {
-                return Restrictions.ProcessRestrictionCommand(rlvMessage, rlvMessage.Option, rlvMessage.Param == "n" || rlvMessage.Param == "add");
+                return RestrictionsHandler.ProcessRestrictionCommand(rlvMessage, rlvMessage.Option, rlvMessage.Param == "n" || rlvMessage.Param == "add");
             }
             else if (int.TryParse(rlvMessage.Param, out var channel))
             {
@@ -63,7 +63,7 @@ namespace LibRLV
                     return false;
                 }
 
-                return Get.ProcessGetCommand(rlvMessage, channel);
+                return GetRequestHandler.ProcessGetCommand(rlvMessage, channel);
             }
 
             return false;
@@ -134,7 +134,256 @@ namespace LibRLV
                 return false;
             }
 
-            return Get.ProcessInstantMessageCommand(message.ToLower(), senderId, senderName);
+            return GetRequestHandler.ProcessInstantMessageCommand(message.ToLower(), senderId, senderName);
+        }
+
+        public void ReportSendPublicMessage(string message)
+        {
+            if (message.StartsWith("/me"))
+            {
+                if (!Restrictions.IsRedirEmote(out var channels))
+                {
+                    return;
+                }
+
+                foreach (var channel in channels)
+                {
+                    Callbacks.SendReplyAsync(channel, message, System.Threading.CancellationToken.None);
+                }
+            }
+            else
+            {
+                if (!Restrictions.IsRedirChat(out var channels))
+                {
+                    return;
+                }
+
+                foreach (var channel in channels)
+                {
+                    Callbacks.SendReplyAsync(channel, message, System.Threading.CancellationToken.None);
+                }
+            }
+        }
+
+        public enum InventoryOfferAction
+        {
+            Accepted = 1,
+            Denied = 2
+        }
+        public void ReportInventoryOffer(string itemOrFolderPath, InventoryOfferAction action)
+        {
+            var isSharedFolder = false;
+
+            if (itemOrFolderPath.StartsWith("#RLV/"))
+            {
+                itemOrFolderPath = itemOrFolderPath.Substring("#RLV/".Length);
+                isSharedFolder = true;
+            }
+
+            var notificationText = "";
+            if (action == InventoryOfferAction.Accepted)
+            {
+                if (isSharedFolder)
+                {
+                    notificationText = $"/accepted_in_rlv inv_offer {itemOrFolderPath}";
+                }
+                else
+                {
+                    notificationText = $"/accepted_in_inv inv_offer {itemOrFolderPath}";
+                }
+            }
+            else
+            {
+                notificationText = $"/declined inv_offer {itemOrFolderPath}";
+            }
+
+            SendNotification(notificationText);
+        }
+
+        public enum WornItemChange
+        {
+            Attached = 1,
+            Detached = 2
+        }
+        public void ReportWornItemChange(UUID objectFolderId, bool isShared, WearableType wearableType, WornItemChange changeType)
+        {
+            var notificationText = "";
+
+            if (changeType == WornItemChange.Attached)
+            {
+                var isLegal = Restrictions.CanAttach(objectFolderId, isShared, null, wearableType);
+
+                if (isLegal)
+                {
+                    notificationText = $"/worn legally {wearableType.ToString().ToLower()}";
+                }
+                else
+                {
+                    notificationText = $"/worn illegally {wearableType.ToString().ToLower()}";
+                }
+            }
+            else if (changeType == WornItemChange.Detached)
+            {
+                var isLegal = Restrictions.CanDetach(objectFolderId, isShared, null, wearableType);
+
+                if (isLegal)
+                {
+                    notificationText = $"/unworn legally {wearableType.ToString().ToLower()}";
+                }
+                else
+                {
+                    notificationText = $"/unworn illegally {wearableType.ToString().ToLower()}";
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            SendNotification(notificationText);
+        }
+
+        public enum AttachedItemChange
+        {
+            Attached = 1,
+            Detached = 2
+        }
+        public void ReportAttachedItemChange(UUID objectFolderId, bool isShared, AttachmentPoint attachmentPoint, AttachedItemChange changeType)
+        {
+            var notificationText = "";
+
+            if (changeType == AttachedItemChange.Attached)
+            {
+                var isLegal = Restrictions.CanAttach(objectFolderId, isShared, attachmentPoint, null);
+
+                if (isLegal)
+                {
+                    notificationText = $"/attached legally {attachmentPoint.ToString().ToLower()}";
+                }
+                else
+                {
+                    notificationText = $"/attached illegally {attachmentPoint.ToString().ToLower()}";
+                }
+            }
+            else if (changeType == AttachedItemChange.Detached)
+            {
+                var isLegal = Restrictions.CanDetach(objectFolderId, isShared, attachmentPoint, null);
+
+                if (isLegal)
+                {
+                    notificationText = $"/detached legally {attachmentPoint.ToString().ToLower()}";
+                }
+                else
+                {
+                    notificationText = $"/detached illegally {attachmentPoint.ToString().ToLower()}";
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            SendNotification(notificationText);
+        }
+
+        public enum SitType
+        {
+            Sit = 1,
+            Stand,
+        }
+        public void ReportSit(SitType sitType, UUID? objectId, float? objectDistance)
+        {
+            var notificationText = "";
+
+            if (sitType == SitType.Sit && objectId != null)
+            {
+                var isLegal = Restrictions.CanInteract() && Restrictions.CanSit();
+
+                if (Restrictions.CanSitTp(out var maxObjectDistance))
+                {
+                    if (objectDistance == null || objectDistance > maxObjectDistance)
+                    {
+                        isLegal = false;
+                    }
+                }
+
+                if (isLegal)
+                {
+                    notificationText = $"/sat object legally {objectId}";
+                }
+                else
+                {
+                    notificationText = $"/sat object illegally {objectId}";
+                }
+            }
+            else if (sitType == SitType.Stand && objectId != null)
+            {
+                var isLegal = Restrictions.CanInteract() && Restrictions.CanUnsit();
+
+                if (isLegal)
+                {
+                    notificationText = $"/unsat object legally {objectId}";
+                }
+                else
+                {
+                    notificationText = $"/unsat object illegally {objectId}";
+                }
+            }
+            else if (sitType == SitType.Sit && objectId == null)
+            {
+                var isLegal = Restrictions.CanSit();
+
+                if (isLegal)
+                {
+                    notificationText = $"/sat ground legally";
+                }
+                else
+                {
+                    notificationText = $"/sat ground illegally";
+                }
+            }
+            else if (sitType == SitType.Stand && objectId == null)
+            {
+                var isLegal = Restrictions.CanUnsit();
+
+                if (isLegal)
+                {
+                    notificationText = $"/unsat ground legally";
+                }
+                else
+                {
+                    notificationText = $"/unsat ground illegally";
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            SendNotification(notificationText);
+        }
+
+        private void SendNotification(string notificationText)
+        {
+            var notificationRestrictions = RestrictionsHandler.GetRestrictions(RLVRestrictionType.Notify);
+
+            foreach (var notificationRestriction in notificationRestrictions)
+            {
+                if (!(notificationRestriction.Args[0] is int channel))
+                {
+                    continue;
+                }
+
+                if (!(notificationRestriction.Args.Count > 1 && notificationRestriction.Args[1] is string filter))
+                {
+                    filter = "";
+                }
+
+                if (notificationText.Contains(filter))
+                {
+                    Callbacks.SendReplyAsync(channel, notificationText, System.Threading.CancellationToken.None);
+                }
+            }
         }
     }
 }

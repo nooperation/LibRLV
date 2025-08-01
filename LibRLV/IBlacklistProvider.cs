@@ -4,6 +4,6 @@ namespace LibRLV
 {
     internal interface IBlacklistProvider
     {
-        HashSet<string> GetBlacklist();
+        IReadOnlyCollection<string> GetBlacklist();
     }
 }
