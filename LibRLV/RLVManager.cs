@@ -203,27 +203,30 @@ namespace LibRLV
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowNearby).Any();
         }
-        public bool CanUnsharedWear()
+
+        private bool CanUnsharedWear()
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.UnsharedWear).Any();
         }
-        public bool CanUnsharedUnwear()
+        private bool CanUnsharedUnwear()
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.UnsharedUnwear).Any();
         }
-        public bool CanSharedWear()
+        private bool CanSharedWear()
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SharedWear).Any();
         }
-        public bool CanSharedUnwear()
+        private bool CanSharedUnwear()
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SharedUnwear).Any();
         }
+
         public bool IsAutoDenyPermissions()
         {
             return _restrictionProvider.GetRestrictions(RLVRestrictionType.DenyPermission).Any();
         }
 
+        #region Camera
         public bool HasCamZoomMin(out float camZoomMin)
         {
             return GetRestrictionValueMax(RLVRestrictionType.CamZoomMin, out camZoomMin);
@@ -232,7 +235,6 @@ namespace LibRLV
         {
             return GetRestrictionValueMax(RLVRestrictionType.SetCamFovMin, out setCamFovMin);
         }
-
         public bool HasSetCamAvDistMin(out float setCamAvDistMin)
         {
             return GetRestrictionValueMax(RLVRestrictionType.SetCamAvDistMin, out setCamAvDistMin);
@@ -261,7 +263,6 @@ namespace LibRLV
         {
             return GetRestrictionValueMin(RLVRestrictionType.SetCamFovMax, out setCamFovMax);
         }
-
         public bool HasSetCamAvDistMax(out float setCamAvDistMax)
         {
             return GetRestrictionValueMin(RLVRestrictionType.SetCamAvDistMax, out setCamAvDistMax);
@@ -270,20 +271,6 @@ namespace LibRLV
         {
             return GetRestrictionValueMin(RLVRestrictionType.CamAvDist, out camAvDist);
         }
-
-        public bool CanSitTp(out float sitTpDist)
-        {
-            return GetOptionalRestrictionValueMin(RLVRestrictionType.SitTp, 1.5f, out sitTpDist);
-        }
-        public bool CanFarTouch(out float farTouchDist)
-        {
-            return GetOptionalRestrictionValueMin(RLVRestrictionType.FarTouch, 1.5f, out farTouchDist);
-        }
-        public bool CanTpLocal(out float tpLocalDist)
-        {
-            return GetOptionalRestrictionValueMin(RLVRestrictionType.TpLocal, 0.0f, out tpLocalDist);
-        }
-
         public bool HasCamDrawColor(out Vector3 camDrawColor)
         {
             camDrawColor.X = 0;
@@ -312,6 +299,21 @@ namespace LibRLV
 
             return true;
         }
+        #endregion
+
+        public bool CanSitTp(out float sitTpDist)
+        {
+            return GetOptionalRestrictionValueMin(RLVRestrictionType.SitTp, 1.5f, out sitTpDist);
+        }
+        public bool CanFarTouch(out float farTouchDist)
+        {
+            return GetOptionalRestrictionValueMin(RLVRestrictionType.FarTouch, 1.5f, out farTouchDist);
+        }
+        public bool CanTpLocal(out float tpLocalDist)
+        {
+            return GetOptionalRestrictionValueMin(RLVRestrictionType.TpLocal, 0.0f, out tpLocalDist);
+        }
+
 
         #region Chat
         public bool IsRedirChat(out List<int> channels)

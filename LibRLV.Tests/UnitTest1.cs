@@ -4139,38 +4139,6 @@ namespace LibRLV.Tests
         // Clothing and Attachments (Shared Folders)
         //
 
-        #region @unsharedwear=<y/n>
-        [Fact]
-        public void CanUnsharedWear()
-        {
-            CheckSimpleCommand("unsharedWear", m => m.CanUnsharedWear());
-        }
-        #endregion
-
-        #region @unsharedunwear=<y/n>
-        [Fact]
-        public void CanUnsharedUnwear()
-        {
-            CheckSimpleCommand("unsharedUnwear", m => m.CanUnsharedUnwear());
-        }
-        #endregion
-
-        #region @sharedwear=<y/n>
-        [Fact]
-        public void CanSharedWear()
-        {
-            CheckSimpleCommand("sharedWear", m => m.CanSharedWear());
-        }
-        #endregion
-
-        #region @sharedunwear=<y/n>
-        [Fact]
-        public void CanSharedUnwear()
-        {
-            CheckSimpleCommand("sharedUnwear", m => m.CanSharedUnwear());
-        }
-        #endregion
-
         #region @getinv[:folder1/.../folderN]=<channel_number>
         [Fact]
         public void GetInv()
