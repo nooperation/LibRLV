@@ -166,7 +166,7 @@ namespace LibRLV
             return true;
         }
 
-        private bool CanRemAttachItem(InventoryItem item, InventoryMap inventoryMap, bool enforceNostrip)
+        private bool CanRemAttachItem(InventoryItem item, bool enforceNostrip)
         {
             if (item.WornOn == null && item.AttachedTo == null)
             {
@@ -183,16 +183,9 @@ namespace LibRLV
                 return false;
             }
 
-            if (!inventoryMap.Folders.TryGetValue(item.FolderId, out var folder))
+            if (enforceNostrip && item.Folder != null && item.Folder.Name.Contains("nostrip"))
             {
-                while (folder != null)
-                {
-                    if (enforceNostrip && folder.Name.Contains("nostrip"))
-                    {
-                        return false;
-                    }
-                    folder = folder.Parent;
-                }
+                return false;
             }
 
             if (!_manager.CanDetach(item, true))
@@ -337,7 +330,7 @@ namespace LibRLV
 
             foreach (var item in folder.Items)
             {
-                if (!CanRemAttachItem(item, inventoryMap, true))
+                if (!CanRemAttachItem(item, true))
                 {
                     continue;
                 }
@@ -367,15 +360,21 @@ namespace LibRLV
             {
                 return false;
             }
+            if (!_callbacks.TryGetCurrentOutfit(out var currentOutfit).Result)
+            {
+                return false;
+            }
+
             var inventoryMap = new InventoryMap(sharedFolder);
 
             var itemIdsToDetach = new List<UUID>();
 
             if (UUID.TryParse(command.Option, out var uuid))
             {
-                if (inventoryMap.Items.TryGetValue(uuid, out var item))
+                var item = currentOutfit.FirstOrDefault(n => n.Id == uuid);
+                if (item != null)
                 {
-                    if (CanRemAttachItem(item, inventoryMap, true))
+                    if (CanRemAttachItem(item, true))
                     {
                         itemIdsToDetach.Add(uuid);
                     }
@@ -387,23 +386,23 @@ namespace LibRLV
             }
             else if (RLVCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
             {
-                itemIdsToDetach = inventoryMap.Items
+                itemIdsToDetach = currentOutfit
                     .Where(n =>
-                        n.Value.AttachedTo == attachmentPoint &&
-                        CanRemAttachItem(n.Value, inventoryMap, true)
+                        n.AttachedTo == attachmentPoint &&
+                        CanRemAttachItem(n, true)
                     )
-                    .Select(n => n.Value.Id)
+                    .Select(n => n.Id)
                     .Distinct()
                     .ToList();
             }
             else if (command.Option.Length == 0)
             {
                 // Everything attachable will be detached (excludes clothing/wearable types)
-                itemIdsToDetach = inventoryMap.Items
+                itemIdsToDetach = currentOutfit
                     .Where(n =>
-                        n.Value.AttachedTo != null && CanRemAttachItem(n.Value, inventoryMap, true)
+                        n.AttachedTo != null && CanRemAttachItem(n, true)
                     )
-                    .Select(n => n.Value.Id)
+                    .Select(n => n.Id)
                     .Distinct()
                     .ToList();
             }
@@ -497,7 +496,7 @@ namespace LibRLV
             var itemIdsToDetach = new List<UUID>();
             if (inventoryMap.Items.TryGetValue(command.Sender, out var sender))
             {
-                if (CanRemAttachItem(sender, inventoryMap, false))
+                if (CanRemAttachItem(sender, false))
                 {
                     itemIdsToDetach.Add(sender.Id);
                 }
@@ -511,10 +510,15 @@ namespace LibRLV
         // TODO: Add support for Attachment groups (RLVa)
         private bool HandleRemOutfit(RLVMessage command)
         {
+            if (!_callbacks.TryGetCurrentOutfit(out var currentOutfit).Result)
+            {
+                return false;
+            }
             if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
             {
                 return false;
             }
+
             var inventoryMap = new InventoryMap(sharedFolder);
 
             UUID? folderId = null;
@@ -533,14 +537,13 @@ namespace LibRLV
                 return false;
             }
 
-            var itemsToDetach = inventoryMap.Items
+            var itemsToDetach = currentOutfit
                 .Where(n =>
-                    n.Value.WornOn != null &&
-                    (folderId == null || n.Value.FolderId == folderId) &&
-                    (wearableType == null || n.Value.WornOn == wearableType) &&
-                    CanRemAttachItem(n.Value, inventoryMap, true)
+                    n.WornOn != null &&
+                    (folderId == null || n.FolderId == folderId) &&
+                    (wearableType == null || n.WornOn == wearableType) &&
+                    CanRemAttachItem(n, true)
                 )
-                .Select(n => n.Value)
                 .ToList();
 
             var itemIdsToDetach = itemsToDetach

@@ -3449,11 +3449,17 @@ namespace LibRLV.Tests
         public void RemOutfitForce()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
             var sharedFolder = sampleTree.Root;
 
             // skin, shape, eyes and hair cannot be removed
+            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Type = InventoryTree.InventoryItem.ItemType.Wearable;
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.WornOn = WearableType.Skin;
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
 
             _callbacks.Setup(e =>
                 e.TryGetRlvInventoryTree(out sharedFolder)
@@ -3475,13 +3481,128 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void RemOutfitForce_Folder()
+        public void RemOutfitForce_ExternalItems()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
+            var externalWearable = new InventoryTree.InventoryItem()
+            {
+                Name = "External Tattoo",
+                Folder = null,
+                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Type = InventoryTree.InventoryItem.ItemType.Wearable,
+                WornOn = WearableType.Tattoo,
+                AttachedTo = null,
+                Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
+            };
+            var externalAttachable = new InventoryTree.InventoryItem()
+            {
+                Name = "External Jaw Thing",
+                Folder = null,
+                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Type = InventoryTree.InventoryItem.ItemType.Attachable,
+                AttachedTo = AttachmentPoint.Jaw,
+                WornOn = null,
+                Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
+            };
+
+            currentOutfit.Add(externalWearable);
+            currentOutfit.Add(externalAttachable);
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<RemOutfitEventArgs>(
+                 attach: n => _rlv.Actions.RemOutfit += n,
+                 detach: n => _rlv.Actions.RemOutfit -= n,
+                 testCode: () => _rlv.ProcessMessage("@remoutfit=force", _sender.Id, _sender.Name)
+            );
+
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+                sampleTree.Root_Accessories_Watch_WornTattoo.Id,
+                externalWearable.Id
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Fact]
+        public void RemOutfitForce_ExternalItems_ByType()
+        {
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
+            var sharedFolder = sampleTree.Root;
+
+            var externalWearable = new InventoryTree.InventoryItem()
+            {
+                Name = "External Tattoo",
+                Folder = null,
+                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Type = InventoryTree.InventoryItem.ItemType.Wearable,
+                WornOn = WearableType.Tattoo,
+                AttachedTo = null,
+                Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
+            };
+            var externalAttachable = new InventoryTree.InventoryItem()
+            {
+                Name = "External Jaw Thing",
+                Folder = null,
+                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Type = InventoryTree.InventoryItem.ItemType.Attachable,
+                AttachedTo = AttachmentPoint.Jaw,
+                WornOn = null,
+                Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
+            };
+
+            currentOutfit.Add(externalWearable);
+            currentOutfit.Add(externalAttachable);
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<RemOutfitEventArgs>(
+                 attach: n => _rlv.Actions.RemOutfit += n,
+                 detach: n => _rlv.Actions.RemOutfit -= n,
+                 testCode: () => _rlv.ProcessMessage("@remoutfit:tattoo=force", _sender.Id, _sender.Name)
+            );
+
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Accessories_Watch_WornTattoo.Id,
+                externalWearable.Id
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Fact]
+        public void RemOutfitForce_Folder()
+        {
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Type = InventoryTree.InventoryItem.ItemType.Wearable;
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.WornOn = WearableType.Tattoo;
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
 
             _callbacks.Setup(e =>
                 e.TryGetRlvInventoryTree(out sharedFolder)
@@ -3505,7 +3626,12 @@ namespace LibRLV.Tests
         public void RemOutfitForce_Specific()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
             var sharedFolder = sampleTree.Root;
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
 
             _callbacks.Setup(e =>
                 e.TryGetRlvInventoryTree(out sharedFolder)
@@ -3529,9 +3655,14 @@ namespace LibRLV.Tests
         public void RemOutfitForce_BodyPart_Specific()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
             var sharedFolder = sampleTree.Root;
 
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Skin;
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
 
             _callbacks.Setup(e =>
                 e.TryGetRlvInventoryTree(out sharedFolder)
@@ -3565,6 +3696,49 @@ namespace LibRLV.Tests
             var expected = new List<(int Channel, string Text)>
             {
                 (1234, "0000000000000000"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getoutfit=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetOutfit_ExternalItems()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            var currentOutfit = new List<InventoryTree.InventoryItem>();
+            var externalWearable = new InventoryTree.InventoryItem()
+            {
+                Name = "External Tattoo",
+                Folder = null,
+                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Type = InventoryTree.InventoryItem.ItemType.Wearable,
+                WornOn = WearableType.Tattoo,
+                AttachedTo = null,
+                Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
+            };
+            var externalAttachable = new InventoryTree.InventoryItem()
+            {
+                Name = "External Jaw Thing",
+                Folder = null,
+                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Type = InventoryTree.InventoryItem.ItemType.Attachable,
+                AttachedTo = AttachmentPoint.Jaw,
+                WornOn = null,
+                Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
+            };
+
+            currentOutfit.Add(externalWearable);
+            currentOutfit.Add(externalAttachable);
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "0000000000000010"),
             };
 
             Assert.True(_rlv.ProcessMessage("@getoutfit=1234", _sender.Id, _sender.Name));
@@ -3719,6 +3893,49 @@ namespace LibRLV.Tests
             var expected = new List<(int Channel, string Text)>
             {
                 (1234, "00000000000000000000000000000000000000000000000000000000"),
+            };
+
+            Assert.True(_rlv.ProcessMessage("@getattach=1234", _sender.Id, _sender.Name));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GetAttach_ExternalItems()
+        {
+            var actual = _callbacks.RecordReplies();
+
+            var currentOutfit = new List<InventoryTree.InventoryItem>();
+            var externalWearable = new InventoryTree.InventoryItem()
+            {
+                Name = "External Tattoo",
+                Folder = null,
+                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Type = InventoryTree.InventoryItem.ItemType.Wearable,
+                WornOn = WearableType.Tattoo,
+                AttachedTo = null,
+                Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
+            };
+            var externalAttachable = new InventoryTree.InventoryItem()
+            {
+                Name = "External Jaw Thing",
+                Folder = null,
+                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Type = InventoryTree.InventoryItem.ItemType.Attachable,
+                AttachedTo = AttachmentPoint.Jaw,
+                WornOn = null,
+                Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
+            };
+
+            currentOutfit.Add(externalWearable);
+            currentOutfit.Add(externalAttachable);
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
+
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, "00000000000000000000000000000000000000000000000100000000"),
             };
 
             Assert.True(_rlv.ProcessMessage("@getattach=1234", _sender.Id, _sender.Name));
@@ -5572,6 +5789,11 @@ namespace LibRLV.Tests
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
 
             _callbacks.Setup(e =>
                 e.TryGetRlvInventoryTree(out sharedFolder)
@@ -5597,12 +5819,78 @@ namespace LibRLV.Tests
         }
 
         [Theory]
+        [InlineData("@detach=force")]
+        [InlineData("@remattach=force")]
+        public void RemAttach_RemoveAllAttachments_ExternalItems(string command)
+        {
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
+
+            var externalWearable = new InventoryTree.InventoryItem()
+            {
+                Name = "External Tattoo",
+                Folder = null,
+                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Type = InventoryTree.InventoryItem.ItemType.Wearable,
+                WornOn = WearableType.Tattoo,
+                AttachedTo = null,
+                Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
+            };
+            var externalAttachable = new InventoryTree.InventoryItem()
+            {
+                Name = "External Jaw Thing",
+                Folder = null,
+                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Type = InventoryTree.InventoryItem.ItemType.Attachable,
+                AttachedTo = AttachmentPoint.Jaw,
+                WornOn = null,
+                Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
+            };
+
+            currentOutfit.Add(externalWearable);
+            currentOutfit.Add(externalAttachable);
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
+            );
+
+            // Remove everything except for clothing despite what you would think. Just how things go.
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
+                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
+                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
+                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
+                sampleTree.Root_Accessories_Glasses_AttachChin.Id,
+                externalAttachable.Id,
+            }.Order();
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Theory]
         [InlineData("@detach:Clothing/Hats=force")]
         [InlineData("@remattach:Clothing/Hats=force")]
         public void RemAttach_ByFolder(string command)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
 
             _callbacks.Setup(e =>
                 e.TryGetRlvInventoryTree(out sharedFolder)
@@ -5630,6 +5918,24 @@ namespace LibRLV.Tests
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
+
+            var externalAttachable = new InventoryTree.InventoryItem()
+            {
+                Name = "External Groin Thing",
+                Folder = null,
+                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Type = InventoryTree.InventoryItem.ItemType.Attachable,
+                AttachedTo = AttachmentPoint.Groin,
+                WornOn = null,
+                Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
+            };
+
+            currentOutfit.Add(externalAttachable);
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
 
             _callbacks.Setup(e =>
                 e.TryGetRlvInventoryTree(out sharedFolder)
@@ -5645,6 +5951,7 @@ namespace LibRLV.Tests
             {
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
+                externalAttachable.Id
             }.Order();
 
             Assert.Equal(expected, raised.Arguments.ItemIds.Order());
@@ -5657,6 +5964,11 @@ namespace LibRLV.Tests
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
 
             _callbacks.Setup(e =>
                 e.TryGetRlvInventoryTree(out sharedFolder)
@@ -5682,6 +5994,66 @@ namespace LibRLV.Tests
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
+
+            _callbacks.Setup(e =>
+                e.TryGetRlvInventoryTree(out sharedFolder)
+            ).ReturnsAsync(true);
+
+            var raised = Assert.Raises<DetachEventArgs>(
+                 attach: n => _rlv.Actions.Detach += n,
+                 detach: n => _rlv.Actions.Detach -= n,
+                 testCode: () => _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id}=force", _sender.Id, _sender.Name)
+            );
+
+            var expected = new List<UUID>()
+            {
+                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id
+            };
+
+            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+        }
+
+        [Theory]
+        [InlineData("detach")]
+        [InlineData("remattach")]
+        public void RemAttach_RemoveByUUID_External(string command)
+        {
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
+
+            var externalWearable = new InventoryTree.InventoryItem()
+            {
+                Name = "External Tattoo",
+                Folder = null,
+                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Type = InventoryTree.InventoryItem.ItemType.Wearable,
+                WornOn = WearableType.Tattoo,
+                AttachedTo = null,
+                Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
+            };
+            var externalAttachable = new InventoryTree.InventoryItem()
+            {
+                Name = "External Jaw Thing",
+                Folder = null,
+                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Type = InventoryTree.InventoryItem.ItemType.Attachable,
+                AttachedTo = AttachmentPoint.Jaw,
+                WornOn = null,
+                Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
+            };
+
+            currentOutfit.Add(externalWearable);
+            currentOutfit.Add(externalAttachable);
+
+            _callbacks.Setup(e =>
+                e.TryGetCurrentOutfit(out currentOutfit)
+            ).ReturnsAsync(true);
 
             _callbacks.Setup(e =>
                 e.TryGetRlvInventoryTree(out sharedFolder)

@@ -13,6 +13,20 @@ namespace LibRLV.Tests
         public InventoryTree.InventoryItem Root_Accessories_Glasses_AttachChin { get; set; } = null!;
         public InventoryTree.InventoryItem Root_Accessories_Watch_WornTattoo { get; set; } = null!;
 
+
+        public static List<InventoryTree.InventoryItem> BuildCurrentOutfit(InventoryTree sharedFolder)
+        {
+            var inventoryMap = new InventoryMap(sharedFolder);
+
+            var result = inventoryMap
+                .Items
+                .Where(n => n.Value.WornOn != null | n.Value.AttachedTo != null)
+                .Select(n => n.Value)
+                .ToList();
+
+            return result;
+        }
+
         public static SampleInventoryTree BuildInventoryTree()
         {
             // #RLV
