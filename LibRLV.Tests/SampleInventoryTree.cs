@@ -112,7 +112,6 @@ namespace LibRLV.Tests
             {
                 Id = new UUID("c0000000-cccc-4ccc-8ccc-cccccccccccc"),
                 Name = "Watch",
-                Type = InventoryTree.InventoryItem.ItemType.Wearable,
                 AttachedTo = null,
                 WornOn = WearableType.Tattoo,
                 Folder = AccessoriesTree,
@@ -122,7 +121,6 @@ namespace LibRLV.Tests
             {
                 Id = new UUID("c1111111-cccc-4ccc-8ccc-cccccccccccc"),
                 Name = "Glasses",
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
                 AttachedTo = AttachmentPoint.Chin,
                 WornOn = null,
                 Folder = AccessoriesTree,
@@ -132,7 +130,6 @@ namespace LibRLV.Tests
             {
                 Id = new UUID("b0000000-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
                 Name = "Business Pants",
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
                 AttachedTo = AttachmentPoint.Groin,
                 WornOn = null,
                 Folder = clothingTree,
@@ -142,7 +139,6 @@ namespace LibRLV.Tests
             {
                 Id = new UUID("b1111111-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
                 Name = "Happy Shirt",
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
                 AttachedTo = AttachmentPoint.Chest,
                 WornOn = null,
                 Folder = clothingTree,
@@ -152,7 +148,6 @@ namespace LibRLV.Tests
             {
                 Id = new UUID("b2222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
                 Name = "Retro Pants",
-                Type = InventoryTree.InventoryItem.ItemType.Wearable,
                 AttachedTo = null,
                 WornOn = WearableType.Pants,
                 Folder = clothingTree,
@@ -162,7 +157,6 @@ namespace LibRLV.Tests
             {
                 Id = new UUID("d0000000-dddd-4ddd-8ddd-dddddddddddd"),
                 Name = "Party Hat",
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
                 AttachedTo = AttachmentPoint.Groin,
                 WornOn = null,
                 Folder = hatsTree,
@@ -172,7 +166,6 @@ namespace LibRLV.Tests
             {
                 Id = new UUID("d1111111-dddd-4ddd-8ddd-dddddddddddd"),
                 Name = "Fancy Hat",
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
                 AttachedTo = AttachmentPoint.Chin,
                 WornOn = null,
                 Folder = hatsTree,

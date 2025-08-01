@@ -7,20 +7,12 @@ namespace LibRLV
     {
         public class InventoryItem
         {
-            public enum ItemType
-            {
-                Other,
-                Wearable,
-                Attachable
-            }
-
             public UUID Id { get; set; }
             public InventoryTree Folder { get; set; }
             public UUID FolderId { get; set; }
             public string Name { get; set; }
             public WearableType? WornOn { get; set; }
             public AttachmentPoint? AttachedTo { get; set; }
-            public ItemType Type { get; set; }
 
             public override string ToString()
             {

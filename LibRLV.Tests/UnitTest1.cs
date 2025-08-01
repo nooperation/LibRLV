@@ -3453,7 +3453,6 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             // skin, shape, eyes and hair cannot be removed
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Type = InventoryTree.InventoryItem.ItemType.Wearable;
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.WornOn = WearableType.Skin;
 
@@ -3492,7 +3491,6 @@ namespace LibRLV.Tests
                 Name = "External Tattoo",
                 Folder = null,
                 FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Type = InventoryTree.InventoryItem.ItemType.Wearable,
                 WornOn = WearableType.Tattoo,
                 AttachedTo = null,
                 Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
@@ -3502,7 +3500,6 @@ namespace LibRLV.Tests
                 Name = "External Jaw Thing",
                 Folder = null,
                 FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
                 AttachedTo = AttachmentPoint.Jaw,
                 WornOn = null,
                 Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
@@ -3547,7 +3544,6 @@ namespace LibRLV.Tests
                 Name = "External Tattoo",
                 Folder = null,
                 FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Type = InventoryTree.InventoryItem.ItemType.Wearable,
                 WornOn = WearableType.Tattoo,
                 AttachedTo = null,
                 Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
@@ -3557,7 +3553,6 @@ namespace LibRLV.Tests
                 Name = "External Jaw Thing",
                 Folder = null,
                 FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
                 AttachedTo = AttachmentPoint.Jaw,
                 WornOn = null,
                 Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
@@ -3596,7 +3591,6 @@ namespace LibRLV.Tests
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
             var sharedFolder = sampleTree.Root;
 
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Type = InventoryTree.InventoryItem.ItemType.Wearable;
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.WornOn = WearableType.Tattoo;
 
@@ -3713,7 +3707,6 @@ namespace LibRLV.Tests
                 Name = "External Tattoo",
                 Folder = null,
                 FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Type = InventoryTree.InventoryItem.ItemType.Wearable,
                 WornOn = WearableType.Tattoo,
                 AttachedTo = null,
                 Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
@@ -3723,7 +3716,6 @@ namespace LibRLV.Tests
                 Name = "External Jaw Thing",
                 Folder = null,
                 FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
                 AttachedTo = AttachmentPoint.Jaw,
                 WornOn = null,
                 Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
@@ -3910,7 +3902,6 @@ namespace LibRLV.Tests
                 Name = "External Tattoo",
                 Folder = null,
                 FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Type = InventoryTree.InventoryItem.ItemType.Wearable,
                 WornOn = WearableType.Tattoo,
                 AttachedTo = null,
                 Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
@@ -3920,7 +3911,6 @@ namespace LibRLV.Tests
                 Name = "External Jaw Thing",
                 Folder = null,
                 FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
                 AttachedTo = AttachmentPoint.Jaw,
                 WornOn = null,
                 Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
@@ -5832,7 +5822,6 @@ namespace LibRLV.Tests
                 Name = "External Tattoo",
                 Folder = null,
                 FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Type = InventoryTree.InventoryItem.ItemType.Wearable,
                 WornOn = WearableType.Tattoo,
                 AttachedTo = null,
                 Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
@@ -5842,7 +5831,6 @@ namespace LibRLV.Tests
                 Name = "External Jaw Thing",
                 Folder = null,
                 FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
                 AttachedTo = AttachmentPoint.Jaw,
                 WornOn = null,
                 Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
@@ -5925,7 +5913,6 @@ namespace LibRLV.Tests
                 Name = "External Groin Thing",
                 Folder = null,
                 FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
                 AttachedTo = AttachmentPoint.Groin,
                 WornOn = null,
                 Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
@@ -6032,7 +6019,6 @@ namespace LibRLV.Tests
                 Name = "External Tattoo",
                 Folder = null,
                 FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Type = InventoryTree.InventoryItem.ItemType.Wearable,
                 WornOn = WearableType.Tattoo,
                 AttachedTo = null,
                 Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
@@ -6042,7 +6028,6 @@ namespace LibRLV.Tests
                 Name = "External Jaw Thing",
                 Folder = null,
                 FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Type = InventoryTree.InventoryItem.ItemType.Attachable,
                 AttachedTo = AttachmentPoint.Jaw,
                 WornOn = null,
                 Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
