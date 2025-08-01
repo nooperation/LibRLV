@@ -5,8 +5,8 @@ namespace LibRLV
 {
     public interface IRestrictionProvider
     {
-        ImmutableList<RLVRestriction> GetRestrictions(string filter = "", UUID? sender = null);
-        ImmutableList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType, UUID? sender = null);
+        ImmutableList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType);
+        ImmutableList<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", UUID? senderFilter = null);
         bool TryGetLockedFolder(UUID folderId, out LockedFolderPublic lockedFolder);
         ImmutableDictionary<UUID, LockedFolderPublic> GetLockedFolders();
     }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using OpenMetaverse;
 
 namespace LibRLV
@@ -25,6 +26,27 @@ namespace LibRLV
         public InventoryTree Parent { get; set; }
         public List<InventoryTree> Children { get; set; }
         public List<InventoryItem> Items { get; set; }
+
+
+        public void GetWornItems(WearableType wearableType, List<InventoryTree.InventoryItem> outWornItems)
+        {
+            outWornItems.AddRange(Items.Where(n => n.WornOn == wearableType));
+
+            foreach (var item in Children)
+            {
+                item.GetWornItems(wearableType, outWornItems);
+            }
+        }
+
+        public void GetAttachedItems(AttachmentPoint attachmentPoint, List<InventoryTree.InventoryItem> outAttachedItems)
+        {
+            outAttachedItems.AddRange(Items.Where(n => n.AttachedTo == attachmentPoint));
+
+            foreach (var item in Children)
+            {
+                item.GetAttachedItems(attachmentPoint, outAttachedItems);
+            }
+        }
 
         public override string ToString()
         {

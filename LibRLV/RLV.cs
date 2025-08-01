@@ -17,8 +17,10 @@ namespace LibRLV
         public RLVManager Restrictions { get; }
         public RLVBlacklist Blacklist { get; }
 
+
         internal IRLVCallbacks Callbacks { get; }
         internal RLVGetRequestHandler GetRequestHandler { get; }
+
         private readonly Regex RLVRegexPattern = new Regex(@"(?<behavior>[^:=]+)(:(?<option>[^=]*))?=(?<param>.+)", RegexOptions.Compiled);
 
         public RLV(IRLVCallbacks callbacks, bool enabled)
