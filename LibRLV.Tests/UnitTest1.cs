@@ -6286,7 +6286,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage("@detachallthis=force", sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, sampleTree.Root_Clothing_HappyShirt_AttachChest.Name)
             );
 
-            // Everything under the clothing folder (and its subfolders recursively) will be detached because happyshirt exists in the clothing folder
+            // Everything under the clothing folder (and its subfolders recursively) will be detached because happy shirt exists in the clothing folder
             var expected = new List<UUID>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
@@ -7702,8 +7702,6 @@ namespace LibRLV.Tests
             Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
             Assert.False(_rlv.RLVManager.CanTouch(RLVManager.TouchLocation.Hud, objectId1, null, null));
 
-            Assert.False(_rlv.RLVManager.CanTouchHud(objectId1));
-
             Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Attached, objectId1));
             Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.RezzedInWorld, objectId1));
             Assert.False(_rlv.RLVManager.CanEdit(RLVManager.ObjectLocation.Hud, objectId1));
@@ -7859,8 +7857,8 @@ namespace LibRLV.Tests
         {
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
         }
 
         [Fact]
@@ -7871,8 +7869,8 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@showhovertextall=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
         }
 
         #endregion
@@ -7884,8 +7882,8 @@ namespace LibRLV.Tests
         {
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
         }
 
         [Fact]
@@ -7896,11 +7894,11 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@showhovertext:{objectId1}=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
 
-            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
-            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
+            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
+            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
         }
 
         #endregion
@@ -7912,8 +7910,8 @@ namespace LibRLV.Tests
         {
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
         }
 
         [Fact]
@@ -7924,11 +7922,11 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@showhovertexthud=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
 
-            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
-            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
+            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
+            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
         }
 
         #endregion
@@ -7940,8 +7938,8 @@ namespace LibRLV.Tests
         {
             var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
         }
 
         [Fact]
@@ -7952,11 +7950,11 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@showhovertextworld=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
+            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
 
-            Assert.False(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
-            Assert.True(_rlv.RLVManager.ShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
+            Assert.False(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId2));
+            Assert.True(_rlv.RLVManager.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId2));
         }
 
         #endregion

@@ -16,8 +16,6 @@ namespace LibRLV
             _callbacks = callbacks;
         }
 
-
-
         private bool GetRestrictionValueMax<T>(RLVRestrictionType restrictionType, out T val)
         {
             var restriction = _restrictionProvider.GetRestrictions(restrictionType);
@@ -80,7 +78,6 @@ namespace LibRLV
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Fly).Any();
         }
-
         public bool CanJump()
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Jump).Any();
@@ -101,6 +98,8 @@ namespace LibRLV
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ChatWhisper).Any();
         }
+
+
         public bool CanChatNormal()
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ChatNormal).Any();
@@ -117,6 +116,7 @@ namespace LibRLV
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SendGesture).Any();
         }
+
         public bool IsCamLocked()
         {
             return _restrictionProvider.GetRestrictions(RLVRestrictionType.SetCamUnlock).Any();
@@ -162,6 +162,7 @@ namespace LibRLV
 
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Sit).Any();
         }
+
         public bool CanDefaultWear()
         {
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.DefaultWear).Any();
@@ -559,8 +560,6 @@ namespace LibRLV
             return CheckSecureRestriction(userId, null, RLVRestrictionType.Share, RLVRestrictionType.ShareSec, null);
         }
 
-
-
         public bool IsAutoAcceptPermissions()
         {
             if (IsAutoDenyPermissions())
@@ -688,37 +687,35 @@ namespace LibRLV
             return true;
         }
 
-        public bool CanAttachWearable(WearableType? typeToRemove)
+        private bool CanAttachWearable(WearableType? typeToRemove)
         {
             return !_restrictionProvider
                 .GetRestrictions(RLVRestrictionType.AddOutfit)
                 .Where(n => n.Args.Count == 0 || (n.Args[0] is WearableType restrictedType && typeToRemove == restrictedType))
                 .Any();
         }
-
-        public bool CanDetachWearable(WearableType? typeToRemove)
+        private bool CanDetachWearable(WearableType? typeToRemove)
         {
             return !_restrictionProvider
                 .GetRestrictions(RLVRestrictionType.RemOutfit)
                 .Where(n => n.Args.Count == 0 || (n.Args[0] is WearableType restrictedType && typeToRemove == restrictedType))
                 .Any();
         }
-
-        public bool CanDetachAttached(AttachmentPoint? attachmentPoint)
+        private bool CanDetachAttached(AttachmentPoint? attachmentPoint)
         {
             return !_restrictionProvider
                 .GetRestrictions(RLVRestrictionType.RemAttach)
                 .Where(n => n.Args.Count == 0 || (n.Args[0] is AttachmentPoint restrictedAttachmentPoint && attachmentPoint == restrictedAttachmentPoint))
                 .Any();
         }
-
-        public bool CanAttachAttached(AttachmentPoint? attachmentPoint)
+        private bool CanAttachAttached(AttachmentPoint? attachmentPoint)
         {
             return !_restrictionProvider
                 .GetRestrictions(RLVRestrictionType.AddAttach)
                 .Where(n => n.Args.Count == 0 || (n.Args[0] is AttachmentPoint restrictedAttachmentPoint && attachmentPoint == restrictedAttachmentPoint))
                 .Any();
         }
+
 
         public bool IsPermissive()
         {
@@ -735,7 +732,7 @@ namespace LibRLV
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Rez).Any();
         }
 
-        public bool CanTouchHud(UUID objectId)
+        private bool CanTouchHud(UUID objectId)
         {
             if (!CanInteract())
             {
@@ -873,7 +870,7 @@ namespace LibRLV
             World,
             Hud
         }
-        public bool ShowHoverText(HoverTextLocation location, UUID? objectId)
+        public bool CanShowHoverText(HoverTextLocation location, UUID? objectId)
         {
             // @showhovertextall
             if (_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowHoverTextAll).Any())
@@ -1021,6 +1018,7 @@ namespace LibRLV
 
             return true;
         }
+
 
         public void ReportSendPublicMessage(string message)
         {
