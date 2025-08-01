@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using OpenMetaverse;
 
 namespace LibRLV
@@ -100,6 +101,78 @@ namespace LibRLV
 
                 iter = candidate;
             }
+        }
+
+        public List<InventoryTree> FindFoldersContaining(bool limitToOneResult, UUID? itemId, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        {
+            var folders = new List<InventoryTree>();
+
+            if (itemId != null)
+            {
+                if (!Items.TryGetValue(itemId.Value, out var item))
+                {
+                    return new List<InventoryTree>();
+                }
+
+                if (!Folders.TryGetValue(item.FolderId, out var folder))
+                {
+                    return new List<InventoryTree>();
+                }
+
+                folders.Add(folder);
+            }
+            else if (attachmentPoint != null)
+            {
+                var folderIds = Items.Values
+                    .Where(n => n.AttachedTo == attachmentPoint)
+                    .Select(n => n.FolderId)
+                    .Distinct()
+                    .ToList();
+
+                var foundFolders = Folders
+                    .Where(n => folderIds.Contains(n.Key))
+                    .Select(n => n.Value);
+
+                if (limitToOneResult)
+                {
+                    var foundFolder = foundFolders.FirstOrDefault();
+                    if (foundFolder != null)
+                    {
+                        folders.Add(foundFolder);
+                    }
+                }
+                else
+                {
+                    folders.AddRange(foundFolders);
+                }
+            }
+            else if (wearableType != null)
+            {
+                var folderIds = Items.Values
+                    .Where(n => n.WornOn == wearableType)
+                    .Select(n => n.FolderId)
+                    .Distinct()
+                    .ToList();
+
+                var foundFolders = Folders
+                    .Where(n => folderIds.Contains(n.Key))
+                    .Select(n => n.Value);
+
+                if (limitToOneResult)
+                {
+                    var foundFolder = foundFolders.FirstOrDefault();
+                    if (foundFolder != null)
+                    {
+                        folders.Add(foundFolder);
+                    }
+                }
+                else
+                {
+                    folders.AddRange(foundFolders);
+                }
+            }
+
+            return folders;
         }
 
         public string BuildPathToFolder(UUID folderId)

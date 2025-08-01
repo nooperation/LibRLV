@@ -593,66 +593,7 @@ namespace LibRLV
             }
 
             var inventoryMap = new InventoryMap(sharedFolder);
-            var folders = new List<InventoryTree>();
-
-            if (itemId != null)
-            {
-                if (!inventoryMap.Items.TryGetValue(itemId.Value, out var item))
-                {
-                    return "";
-                }
-
-                if (!inventoryMap.Folders.TryGetValue(item.FolderId, out var folder))
-                {
-                    return "";
-                }
-
-                folders.Add(folder);
-            }
-            else if (attachmentPoint != null)
-            {
-                var folderIds = inventoryMap.Items.Values
-                    .Where(n => n.AttachedTo == attachmentPoint)
-                    .Select(n => n.FolderId)
-                    .Distinct()
-                    .ToList();
-
-                var foundFolders = inventoryMap
-                    .Folders
-                    .Where(n => folderIds.Contains(n.Key))
-                    .Select(n => n.Value);
-
-                if (limitToOneResult)
-                {
-                    folders.Add(foundFolders.First());
-                }
-                else
-                {
-                    folders.AddRange(foundFolders);
-                }
-            }
-            else if (wearableType != null)
-            {
-                var folderIds = inventoryMap.Items.Values
-                    .Where(n => n.WornOn == wearableType)
-                    .Select(n => n.FolderId)
-                    .Distinct()
-                    .ToList();
-
-                var foundFolders = inventoryMap
-                    .Folders
-                    .Where(n => folderIds.Contains(n.Key))
-                    .Select(n => n.Value);
-
-                if (limitToOneResult)
-                {
-                    folders.Add(foundFolders.First());
-                }
-                else
-                {
-                    folders.AddRange(foundFolders);
-                }
-            }
+            var folders = inventoryMap.FindFoldersContaining(limitToOneResult, itemId, attachmentPoint, wearableType);
 
             var sb = new StringBuilder();
             foreach (var folder in folders.OrderBy(n => n.Name))
