@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -89,47 +88,6 @@ namespace LibRLV
             {"left hind foot", AttachmentPoint.LeftHindFoot},
             {"right hind foot", AttachmentPoint.RightHindFoot},
         }.ToImmutableDictionary();
-
-        public static List<object> ParseOptions(string options)
-        {
-            var result = new List<object>();
-            var args = options.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (var arg in args)
-            {
-                if (UUID.TryParse(arg, out var id))
-                {
-                    result.Add(id);
-                    continue;
-                }
-                else if (int.TryParse(arg, out var intValue))
-                {
-                    result.Add(intValue);
-                    continue;
-                }
-                else if (float.TryParse(arg, out var floatValue))
-                {
-                    result.Add(floatValue);
-                    continue;
-                }
-                else if (RLVWearableTypeMap.TryGetValue(arg, out var part) && part != WearableType.Invalid)
-                {
-                    result.Add(part);
-                    continue;
-                }
-                else if (RLVAttachmentPointMap.TryGetValue(arg, out var attachmentPoint))
-                {
-                    result.Add(attachmentPoint);
-                    continue;
-                }
-                else
-                {
-                    result.Add(arg);
-                }
-            }
-
-            return result;
-        }
 
         private static readonly Regex _attachmentPointTagRegex = new Regex(@"\((?<tag>[^\)]+)\)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         public static bool TryGetAttachmentPointFromItemName(string itemName, out AttachmentPoint attachmentPoint)

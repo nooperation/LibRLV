@@ -392,8 +392,8 @@ namespace LibRLV
 
         private class InvWornInfoContainer
         {
-            public string FolderName { get; set; }
-            public string CountIndicator { get; set; }
+            public string FolderName { get; }
+            public string CountIndicator { get; }
 
             public InvWornInfoContainer(string folderName, string countIndicator)
             {

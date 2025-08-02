@@ -30,7 +30,7 @@ namespace LibRLV
         private readonly RLVManager _manager;
         private readonly IRLVCallbacks _callbacks;
 
-        public RLVActionHandler(RLVManager manager, IRLVCallbacks callbacks)
+        internal RLVActionHandler(RLVManager manager, IRLVCallbacks callbacks)
         {
             _manager = manager;
             _callbacks = callbacks;

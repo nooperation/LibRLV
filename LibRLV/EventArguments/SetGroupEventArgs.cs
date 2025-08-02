@@ -5,6 +5,10 @@ namespace LibRLV.EventArguments
 {
     public class SetGroupEventArgs : EventArgs
     {
+        public string GroupName { get; }
+        public string Role { get; }
+        public UUID GroupId { get; }
+
         public SetGroupEventArgs(string groupName, string role)
         {
             GroupName = groupName;
@@ -17,9 +21,5 @@ namespace LibRLV.EventArguments
             Role = role;
             GroupId = groupID;
         }
-
-        public string GroupName { get; }
-        public string Role { get; }
-        public UUID GroupId { get; set; }
     }
 }

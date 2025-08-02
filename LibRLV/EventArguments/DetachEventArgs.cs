@@ -6,11 +6,11 @@ namespace LibRLV.EventArguments
 {
     public class DetachEventArgs : EventArgs
     {
+        public List<UUID> ItemIds { get; }
+
         public DetachEventArgs(List<UUID> itemIds)
         {
             ItemIds = itemIds;
         }
-
-        public List<UUID> ItemIds { get; set; }
     }
 }

@@ -257,12 +257,7 @@ namespace LibRLV
 
             if (restrictions.Contains(restriction))
             {
-                RestrictionUpdated?.Invoke(this, new RestrictionUpdatedEventArgs()
-                {
-                    IsDeleted = true,
-                    IsNew = false,
-                    Restriction = restriction
-                });
+                RestrictionUpdated?.Invoke(this, new RestrictionUpdatedEventArgs(restriction, false, true));
                 restrictions.Remove(restriction);
             }
 
@@ -287,12 +282,7 @@ namespace LibRLV
                 // TODO: Check newRestriction args to confirm they're within bounds (like camdrawmin must be at least 0.40f)?
 
                 restrictions.Add(newRestriction);
-                RestrictionUpdated?.Invoke(this, new RestrictionUpdatedEventArgs()
-                {
-                    IsDeleted = false,
-                    IsNew = true,
-                    Restriction = newRestriction
-                });
+                RestrictionUpdated?.Invoke(this, new RestrictionUpdatedEventArgs(newRestriction, true, false));
             }
 
             NotifyRestrictionChange(newRestriction, true);

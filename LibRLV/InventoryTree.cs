@@ -28,7 +28,7 @@ namespace LibRLV
         public List<InventoryItem> Items { get; set; }
 
 
-        public void GetWornItems(WearableType wearableType, List<InventoryTree.InventoryItem> outWornItems)
+        public void GetWornItems(WearableType wearableType, List<InventoryItem> outWornItems)
         {
             outWornItems.AddRange(Items.Where(n => n.WornOn == wearableType));
 
@@ -38,7 +38,7 @@ namespace LibRLV
             }
         }
 
-        public void GetAttachedItems(AttachmentPoint attachmentPoint, List<InventoryTree.InventoryItem> outAttachedItems)
+        public void GetAttachedItems(AttachmentPoint attachmentPoint, List<InventoryItem> outAttachedItems)
         {
             outAttachedItems.AddRange(Items.Where(n => n.AttachedTo == attachmentPoint));
 

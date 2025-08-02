@@ -10,10 +10,10 @@ namespace LibRLV
         private readonly IRLVCallbacks _callbacks;
         private readonly RLVRestrictionHandler _restrictionManager;
 
-        private Dictionary<UUID, LockedFolder> LockedFolders { get; set; } = new Dictionary<UUID, LockedFolder>();
+        private readonly Dictionary<UUID, LockedFolder> _lockedFolders = new Dictionary<UUID, LockedFolder>();
         private readonly object _lockedFoldersLock = new object();
 
-        public LockedFolderManager(IRLVCallbacks callbacks, RLVRestrictionHandler restrictionManager)
+        internal LockedFolderManager(IRLVCallbacks callbacks, RLVRestrictionHandler restrictionManager)
         {
             _callbacks = callbacks;
             _restrictionManager = restrictionManager;
@@ -41,7 +41,7 @@ namespace LibRLV
         {
             lock (_lockedFoldersLock)
             {
-                return LockedFolders
+                return _lockedFolders
                     .Select(n => new LockedFolderPublic(n.Value))
                     .ToImmutableDictionary(k => k.Id, v => v);
             }
@@ -51,7 +51,7 @@ namespace LibRLV
         {
             lock (_lockedFoldersLock)
             {
-                if (LockedFolders.TryGetValue(folderId, out var lockedFolderPrivate))
+                if (_lockedFolders.TryGetValue(folderId, out var lockedFolderPrivate))
                 {
                     lockedFolder = new LockedFolderPublic(lockedFolderPrivate);
                     return true;
@@ -66,10 +66,10 @@ namespace LibRLV
         {
             lock (_lockedFoldersLock)
             {
-                if (!LockedFolders.TryGetValue(folder.Id, out var existingLockedFolder))
+                if (!_lockedFolders.TryGetValue(folder.Id, out var existingLockedFolder))
                 {
                     existingLockedFolder = new LockedFolder(folder);
-                    LockedFolders[folder.Id] = existingLockedFolder;
+                    _lockedFolders[folder.Id] = existingLockedFolder;
                 }
 
                 if (restriction.Behavior == RLVRestrictionType.DetachAllThis || restriction.Behavior == RLVRestrictionType.DetachThis)
@@ -123,7 +123,7 @@ namespace LibRLV
 
             lock (_lockedFoldersLock)
             {
-                LockedFolders.Clear();
+                _lockedFolders.Clear();
 
                 var inventoryMap = new InventoryMap(sharedFolder);
 

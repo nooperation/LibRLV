@@ -8,9 +8,9 @@ namespace LibRLV.EventArguments
     {
         public class AttachmentRequest
         {
-            public UUID ItemId { get; set; }
-            public AttachmentPoint AttachmentPoint { get; set; }
-            public bool ReplaceExistingAttachments { get; set; }
+            public UUID ItemId { get; }
+            public AttachmentPoint AttachmentPoint { get; }
+            public bool ReplaceExistingAttachments { get; }
 
             public AttachmentRequest(UUID itemId, AttachmentPoint attachmentPoint, bool replaceExistingAttachments)
             {
@@ -38,6 +38,6 @@ namespace LibRLV.EventArguments
             ItemsToAttach = itemsToAttach;
         }
 
-        public List<AttachmentRequest> ItemsToAttach { get; set; }
+        public List<AttachmentRequest> ItemsToAttach { get; }
     }
 }
