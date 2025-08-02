@@ -42,7 +42,7 @@
         {
             _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.IsRedirChat(out var channels));
+            Assert.True(_rlv.Permissions.IsRedirChat(out var channels));
 
             var expected = new List<int>
             {
@@ -58,7 +58,7 @@
             _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@redirchat:1234=rem", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.IsRedirChat(out var channels));
+            Assert.False(_rlv.Permissions.IsRedirChat(out var channels));
         }
 
         [Fact]
@@ -67,7 +67,7 @@
             _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@redirchat:12345=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.IsRedirChat(out var channels));
+            Assert.True(_rlv.Permissions.IsRedirChat(out var channels));
 
             var expected = new List<int>
             {
@@ -86,7 +86,7 @@
             _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
             _rlv.ReportSendPublicMessage("Hello World");
 
-            Assert.True(_rlv.Restrictions.IsRedirChat(out var channels));
+            Assert.True(_rlv.Permissions.IsRedirChat(out var channels));
             var expected = new List<(int Channel, string Text)>
             {
                 (1234, "Hello World"),
@@ -104,7 +104,7 @@
             _rlv.ProcessMessage("@redirchat:5678=add", _sender.Id, _sender.Name);
 
             _rlv.ReportSendPublicMessage("Hello World");
-            _rlv.Restrictions.IsRedirChat(out var channels);
+            _rlv.Permissions.IsRedirChat(out var channels);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -124,7 +124,7 @@
 
             _rlv.ReportSendPublicMessage("/me says Hello World");
 
-            Assert.True(_rlv.Restrictions.IsRedirChat(out var channels));
+            Assert.True(_rlv.Permissions.IsRedirChat(out var channels));
             Assert.Empty(actual);
         }
 
@@ -138,10 +138,10 @@
             var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
             var userId2 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
 
-            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", null));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId1));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", null));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId2));
+            Assert.True(_rlv.Permissions.CanReceiveChat("Hello world", null));
+            Assert.True(_rlv.Permissions.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.Permissions.CanReceiveChat("/me says Hello world", null));
+            Assert.True(_rlv.Permissions.CanReceiveChat("/me says Hello world", userId2));
         }
 
         [Fact]
@@ -150,10 +150,10 @@
             _rlv.ProcessMessage("@recvchat=n", _sender.Id, _sender.Name);
             var userId = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
-            Assert.False(_rlv.Restrictions.CanReceiveChat("Hello world", null));
-            Assert.False(_rlv.Restrictions.CanReceiveChat("Hello world", userId));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", null));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId));
+            Assert.False(_rlv.Permissions.CanReceiveChat("Hello world", null));
+            Assert.False(_rlv.Permissions.CanReceiveChat("Hello world", userId));
+            Assert.True(_rlv.Permissions.CanReceiveChat("/me says Hello world", null));
+            Assert.True(_rlv.Permissions.CanReceiveChat("/me says Hello world", userId));
         }
 
         [Fact]
@@ -164,10 +164,10 @@
             _rlv.ProcessMessage("@recvchat=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvchat:{userId}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanReceiveChat("Hello world", null));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", null));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId));
+            Assert.False(_rlv.Permissions.CanReceiveChat("Hello world", null));
+            Assert.True(_rlv.Permissions.CanReceiveChat("Hello world", userId));
+            Assert.True(_rlv.Permissions.CanReceiveChat("/me says Hello world", null));
+            Assert.True(_rlv.Permissions.CanReceiveChat("/me says Hello world", userId));
         }
 
         [Fact]
@@ -182,9 +182,9 @@
             _rlv.ProcessMessage($"@recvchat:{userId1}=add", sender2.Id, sender2.Name);
             _rlv.ProcessMessage($"@recvchat:{userId2}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanReceiveChat("Hello world", null));
-            Assert.False(_rlv.Restrictions.CanReceiveChat("Hello world", userId1));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId2));
+            Assert.False(_rlv.Permissions.CanReceiveChat("Hello world", null));
+            Assert.False(_rlv.Permissions.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.Permissions.CanReceiveChat("Hello world", userId2));
         }
 
         [Fact]
@@ -194,10 +194,10 @@
 
             var userId = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
-            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", null));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId));
-            Assert.False(_rlv.Restrictions.CanReceiveChat("/me says Hello world", null));
-            Assert.False(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId));
+            Assert.True(_rlv.Permissions.CanReceiveChat("Hello world", null));
+            Assert.True(_rlv.Permissions.CanReceiveChat("Hello world", userId));
+            Assert.False(_rlv.Permissions.CanReceiveChat("/me says Hello world", null));
+            Assert.False(_rlv.Permissions.CanReceiveChat("/me says Hello world", userId));
         }
 
         [Fact]
@@ -208,10 +208,10 @@
 
             _rlv.ProcessMessage($"@recvemotefrom:{userId1}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId1));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId2));
-            Assert.False(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId1));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId2));
+            Assert.True(_rlv.Permissions.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.Permissions.CanReceiveChat("Hello world", userId2));
+            Assert.False(_rlv.Permissions.CanReceiveChat("/me says Hello world", userId1));
+            Assert.True(_rlv.Permissions.CanReceiveChat("/me says Hello world", userId2));
         }
 
         [Fact]
@@ -223,10 +223,10 @@
             _rlv.ProcessMessage("@recvemote=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvemote:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId1));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId2));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId1));
-            Assert.False(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId2));
+            Assert.True(_rlv.Permissions.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.Permissions.CanReceiveChat("Hello world", userId2));
+            Assert.True(_rlv.Permissions.CanReceiveChat("/me says Hello world", userId1));
+            Assert.False(_rlv.Permissions.CanReceiveChat("/me says Hello world", userId2));
         }
 
         [Fact]
@@ -241,10 +241,10 @@
             _rlv.ProcessMessage($"@recvemote:{userId1}=add", sender2.Id, sender2.Name);
             _rlv.ProcessMessage($"@recvemote:{userId2}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId1));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId2));
-            Assert.False(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId1));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId2));
+            Assert.True(_rlv.Permissions.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.Permissions.CanReceiveChat("Hello world", userId2));
+            Assert.False(_rlv.Permissions.CanReceiveChat("/me says Hello world", userId1));
+            Assert.True(_rlv.Permissions.CanReceiveChat("/me says Hello world", userId2));
         }
 
         [Fact]
@@ -255,10 +255,10 @@
 
             _rlv.ProcessMessage($"@recvchatfrom:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanReceiveChat("Hello world", userId1));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId1));
+            Assert.False(_rlv.Permissions.CanReceiveChat("Hello world", userId1));
+            Assert.True(_rlv.Permissions.CanReceiveChat("/me says Hello world", userId1));
 
-            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId2));
+            Assert.True(_rlv.Permissions.CanReceiveChat("Hello world", userId2));
         }
 
         #endregion
@@ -290,7 +290,7 @@
         {
             _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.IsRedirEmote(out var channels));
+            Assert.True(_rlv.Permissions.IsRedirEmote(out var channels));
 
             var expected = new List<int>
             {
@@ -306,7 +306,7 @@
             _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@rediremote:1234=rem", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.IsRedirEmote(out var channels));
+            Assert.False(_rlv.Permissions.IsRedirEmote(out var channels));
         }
 
         [Fact]
@@ -315,7 +315,7 @@
             _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@rediremote:12345=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.IsRedirEmote(out var channels));
+            Assert.True(_rlv.Permissions.IsRedirEmote(out var channels));
 
             var expected = new List<int>
             {
@@ -334,7 +334,7 @@
             _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
             _rlv.ReportSendPublicMessage("/me says Hello World");
 
-            Assert.True(_rlv.Restrictions.IsRedirEmote(out var channels));
+            Assert.True(_rlv.Permissions.IsRedirEmote(out var channels));
             var expected = new List<(int Channel, string Text)>
             {
                 (1234, "/me says Hello World"),
@@ -352,7 +352,7 @@
             _rlv.ProcessMessage("@rediremote:5678=n", _sender.Id, _sender.Name);
 
             _rlv.ReportSendPublicMessage("/me says Hello World");
-            _rlv.Restrictions.IsRedirEmote(out var channels);
+            _rlv.Permissions.IsRedirEmote(out var channels);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -371,7 +371,7 @@
             _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
             _rlv.ReportSendPublicMessage("Hello World");
 
-            Assert.True(_rlv.Restrictions.IsRedirEmote(out var channels));
+            Assert.True(_rlv.Permissions.IsRedirEmote(out var channels));
             Assert.Empty(actual);
         }
 
@@ -382,9 +382,9 @@
         [Fact]
         public void CanChat_Default()
         {
-            Assert.True(_rlv.Restrictions.CanChat(0, "Hello"));
-            Assert.True(_rlv.Restrictions.CanChat(0, "/me says Hello"));
-            Assert.True(_rlv.Restrictions.CanChat(5, "Hello"));
+            Assert.True(_rlv.Permissions.CanChat(0, "Hello"));
+            Assert.True(_rlv.Permissions.CanChat(0, "/me says Hello"));
+            Assert.True(_rlv.Permissions.CanChat(5, "Hello"));
         }
 
         [Fact]
@@ -393,23 +393,23 @@
             _rlv.ProcessMessage("@sendchat=n", _sender.Id, _sender.Name);
 
             // No public chat allowed unless it starts with '/'
-            Assert.False(_rlv.Restrictions.CanChat(0, "Hello"));
+            Assert.False(_rlv.Permissions.CanChat(0, "Hello"));
 
             // Emotes and other messages starting with / are allowed
-            Assert.True(_rlv.Restrictions.CanChat(0, "/me says Hello"));
-            Assert.True(_rlv.Restrictions.CanChat(0, "/ something?"));
+            Assert.True(_rlv.Permissions.CanChat(0, "/me says Hello"));
+            Assert.True(_rlv.Permissions.CanChat(0, "/ something?"));
 
             // Messages containing ()"-*=_^ are prohibited
-            Assert.False(_rlv.Restrictions.CanChat(0, "/me says Hello ^_^"));
+            Assert.False(_rlv.Permissions.CanChat(0, "/me says Hello ^_^"));
 
             // Private channels are not impacted
-            Assert.True(_rlv.Restrictions.CanChat(5, "Hello"));
+            Assert.True(_rlv.Permissions.CanChat(5, "Hello"));
         }
 
         [Fact]
         public void CanSendChannel_Default()
         {
-            Assert.True(_rlv.Restrictions.CanChat(123, "Hello world"));
+            Assert.True(_rlv.Permissions.CanChat(123, "Hello world"));
         }
 
         [Fact]
@@ -417,7 +417,7 @@
         {
             _rlv.ProcessMessage("@sendchannel=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanChat(123, "Hello world"));
+            Assert.False(_rlv.Permissions.CanChat(123, "Hello world"));
         }
 
         [Fact]
@@ -426,7 +426,7 @@
             _rlv.ProcessMessage("@sendchannel=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@sendchannel:123=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanChat(123, "Hello world"));
+            Assert.True(_rlv.Permissions.CanChat(123, "Hello world"));
         }
 
         [Fact]
@@ -441,8 +441,8 @@
             _rlv.ProcessMessage("@sendchannel:123=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@sendchannel:456=n", sender2.Id, sender2.Name);
 
-            Assert.True(_rlv.Restrictions.CanChat(123, "Hello world"));
-            Assert.False(_rlv.Restrictions.CanChat(456, "Hello world"));
+            Assert.True(_rlv.Permissions.CanChat(123, "Hello world"));
+            Assert.False(_rlv.Permissions.CanChat(456, "Hello world"));
         }
 
         [Fact]
@@ -450,8 +450,8 @@
         {
             _rlv.ProcessMessage("@sendchannel_except:456=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanChat(123, "Hello world"));
-            Assert.False(_rlv.Restrictions.CanChat(456, "Hello world"));
+            Assert.True(_rlv.Permissions.CanChat(123, "Hello world"));
+            Assert.False(_rlv.Permissions.CanChat(456, "Hello world"));
         }
 
         #endregion
@@ -463,8 +463,8 @@
         {
             var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.Restrictions.CanSendIM("Hello", userId1));
-            Assert.True(_rlv.Restrictions.CanSendIM("Hello", userId1, "Group Name"));
+            Assert.True(_rlv.Permissions.CanSendIM("Hello", userId1));
+            Assert.True(_rlv.Permissions.CanSendIM("Hello", userId1, "Group Name"));
         }
 
         [Fact]
@@ -474,8 +474,8 @@
 
             _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanSendIM("Hello", userId1));
-            Assert.False(_rlv.Restrictions.CanSendIM("Hello", userId1, "Group Name"));
+            Assert.False(_rlv.Permissions.CanSendIM("Hello", userId1));
+            Assert.False(_rlv.Permissions.CanSendIM("Hello", userId1, "Group Name"));
         }
 
         [Fact]
@@ -486,7 +486,7 @@
             _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", userId1));
+            Assert.True(_rlv.Permissions.CanSendIM("Hello world", userId1));
         }
 
         [Fact]
@@ -497,7 +497,7 @@
             _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:Group Name=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "Group Name"));
+            Assert.True(_rlv.Permissions.CanSendIM("Hello world", groupId1, "Group Name"));
         }
 
         [Fact]
@@ -508,7 +508,7 @@
             _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:allgroups=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "Group name"));
+            Assert.True(_rlv.Permissions.CanSendIM("Hello world", groupId1, "Group name"));
         }
 
         [Fact]
@@ -523,8 +523,8 @@
             _rlv.ProcessMessage($"@sendim:{userId1}=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:{userId2}=add", sender2.Id, sender2.Name);
 
-            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", userId1));
-            Assert.False(_rlv.Restrictions.CanSendIM("Hello world", userId2));
+            Assert.True(_rlv.Permissions.CanSendIM("Hello world", userId1));
+            Assert.False(_rlv.Permissions.CanSendIM("Hello world", userId2));
         }
 
         [Fact]
@@ -538,8 +538,8 @@
             _rlv.ProcessMessage($"@sendim:Group Name=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:allgroups=add", sender2.Id, sender2.Name);
 
-            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "Group Name"));
-            Assert.False(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "Another Group"));
+            Assert.True(_rlv.Permissions.CanSendIM("Hello world", groupId1, "Group Name"));
+            Assert.False(_rlv.Permissions.CanSendIM("Hello world", groupId1, "Another Group"));
         }
 
         [Fact]
@@ -550,8 +550,8 @@
             _rlv.ProcessMessage("@sendim_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:allgroups=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "Group Name"));
-            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "Another Group"));
+            Assert.True(_rlv.Permissions.CanSendIM("Hello world", groupId1, "Group Name"));
+            Assert.True(_rlv.Permissions.CanSendIM("Hello world", groupId1, "Another Group"));
         }
 
         [Fact]
@@ -562,8 +562,8 @@
 
             _rlv.ProcessMessage($"@sendimto:{userId1}=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanSendIM("Hello world", userId1));
-            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", userId2));
+            Assert.False(_rlv.Permissions.CanSendIM("Hello world", userId1));
+            Assert.True(_rlv.Permissions.CanSendIM("Hello world", userId2));
         }
 
         [Fact]
@@ -574,8 +574,8 @@
 
             _rlv.ProcessMessage($"@sendimto:First Group=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "First Group"));
-            Assert.True(_rlv.Restrictions.CanSendIM("Hello world", groupId2, "Second Group"));
+            Assert.False(_rlv.Permissions.CanSendIM("Hello world", groupId1, "First Group"));
+            Assert.True(_rlv.Permissions.CanSendIM("Hello world", groupId2, "Second Group"));
         }
 
         [Fact]
@@ -586,8 +586,8 @@
 
             _rlv.ProcessMessage($"@sendimto:allgroups=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanSendIM("Hello world", groupId1, "First Group"));
-            Assert.False(_rlv.Restrictions.CanSendIM("Hello world", groupId2, "Second Group"));
+            Assert.False(_rlv.Permissions.CanSendIM("Hello world", groupId1, "First Group"));
+            Assert.False(_rlv.Permissions.CanSendIM("Hello world", groupId2, "Second Group"));
         }
 
         #endregion
@@ -599,8 +599,8 @@
         {
             var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.Restrictions.CanStartIM(null));
-            Assert.True(_rlv.Restrictions.CanStartIM(userId1));
+            Assert.True(_rlv.Permissions.CanStartIM(null));
+            Assert.True(_rlv.Permissions.CanStartIM(userId1));
         }
 
         [Fact]
@@ -610,8 +610,8 @@
 
             _rlv.ProcessMessage("@startim=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanStartIM(null));
-            Assert.False(_rlv.Restrictions.CanStartIM(userId1));
+            Assert.False(_rlv.Permissions.CanStartIM(null));
+            Assert.False(_rlv.Permissions.CanStartIM(userId1));
         }
 
         [Fact]
@@ -623,8 +623,8 @@
             _rlv.ProcessMessage("@startim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@startim:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanStartIM(userId1));
-            Assert.False(_rlv.Restrictions.CanStartIM(userId2));
+            Assert.True(_rlv.Permissions.CanStartIM(userId1));
+            Assert.False(_rlv.Permissions.CanStartIM(userId2));
         }
 
         [Fact]
@@ -635,8 +635,8 @@
 
             _rlv.ProcessMessage($"@startimto:{userId2}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanStartIM(userId1));
-            Assert.False(_rlv.Restrictions.CanStartIM(userId2));
+            Assert.True(_rlv.Permissions.CanStartIM(userId1));
+            Assert.False(_rlv.Permissions.CanStartIM(userId2));
         }
 
         #endregion
@@ -648,8 +648,8 @@
         {
             var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello", userId1));
-            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello", userId1, "Group Name"));
+            Assert.True(_rlv.Permissions.CanReceiveIM("Hello", userId1));
+            Assert.True(_rlv.Permissions.CanReceiveIM("Hello", userId1, "Group Name"));
         }
 
         [Fact]
@@ -659,8 +659,8 @@
 
             _rlv.ProcessMessage("@recvim=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello", userId1));
-            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello", userId1, "Group Name"));
+            Assert.False(_rlv.Permissions.CanReceiveIM("Hello", userId1));
+            Assert.False(_rlv.Permissions.CanReceiveIM("Hello", userId1, "Group Name"));
         }
 
         [Fact]
@@ -671,7 +671,7 @@
             _rlv.ProcessMessage("@recvim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", userId1));
+            Assert.True(_rlv.Permissions.CanReceiveIM("Hello world", userId1));
         }
 
         [Fact]
@@ -682,7 +682,7 @@
             _rlv.ProcessMessage("@recvim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:Group Name=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "Group Name"));
+            Assert.True(_rlv.Permissions.CanReceiveIM("Hello world", groupId1, "Group Name"));
         }
 
         [Fact]
@@ -693,7 +693,7 @@
             _rlv.ProcessMessage("@recvim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:allgroups=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "Group name"));
+            Assert.True(_rlv.Permissions.CanReceiveIM("Hello world", groupId1, "Group name"));
         }
 
         [Fact]
@@ -708,8 +708,8 @@
             _rlv.ProcessMessage($"@recvim:{userId1}=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:{userId2}=add", sender2.Id, sender2.Name);
 
-            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", userId1));
-            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello world", userId2));
+            Assert.True(_rlv.Permissions.CanReceiveIM("Hello world", userId1));
+            Assert.False(_rlv.Permissions.CanReceiveIM("Hello world", userId2));
         }
 
         [Fact]
@@ -723,8 +723,8 @@
             _rlv.ProcessMessage($"@recvim:Group Name=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:allgroups=add", sender2.Id, sender2.Name);
 
-            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "Group Name"));
-            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "Another Group"));
+            Assert.True(_rlv.Permissions.CanReceiveIM("Hello world", groupId1, "Group Name"));
+            Assert.False(_rlv.Permissions.CanReceiveIM("Hello world", groupId1, "Another Group"));
         }
 
         [Fact]
@@ -735,8 +735,8 @@
             _rlv.ProcessMessage("@recvim_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:allgroups=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "Group Name"));
-            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "Another Group"));
+            Assert.True(_rlv.Permissions.CanReceiveIM("Hello world", groupId1, "Group Name"));
+            Assert.True(_rlv.Permissions.CanReceiveIM("Hello world", groupId1, "Another Group"));
         }
 
         [Fact]
@@ -747,8 +747,8 @@
 
             _rlv.ProcessMessage($"@recvimfrom:{userId1}=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello world", userId1));
-            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", userId2));
+            Assert.False(_rlv.Permissions.CanReceiveIM("Hello world", userId1));
+            Assert.True(_rlv.Permissions.CanReceiveIM("Hello world", userId2));
         }
 
         [Fact]
@@ -759,8 +759,8 @@
 
             _rlv.ProcessMessage($"@recvimfrom:First Group=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "First Group"));
-            Assert.True(_rlv.Restrictions.CanReceiveIM("Hello world", groupId2, "Second Group"));
+            Assert.False(_rlv.Permissions.CanReceiveIM("Hello world", groupId1, "First Group"));
+            Assert.True(_rlv.Permissions.CanReceiveIM("Hello world", groupId2, "Second Group"));
         }
 
         [Fact]
@@ -771,8 +771,8 @@
 
             _rlv.ProcessMessage($"@recvimfrom:allgroups=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello world", groupId1, "First Group"));
-            Assert.False(_rlv.Restrictions.CanReceiveIM("Hello world", groupId2, "Second Group"));
+            Assert.False(_rlv.Permissions.CanReceiveIM("Hello world", groupId1, "First Group"));
+            Assert.False(_rlv.Permissions.CanReceiveIM("Hello world", groupId2, "Second Group"));
         }
 
         #endregion

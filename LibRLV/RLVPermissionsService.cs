@@ -5,11 +5,11 @@ using System.Numerics;
 
 namespace LibRLV
 {
-    public class RLVManager
+    public class RLVPermissionsService
     {
         private readonly IRestrictionProvider _restrictionProvider;
 
-        internal RLVManager(IRestrictionProvider restrictionProvider)
+        internal RLVPermissionsService(IRestrictionProvider restrictionProvider)
         {
             _restrictionProvider = restrictionProvider;
         }

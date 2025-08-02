@@ -11,7 +11,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@TpLocal=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanTpLocal(out var distance));
+            Assert.True(_rlv.Permissions.CanTpLocal(out var distance));
             Assert.Equal(0.0f, distance, FloatTolerance);
         }
 
@@ -20,7 +20,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@TpLocal:0.9=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanTpLocal(out var distance));
+            Assert.True(_rlv.Permissions.CanTpLocal(out var distance));
             Assert.Equal(0.9f, distance, FloatTolerance);
         }
         #endregion
@@ -48,8 +48,8 @@ namespace LibRLV.Tests
         {
             var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
-            Assert.True(_rlv.Restrictions.CanTPLure(null));
-            Assert.True(_rlv.Restrictions.CanTPLure(userId1));
+            Assert.True(_rlv.Permissions.CanTPLure(null));
+            Assert.True(_rlv.Permissions.CanTPLure(userId1));
         }
 
         [Fact]
@@ -59,8 +59,8 @@ namespace LibRLV.Tests
 
             var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
-            Assert.False(_rlv.Restrictions.CanTPLure(null));
-            Assert.False(_rlv.Restrictions.CanTPLure(userId1));
+            Assert.False(_rlv.Permissions.CanTPLure(null));
+            Assert.False(_rlv.Permissions.CanTPLure(userId1));
         }
 
         [Fact]
@@ -72,9 +72,9 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@tplure=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@tplure:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanTPLure(null));
-            Assert.True(_rlv.Restrictions.CanTPLure(userId1));
-            Assert.False(_rlv.Restrictions.CanTPLure(userId2));
+            Assert.False(_rlv.Permissions.CanTPLure(null));
+            Assert.True(_rlv.Permissions.CanTPLure(userId1));
+            Assert.False(_rlv.Permissions.CanTPLure(userId2));
         }
 
         [Fact]
@@ -86,9 +86,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@tplure_sec=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanTPLure(null));
-            Assert.False(_rlv.Restrictions.CanTPLure(userId1));
-            Assert.False(_rlv.Restrictions.CanTPLure(userId2));
+            Assert.False(_rlv.Permissions.CanTPLure(null));
+            Assert.False(_rlv.Permissions.CanTPLure(userId1));
+            Assert.False(_rlv.Permissions.CanTPLure(userId2));
         }
 
         [Fact]
@@ -102,9 +102,9 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@tplure:{userId1}=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@tplure:{userId2}=add", sender2.Id, sender2.Name);
 
-            Assert.False(_rlv.Restrictions.CanTPLure(null));
-            Assert.True(_rlv.Restrictions.CanTPLure(userId1));
-            Assert.False(_rlv.Restrictions.CanTPLure(userId2));
+            Assert.False(_rlv.Permissions.CanTPLure(null));
+            Assert.True(_rlv.Permissions.CanTPLure(userId1));
+            Assert.False(_rlv.Permissions.CanTPLure(userId2));
         }
 
         #endregion
@@ -114,7 +114,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSitTp_Default()
         {
-            Assert.False(_rlv.Restrictions.CanSitTp(out var maxDistance));
+            Assert.False(_rlv.Permissions.CanSitTp(out var maxDistance));
             Assert.Equal(1.5f, maxDistance);
         }
 
@@ -123,7 +123,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanSitTp(out var maxDistance));
+            Assert.True(_rlv.Permissions.CanSitTp(out var maxDistance));
             Assert.Equal(2.5f, maxDistance);
         }
 
@@ -134,7 +134,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@SitTp:4.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanSitTp(out var maxDistance));
+            Assert.True(_rlv.Permissions.CanSitTp(out var maxDistance));
             Assert.Equal(2.5f, maxDistance);
         }
 
@@ -148,7 +148,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@SitTp:8.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@SitTp:8.5=y", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.CanSitTp(out var maxDistance));
+            Assert.True(_rlv.Permissions.CanSitTp(out var maxDistance));
             Assert.Equal(2.5f, maxDistance);
         }
 
@@ -162,7 +162,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@SitTp:4.5=n", sender2.Id, sender2.Name);
             _rlv.ProcessMessage("@SitTp:2.5=n", sender3.Id, sender3.Name);
 
-            Assert.True(_rlv.Restrictions.CanSitTp(out var maxDistance));
+            Assert.True(_rlv.Permissions.CanSitTp(out var maxDistance));
             Assert.Equal(2.5f, maxDistance);
         }
 
@@ -172,7 +172,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@SitTp:2.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@SitTp:2.5=y", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanSitTp(out var maxDistance));
+            Assert.False(_rlv.Permissions.CanSitTp(out var maxDistance));
             Assert.Equal(1.5f, maxDistance);
         }
         #endregion
@@ -191,8 +191,8 @@ namespace LibRLV.Tests
         public void TpTo_Default()
         {
             var raised = Assert.Raises<TpToEventArgs>(
-                attach: n => _rlv.Actions.TpTo += n,
-                detach: n => _rlv.Actions.TpTo -= n,
+                attach: n => _rlv.Commands.TpTo += n,
+                detach: n => _rlv.Commands.TpTo -= n,
                 testCode: () => _rlv.ProcessMessage("@tpto:1.5/2.5/3.5=force", _sender.Id, _sender.Name)
             );
 
@@ -207,8 +207,8 @@ namespace LibRLV.Tests
         public void TpTo_WithRegion()
         {
             var raised = Assert.Raises<TpToEventArgs>(
-                attach: n => _rlv.Actions.TpTo += n,
-                detach: n => _rlv.Actions.TpTo -= n,
+                attach: n => _rlv.Commands.TpTo += n,
+                detach: n => _rlv.Commands.TpTo -= n,
                 testCode: () => _rlv.ProcessMessage("@tpto:Region Name/1.5/2.5/3.5=force", _sender.Id, _sender.Name)
             );
 
@@ -223,8 +223,8 @@ namespace LibRLV.Tests
         public void TpTo_WithRegionAndLookAt()
         {
             var raised = Assert.Raises<TpToEventArgs>(
-                attach: n => _rlv.Actions.TpTo += n,
-                detach: n => _rlv.Actions.TpTo -= n,
+                attach: n => _rlv.Commands.TpTo += n,
+                detach: n => _rlv.Commands.TpTo -= n,
                 testCode: () => _rlv.ProcessMessage("@tpto:Region Name/1.5/2.5/3.5;3.1415=force", _sender.Id, _sender.Name)
             );
 
@@ -242,7 +242,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
             var raisedEvent = false;
-            _rlv.Actions.TpTo += (sender, args) =>
+            _rlv.Commands.TpTo += (sender, args) =>
             {
                 raisedEvent = true;
             };
@@ -257,7 +257,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@tploc=n", _sender.Id, _sender.Name);
 
             var raisedEvent = false;
-            _rlv.Actions.TpTo += (sender, args) =>
+            _rlv.Commands.TpTo += (sender, args) =>
             {
                 raisedEvent = true;
             };
@@ -276,9 +276,9 @@ namespace LibRLV.Tests
             var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
-            Assert.False(_rlv.Restrictions.IsAutoAcceptTp(userId1));
-            Assert.False(_rlv.Restrictions.IsAutoAcceptTp(userId2));
-            Assert.False(_rlv.Restrictions.IsAutoAcceptTp());
+            Assert.False(_rlv.Permissions.IsAutoAcceptTp(userId1));
+            Assert.False(_rlv.Permissions.IsAutoAcceptTp(userId2));
+            Assert.False(_rlv.Permissions.IsAutoAcceptTp());
         }
 
         [Fact]
@@ -289,9 +289,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@accepttp:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.IsAutoAcceptTp(userId1));
-            Assert.False(_rlv.Restrictions.IsAutoAcceptTp(userId2));
-            Assert.False(_rlv.Restrictions.IsAutoAcceptTp());
+            Assert.True(_rlv.Permissions.IsAutoAcceptTp(userId1));
+            Assert.False(_rlv.Permissions.IsAutoAcceptTp(userId2));
+            Assert.False(_rlv.Permissions.IsAutoAcceptTp());
         }
 
         [Fact]
@@ -302,9 +302,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@accepttp=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.IsAutoAcceptTp(userId1));
-            Assert.True(_rlv.Restrictions.IsAutoAcceptTp(userId2));
-            Assert.True(_rlv.Restrictions.IsAutoAcceptTp());
+            Assert.True(_rlv.Permissions.IsAutoAcceptTp(userId1));
+            Assert.True(_rlv.Permissions.IsAutoAcceptTp(userId2));
+            Assert.True(_rlv.Permissions.IsAutoAcceptTp());
         }
 
         #endregion
@@ -317,9 +317,9 @@ namespace LibRLV.Tests
             var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
-            Assert.False(_rlv.Restrictions.IsAutoAcceptTpRequest(userId1));
-            Assert.False(_rlv.Restrictions.IsAutoAcceptTpRequest(userId2));
-            Assert.False(_rlv.Restrictions.IsAutoAcceptTpRequest());
+            Assert.False(_rlv.Permissions.IsAutoAcceptTpRequest(userId1));
+            Assert.False(_rlv.Permissions.IsAutoAcceptTpRequest(userId2));
+            Assert.False(_rlv.Permissions.IsAutoAcceptTpRequest());
         }
 
         [Fact]
@@ -330,9 +330,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@accepttprequest:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.IsAutoAcceptTpRequest(userId1));
-            Assert.False(_rlv.Restrictions.IsAutoAcceptTpRequest(userId2));
-            Assert.False(_rlv.Restrictions.IsAutoAcceptTpRequest());
+            Assert.True(_rlv.Permissions.IsAutoAcceptTpRequest(userId1));
+            Assert.False(_rlv.Permissions.IsAutoAcceptTpRequest(userId2));
+            Assert.False(_rlv.Permissions.IsAutoAcceptTpRequest());
         }
 
         [Fact]
@@ -343,9 +343,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@accepttprequest=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.IsAutoAcceptTpRequest(userId1));
-            Assert.True(_rlv.Restrictions.IsAutoAcceptTpRequest(userId2));
-            Assert.True(_rlv.Restrictions.IsAutoAcceptTpRequest());
+            Assert.True(_rlv.Permissions.IsAutoAcceptTpRequest(userId1));
+            Assert.True(_rlv.Permissions.IsAutoAcceptTpRequest(userId2));
+            Assert.True(_rlv.Permissions.IsAutoAcceptTpRequest());
         }
 
         #endregion
@@ -357,8 +357,8 @@ namespace LibRLV.Tests
         {
             var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
-            Assert.True(_rlv.Restrictions.CanTpRequest(null));
-            Assert.True(_rlv.Restrictions.CanTpRequest(userId1));
+            Assert.True(_rlv.Permissions.CanTpRequest(null));
+            Assert.True(_rlv.Permissions.CanTpRequest(userId1));
         }
 
         [Fact]
@@ -368,8 +368,8 @@ namespace LibRLV.Tests
 
             var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
-            Assert.False(_rlv.Restrictions.CanTpRequest(null));
-            Assert.False(_rlv.Restrictions.CanTpRequest(userId1));
+            Assert.False(_rlv.Permissions.CanTpRequest(null));
+            Assert.False(_rlv.Permissions.CanTpRequest(userId1));
         }
 
         [Fact]
@@ -381,9 +381,9 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@tprequest=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@tprequest:{userId1}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanTpRequest(null));
-            Assert.True(_rlv.Restrictions.CanTpRequest(userId1));
-            Assert.False(_rlv.Restrictions.CanTpRequest(userId2));
+            Assert.False(_rlv.Permissions.CanTpRequest(null));
+            Assert.True(_rlv.Permissions.CanTpRequest(userId1));
+            Assert.False(_rlv.Permissions.CanTpRequest(userId2));
         }
 
         [Fact]
@@ -395,9 +395,9 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage("@tprequest_sec=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.CanTpRequest(null));
-            Assert.False(_rlv.Restrictions.CanTpRequest(userId1));
-            Assert.False(_rlv.Restrictions.CanTpRequest(userId2));
+            Assert.False(_rlv.Permissions.CanTpRequest(null));
+            Assert.False(_rlv.Permissions.CanTpRequest(userId1));
+            Assert.False(_rlv.Permissions.CanTpRequest(userId2));
         }
 
         [Fact]
@@ -411,9 +411,9 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@tprequest:{userId1}=add", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@tprequest:{userId2}=add", sender2.Id, sender2.Name);
 
-            Assert.False(_rlv.Restrictions.CanTpRequest(null));
-            Assert.True(_rlv.Restrictions.CanTpRequest(userId1));
-            Assert.False(_rlv.Restrictions.CanTpRequest(userId2));
+            Assert.False(_rlv.Permissions.CanTpRequest(null));
+            Assert.True(_rlv.Permissions.CanTpRequest(userId1));
+            Assert.False(_rlv.Permissions.CanTpRequest(userId2));
         }
 
         #endregion

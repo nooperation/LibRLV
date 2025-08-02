@@ -12,11 +12,10 @@ namespace LibRLV
         public bool Enabled { get; set; }
         public bool EnableInstantMessageProcessing { get; set; }
 
-        public RLVActionHandler Actions { get; }
-        public RLVRestrictionHandler RestrictionsHandler { get; }
-        public RLVManager Restrictions { get; }
+        public RLVCommandProcessor Commands { get; }
+        public RLVRestrictionManager Restrictions { get; }
+        public RLVPermissionsService Permissions { get; }
         public RLVBlacklist Blacklist { get; }
-
 
         internal IRLVCallbacks Callbacks { get; }
         internal RLVGetRequestHandler GetRequestHandler { get; }
@@ -27,10 +26,10 @@ namespace LibRLV
         {
             Callbacks = callbacks;
             Blacklist = new RLVBlacklist();
-            RestrictionsHandler = new RLVRestrictionHandler(Callbacks);
-            GetRequestHandler = new RLVGetRequestHandler(Blacklist, RestrictionsHandler, Callbacks);
-            Restrictions = new RLVManager(RestrictionsHandler);
-            Actions = new RLVActionHandler(Restrictions, Callbacks);
+            Restrictions = new RLVRestrictionManager(Callbacks);
+            GetRequestHandler = new RLVGetRequestHandler(Blacklist, Restrictions, Callbacks);
+            Permissions = new RLVPermissionsService(Restrictions);
+            Commands = new RLVCommandProcessor(Permissions, Callbacks);
             Enabled = enabled;
         }
 
@@ -48,15 +47,15 @@ namespace LibRLV
 
             if (rlvMessage.Behavior == "clear")
             {
-                return RestrictionsHandler.ProcessClearCommand(rlvMessage);
+                return Restrictions.ProcessClearCommand(rlvMessage);
             }
             else if (rlvMessage.Param == "force")
             {
-                return Actions.ProcessActionCommand(rlvMessage);
+                return Commands.ProcessActionCommand(rlvMessage);
             }
             else if (rlvMessage.Param == "y" || rlvMessage.Param == "n" || rlvMessage.Param == "add" || rlvMessage.Param == "rem")
             {
-                return RestrictionsHandler.ProcessRestrictionCommand(rlvMessage, rlvMessage.Option, rlvMessage.Param == "n" || rlvMessage.Param == "add");
+                return Restrictions.ProcessRestrictionCommand(rlvMessage, rlvMessage.Option, rlvMessage.Param == "n" || rlvMessage.Param == "add");
             }
             else if (int.TryParse(rlvMessage.Param, out var channel))
             {
@@ -143,7 +142,7 @@ namespace LibRLV
         {
             if (message.StartsWith("/me"))
             {
-                if (!Restrictions.IsRedirEmote(out var channels))
+                if (!Permissions.IsRedirEmote(out var channels))
                 {
                     return;
                 }
@@ -155,7 +154,7 @@ namespace LibRLV
             }
             else
             {
-                if (!Restrictions.IsRedirChat(out var channels))
+                if (!Permissions.IsRedirChat(out var channels))
                 {
                     return;
                 }
@@ -213,7 +212,7 @@ namespace LibRLV
 
             if (changeType == WornItemChange.Attached)
             {
-                var isLegal = Restrictions.CanAttach(objectFolderId, isShared, null, wearableType);
+                var isLegal = Permissions.CanAttach(objectFolderId, isShared, null, wearableType);
 
                 if (isLegal)
                 {
@@ -226,7 +225,7 @@ namespace LibRLV
             }
             else if (changeType == WornItemChange.Detached)
             {
-                var isLegal = Restrictions.CanDetach(objectFolderId, isShared, null, wearableType);
+                var isLegal = Permissions.CanDetach(objectFolderId, isShared, null, wearableType);
 
                 if (isLegal)
                 {
@@ -256,7 +255,7 @@ namespace LibRLV
 
             if (changeType == AttachedItemChange.Attached)
             {
-                var isLegal = Restrictions.CanAttach(objectFolderId, isShared, attachmentPoint, null);
+                var isLegal = Permissions.CanAttach(objectFolderId, isShared, attachmentPoint, null);
 
                 if (isLegal)
                 {
@@ -269,7 +268,7 @@ namespace LibRLV
             }
             else if (changeType == AttachedItemChange.Detached)
             {
-                var isLegal = Restrictions.CanDetach(objectFolderId, isShared, attachmentPoint, null);
+                var isLegal = Permissions.CanDetach(objectFolderId, isShared, attachmentPoint, null);
 
                 if (isLegal)
                 {
@@ -299,9 +298,9 @@ namespace LibRLV
 
             if (sitType == SitType.Sit && objectId != null)
             {
-                var isLegal = Restrictions.CanInteract() && Restrictions.CanSit();
+                var isLegal = Permissions.CanInteract() && Permissions.CanSit();
 
-                if (Restrictions.CanSitTp(out var maxObjectDistance))
+                if (Permissions.CanSitTp(out var maxObjectDistance))
                 {
                     if (objectDistance == null || objectDistance > maxObjectDistance)
                     {
@@ -320,7 +319,7 @@ namespace LibRLV
             }
             else if (sitType == SitType.Stand && objectId != null)
             {
-                var isLegal = Restrictions.CanInteract() && Restrictions.CanUnsit();
+                var isLegal = Permissions.CanInteract() && Permissions.CanUnsit();
 
                 if (isLegal)
                 {
@@ -333,7 +332,7 @@ namespace LibRLV
             }
             else if (sitType == SitType.Sit && objectId == null)
             {
-                var isLegal = Restrictions.CanSit();
+                var isLegal = Permissions.CanSit();
 
                 if (isLegal)
                 {
@@ -346,7 +345,7 @@ namespace LibRLV
             }
             else if (sitType == SitType.Stand && objectId == null)
             {
-                var isLegal = Restrictions.CanUnsit();
+                var isLegal = Permissions.CanUnsit();
 
                 if (isLegal)
                 {
@@ -367,7 +366,7 @@ namespace LibRLV
 
         private void SendNotification(string notificationText)
         {
-            var notificationRestrictions = RestrictionsHandler.GetRestrictions(RLVRestrictionType.Notify);
+            var notificationRestrictions = Restrictions.GetRestrictions(RLVRestrictionType.Notify);
 
             foreach (var notificationRestriction in notificationRestrictions)
             {

@@ -8,12 +8,12 @@ namespace LibRLV
     public class LockedFolderManager
     {
         private readonly IRLVCallbacks _callbacks;
-        private readonly RLVRestrictionHandler _restrictionManager;
+        private readonly RLVRestrictionManager _restrictionManager;
 
         private readonly Dictionary<Guid, LockedFolder> _lockedFolders = new Dictionary<Guid, LockedFolder>();
         private readonly object _lockedFoldersLock = new object();
 
-        internal LockedFolderManager(IRLVCallbacks callbacks, RLVRestrictionHandler restrictionManager)
+        internal LockedFolderManager(IRLVCallbacks callbacks, RLVRestrictionManager restrictionManager)
         {
             _callbacks = callbacks;
             _restrictionManager = restrictionManager;

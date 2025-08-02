@@ -42,8 +42,8 @@ namespace LibRLV.Tests
         public void SetRot()
         {
             var raised = Assert.Raises<SetRotEventArgs>(
-                 attach: n => _rlv.Actions.SetRot += n,
-                 detach: n => _rlv.Actions.SetRot -= n,
+                 attach: n => _rlv.Commands.SetRot += n,
+                 detach: n => _rlv.Commands.SetRot -= n,
                  testCode: () => _rlv.ProcessMessage("@setrot:1.5=force", _sender.Id, _sender.Name)
              );
 
@@ -56,8 +56,8 @@ namespace LibRLV.Tests
         public void AdjustHeight()
         {
             var raised = Assert.Raises<AdjustHeightEventArgs>(
-                 attach: n => _rlv.Actions.AdjustHeight += n,
-                 detach: n => _rlv.Actions.AdjustHeight -= n,
+                 attach: n => _rlv.Commands.AdjustHeight += n,
+                 detach: n => _rlv.Commands.AdjustHeight -= n,
                  testCode: () => _rlv.ProcessMessage("@adjustheight:4.3;1.25=force", _sender.Id, _sender.Name)
              );
 
@@ -70,8 +70,8 @@ namespace LibRLV.Tests
         public void AdjustHeight_WithDelta()
         {
             var raised = Assert.Raises<AdjustHeightEventArgs>(
-                 attach: n => _rlv.Actions.AdjustHeight += n,
-                 detach: n => _rlv.Actions.AdjustHeight -= n,
+                 attach: n => _rlv.Commands.AdjustHeight += n,
+                 detach: n => _rlv.Commands.AdjustHeight -= n,
                  testCode: () => _rlv.ProcessMessage("@adjustheight:4.3;1.25;12.34=force", _sender.Id, _sender.Name)
              );
 
@@ -113,8 +113,8 @@ namespace LibRLV.Tests
             SetObjectExists(objectId1, false);
 
             var raised = Assert.Raises<SitEventArgs>(
-                attach: n => _rlv.Actions.Sit += n,
-                detach: n => _rlv.Actions.Sit -= n,
+                attach: n => _rlv.Commands.Sit += n,
+                detach: n => _rlv.Commands.Sit -= n,
                 testCode: () => _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name)
             );
 
@@ -130,8 +130,8 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
             var raised = Assert.Raises<SitEventArgs>(
-                attach: n => _rlv.Actions.Sit += n,
-                detach: n => _rlv.Actions.Sit -= n,
+                attach: n => _rlv.Commands.Sit += n,
+                detach: n => _rlv.Commands.Sit -= n,
                 testCode: () => _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name)
             );
 
@@ -147,7 +147,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
             var raisedEvent = false;
-            _rlv.Actions.TpTo += (sender, args) =>
+            _rlv.Commands.TpTo += (sender, args) =>
             {
                 raisedEvent = true;
             };
@@ -166,7 +166,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@sit=n", _sender.Id, _sender.Name);
 
             var raisedEvent = false;
-            _rlv.Actions.TpTo += (sender, args) =>
+            _rlv.Commands.TpTo += (sender, args) =>
             {
                 raisedEvent = true;
             };
@@ -184,7 +184,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@standtp=n", _sender.Id, _sender.Name);
 
             var raisedEvent = false;
-            _rlv.Actions.TpTo += (sender, args) =>
+            _rlv.Commands.TpTo += (sender, args) =>
             {
                 raisedEvent = true;
             };
@@ -200,7 +200,7 @@ namespace LibRLV.Tests
             // SetupSitTarget(objectId1, true); <-- Don't setup sit target for this test
 
             var raisedEvent = false;
-            _rlv.Actions.TpTo += (sender, args) =>
+            _rlv.Commands.TpTo += (sender, args) =>
             {
                 raisedEvent = true;
             };

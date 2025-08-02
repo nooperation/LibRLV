@@ -21,8 +21,8 @@ namespace LibRLV.Tests
         public void SetDebug_Default(string settingName, string settingValue)
         {
             var raised = Assert.Raises<SetSettingEventArgs>(
-                 attach: n => _rlv.Actions.SetDebug += n,
-                 detach: n => _rlv.Actions.SetDebug -= n,
+                 attach: n => _rlv.Commands.SetDebug += n,
+                 detach: n => _rlv.Commands.SetDebug -= n,
                  testCode: () => _rlv.ProcessMessage($"@setdebug_{settingName}:{settingValue}=force", _sender.Id, _sender.Name)
              );
 
@@ -34,7 +34,7 @@ namespace LibRLV.Tests
         public void SetDebug_Invalid()
         {
             var eventRaised = false;
-            _rlv.Actions.SetDebug += (sender, args) =>
+            _rlv.Commands.SetDebug += (sender, args) =>
             {
                 eventRaised = true;
             };
@@ -82,8 +82,8 @@ namespace LibRLV.Tests
         public void SetEnv_Default(string settingName, string settingValue)
         {
             var raised = Assert.Raises<SetSettingEventArgs>(
-                 attach: n => _rlv.Actions.SetEnv += n,
-                 detach: n => _rlv.Actions.SetEnv -= n,
+                 attach: n => _rlv.Commands.SetEnv += n,
+                 detach: n => _rlv.Commands.SetEnv -= n,
                  testCode: () => _rlv.ProcessMessage($"@setenv_{settingName}:{settingValue}=force", _sender.Id, _sender.Name)
              );
 

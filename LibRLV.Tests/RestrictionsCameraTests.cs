@@ -11,7 +11,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CamZoomMin_Default()
         {
-            Assert.False(_rlv.Restrictions.HasCamZoomMin(out var camZoomMin));
+            Assert.False(_rlv.Permissions.HasCamZoomMin(out var camZoomMin));
             Assert.Equal(default, camZoomMin);
         }
 
@@ -20,7 +20,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamZoomMin:1.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamZoomMin(out var camZoomMin));
+            Assert.True(_rlv.Permissions.HasCamZoomMin(out var camZoomMin));
             Assert.Equal(1.5f, camZoomMin);
         }
 
@@ -31,7 +31,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMin:4.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamZoomMin:1.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamZoomMin(out var camZoomMin));
+            Assert.True(_rlv.Permissions.HasCamZoomMin(out var camZoomMin));
             Assert.Equal(4.5f, camZoomMin);
         }
 
@@ -45,7 +45,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMin:8.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamZoomMin:8.5=y", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamZoomMin(out var camZoomMin));
+            Assert.True(_rlv.Permissions.HasCamZoomMin(out var camZoomMin));
             Assert.Equal(4.5f, camZoomMin);
         }
 
@@ -59,7 +59,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMin:4.5=n", sender2.Id, sender2.Name);
             _rlv.ProcessMessage("@CamZoomMin:1.5=n", sender3.Id, sender3.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamZoomMin(out var camZoomMin));
+            Assert.True(_rlv.Permissions.HasCamZoomMin(out var camZoomMin));
             Assert.Equal(4.5f, camZoomMin);
         }
 
@@ -69,7 +69,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMin:1.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamZoomMin:1.5=y", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.HasCamZoomMin(out var camZoomMin));
+            Assert.False(_rlv.Permissions.HasCamZoomMin(out var camZoomMin));
             Assert.Equal(default, camZoomMin);
         }
         #endregion
@@ -78,7 +78,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CamZoomMax_Default()
         {
-            Assert.False(_rlv.Restrictions.HasCamZoomMax(out var camZoomMax));
+            Assert.False(_rlv.Permissions.HasCamZoomMax(out var camZoomMax));
             Assert.Equal(default, camZoomMax);
         }
 
@@ -87,7 +87,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamZoomMax:1.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamZoomMax(out var camZoomMax));
+            Assert.True(_rlv.Permissions.HasCamZoomMax(out var camZoomMax));
             Assert.Equal(1.5f, camZoomMax);
         }
 
@@ -98,7 +98,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMax:4.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamZoomMax:1.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamZoomMax(out var camZoomMax));
+            Assert.True(_rlv.Permissions.HasCamZoomMax(out var camZoomMax));
             Assert.Equal(1.5f, camZoomMax);
         }
 
@@ -112,7 +112,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMax:0.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamZoomMax:0.5=y", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamZoomMax(out var camZoomMax));
+            Assert.True(_rlv.Permissions.HasCamZoomMax(out var camZoomMax));
             Assert.Equal(1.5f, camZoomMax);
         }
 
@@ -126,7 +126,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMax:4.5=n", sender2.Id, sender2.Name);
             _rlv.ProcessMessage("@CamZoomMax:1.5=n", sender3.Id, sender3.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamZoomMax(out var camZoomMax));
+            Assert.True(_rlv.Permissions.HasCamZoomMax(out var camZoomMax));
             Assert.Equal(1.5f, camZoomMax);
         }
 
@@ -136,7 +136,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamZoomMax:1.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamZoomMax:1.5=y", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.HasCamZoomMax(out var camZoomMax));
+            Assert.False(_rlv.Permissions.HasCamZoomMax(out var camZoomMax));
             Assert.Equal(default, camZoomMax);
         }
 
@@ -148,7 +148,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamZoomMin:0.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamZoomMin(out var camZoomMin));
+            Assert.True(_rlv.Permissions.HasCamZoomMin(out var camZoomMin));
             Assert.Equal(0.5f, camZoomMin);
         }
         #endregion
@@ -159,7 +159,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamZoomMax:1.5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamZoomMax(out var camZoomMax));
+            Assert.True(_rlv.Permissions.HasCamZoomMax(out var camZoomMax));
             Assert.Equal(1.5f, camZoomMax);
         }
         #endregion
@@ -170,7 +170,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@setcam_fovmin:15=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasSetCamFovMin(out var setCamFovMin));
+            Assert.True(_rlv.Permissions.HasSetCamFovMin(out var setCamFovMin));
             Assert.Equal(15f, setCamFovMin);
         }
         #endregion
@@ -181,7 +181,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@setcam_fovmax:45=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasSetCamFovMax(out var setCamFovMax));
+            Assert.True(_rlv.Permissions.HasSetCamFovMax(out var setCamFovMax));
             Assert.Equal(45f, setCamFovMax);
         }
         #endregion
@@ -191,8 +191,8 @@ namespace LibRLV.Tests
         public void SetCamFov()
         {
             var raised = Assert.Raises<SetCamFOVEventArgs>(
-                 attach: n => _rlv.Actions.SetCamFOV += n,
-                 detach: n => _rlv.Actions.SetCamFOV -= n,
+                 attach: n => _rlv.Commands.SetCamFOV += n,
+                 detach: n => _rlv.Commands.SetCamFOV -= n,
                  testCode: () => _rlv.ProcessMessage("@setcam_fov:1.75=force", _sender.Id, _sender.Name)
              );
 
@@ -203,7 +203,7 @@ namespace LibRLV.Tests
         public void SetCamFov_Restricted()
         {
             var raisedEvent = false;
-            _rlv.Actions.SetCamFOV += (sender, args) =>
+            _rlv.Commands.SetCamFOV += (sender, args) =>
             {
                 raisedEvent = true;
             };
@@ -218,7 +218,7 @@ namespace LibRLV.Tests
         public void SetCamFov_Restricted_Synonym()
         {
             var raisedEvent = false;
-            _rlv.Actions.SetCamFOV += (sender, args) =>
+            _rlv.Commands.SetCamFOV += (sender, args) =>
             {
                 raisedEvent = true;
             };
@@ -236,7 +236,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@setcam_avdistmax:30=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasSetCamAvDistMax(out var setCamAvDistMax));
+            Assert.True(_rlv.Permissions.HasSetCamAvDistMax(out var setCamAvDistMax));
             Assert.Equal(30f, setCamAvDistMax);
         }
         [Fact]
@@ -244,7 +244,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@camdistmax:30=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasSetCamAvDistMax(out var setCamAvDistMax));
+            Assert.True(_rlv.Permissions.HasSetCamAvDistMax(out var setCamAvDistMax));
             Assert.Equal(30f, setCamAvDistMax);
         }
         #endregion
@@ -255,7 +255,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@setcam_avdistmin:0.3=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasSetCamAvDistMin(out var setCamAvDistMin));
+            Assert.True(_rlv.Permissions.HasSetCamAvDistMin(out var setCamAvDistMin));
             Assert.Equal(0.3f, setCamAvDistMin);
         }
 
@@ -264,7 +264,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@camdistmin:0.3=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasSetCamAvDistMin(out var setCamAvDistMin));
+            Assert.True(_rlv.Permissions.HasSetCamAvDistMin(out var setCamAvDistMin));
             Assert.Equal(0.3f, setCamAvDistMin);
         }
         #endregion
@@ -275,7 +275,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamDrawAlphaMax:0.9=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamDrawAlphaMax(out var camDrawAlphaMax));
+            Assert.True(_rlv.Permissions.HasCamDrawAlphaMax(out var camDrawAlphaMax));
             Assert.Equal(0.9f, camDrawAlphaMax);
         }
         #endregion
@@ -287,7 +287,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@camdrawmin:1.75=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamDrawMin(out var camDrawMin));
+            Assert.True(_rlv.Permissions.HasCamDrawMin(out var camDrawMin));
             Assert.Equal(1.75f, camDrawMin);
         }
 
@@ -295,7 +295,7 @@ namespace LibRLV.Tests
         public void CamDrawMin_Small()
         {
             Assert.False(_rlv.ProcessMessage("@camdrawmin:0.15=n", _sender.Id, _sender.Name));
-            Assert.False(_rlv.Restrictions.HasCamDrawMin(out var camDrawMin));
+            Assert.False(_rlv.Permissions.HasCamDrawMin(out var camDrawMin));
         }
 
         #endregion
@@ -307,7 +307,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@camdrawmax:1.75=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamDrawMax(out var camDrawMax));
+            Assert.True(_rlv.Permissions.HasCamDrawMax(out var camDrawMax));
             Assert.Equal(1.75f, camDrawMax);
         }
 
@@ -315,7 +315,7 @@ namespace LibRLV.Tests
         public void CamDrawMax_Small()
         {
             Assert.False(_rlv.ProcessMessage("@camdrawmax:0.15=n", _sender.Id, _sender.Name));
-            Assert.False(_rlv.Restrictions.HasCamDrawMax(out var camDrawMax));
+            Assert.False(_rlv.Permissions.HasCamDrawMax(out var camDrawMax));
         }
 
         #endregion
@@ -327,7 +327,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@camdrawalphamin:1.75=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamDrawAlphaMin(out var camDrawAlphaMin));
+            Assert.True(_rlv.Permissions.HasCamDrawAlphaMin(out var camDrawAlphaMin));
             Assert.Equal(1.75f, camDrawAlphaMin);
         }
 
@@ -340,7 +340,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamDrawColor:0.1;0.2;0.3=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamDrawColor(out var color));
+            Assert.True(_rlv.Permissions.HasCamDrawColor(out var color));
 
             Assert.Equal(0.1f, color.X, FloatTolerance);
             Assert.Equal(0.2f, color.Y, FloatTolerance);
@@ -350,7 +350,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CamDrawColor_Default()
         {
-            Assert.False(_rlv.Restrictions.HasCamDrawColor(out var color));
+            Assert.False(_rlv.Permissions.HasCamDrawColor(out var color));
         }
 
         [Fact]
@@ -358,7 +358,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamDrawColor:5;6;7=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamDrawColor(out var color));
+            Assert.True(_rlv.Permissions.HasCamDrawColor(out var color));
             Assert.Equal(1.0f, color.X, FloatTolerance);
             Assert.Equal(1.0f, color.Y, FloatTolerance);
             Assert.Equal(1.0f, color.Z, FloatTolerance);
@@ -369,7 +369,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamDrawColor:-5;-6;-7=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamDrawColor(out var color));
+            Assert.True(_rlv.Permissions.HasCamDrawColor(out var color));
             Assert.Equal(0.0f, color.X, FloatTolerance);
             Assert.Equal(0.0f, color.Y, FloatTolerance);
             Assert.Equal(0.0f, color.Z, FloatTolerance);
@@ -381,7 +381,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamDrawColor:0.1;0.2;0.3=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamDrawColor:0.1;0.2;0.3=y", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Restrictions.HasCamDrawColor(out var color));
+            Assert.False(_rlv.Permissions.HasCamDrawColor(out var color));
         }
 
         [Fact]
@@ -390,7 +390,7 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage("@CamDrawColor:0.1;0.2;0.3=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamDrawColor:0.2;0.3;0.6=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamDrawColor(out var color));
+            Assert.True(_rlv.Permissions.HasCamDrawColor(out var color));
             Assert.Equal(0.15f, color.X, FloatTolerance);
             Assert.Equal(0.25f, color.Y, FloatTolerance);
             Assert.Equal(0.45f, color.Z, FloatTolerance);
@@ -420,7 +420,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@CamAvDist:5=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasCamAvDist(out var camAvDist));
+            Assert.True(_rlv.Permissions.HasCamAvDist(out var camAvDist));
             Assert.Equal(5f, camAvDist);
         }
         #endregion
@@ -434,7 +434,7 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage($"@{command}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasSetCamtextures(out var actualTextureId));
+            Assert.True(_rlv.Permissions.HasSetCamtextures(out var actualTextureId));
 
             Assert.Equal(Guid.Empty, actualTextureId);
         }
@@ -448,7 +448,7 @@ namespace LibRLV.Tests
 
             _rlv.ProcessMessage($"@{command}:{textureId1}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasSetCamtextures(out var actualTextureId));
+            Assert.True(_rlv.Permissions.HasSetCamtextures(out var actualTextureId));
 
             Assert.Equal(textureId1, actualTextureId);
         }
@@ -466,11 +466,11 @@ namespace LibRLV.Tests
             _rlv.ProcessMessage($"@{command1}:{textureId1}=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@{command2}:{textureId2}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasSetCamtextures(out var actualTextureId2));
+            Assert.True(_rlv.Permissions.HasSetCamtextures(out var actualTextureId2));
 
             _rlv.ProcessMessage($"@{command1}:{textureId2}=y", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Restrictions.HasSetCamtextures(out var actualTextureId1));
+            Assert.True(_rlv.Permissions.HasSetCamtextures(out var actualTextureId1));
 
             Assert.Equal(textureId2, actualTextureId2);
             Assert.Equal(textureId1, actualTextureId1);

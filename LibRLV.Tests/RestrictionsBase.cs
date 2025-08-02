@@ -19,13 +19,13 @@ namespace LibRLV.Tests
             _rlv = new RLV(_callbacks.Object, true);
         }
 
-        protected void CheckSimpleCommand(string cmd, Func<RLVManager, bool> canFunc)
+        protected void CheckSimpleCommand(string cmd, Func<RLVPermissionsService, bool> canFunc)
         {
             _rlv.ProcessMessage($"@{cmd}=n", _sender.Id, _sender.Name);
-            Assert.False(canFunc(_rlv.Restrictions));
+            Assert.False(canFunc(_rlv.Permissions));
 
             _rlv.ProcessMessage($"@{cmd}=y", _sender.Id, _sender.Name);
-            Assert.True(canFunc(_rlv.Restrictions));
+            Assert.True(canFunc(_rlv.Permissions));
         }
 
         //

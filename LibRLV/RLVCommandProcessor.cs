@@ -7,7 +7,7 @@ using static LibRLV.InventoryTree;
 
 namespace LibRLV
 {
-    public class RLVActionHandler
+    public class RLVCommandProcessor
     {
         private readonly ImmutableDictionary<string, Func<RLVMessage, bool>> RLVActionHandlers;
 
@@ -26,10 +26,10 @@ namespace LibRLV
         public event EventHandler<SetSettingEventArgs> SetDebug;
 
         // TODO: Swap manager out with an interface once it's been solidified into only useful stuff
-        private readonly RLVManager _manager;
+        private readonly RLVPermissionsService _manager;
         private readonly IRLVCallbacks _callbacks;
 
-        internal RLVActionHandler(RLVManager manager, IRLVCallbacks callbacks)
+        internal RLVCommandProcessor(RLVPermissionsService manager, IRLVCallbacks callbacks)
         {
             _manager = manager;
             _callbacks = callbacks;

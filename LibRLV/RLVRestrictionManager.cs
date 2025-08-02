@@ -6,7 +6,7 @@ using LibRLV.EventArguments;
 
 namespace LibRLV
 {
-    public partial class RLVRestrictionHandler : IRestrictionProvider
+    public partial class RLVRestrictionManager : IRestrictionProvider
     {
         internal static readonly ImmutableDictionary<string, RLVRestrictionType> NameToRestrictionMap = new Dictionary<string, RLVRestrictionType>(StringComparer.OrdinalIgnoreCase)
         {
@@ -141,7 +141,7 @@ namespace LibRLV
         private readonly IRLVCallbacks _callbacks;
         private readonly LockedFolderManager _lockedFolderManager;
 
-        internal RLVRestrictionHandler(IRLVCallbacks callbacks)
+        internal RLVRestrictionManager(IRLVCallbacks callbacks)
         {
             _callbacks = callbacks;
             _lockedFolderManager = new LockedFolderManager(callbacks, this);
