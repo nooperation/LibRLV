@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using LibRLV.EventArguments;
-using OpenMetaverse;
 using static LibRLV.InventoryTree;
 
 namespace LibRLV
@@ -154,7 +153,7 @@ namespace LibRLV
                 groupRole = argParts[1];
             }
 
-            if (UUID.TryParse(argParts[0], out var groupId))
+            if (Guid.TryParse(argParts[0], out var groupId))
             {
                 SetGroup?.Invoke(this, new SetGroupEventArgs(groupId, groupRole));
             }
@@ -321,7 +320,7 @@ namespace LibRLV
             return true;
         }
 
-        private void CollectItemsToDetach(InventoryTree folder, InventoryMap inventoryMap, bool recursive, List<UUID> itemsToDetach)
+        private void CollectItemsToDetach(InventoryTree folder, InventoryMap inventoryMap, bool recursive, List<Guid> itemsToDetach)
         {
             if (folder.Name.StartsWith("."))
             {
@@ -367,9 +366,9 @@ namespace LibRLV
 
             var inventoryMap = new InventoryMap(sharedFolder);
 
-            var itemIdsToDetach = new List<UUID>();
+            var itemIdsToDetach = new List<Guid>();
 
-            if (UUID.TryParse(command.Option, out var uuid))
+            if (Guid.TryParse(command.Option, out var uuid))
             {
                 var item = currentOutfit.FirstOrDefault(n => n.Id == uuid);
                 if (item != null)
@@ -428,7 +427,7 @@ namespace LibRLV
                 return false;
             }
 
-            var itemIdsToDetach = new List<UUID>();
+            var itemIdsToDetach = new List<Guid>();
             CollectItemsToDetach(folder, inventoryMap, true, itemIdsToDetach);
 
             Detach?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
@@ -444,7 +443,7 @@ namespace LibRLV
             var inventoryMap = new InventoryMap(sharedFolder);
             var folderPaths = new List<InventoryTree>();
 
-            if (UUID.TryParse(command.Option, out var uuid))
+            if (Guid.TryParse(command.Option, out var uuid))
             {
                 if (inventoryMap.Items.TryGetValue(uuid, out var item))
                 {
@@ -474,7 +473,7 @@ namespace LibRLV
                 folderPaths.AddRange(parts);
             }
 
-            var itemIdsToDetach = new List<UUID>();
+            var itemIdsToDetach = new List<Guid>();
             foreach (var item in folderPaths)
             {
                 CollectItemsToDetach(item, inventoryMap, recursive, itemIdsToDetach);
@@ -493,7 +492,7 @@ namespace LibRLV
             }
             var inventoryMap = new InventoryMap(sharedFolder);
 
-            var itemIdsToDetach = new List<UUID>();
+            var itemIdsToDetach = new List<Guid>();
             if (inventoryMap.Items.TryGetValue(command.Sender, out var sender))
             {
                 if (CanRemAttachItem(sender, false))
@@ -521,7 +520,7 @@ namespace LibRLV
 
             var inventoryMap = new InventoryMap(sharedFolder);
 
-            UUID? folderId = null;
+            Guid? folderId = null;
             WearableType? wearableType = null;
 
             if (RLVCommon.RLVWearableTypeMap.TryGetValue(command.Option, out var wearableTypeTemp))
@@ -636,7 +635,7 @@ namespace LibRLV
 
         private bool HandleSit(RLVMessage command)
         {
-            if (command.Option != string.Empty && !UUID.TryParse(command.Option, out var sitTarget))
+            if (command.Option != string.Empty && !Guid.TryParse(command.Option, out var sitTarget))
             {
                 return false;
             }

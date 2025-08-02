@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using OpenMetaverse;
 
 namespace LibRLV
 {
@@ -8,9 +8,9 @@ namespace LibRLV
     {
         public class InventoryItem
         {
-            public UUID Id { get; set; }
+            public Guid Id { get; set; }
             public InventoryTree Folder { get; set; }
-            public UUID FolderId { get; set; }
+            public Guid FolderId { get; set; }
             public string Name { get; set; }
             public WearableType? WornOn { get; set; }
             public AttachmentPoint? AttachedTo { get; set; }
@@ -21,7 +21,7 @@ namespace LibRLV
             }
         }
 
-        public UUID Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public InventoryTree Parent { get; set; }
         public List<InventoryTree> Children { get; set; }

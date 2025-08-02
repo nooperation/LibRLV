@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using OpenMetaverse;
 
 namespace LibRLV
 {
@@ -42,7 +41,7 @@ namespace LibRLV
             }.ToImmutableDictionary();
         }
 
-        private string HandleGetStatus(string option, UUID? sender)
+        private string HandleGetStatus(string option, Guid? sender)
         {
             var parts = option.Split(';');
             var filter = string.Empty;
@@ -213,7 +212,7 @@ namespace LibRLV
                 switch (name)
                 {
                     case RLVDataRequest.GetSitId:
-                        if (!_callbacks.TryGetSitId(out var sitId).Result || sitId == UUID.Zero)
+                        if (!_callbacks.TryGetSitId(out var sitId).Result || sitId == Guid.Empty)
                         {
                             response = "NULL_KEY";
                         }
@@ -344,7 +343,7 @@ namespace LibRLV
                         {
                             response = HandleGetPath(name == RLVDataRequest.GetPath, rlvMessage.Sender, null, null);
                         }
-                        else if (UUID.TryParse(parsedOptions[0], out var uuid))
+                        else if (Guid.TryParse(parsedOptions[0], out var uuid))
                         {
                             response = HandleGetPath(name == RLVDataRequest.GetPath, uuid, null, null);
                         }
@@ -586,7 +585,7 @@ namespace LibRLV
             return result;
         }
 
-        private string HandleGetPath(bool limitToOneResult, UUID? itemId, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        private string HandleGetPath(bool limitToOneResult, Guid? itemId, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
             if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
             {
@@ -614,7 +613,7 @@ namespace LibRLV
             return sb.ToString();
         }
 
-        internal bool ProcessInstantMessageCommand(string message, UUID senderId, string senderName)
+        internal bool ProcessInstantMessageCommand(string message, Guid senderId, string senderName)
         {
             switch (message)
             {

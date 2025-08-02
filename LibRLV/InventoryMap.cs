@@ -1,20 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using OpenMetaverse;
 
 namespace LibRLV
 {
     public class InventoryMap
     {
-        public ImmutableDictionary<UUID, InventoryTree.InventoryItem> Items { get; }
-        public ImmutableDictionary<UUID, InventoryTree> Folders { get; }
+        public ImmutableDictionary<Guid, InventoryTree.InventoryItem> Items { get; }
+        public ImmutableDictionary<Guid, InventoryTree> Folders { get; }
         public InventoryTree Root { get; }
 
         public InventoryMap(InventoryTree root)
         {
-            var itemsTemp = new Dictionary<UUID, InventoryTree.InventoryItem>();
-            var foldersTemp = new Dictionary<UUID, InventoryTree>();
+            var itemsTemp = new Dictionary<Guid, InventoryTree.InventoryItem>();
+            var foldersTemp = new Dictionary<Guid, InventoryTree>();
             CreateInventoryMap(root, foldersTemp, itemsTemp);
 
             Root = root;
@@ -103,7 +103,7 @@ namespace LibRLV
             }
         }
 
-        public List<InventoryTree> FindFoldersContaining(bool limitToOneResult, UUID? itemId, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        public List<InventoryTree> FindFoldersContaining(bool limitToOneResult, Guid? itemId, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
             var folders = new List<InventoryTree>();
 
@@ -175,7 +175,7 @@ namespace LibRLV
             return folders;
         }
 
-        public string BuildPathToFolder(UUID folderId)
+        public string BuildPathToFolder(Guid folderId)
         {
             var path = new Stack<string>();
 
@@ -200,7 +200,7 @@ namespace LibRLV
             return string.Join("/", path);
         }
 
-        private static void CreateInventoryMap(InventoryTree root, Dictionary<UUID, InventoryTree> folders, Dictionary<UUID, InventoryTree.InventoryItem> items)
+        private static void CreateInventoryMap(InventoryTree root, Dictionary<Guid, InventoryTree> folders, Dictionary<Guid, InventoryTree.InventoryItem> items)
         {
             folders[root.Id] = root;
             foreach (var item in root.Items)

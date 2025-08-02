@@ -1,12 +1,11 @@
 using LibRLV.EventArguments;
 using Moq;
-using OpenMetaverse;
 
 namespace LibRLV.Tests
 {
     public class UnitTest1
     {
-        public record RlvObject(string Name, UUID Id);
+        public record RlvObject(string Name, Guid Id);
 
         private readonly RlvObject _sender;
         private readonly Mock<IRLVCallbacks> _callbacks;
@@ -16,7 +15,7 @@ namespace LibRLV.Tests
 
         public UnitTest1()
         {
-            _sender = new RlvObject("Sender 1", new UUID("ffffffff-ffff-4fff-8fff-ffffffffffff"));
+            _sender = new RlvObject("Sender 1", new Guid("ffffffff-ffff-4fff-8fff-ffffffffffff"));
             _callbacks = new Mock<IRLVCallbacks>();
             _rlv = new RLV(_callbacks.Object, true);
         }
@@ -392,7 +391,9 @@ namespace LibRLV.Tests
         {
             var actual = _callbacks.RecordReplies();
 
-            _rlv.ProcessMessage("@notify:1234=add", UUID.Random(), "Main");
+            var sender2Id = new Guid("11111111-1111-4111-8111-111111111111");
+
+            _rlv.ProcessMessage("@notify:1234=add", sender2Id, "Main");
             _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@clear", _sender.Id, _sender.Name);
 
@@ -434,7 +435,7 @@ namespace LibRLV.Tests
         {
             var actual = _callbacks.RecordReplies();
 
-            var sitTarget = UUID.Random();
+            var sitTarget = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
             _rlv.ReportSit(RLV.SitType.Sit, sitTarget, 1.0f);
@@ -459,7 +460,7 @@ namespace LibRLV.Tests
         {
             var actual = _callbacks.RecordReplies();
 
-            var sitTarget = UUID.Random();
+            var sitTarget = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@sit=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
@@ -487,7 +488,7 @@ namespace LibRLV.Tests
         {
             var actual = _callbacks.RecordReplies();
 
-            var sitTarget = UUID.Random();
+            var sitTarget = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@sittp=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
@@ -508,11 +509,14 @@ namespace LibRLV.Tests
         public void NotifyWear()
         {
             var actual = _callbacks.RecordReplies();
-            var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+
+            var folderId1 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
+            var folderId2 = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLV.WornItemChange.Attached);
-            _rlv.ReportWornItemChange(UUID.Random(), true, WearableType.Tattoo, RLV.WornItemChange.Attached);
+            _rlv.ReportWornItemChange(folderId1, false, WearableType.Skin, RLV.WornItemChange.Attached);
+            _rlv.ReportWornItemChange(folderId2, true, WearableType.Tattoo, RLV.WornItemChange.Attached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -529,11 +533,13 @@ namespace LibRLV.Tests
         public void NotifyWear_Illegal()
         {
             var actual = _callbacks.RecordReplies();
-            var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+
+            var itemId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
             _rlv.ProcessMessage("@addoutfit:skin=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLV.WornItemChange.Attached);
+            _rlv.ReportWornItemChange(itemId1, false, WearableType.Skin, RLV.WornItemChange.Attached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -548,11 +554,14 @@ namespace LibRLV.Tests
         public void NotifyUnWear()
         {
             var actual = _callbacks.RecordReplies();
-            var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+
+            var folderId1 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
+            var folderId2 = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLV.WornItemChange.Detached);
-            _rlv.ReportWornItemChange(UUID.Random(), true, WearableType.Tattoo, RLV.WornItemChange.Detached);
+            _rlv.ReportWornItemChange(folderId1, false, WearableType.Skin, RLV.WornItemChange.Detached);
+            _rlv.ReportWornItemChange(folderId2, true, WearableType.Tattoo, RLV.WornItemChange.Detached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -568,12 +577,14 @@ namespace LibRLV.Tests
         public void NotifyUnWear_illegal()
         {
             var actual = _callbacks.RecordReplies();
-            var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+
+            var itemId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
             _rlv.ProcessMessage("@remoutfit:skin=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
 
-            _rlv.ReportWornItemChange(UUID.Random(), false, WearableType.Skin, RLV.WornItemChange.Detached);
+            _rlv.ReportWornItemChange(itemId1, false, WearableType.Skin, RLV.WornItemChange.Detached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -588,11 +599,14 @@ namespace LibRLV.Tests
         public void NotifyAttached()
         {
             var actual = _callbacks.RecordReplies();
-            var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+
+            var itemId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+            var itemId2 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLV.AttachedItemChange.Attached);
-            _rlv.ReportAttachedItemChange(UUID.Random(), true, AttachmentPoint.Skull, RLV.AttachedItemChange.Attached);
+            _rlv.ReportAttachedItemChange(itemId1, false, AttachmentPoint.Chest, RLV.AttachedItemChange.Attached);
+            _rlv.ReportAttachedItemChange(itemId2, true, AttachmentPoint.Skull, RLV.AttachedItemChange.Attached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -609,11 +623,13 @@ namespace LibRLV.Tests
         public void NotifyAttached_Illegal()
         {
             var actual = _callbacks.RecordReplies();
-            var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+
+            var itemId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
             _rlv.ProcessMessage("@addattach:chest=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLV.AttachedItemChange.Attached);
+            _rlv.ReportAttachedItemChange(itemId1, false, AttachmentPoint.Chest, RLV.AttachedItemChange.Attached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -628,11 +644,14 @@ namespace LibRLV.Tests
         public void NotifyDetached()
         {
             var actual = _callbacks.RecordReplies();
-            var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+
+            var folderId1 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
+            var folderId2 = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
 
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLV.AttachedItemChange.Detached);
-            _rlv.ReportAttachedItemChange(UUID.Random(), true, AttachmentPoint.Skull, RLV.AttachedItemChange.Detached);
+            _rlv.ReportAttachedItemChange(folderId1, false, AttachmentPoint.Chest, RLV.AttachedItemChange.Detached);
+            _rlv.ReportAttachedItemChange(folderId2, true, AttachmentPoint.Skull, RLV.AttachedItemChange.Detached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -648,11 +667,13 @@ namespace LibRLV.Tests
         public void NotifyDetached_Illegal()
         {
             var actual = _callbacks.RecordReplies();
-            var wornItem = new RlvObject("TargetItem", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+
+            var itemId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
             _rlv.ProcessMessage("@remattach:chest=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            _rlv.ReportAttachedItemChange(UUID.Random(), false, AttachmentPoint.Chest, RLV.AttachedItemChange.Detached);
+            _rlv.ReportAttachedItemChange(itemId1, false, AttachmentPoint.Chest, RLV.AttachedItemChange.Detached);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -702,7 +723,7 @@ namespace LibRLV.Tests
         [Fact]
         public void Clear_SenderBased()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             _rlv.ProcessMessage("@tploc=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@tplm=n", _sender.Id, _sender.Name);
@@ -740,7 +761,7 @@ namespace LibRLV.Tests
         public void GetStatus()
         {
             var actual = _callbacks.RecordReplies();
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@tplure=n", _sender.Id, _sender.Name);
@@ -761,7 +782,7 @@ namespace LibRLV.Tests
         public void GetStatus_filtered()
         {
             var actual = _callbacks.RecordReplies();
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@tplure=n", _sender.Id, _sender.Name);
@@ -782,7 +803,7 @@ namespace LibRLV.Tests
         public void GetStatus_customSeparator()
         {
             var actual = _callbacks.RecordReplies();
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@tplure=n", _sender.Id, _sender.Name);
@@ -807,7 +828,7 @@ namespace LibRLV.Tests
         public void GetStatusAll()
         {
             var actual = _callbacks.RecordReplies();
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@tplure=n", _sender.Id, _sender.Name);
@@ -957,8 +978,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CamZoomMin_Multiple_MultipleSenders()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
-            var sender3 = new RlvObject("Sender 3", new UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender3 = new RlvObject("Sender 3", new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"));
 
             _rlv.ProcessMessage("@CamZoomMin:3.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamZoomMin:4.5=n", sender2.Id, sender2.Name);
@@ -1024,8 +1045,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CamZoomMax_Multiple_MultipleSenders()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
-            var sender3 = new RlvObject("Sender 3", new UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender3 = new RlvObject("Sender 3", new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"));
 
             _rlv.ProcessMessage("@CamZoomMax:3.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@CamZoomMax:4.5=n", sender2.Id, sender2.Name);
@@ -1341,7 +1362,7 @@ namespace LibRLV.Tests
 
             Assert.True(_rlv.Restrictions.HasSetCamtextures(out var actualTextureId));
 
-            Assert.Equal(UUID.Zero, actualTextureId);
+            Assert.Equal(Guid.Empty, actualTextureId);
         }
 
         [Theory]
@@ -1349,7 +1370,7 @@ namespace LibRLV.Tests
         [InlineData("camtextures")]
         public void SetCamTextures_Single(string command)
         {
-            var textureId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var textureId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage($"@{command}:{textureId1}=n", _sender.Id, _sender.Name);
 
@@ -1365,8 +1386,8 @@ namespace LibRLV.Tests
         [InlineData("camtextures", "setcam_textures")]
         public void SetCamTextures_Multiple_Synonyms(string command1, string command2)
         {
-            var textureId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var textureId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var textureId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var textureId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@{command1}:{textureId1}=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@{command2}:{textureId2}=n", _sender.Id, _sender.Name);
@@ -1734,17 +1755,20 @@ namespace LibRLV.Tests
         [Fact]
         public void CanRecvChat_Default()
         {
+            var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+            var userId2 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
+
             Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", null));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", UUID.Random()));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId1));
             Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", null));
-            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", UUID.Random()));
+            Assert.True(_rlv.Restrictions.CanReceiveChat("/me says Hello world", userId2));
         }
 
         [Fact]
         public void CanRecvChat()
         {
             _rlv.ProcessMessage("@recvchat=n", _sender.Id, _sender.Name);
-            var userId = UUID.Random();
+            var userId = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
             Assert.False(_rlv.Restrictions.CanReceiveChat("Hello world", null));
             Assert.False(_rlv.Restrictions.CanReceiveChat("Hello world", userId));
@@ -1755,7 +1779,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanRecvChat_Except()
         {
-            var userId = UUID.Random();
+            var userId = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
             _rlv.ProcessMessage("@recvchat=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvchat:{userId}=add", _sender.Id, _sender.Name);
@@ -1769,10 +1793,10 @@ namespace LibRLV.Tests
         [Fact]
         public void CanRecvChat_Secure()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@recvchat_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvchat:{userId1}=add", sender2.Id, sender2.Name);
@@ -1787,7 +1811,8 @@ namespace LibRLV.Tests
         public void CanRecvChat_RecvEmote()
         {
             _rlv.ProcessMessage("@recvemote=n", _sender.Id, _sender.Name);
-            var userId = UUID.Random();
+
+            var userId = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
             Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", null));
             Assert.True(_rlv.Restrictions.CanReceiveChat("Hello world", userId));
@@ -1798,8 +1823,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanRecvChat_RecvEmoteFrom()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@recvemotefrom:{userId1}=n", _sender.Id, _sender.Name);
 
@@ -1812,8 +1837,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanRecvChat_RecvEmote_Except()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@recvemote=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvemote:{userId1}=add", _sender.Id, _sender.Name);
@@ -1827,10 +1852,10 @@ namespace LibRLV.Tests
         [Fact]
         public void CanRecvChat_RecvEmote_Secure()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@recvemote_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvemote:{userId1}=add", sender2.Id, sender2.Name);
@@ -1845,8 +1870,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanRecvChatFrom()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@recvchatfrom:{userId1}=add", _sender.Id, _sender.Name);
 
@@ -2027,10 +2052,10 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSendChannel_Secure()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@sendchannel_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@sendchannel:123=n", _sender.Id, _sender.Name);
@@ -2056,7 +2081,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSendIM_Default()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             Assert.True(_rlv.Restrictions.CanSendIM("Hello", userId1));
             Assert.True(_rlv.Restrictions.CanSendIM("Hello", userId1, "Group Name"));
@@ -2065,7 +2090,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSendIM()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
 
@@ -2076,7 +2101,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSendIM_Exception()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:{userId1}=add", _sender.Id, _sender.Name);
@@ -2087,7 +2112,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSendIM_Exception_SingleGroup()
         {
-            var groupId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var groupId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:Group Name=add", _sender.Id, _sender.Name);
@@ -2098,7 +2123,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSendIM_Exception_AllGroups()
         {
-            var groupId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var groupId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:allgroups=add", _sender.Id, _sender.Name);
@@ -2109,10 +2134,10 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSendIM_Secure()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@sendim_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:{userId1}=add", _sender.Id, _sender.Name);
@@ -2125,9 +2150,9 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSendIM_Secure_Group()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
-            var groupId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var groupId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage("@sendim_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:Group Name=add", _sender.Id, _sender.Name);
@@ -2140,7 +2165,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSendIM_Secure_AllGroups()
         {
-            var groupId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var groupId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage("@sendim_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@sendim:allgroups=add", _sender.Id, _sender.Name);
@@ -2152,8 +2177,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSendIMTo()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@sendimto:{userId1}=n", _sender.Id, _sender.Name);
 
@@ -2164,8 +2189,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSendIMTo_Group()
         {
-            var groupId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var groupId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var groupId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var groupId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@sendimto:First Group=n", _sender.Id, _sender.Name);
 
@@ -2176,8 +2201,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSendIMTo_AllGroups()
         {
-            var groupId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var groupId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var groupId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var groupId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@sendimto:allgroups=n", _sender.Id, _sender.Name);
 
@@ -2192,7 +2217,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanStartIM_Default()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             Assert.True(_rlv.Restrictions.CanStartIM(null));
             Assert.True(_rlv.Restrictions.CanStartIM(userId1));
@@ -2201,7 +2226,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanStartIM()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage("@startim=n", _sender.Id, _sender.Name);
 
@@ -2212,8 +2237,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanStartIM_Exception()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@startim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@startim:{userId1}=add", _sender.Id, _sender.Name);
@@ -2225,8 +2250,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanStartIMTo()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@startimto:{userId2}=n", _sender.Id, _sender.Name);
 
@@ -2241,7 +2266,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanReceiveIM_Default()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             Assert.True(_rlv.Restrictions.CanReceiveIM("Hello", userId1));
             Assert.True(_rlv.Restrictions.CanReceiveIM("Hello", userId1, "Group Name"));
@@ -2250,7 +2275,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanReceiveIM()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage("@recvim=n", _sender.Id, _sender.Name);
 
@@ -2261,7 +2286,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanReceiveIM_Exception()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage("@recvim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:{userId1}=add", _sender.Id, _sender.Name);
@@ -2272,7 +2297,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanReceiveIM_Exception_SingleGroup()
         {
-            var groupId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var groupId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage("@recvim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:Group Name=add", _sender.Id, _sender.Name);
@@ -2283,7 +2308,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanReceiveIM_Exception_AllGroups()
         {
-            var groupId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var groupId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage("@recvim=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:allgroups=add", _sender.Id, _sender.Name);
@@ -2294,10 +2319,10 @@ namespace LibRLV.Tests
         [Fact]
         public void CanReceiveIM_Secure()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@recvim_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:{userId1}=add", _sender.Id, _sender.Name);
@@ -2310,9 +2335,9 @@ namespace LibRLV.Tests
         [Fact]
         public void CanReceiveIM_Secure_Group()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
-            var groupId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var groupId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage("@recvim_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:Group Name=add", _sender.Id, _sender.Name);
@@ -2325,7 +2350,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanReceiveIM_Secure_AllGroups()
         {
-            var groupId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var groupId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage("@recvim_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@recvim:allgroups=add", _sender.Id, _sender.Name);
@@ -2337,8 +2362,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanReceiveIMFrom()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@recvimfrom:{userId1}=n", _sender.Id, _sender.Name);
 
@@ -2349,8 +2374,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanReceiveIMFrom_Group()
         {
-            var groupId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var groupId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var groupId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var groupId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@recvimfrom:First Group=n", _sender.Id, _sender.Name);
 
@@ -2361,8 +2386,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanReceiveIMTo_AllGroups()
         {
-            var groupId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var groupId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var groupId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var groupId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@recvimfrom:allgroups=n", _sender.Id, _sender.Name);
 
@@ -2417,8 +2442,10 @@ namespace LibRLV.Tests
         [Fact]
         public void CanTpLure_Default()
         {
+            var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+
             Assert.True(_rlv.Restrictions.CanTPLure(null));
-            Assert.True(_rlv.Restrictions.CanTPLure(UUID.Random()));
+            Assert.True(_rlv.Restrictions.CanTPLure(userId1));
         }
 
         [Fact]
@@ -2426,15 +2453,17 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@tplure=n", _sender.Id, _sender.Name);
 
+            var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+
             Assert.False(_rlv.Restrictions.CanTPLure(null));
-            Assert.False(_rlv.Restrictions.CanTPLure(UUID.Random()));
+            Assert.False(_rlv.Restrictions.CanTPLure(userId1));
         }
 
         [Fact]
         public void CanTpLure_Except()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@tplure=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@tplure:{userId1}=add", _sender.Id, _sender.Name);
@@ -2447,9 +2476,9 @@ namespace LibRLV.Tests
         [Fact]
         public void CanTpLure_Secure_Default()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@tplure_sec=n", _sender.Id, _sender.Name);
 
@@ -2461,9 +2490,9 @@ namespace LibRLV.Tests
         [Fact]
         public void CanTpLure_Secure()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@tplure_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@tplure:{userId1}=add", _sender.Id, _sender.Name);
@@ -2522,8 +2551,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanSitTp_Multiple_MultipleSenders()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
-            var sender3 = new RlvObject("Sender 3", new UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"));
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var sender3 = new RlvObject("Sender 3", new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"));
 
             _rlv.ProcessMessage("@SitTp:3.5=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@SitTp:4.5=n", sender2.Id, sender2.Name);
@@ -2640,8 +2669,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanAutoAcceptTp_Default()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             Assert.False(_rlv.Restrictions.IsAutoAcceptTp(userId1));
             Assert.False(_rlv.Restrictions.IsAutoAcceptTp(userId2));
@@ -2651,8 +2680,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanAutoAcceptTp_User()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@accepttp:{userId1}=add", _sender.Id, _sender.Name);
 
@@ -2664,8 +2693,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanAutoAcceptTp_All()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@accepttp=add", _sender.Id, _sender.Name);
 
@@ -2681,8 +2710,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanAutoAcceptTpRequest_Default()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             Assert.False(_rlv.Restrictions.IsAutoAcceptTpRequest(userId1));
             Assert.False(_rlv.Restrictions.IsAutoAcceptTpRequest(userId2));
@@ -2692,8 +2721,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanAutoAcceptTpRequest_User()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@accepttprequest:{userId1}=add", _sender.Id, _sender.Name);
 
@@ -2705,8 +2734,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanAutoAcceptTpRequest_All()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@accepttprequest=add", _sender.Id, _sender.Name);
 
@@ -2722,8 +2751,10 @@ namespace LibRLV.Tests
         [Fact]
         public void CanTpRequest_Default()
         {
+            var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+
             Assert.True(_rlv.Restrictions.CanTpRequest(null));
-            Assert.True(_rlv.Restrictions.CanTpRequest(UUID.Random()));
+            Assert.True(_rlv.Restrictions.CanTpRequest(userId1));
         }
 
         [Fact]
@@ -2731,15 +2762,17 @@ namespace LibRLV.Tests
         {
             _rlv.ProcessMessage("@tprequest=n", _sender.Id, _sender.Name);
 
+            var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+
             Assert.False(_rlv.Restrictions.CanTpRequest(null));
-            Assert.False(_rlv.Restrictions.CanTpRequest(UUID.Random()));
+            Assert.False(_rlv.Restrictions.CanTpRequest(userId1));
         }
 
         [Fact]
         public void CanTpRequest_Except()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@tprequest=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@tprequest:{userId1}=add", _sender.Id, _sender.Name);
@@ -2752,9 +2785,9 @@ namespace LibRLV.Tests
         [Fact]
         public void CanTpRequest_Secure_Default()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@tprequest_sec=n", _sender.Id, _sender.Name);
 
@@ -2766,9 +2799,9 @@ namespace LibRLV.Tests
         [Fact]
         public void CanTpRequest_Secure()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@tprequest_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@tprequest:{userId1}=add", _sender.Id, _sender.Name);
@@ -2823,7 +2856,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanEdit_Default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Hud, null));
             Assert.True(_rlv.Restrictions.CanEdit(RLVManager.ObjectLocation.Attached, null));
@@ -2837,7 +2870,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanEditFolderNameSpecifiesToAddInsteadOfReplace()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage("@edit=n", _sender.Id, _sender.Name);
 
@@ -2853,8 +2886,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanEdit_Exception()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@edit=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@edit:{objectId1}=add", _sender.Id, _sender.Name);
@@ -2875,8 +2908,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanEdit_Specific()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@editobj:{objectId1}=n", _sender.Id, _sender.Name);
 
@@ -2896,7 +2929,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanEdit_World()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage($"@editworld=n", _sender.Id, _sender.Name);
 
@@ -2912,7 +2945,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanEdit_Attachment()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             _rlv.ProcessMessage($"@editattach=n", _sender.Id, _sender.Name);
 
@@ -2941,24 +2974,28 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShare_Default()
         {
+            var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+
             Assert.True(_rlv.Restrictions.CanShare(null));
-            Assert.True(_rlv.Restrictions.CanShare(UUID.Random()));
+            Assert.True(_rlv.Restrictions.CanShare(userId1));
         }
 
         [Fact]
         public void CanShare()
         {
+            var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+
             _rlv.ProcessMessage("@share=n", _sender.Id, _sender.Name);
 
             Assert.False(_rlv.Restrictions.CanShare(null));
-            Assert.False(_rlv.Restrictions.CanShare(UUID.Random()));
+            Assert.False(_rlv.Restrictions.CanShare(userId1));
         }
 
         [Fact]
         public void CanShare_Except()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@share=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@share:{userId1}=add", _sender.Id, _sender.Name);
@@ -2971,9 +3008,9 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShare_Secure_Default()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@share_sec=n", _sender.Id, _sender.Name);
 
@@ -2985,9 +3022,9 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShare_Secure()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@share_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@share:{userId1}=add", _sender.Id, _sender.Name);
@@ -3013,24 +3050,24 @@ namespace LibRLV.Tests
         #endregion
 
         #region @sit:<uuid>=force
-        private void SetObjectExists(UUID objectId, bool isCurrentlySitting)
+        private void SetObjectExists(Guid objectId, bool isCurrentlySitting)
         {
             _callbacks.Setup(e =>
                 e.TryGetObjectExists(objectId, out isCurrentlySitting)
             ).ReturnsAsync(true);
         }
 
-        private void SetCurrentSitId(UUID objectId)
+        private void SetCurrentSitId(Guid objectId)
         {
             _callbacks.Setup(e =>
                 e.TryGetSitId(out objectId)
-            ).ReturnsAsync(objectId != UUID.Zero);
+            ).ReturnsAsync(objectId != Guid.Empty);
         }
 
         [Fact]
         public void ForceSit_Default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             SetObjectExists(objectId1, false);
 
             var raised = Assert.Raises<SitEventArgs>(
@@ -3045,7 +3082,7 @@ namespace LibRLV.Tests
         [Fact]
         public void ForceSit_RestrictedUnsit_WhileStanding()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             SetObjectExists(objectId1, false);
 
             _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
@@ -3062,7 +3099,7 @@ namespace LibRLV.Tests
         [Fact]
         public void ForceSit_RestrictedUnsit_WhileSeated()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             SetObjectExists(objectId1, true);
 
             _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
@@ -3081,7 +3118,7 @@ namespace LibRLV.Tests
         [Fact]
         public void ForceSit_RestrictedSit()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             SetObjectExists(objectId1, true);
 
             _rlv.ProcessMessage("@sit=n", _sender.Id, _sender.Name);
@@ -3099,7 +3136,7 @@ namespace LibRLV.Tests
         [Fact]
         public void ForceSit_RestrictedStandTp()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             SetObjectExists(objectId1, true);
 
             _rlv.ProcessMessage("@standtp=n", _sender.Id, _sender.Name);
@@ -3117,7 +3154,7 @@ namespace LibRLV.Tests
         [Fact]
         public void ForceSit_InvalidObject()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             // SetupSitTarget(objectId1, true); <-- Don't setup sit target for this test
 
             var raisedEvent = false;
@@ -3137,7 +3174,7 @@ namespace LibRLV.Tests
         public void GetSitID()
         {
             var actual = _callbacks.RecordReplies();
-            SetCurrentSitId(UUID.Zero);
+            SetCurrentSitId(Guid.Empty);
 
             _rlv.ProcessMessage("@getsitid=1234", _sender.Id, _sender.Name);
 
@@ -3153,7 +3190,7 @@ namespace LibRLV.Tests
         public void GetSitID_Default()
         {
             var actual = _callbacks.RecordReplies();
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             SetCurrentSitId(objectId1);
 
             _rlv.ProcessMessage("@getsitid=1234", _sender.Id, _sender.Name);
@@ -3222,10 +3259,10 @@ namespace LibRLV.Tests
         [Fact]
         public void Detach_Default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
-            var folderId1 = new UUID("99999999-9999-4999-8999-999999999999");
+            var folderId1 = new Guid("99999999-9999-4999-8999-999999999999");
 
             Assert.True(_rlv.Restrictions.CanDetach(folderId1, false, null, null));
             Assert.True(_rlv.Restrictions.CanDetach(folderId1, false, AttachmentPoint.Chest, null));
@@ -3239,10 +3276,10 @@ namespace LibRLV.Tests
         [Fact]
         public void Detach()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
-            var folderId1 = new UUID("99999999-9999-4999-8999-999999999999");
+            var folderId1 = new Guid("99999999-9999-4999-8999-999999999999");
 
             Assert.True(_rlv.ProcessMessage("@detach=n", _sender.Id, _sender.Name));
 
@@ -3258,10 +3295,10 @@ namespace LibRLV.Tests
         [Fact]
         public void Detach_AttachPoint()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
-            var folderId1 = new UUID("99999999-9999-4999-8999-999999999999");
+            var folderId1 = new Guid("99999999-9999-4999-8999-999999999999");
 
             Assert.True(_rlv.ProcessMessage("@detach:skull=n", _sender.Id, _sender.Name));
 
@@ -3473,7 +3510,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage("@remoutfit=force", _sender.Id, _sender.Name)
             );
 
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_RetroPants_WornPants.Id,
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
@@ -3493,19 +3530,19 @@ namespace LibRLV.Tests
             {
                 Name = "External Tattoo",
                 Folder = null,
-                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 WornOn = WearableType.Tattoo,
                 AttachedTo = null,
-                Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
+                Id = new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
             };
             var externalAttachable = new InventoryTree.InventoryItem()
             {
                 Name = "External Jaw Thing",
                 Folder = null,
-                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 AttachedTo = AttachmentPoint.Jaw,
                 WornOn = null,
-                Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
+                Id = new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
             };
 
             currentOutfit.Add(externalWearable);
@@ -3525,7 +3562,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage("@remoutfit=force", _sender.Id, _sender.Name)
             );
 
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_RetroPants_WornPants.Id,
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
@@ -3546,19 +3583,19 @@ namespace LibRLV.Tests
             {
                 Name = "External Tattoo",
                 Folder = null,
-                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 WornOn = WearableType.Tattoo,
                 AttachedTo = null,
-                Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
+                Id = new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
             };
             var externalAttachable = new InventoryTree.InventoryItem()
             {
                 Name = "External Jaw Thing",
                 Folder = null,
-                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 AttachedTo = AttachmentPoint.Jaw,
                 WornOn = null,
-                Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
+                Id = new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
             };
 
             currentOutfit.Add(externalWearable);
@@ -3578,7 +3615,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage("@remoutfit:tattoo=force", _sender.Id, _sender.Name)
             );
 
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
                 externalWearable.Id
@@ -3611,7 +3648,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage("@remoutfit:Clothing/Hats=force", _sender.Id, _sender.Name)
             );
 
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
             }.Order();
@@ -3640,7 +3677,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage("@remoutfit:tattoo=force", _sender.Id, _sender.Name)
             );
 
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
             }.Order();
@@ -3671,7 +3708,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage("@remoutfit:skin=force", _sender.Id, _sender.Name)
             );
 
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
             }.Order();
 
@@ -3709,19 +3746,19 @@ namespace LibRLV.Tests
             {
                 Name = "External Tattoo",
                 Folder = null,
-                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 WornOn = WearableType.Tattoo,
                 AttachedTo = null,
-                Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
+                Id = new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
             };
             var externalAttachable = new InventoryTree.InventoryItem()
             {
                 Name = "External Jaw Thing",
                 Folder = null,
-                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 AttachedTo = AttachmentPoint.Jaw,
                 WornOn = null,
-                Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
+                Id = new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
             };
 
             currentOutfit.Add(externalWearable);
@@ -3749,18 +3786,18 @@ namespace LibRLV.Tests
                 new()
                 {
                     WornOn = WearableType.Socks,
-                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     AttachedTo = null,
                     Name = $"My Socks",
-                    Id = new UUID($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
+                    Id = new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
                 },
                 new()
                 {
                     WornOn = WearableType.Hair,
-                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     AttachedTo = null,
                     Name = $"My Hair",
-                    Id = new UUID($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
+                    Id = new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
                 },
             };
 
@@ -3792,10 +3829,10 @@ namespace LibRLV.Tests
                 currentOutfit.Add(new InventoryTree.InventoryItem()
                 {
                     WornOn = item,
-                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     AttachedTo = null,
                     Name = $"My {item}",
-                    Id = new UUID($"c{(int)item:D7}-cccc-4ccc-8ccc-cccccccccccc")
+                    Id = new Guid($"c{(int)item:D7}-cccc-4ccc-8ccc-cccccccccccc")
                 });
             }
             ;
@@ -3822,10 +3859,10 @@ namespace LibRLV.Tests
                 new()
                 {
                     WornOn = WearableType.Socks,
-                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     AttachedTo = null,
                     Name = $"My Socks",
-                    Id = new UUID($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
+                    Id = new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
                 },
             };
 
@@ -3851,10 +3888,10 @@ namespace LibRLV.Tests
                 new()
                 {
                     WornOn = WearableType.Hair,
-                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     AttachedTo = null,
                     Name = $"My Hair",
-                    Id = new UUID($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
+                    Id = new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
                 },
             };
 
@@ -3904,19 +3941,19 @@ namespace LibRLV.Tests
             {
                 Name = "External Tattoo",
                 Folder = null,
-                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 WornOn = WearableType.Tattoo,
                 AttachedTo = null,
-                Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
+                Id = new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
             };
             var externalAttachable = new InventoryTree.InventoryItem()
             {
                 Name = "External Jaw Thing",
                 Folder = null,
-                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 AttachedTo = AttachmentPoint.Jaw,
                 WornOn = null,
-                Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
+                Id = new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
             };
 
             currentOutfit.Add(externalWearable);
@@ -3944,18 +3981,18 @@ namespace LibRLV.Tests
                 new()
                 {
                     WornOn = null,
-                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     AttachedTo = AttachmentPoint.LeftFoot,
                     Name = $"My Socks",
-                    Id = new UUID($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
+                    Id = new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
                 },
                 new()
                 {
                     WornOn = null,
-                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     AttachedTo = AttachmentPoint.Skull,
                     Name = $"My Hair",
-                    Id = new UUID($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
+                    Id = new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
                 },
             };
 
@@ -3982,10 +4019,10 @@ namespace LibRLV.Tests
                 currentAttach.Add(new InventoryTree.InventoryItem()
                 {
                     WornOn = null,
-                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     AttachedTo = item,
                     Name = $"My {item}",
-                    Id = new UUID($"c{(int)item:D7}-cccc-4ccc-8ccc-cccccccccccc")
+                    Id = new Guid($"c{(int)item:D7}-cccc-4ccc-8ccc-cccccccccccc")
                 });
             }
             ;
@@ -4012,10 +4049,10 @@ namespace LibRLV.Tests
                 new()
                 {
                     WornOn = null,
-                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     AttachedTo = AttachmentPoint.LeftFoot,
                     Name = $"My Sock",
-                    Id = new UUID($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
+                    Id = new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
                 },
             };
 
@@ -4041,10 +4078,10 @@ namespace LibRLV.Tests
                 new()
                 {
                     WornOn = null,
-                    FolderId = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     AttachedTo = AttachmentPoint.Skull,
                     Name = $"My Hair",
-                    Id = new UUID($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
+                    Id = new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
                 },
             };
 
@@ -4103,7 +4140,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage("@detachme=force", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name)
             );
 
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
             }.Order();
@@ -4129,7 +4166,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage("@detachme=force", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name)
             );
 
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
             }.Order();
@@ -5767,7 +5804,7 @@ namespace LibRLV.Tests
             );
 
             // Remove everything except for clothing despite what you would think. Just how things go.
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
@@ -5792,19 +5829,19 @@ namespace LibRLV.Tests
             {
                 Name = "External Tattoo",
                 Folder = null,
-                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 WornOn = WearableType.Tattoo,
                 AttachedTo = null,
-                Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
+                Id = new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
             };
             var externalAttachable = new InventoryTree.InventoryItem()
             {
                 Name = "External Jaw Thing",
                 Folder = null,
-                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 AttachedTo = AttachmentPoint.Jaw,
                 WornOn = null,
-                Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
+                Id = new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
             };
 
             currentOutfit.Add(externalWearable);
@@ -5825,7 +5862,7 @@ namespace LibRLV.Tests
             );
 
             // Remove everything except for clothing despite what you would think. Just how things go.
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
@@ -5861,7 +5898,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
             );
 
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
@@ -5883,10 +5920,10 @@ namespace LibRLV.Tests
             {
                 Name = "External Groin Thing",
                 Folder = null,
-                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 AttachedTo = AttachmentPoint.Groin,
                 WornOn = null,
-                Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
+                Id = new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
             };
 
             currentOutfit.Add(externalAttachable);
@@ -5905,7 +5942,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
             );
 
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
@@ -5938,7 +5975,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
             );
 
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
             };
 
@@ -5968,7 +6005,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id}=force", _sender.Id, _sender.Name)
             );
 
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id
             };
@@ -5989,19 +6026,19 @@ namespace LibRLV.Tests
             {
                 Name = "External Tattoo",
                 Folder = null,
-                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 WornOn = WearableType.Tattoo,
                 AttachedTo = null,
-                Id = new UUID("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
+                Id = new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
             };
             var externalAttachable = new InventoryTree.InventoryItem()
             {
                 Name = "External Jaw Thing",
                 Folder = null,
-                FolderId = new UUID("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 AttachedTo = AttachmentPoint.Jaw,
                 WornOn = null,
-                Id = new UUID("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
+                Id = new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
             };
 
             currentOutfit.Add(externalWearable);
@@ -6021,7 +6058,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id}=force", _sender.Id, _sender.Name)
             );
 
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id
             };
@@ -6048,7 +6085,7 @@ namespace LibRLV.Tests
             );
 
             // Everything under the clothing folder, and all of its subfolders will be removed
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
@@ -6079,7 +6116,7 @@ namespace LibRLV.Tests
             );
 
             // Everything under the clothing folder will be detached because happyshirt exists in the clothing folder
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
@@ -6127,7 +6164,7 @@ namespace LibRLV.Tests
             );
 
             // Everything under the clothing and accessories folder will be detached, not recursive
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
@@ -6177,7 +6214,7 @@ namespace LibRLV.Tests
             );
 
             // Everything under the clothing and accessories folder will be detached, not recursive
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
@@ -6230,7 +6267,7 @@ namespace LibRLV.Tests
             );
 
             // Only accessories will be removed even though pants exist in our clothing folder. The clothing folder is private ".clothing"
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
                 sampleTree.Root_Accessories_Glasses_AttachChin.Id,
@@ -6258,7 +6295,7 @@ namespace LibRLV.Tests
             );
 
             // Everything under the clothing folder (and its subfolders recursively) will be detached because happy shirt exists in the clothing folder
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
@@ -6308,7 +6345,7 @@ namespace LibRLV.Tests
             );
 
             // Everything under the clothing and accessories folder will be detached, and their subfolders recursively
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
@@ -6361,7 +6398,7 @@ namespace LibRLV.Tests
             );
 
             // Everything under the clothing and accessories folder will be detached, recursive
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
@@ -6418,7 +6455,7 @@ namespace LibRLV.Tests
 
             // Everything under the clothing and accessories folder will be detached, recursive.
             //   Hats will be excluded because they are in a private folder ".hats"
-            var expected = new List<UUID>()
+            var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
@@ -7435,8 +7472,8 @@ namespace LibRLV.Tests
         [Fact]
         public void TouchAll()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId1 = new UUID("11111111-1111-4111-8111-111111111111");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("11111111-1111-4111-8111-111111111111");
 
             Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedSelf, objectId1, null, null));
             Assert.True(_rlv.Restrictions.CanTouch(RLVManager.TouchLocation.AttachedOther, objectId1, userId1, null));
@@ -7447,8 +7484,8 @@ namespace LibRLV.Tests
         [Fact]
         public void TouchAll_default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId1 = new UUID("11111111-1111-4111-8111-111111111111");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@touchall=n", _sender.Id, _sender.Name);
 
@@ -7460,14 +7497,14 @@ namespace LibRLV.Tests
 
         #endregion
 
-        #region @touchworld=<y/n> @touchworld:<UUID>=<rem/add>
+        #region @touchworld=<y/n> @touchworld:<Guid>=<rem/add>
 
         [Fact]
         public void TouchWorld_default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
-            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
             _rlv.ProcessMessage("@touchworld=n", _sender.Id, _sender.Name);
 
@@ -7480,9 +7517,9 @@ namespace LibRLV.Tests
         [Fact]
         public void TouchWorld_Exception()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
-            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
             _rlv.ProcessMessage("@touchworld=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@touchworld:{objectId2}=add", _sender.Id, _sender.Name);
@@ -7500,14 +7537,14 @@ namespace LibRLV.Tests
 
         #endregion
 
-        #region @touchthis:<UUID>=<rem/add>
+        #region @touchthis:<Guid>=<rem/add>
 
         [Fact]
         public void TouchThis_default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
-            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
             _rlv.ProcessMessage($"@touchthis:{objectId1}=add", _sender.Id, _sender.Name);
 
@@ -7529,8 +7566,8 @@ namespace LibRLV.Tests
         [Fact]
         public void TouchMe_default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
             _rlv.ProcessMessage("@touchall=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage("@touchme=add", _sender.Id, _sender.Name);
@@ -7553,8 +7590,8 @@ namespace LibRLV.Tests
         [Fact]
         public void TouchAttach_default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
             _rlv.ProcessMessage("@touchattach=n", _sender.Id, _sender.Name);
 
@@ -7571,8 +7608,8 @@ namespace LibRLV.Tests
         [Fact]
         public void TouchAttachSelf_default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
             _rlv.ProcessMessage("@touchattachself=n", _sender.Id, _sender.Name);
 
@@ -7584,13 +7621,13 @@ namespace LibRLV.Tests
 
         #endregion
 
-        #region @touchattachother=<y/n> @touchattachother:<UUID>=<y/n>
+        #region @touchattachother=<y/n> @touchattachother:<Guid>=<y/n>
 
         [Fact]
         public void TouchAttachOther_default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
             _rlv.ProcessMessage("@touchattachother=n", _sender.Id, _sender.Name);
 
@@ -7603,9 +7640,9 @@ namespace LibRLV.Tests
         [Fact]
         public void TouchAttachOther_Specific()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
-            var userId2 = new UUID("66666666-6666-4666-8666-666666666666");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
+            var userId2 = new Guid("66666666-6666-4666-8666-666666666666");
 
             _rlv.ProcessMessage($"@touchattachother:{userId2}=n", _sender.Id, _sender.Name);
 
@@ -7618,13 +7655,13 @@ namespace LibRLV.Tests
 
         #endregion
 
-        #region @touchhud[:<UUID>]=<y/n>
+        #region @touchhud[:<Guid>]=<y/n>
 
         [Fact]
         public void TouchHud_default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
             _rlv.ProcessMessage($"@touchhud=n", _sender.Id, _sender.Name);
 
@@ -7637,9 +7674,9 @@ namespace LibRLV.Tests
         [Fact]
         public void TouchHud_specific()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
-            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
             _rlv.ProcessMessage($"@touchhud:{objectId2}=n", _sender.Id, _sender.Name);
 
@@ -7663,8 +7700,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanInteract_default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId1 = new UUID("55555555-5555-4555-8555-555555555555");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
             _rlv.ProcessMessage($"@interact=n", _sender.Id, _sender.Name);
 
@@ -7721,24 +7758,28 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShowNames_Default()
         {
+            var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+
             Assert.True(_rlv.Restrictions.CanShowNames(null));
-            Assert.True(_rlv.Restrictions.CanShowNames(UUID.Random()));
+            Assert.True(_rlv.Restrictions.CanShowNames(userId1));
         }
 
         [Fact]
         public void CanShowNames()
         {
+            var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+
             _rlv.ProcessMessage("@shownames=n", _sender.Id, _sender.Name);
 
             Assert.False(_rlv.Restrictions.CanShowNames(null));
-            Assert.False(_rlv.Restrictions.CanShowNames(UUID.Random()));
+            Assert.False(_rlv.Restrictions.CanShowNames(userId1));
         }
 
         [Fact]
         public void CanShowNames_Except()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@shownames=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@shownames:{userId1}=add", _sender.Id, _sender.Name);
@@ -7751,8 +7792,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShowNames_Secure_Default()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@shownames_sec=n", _sender.Id, _sender.Name);
 
@@ -7764,9 +7805,9 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShowNames_Secure()
         {
-            var sender2 = new RlvObject("Sender 2", new UUID("22222222-2222-4222-8222-222222222222"));
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var sender2 = new RlvObject("Sender 2", new Guid("22222222-2222-4222-8222-222222222222"));
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@shownames_sec=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@shownames:{userId1}=add", _sender.Id, _sender.Name);
@@ -7784,24 +7825,28 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShowNameTags_Default()
         {
+            var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+
             Assert.True(_rlv.Restrictions.CanShowNameTags(null));
-            Assert.True(_rlv.Restrictions.CanShowNameTags(UUID.Random()));
+            Assert.True(_rlv.Restrictions.CanShowNameTags(userId1));
         }
 
         [Fact]
         public void CanShowNameTags()
         {
+            var userId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+
             _rlv.ProcessMessage("@shownametags=n", _sender.Id, _sender.Name);
 
             Assert.False(_rlv.Restrictions.CanShowNameTags(null));
-            Assert.False(_rlv.Restrictions.CanShowNameTags(UUID.Random()));
+            Assert.False(_rlv.Restrictions.CanShowNameTags(userId1));
         }
 
         [Fact]
         public void CanShowNameTags_Except()
         {
-            var userId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var userId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@shownametags=n", _sender.Id, _sender.Name);
             _rlv.ProcessMessage($"@shownametags:{userId1}=add", _sender.Id, _sender.Name);
@@ -7826,7 +7871,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShowHoverTextAll_Default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
             Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
@@ -7835,8 +7880,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShowHoverTextAll()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var userId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var userId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage("@showhovertextall=n", _sender.Id, _sender.Name);
 
@@ -7846,12 +7891,12 @@ namespace LibRLV.Tests
 
         #endregion
 
-        #region @showhovertext:<UUID>=<y/n>
+        #region @showhovertext:<Guid>=<y/n>
 
         [Fact]
         public void CanShowHoverText_Default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
             Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
@@ -7860,8 +7905,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShowHoverText()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@showhovertext:{objectId1}=n", _sender.Id, _sender.Name);
 
@@ -7879,7 +7924,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShowHoverTextHud_Default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
             Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
@@ -7888,8 +7933,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShowHoverTextHud()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@showhovertexthud=n", _sender.Id, _sender.Name);
 
@@ -7907,7 +7952,7 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShowHoverTextWorld_Default()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.World, objectId1));
             Assert.True(_rlv.Restrictions.CanShowHoverText(RLVManager.HoverTextLocation.Hud, objectId1));
@@ -7916,8 +7961,8 @@ namespace LibRLV.Tests
         [Fact]
         public void CanShowHoverTextWorld()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
-            var objectId2 = new UUID("11111111-1111-4111-8111-111111111111");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             _rlv.ProcessMessage($"@showhovertextworld=n", _sender.Id, _sender.Name);
 
@@ -7946,7 +7991,7 @@ namespace LibRLV.Tests
             );
 
             Assert.Equal("Group Name", raised.Arguments.GroupName);
-            Assert.Equal(UUID.Zero, raised.Arguments.GroupId);
+            Assert.Equal(Guid.Empty, raised.Arguments.GroupId);
             Assert.Equal(string.Empty, raised.Arguments.Role);
         }
 
@@ -7961,13 +8006,13 @@ namespace LibRLV.Tests
 
             Assert.Equal("Group Name", raised.Arguments.GroupName);
             Assert.Equal("Admin Role", raised.Arguments.Role);
-            Assert.Equal(UUID.Zero, raised.Arguments.GroupId);
+            Assert.Equal(Guid.Empty, raised.Arguments.GroupId);
         }
 
         [Fact]
         public void SetGroup_ById()
         {
-            var objectId1 = new UUID("00000000-0000-4000-8000-000000000000");
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
             var raised = Assert.Raises<SetGroupEventArgs>(
                  attach: n => _rlv.Actions.SetGroup += n,

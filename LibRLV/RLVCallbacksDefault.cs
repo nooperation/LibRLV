@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenMetaverse;
 
 namespace LibRLV
 {
@@ -100,7 +99,7 @@ namespace LibRLV
                 case RLVGetEnvType.MoonImage:
                 case RLVGetEnvType.SunImage:
                 case RLVGetEnvType.CloudImage:
-                    return Task.FromResult(UUID.Zero.ToString());
+                    return Task.FromResult(Guid.Empty.ToString());
 
                 case RLVGetEnvType.SunGlowSize:
                     return Task.FromResult("1");
@@ -137,19 +136,19 @@ namespace LibRLV
             return Task.FromResult(false);
         }
 
-        public virtual Task SendInstantMessageAsync(UUID targetUser, string message, CancellationToken cancellationToken)
+        public virtual Task SendInstantMessageAsync(Guid targetUser, string message, CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
         }
 
         // TODO: Replace this, just temp hack to get the data i need right now for testing
-        public Task<bool> TryGetObjectExists(UUID objectID, out bool isCurrentlySitting)
+        public Task<bool> TryGetObjectExists(Guid objectID, out bool isCurrentlySitting)
         {
             isCurrentlySitting = false;
             return Task.FromResult(false);
         }
 
-        public virtual Task<bool> TryGetSitId(out UUID sitId)
+        public virtual Task<bool> TryGetSitId(out Guid sitId)
         {
             sitId = default;
             return Task.FromResult(false);

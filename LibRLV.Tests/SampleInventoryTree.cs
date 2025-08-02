@@ -1,5 +1,4 @@
-﻿using OpenMetaverse;
-
+﻿
 namespace LibRLV.Tests
 {
     public class SampleInventoryTree
@@ -50,7 +49,7 @@ namespace LibRLV.Tests
 
             var root = new InventoryTree()
             {
-                Id = new UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
+                Id = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 Name = "#RLV",
                 Parent = null,
                 Children = [],
@@ -59,7 +58,7 @@ namespace LibRLV.Tests
 
             var clothingTree = new InventoryTree()
             {
-                Id = new UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
+                Id = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
                 Name = "Clothing",
                 Parent = root,
                 Children = [],
@@ -70,7 +69,7 @@ namespace LibRLV.Tests
 
             var hatsTree = new InventoryTree
             {
-                Id = new UUID("dddddddd-dddd-4ddd-8ddd-dddddddddddd"),
+                Id = new Guid("dddddddd-dddd-4ddd-8ddd-dddddddddddd"),
                 Name = "Hats",
                 Parent = clothingTree,
                 Children = [],
@@ -80,7 +79,7 @@ namespace LibRLV.Tests
 
             var subHatsTree = new InventoryTree
             {
-                Id = new UUID("ffffffff-0000-4000-8000-000000000000"),
+                Id = new Guid("ffffffff-0000-4000-8000-000000000000"),
                 Name = "Sub Hats",
                 Parent = hatsTree,
                 Children = [],
@@ -90,7 +89,7 @@ namespace LibRLV.Tests
 
             var privateTree = new InventoryTree
             {
-                Id = new UUID("eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"),
+                Id = new Guid("eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"),
                 Name = ".private",
                 Parent = root,
                 Children = [],
@@ -100,7 +99,7 @@ namespace LibRLV.Tests
 
             var AccessoriesTree = new InventoryTree
             {
-                Id = new UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
+                Id = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                 Name = "Accessories",
                 Parent = root,
                 Children = [],
@@ -110,7 +109,7 @@ namespace LibRLV.Tests
 
             var watch_tattoo = new InventoryTree.InventoryItem()
             {
-                Id = new UUID("c0000000-cccc-4ccc-8ccc-cccccccccccc"),
+                Id = new Guid("c0000000-cccc-4ccc-8ccc-cccccccccccc"),
                 Name = "Watch",
                 AttachedTo = null,
                 WornOn = WearableType.Tattoo,
@@ -119,7 +118,7 @@ namespace LibRLV.Tests
             };
             var glasses_chin = new InventoryTree.InventoryItem()
             {
-                Id = new UUID("c1111111-cccc-4ccc-8ccc-cccccccccccc"),
+                Id = new Guid("c1111111-cccc-4ccc-8ccc-cccccccccccc"),
                 Name = "Glasses",
                 AttachedTo = AttachmentPoint.Chin,
                 WornOn = null,
@@ -128,7 +127,7 @@ namespace LibRLV.Tests
             };
             var businessPants_groin = new InventoryTree.InventoryItem()
             {
-                Id = new UUID("b0000000-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
+                Id = new Guid("b0000000-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
                 Name = "Business Pants",
                 AttachedTo = AttachmentPoint.Groin,
                 WornOn = null,
@@ -137,7 +136,7 @@ namespace LibRLV.Tests
             };
             var happyShirt_chest = new InventoryTree.InventoryItem()
             {
-                Id = new UUID("b1111111-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
+                Id = new Guid("b1111111-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
                 Name = "Happy Shirt",
                 AttachedTo = AttachmentPoint.Chest,
                 WornOn = null,
@@ -146,7 +145,7 @@ namespace LibRLV.Tests
             };
             var retroPants_pants = new InventoryTree.InventoryItem()
             {
-                Id = new UUID("b2222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
+                Id = new Guid("b2222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
                 Name = "Retro Pants",
                 AttachedTo = null,
                 WornOn = WearableType.Pants,
@@ -155,7 +154,7 @@ namespace LibRLV.Tests
             };
             var partyHat_groin = new InventoryTree.InventoryItem()
             {
-                Id = new UUID("d0000000-dddd-4ddd-8ddd-dddddddddddd"),
+                Id = new Guid("d0000000-dddd-4ddd-8ddd-dddddddddddd"),
                 Name = "Party Hat",
                 AttachedTo = AttachmentPoint.Groin,
                 WornOn = null,
@@ -164,7 +163,7 @@ namespace LibRLV.Tests
             };
             var fancyHat_chin = new InventoryTree.InventoryItem()
             {
-                Id = new UUID("d1111111-dddd-4ddd-8ddd-dddddddddddd"),
+                Id = new Guid("d1111111-dddd-4ddd-8ddd-dddddddddddd"),
                 Name = "Fancy Hat",
                 AttachedTo = AttachmentPoint.Chin,
                 WornOn = null,

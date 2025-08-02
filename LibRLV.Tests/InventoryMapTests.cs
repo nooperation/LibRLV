@@ -1,6 +1,4 @@
-﻿using OpenMetaverse;
-
-namespace LibRLV.Tests
+﻿namespace LibRLV.Tests
 {
     public class InventoryMapTests
     {
@@ -83,7 +81,7 @@ namespace LibRLV.Tests
 
             var contendingTree1 = new InventoryTree
             {
-                Id = new UUID("12345678-1ddd-4ddd-8ddd-dddddddddddd"),
+                Id = new Guid("12345678-1ddd-4ddd-8ddd-dddddddddddd"),
                 Name = "Clothing",
                 Parent = sharedFolder,
                 Children = [],
@@ -91,7 +89,7 @@ namespace LibRLV.Tests
             };
             var contendingTree3 = new InventoryTree
             {
-                Id = new UUID("12345678-123d-4ddd-8ddd-dddddddddddd"),
+                Id = new Guid("12345678-123d-4ddd-8ddd-dddddddddddd"),
                 Name = "+Clothing///",
                 Parent = sharedFolder,
                 Children = [],
@@ -99,7 +97,7 @@ namespace LibRLV.Tests
             };
             var contendingTree4 = new InventoryTree
             {
-                Id = new UUID("12345678-123d-4ddd-8ddd-dddddddddddd"),
+                Id = new Guid("12345678-123d-4ddd-8ddd-dddddddddddd"),
                 Name = "+Clothing///",
                 Parent = sharedFolder,
                 Children = [],

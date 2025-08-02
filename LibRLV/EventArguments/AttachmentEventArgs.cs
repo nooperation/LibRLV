@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using OpenMetaverse;
 
 namespace LibRLV.EventArguments
 {
@@ -8,11 +7,11 @@ namespace LibRLV.EventArguments
     {
         public class AttachmentRequest
         {
-            public UUID ItemId { get; }
+            public Guid ItemId { get; }
             public AttachmentPoint AttachmentPoint { get; }
             public bool ReplaceExistingAttachments { get; }
 
-            public AttachmentRequest(UUID itemId, AttachmentPoint attachmentPoint, bool replaceExistingAttachments)
+            public AttachmentRequest(Guid itemId, AttachmentPoint attachmentPoint, bool replaceExistingAttachments)
             {
                 ItemId = itemId;
                 AttachmentPoint = attachmentPoint;

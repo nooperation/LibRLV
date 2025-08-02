@@ -1,6 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 using System.Threading;
-using OpenMetaverse;
 
 namespace LibRLV
 {
@@ -71,7 +71,7 @@ namespace LibRLV
             return false;
         }
 
-        private bool ProcessSingleMessage(string message, UUID senderId, string senderName)
+        private bool ProcessSingleMessage(string message, Guid senderId, string senderName)
         {
             // Special hack for @clear, which doesn't match the standard pattern of @behavior=param
             if (message == "clear")
@@ -104,7 +104,7 @@ namespace LibRLV
             return ProcessRLVMessage(rlvMessage);
         }
 
-        public bool ProcessMessage(string message, UUID senderId, string senderName)
+        public bool ProcessMessage(string message, Guid senderId, string senderName)
         {
             if (!Enabled || !message.StartsWith("@"))
             {
@@ -124,7 +124,7 @@ namespace LibRLV
             return result;
         }
 
-        public bool ProcessInstantMessage(string message, UUID senderId, string senderName)
+        public bool ProcessInstantMessage(string message, Guid senderId, string senderName)
         {
             if (!EnableInstantMessageProcessing || !Enabled || !message.StartsWith("@"))
             {
@@ -207,7 +207,7 @@ namespace LibRLV
             Attached = 1,
             Detached = 2
         }
-        public void ReportWornItemChange(UUID objectFolderId, bool isShared, WearableType wearableType, WornItemChange changeType)
+        public void ReportWornItemChange(Guid objectFolderId, bool isShared, WearableType wearableType, WornItemChange changeType)
         {
             var notificationText = "";
 
@@ -250,7 +250,7 @@ namespace LibRLV
             Attached = 1,
             Detached = 2
         }
-        public void ReportAttachedItemChange(UUID objectFolderId, bool isShared, AttachmentPoint attachmentPoint, AttachedItemChange changeType)
+        public void ReportAttachedItemChange(Guid objectFolderId, bool isShared, AttachmentPoint attachmentPoint, AttachedItemChange changeType)
         {
             var notificationText = "";
 
@@ -293,7 +293,7 @@ namespace LibRLV
             Sit = 1,
             Stand,
         }
-        public void ReportSit(SitType sitType, UUID? objectId, float? objectDistance)
+        public void ReportSit(SitType sitType, Guid? objectId, float? objectDistance)
         {
             var notificationText = "";
 

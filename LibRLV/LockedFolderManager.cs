@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using OpenMetaverse;
 
 namespace LibRLV
 {
@@ -10,7 +10,7 @@ namespace LibRLV
         private readonly IRLVCallbacks _callbacks;
         private readonly RLVRestrictionHandler _restrictionManager;
 
-        private readonly Dictionary<UUID, LockedFolder> _lockedFolders = new Dictionary<UUID, LockedFolder>();
+        private readonly Dictionary<Guid, LockedFolder> _lockedFolders = new Dictionary<Guid, LockedFolder>();
         private readonly object _lockedFoldersLock = new object();
 
         internal LockedFolderManager(IRLVCallbacks callbacks, RLVRestrictionHandler restrictionManager)
@@ -19,10 +19,10 @@ namespace LibRLV
             _restrictionManager = restrictionManager;
         }
 
-        private static List<InventoryTree> GetFoldersForItems(IDictionary<UUID, InventoryTree> rootMap, List<InventoryTree.InventoryItem> items)
+        private static List<InventoryTree> GetFoldersForItems(IDictionary<Guid, InventoryTree> rootMap, List<InventoryTree.InventoryItem> items)
         {
             // TODO: What is this - remove?
-            var result = new Dictionary<UUID, InventoryTree>();
+            var result = new Dictionary<Guid, InventoryTree>();
 
             foreach (var item in items)
             {
@@ -37,7 +37,7 @@ namespace LibRLV
             return result.Values.ToList();
         }
 
-        public ImmutableDictionary<UUID, LockedFolderPublic> GetLockedFolders()
+        public ImmutableDictionary<Guid, LockedFolderPublic> GetLockedFolders()
         {
             lock (_lockedFoldersLock)
             {
@@ -47,7 +47,7 @@ namespace LibRLV
             }
         }
 
-        public bool TryGetLockedFolder(UUID folderId, out LockedFolderPublic lockedFolder)
+        public bool TryGetLockedFolder(Guid folderId, out LockedFolderPublic lockedFolder)
         {
             lock (_lockedFoldersLock)
             {
@@ -213,7 +213,7 @@ namespace LibRLV
             return ProcessFolderRestrictions(restriction, sharedFolder, inventoryMap.Folders);
         }
 
-        private bool TryGetItem(UUID itemId, IDictionary<UUID, InventoryTree> sharedFolderMap, out InventoryTree.InventoryItem outItem)
+        private bool TryGetItem(Guid itemId, IDictionary<Guid, InventoryTree> sharedFolderMap, out InventoryTree.InventoryItem outItem)
         {
             foreach (var folder in sharedFolderMap.Values)
             {
@@ -231,7 +231,7 @@ namespace LibRLV
             return false;
         }
 
-        private bool ProcessFolderRestrictions(RLVRestriction restriction, InventoryTree sharedFolder, IDictionary<UUID, InventoryTree> sharedFolderMap)
+        private bool ProcessFolderRestrictions(RLVRestriction restriction, InventoryTree sharedFolder, IDictionary<Guid, InventoryTree> sharedFolderMap)
         {
             if (restriction.Args.Count == 0)
             {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using LibRLV.EventArguments;
-using OpenMetaverse;
 
 namespace LibRLV
 {
@@ -40,47 +39,47 @@ namespace LibRLV
             { "chatnormal", RLVRestrictionType.ChatNormal },
             { "chatwhisper", RLVRestrictionType.ChatWhisper },
             { "redirchat", RLVRestrictionType.RedirChat },
-            { "recvchat", RLVRestrictionType.RecvChat }, // Has exception if UUID specified
+            { "recvchat", RLVRestrictionType.RecvChat }, // Has exception if Guid specified
             { "recvchat_sec", RLVRestrictionType.RecvChatSec }, // Uses exceptions from recvchat, but only from same object
             { "recvchatfrom", RLVRestrictionType.RecvChatFrom },
             { "sendgesture", RLVRestrictionType.SendGesture },
             { "emote", RLVRestrictionType.Emote },
             { "rediremote", RLVRestrictionType.RedirEmote },
-            { "recvemote", RLVRestrictionType.RecvEmote }, // Has exception if UUID specified
+            { "recvemote", RLVRestrictionType.RecvEmote }, // Has exception if Guid specified
             { "recvemotefrom", RLVRestrictionType.RecvEmoteFrom },
             { "recvemote_sec", RLVRestrictionType.RecvEmoteSec }, // Uses exceptions from recvemote, but only from same object
             { "sendchannel", RLVRestrictionType.SendChannel }, // Has exception if channel is specified
             { "sendchannel_sec", RLVRestrictionType.SendChannelSec },// Uses exceptions from sendchannel, but only from same object
             { "sendchannel_except", RLVRestrictionType.SendChannelExcept },
-            { "sendim", RLVRestrictionType.SendIm },  // Has exception if UUID or group name specified, "allgroups" will block all groups
+            { "sendim", RLVRestrictionType.SendIm },  // Has exception if Guid or group name specified, "allgroups" will block all groups
             { "sendim_sec", RLVRestrictionType.SendImSec }, // Uses exceptions from sendim, but only from same object
             { "sendimto", RLVRestrictionType.SendImTo }, // "allgroups" for group name will block all groups
-            { "startim", RLVRestrictionType.StartIm },  // Has exception if UUID is specified
+            { "startim", RLVRestrictionType.StartIm },  // Has exception if Guid is specified
             { "startimto", RLVRestrictionType.StartImTo },
-            { "recvim", RLVRestrictionType.RecvIm },  // Has exception if UUID or group name specified, "allgroups" will block all groups
+            { "recvim", RLVRestrictionType.RecvIm },  // Has exception if Guid or group name specified, "allgroups" will block all groups
             { "recvim_sec", RLVRestrictionType.RecvImSec }, // Uses exceptions from recvim, but only from same object
             { "recvimfrom", RLVRestrictionType.RecvImFrom }, // "allgroups" for group name will block all groups
             { "tplocal", RLVRestrictionType.TpLocal },
             { "tplm", RLVRestrictionType.TpLm },
             { "tploc", RLVRestrictionType.TpLoc },
-            { "tplure", RLVRestrictionType.TpLure }, // Has exception if UUID specified
+            { "tplure", RLVRestrictionType.TpLure }, // Has exception if Guid specified
             { "tplure_sec", RLVRestrictionType.TpLureSec }, // Uses exceptions from tplure, but only from same object
             { "sittp", RLVRestrictionType.SitTp },
             { "standtp", RLVRestrictionType.StandTp },
             { "accepttp", RLVRestrictionType.AcceptTp }, // NOT A RESTRICTION - enables auto-accept teleport. uuid is optional
             { "accepttprequest", RLVRestrictionType.AcceptTpRequest }, // NOT A RESTRICTION - enables auto-accept teleport request. uuid is optional
-            { "tprequest", RLVRestrictionType.TpRequest }, // Has exception if UUID specified
+            { "tprequest", RLVRestrictionType.TpRequest }, // Has exception if Guid specified
             { "tprequest_sec", RLVRestrictionType.TpRequestSec }, // Uses exceptions from tprequest, but only from same object
             { "showinv", RLVRestrictionType.ShowInv },
             { "viewnote", RLVRestrictionType.ViewNote },
             { "viewscript", RLVRestrictionType.ViewScript },
             { "viewtexture", RLVRestrictionType.ViewTexture },
-            { "edit", RLVRestrictionType.Edit }, // Has exception if UUID specified
+            { "edit", RLVRestrictionType.Edit }, // Has exception if Guid specified
             { "rez", RLVRestrictionType.Rez },
             { "editobj", RLVRestrictionType.EditObj },
             { "editworld", RLVRestrictionType.EditWorld },
             { "editattach", RLVRestrictionType.EditAttach },
-            { "share", RLVRestrictionType.Share }, // Has exception if UUID specified
+            { "share", RLVRestrictionType.Share }, // Has exception if Guid specified
             { "share_sec", RLVRestrictionType.ShareSec }, // Uses exceptions from share, but only from same object
             { "unsit", RLVRestrictionType.Unsit },
             { "sit", RLVRestrictionType.Sit },
@@ -107,19 +106,19 @@ namespace LibRLV
             { "fartouch", RLVRestrictionType.FarTouch },
             { "touchfar", RLVRestrictionType.TouchFar }, // synonym of fartouch
             { "touchall", RLVRestrictionType.TouchAll },
-            { "touchworld", RLVRestrictionType.TouchWorld }, // Has exception if UUID specified
+            { "touchworld", RLVRestrictionType.TouchWorld }, // Has exception if Guid specified
             { "touchthis", RLVRestrictionType.TouchThis },
             { "touchme", RLVRestrictionType.TouchMe },
             { "touchattach", RLVRestrictionType.TouchAttach }, // does not apply to HUD's
             { "touchattachself", RLVRestrictionType.TouchAttachSelf }, // does not apply to HUD's
-            { "touchattachother", RLVRestrictionType.TouchAttachOther }, // UUID is a single restriction, no UUID = global restriction
-            { "touchhud", RLVRestrictionType.TouchHud }, // UUID is a single restriction, no UUID = global restriction
+            { "touchattachother", RLVRestrictionType.TouchAttachOther }, // Guid is a single restriction, no Guid = global restriction
+            { "touchhud", RLVRestrictionType.TouchHud }, // Guid is a single restriction, no Guid = global restriction
             { "interact", RLVRestrictionType.Interact },
             { "showworldmap", RLVRestrictionType.ShowWorldMap },
             { "showminimap", RLVRestrictionType.ShowMiniMap },
             { "showloc", RLVRestrictionType.ShowLoc },
-            { "shownames", RLVRestrictionType.ShowNames }, // Has exception if UUID specified
-            { "shownames_sec", RLVRestrictionType.ShowNamesSec }, // Has exception if UUID specified and from the same object
+            { "shownames", RLVRestrictionType.ShowNames }, // Has exception if Guid specified
+            { "shownames_sec", RLVRestrictionType.ShowNamesSec }, // Has exception if Guid specified and from the same object
             { "shownametags", RLVRestrictionType.ShowNameTags },
             { "shownearby", RLVRestrictionType.ShowNearby },
             { "showhovertextall", RLVRestrictionType.ShowHoverTextAll },
@@ -212,7 +211,7 @@ namespace LibRLV
             return restrictions.ToImmutableList();
         }
 
-        public ImmutableList<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", UUID? senderFilter = null)
+        public ImmutableList<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null)
         {
             var restrictions = new List<RLVRestriction>();
 
@@ -382,12 +381,12 @@ namespace LibRLV
             return true;
         }
 
-        public bool TryGetLockedFolder(UUID folderId, out LockedFolderPublic lockedFolder)
+        public bool TryGetLockedFolder(Guid folderId, out LockedFolderPublic lockedFolder)
         {
             return _lockedFolderManager.TryGetLockedFolder(folderId, out lockedFolder);
         }
 
-        public ImmutableDictionary<UUID, LockedFolderPublic> GetLockedFolders()
+        public ImmutableDictionary<Guid, LockedFolderPublic> GetLockedFolders()
         {
             return _lockedFolderManager.GetLockedFolders();
         }

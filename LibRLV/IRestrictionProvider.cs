@@ -1,13 +1,13 @@
-﻿using System.Collections.Immutable;
-using OpenMetaverse;
+﻿using System;
+using System.Collections.Immutable;
 
 namespace LibRLV
 {
     public interface IRestrictionProvider
     {
         ImmutableList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType);
-        ImmutableList<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", UUID? senderFilter = null);
-        bool TryGetLockedFolder(UUID folderId, out LockedFolderPublic lockedFolder);
-        ImmutableDictionary<UUID, LockedFolderPublic> GetLockedFolders();
+        ImmutableList<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null);
+        bool TryGetLockedFolder(Guid folderId, out LockedFolderPublic lockedFolder);
+        ImmutableDictionary<Guid, LockedFolderPublic> GetLockedFolders();
     }
 }

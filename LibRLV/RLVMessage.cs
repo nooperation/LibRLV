@@ -1,4 +1,4 @@
-﻿using OpenMetaverse;
+﻿using System;
 
 namespace LibRLV
 {
@@ -7,7 +7,7 @@ namespace LibRLV
         public string Behavior { get; set; }
         public string Option { get; set; }
         public string Param { get; set; }
-        public UUID Sender { get; set; }
+        public Guid Sender { get; set; }
         public string SenderName { get; set; }
     }
 }

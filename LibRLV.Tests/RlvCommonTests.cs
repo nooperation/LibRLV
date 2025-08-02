@@ -1,6 +1,4 @@
-﻿using OpenMetaverse;
-
-namespace LibRLV.Tests
+﻿namespace LibRLV.Tests
 {
     public class RlvCommonTests
     {

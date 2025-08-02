@@ -1,13 +1,12 @@
 ﻿using System;
-using OpenMetaverse;
 
 namespace LibRLV.EventArguments
 {
     public class SitEventArgs : EventArgs
     {
-        public UUID? Target { get; }
+        public Guid? Target { get; }
 
-        public SitEventArgs(UUID? target)
+        public SitEventArgs(Guid? target)
         {
             Target = target;
         }

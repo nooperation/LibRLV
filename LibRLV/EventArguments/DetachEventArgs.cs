@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using OpenMetaverse;
 
 namespace LibRLV.EventArguments
 {
     public class DetachEventArgs : EventArgs
     {
-        public List<UUID> ItemIds { get; }
+        public List<Guid> ItemIds { get; }
 
-        public DetachEventArgs(List<UUID> itemIds)
+        public DetachEventArgs(List<Guid> itemIds)
         {
             ItemIds = itemIds;
         }

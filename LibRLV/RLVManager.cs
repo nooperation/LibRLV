@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using OpenMetaverse;
+using System.Numerics;
 
 namespace LibRLV
 {
@@ -69,14 +69,14 @@ namespace LibRLV
 
             return true;
         }
-        private bool CheckSecureRestriction(UUID? userId, string groupName, RLVRestrictionType normalType, RLVRestrictionType? secureType, RLVRestrictionType? fromToType)
+        private bool CheckSecureRestriction(Guid? userId, string groupName, RLVRestrictionType normalType, RLVRestrictionType? secureType, RLVRestrictionType? fromToType)
         {
             // Explicit restrictions
             if (fromToType != null)
             {
                 var isRestrictedBySendImTo = _restrictionProvider.GetRestrictions(fromToType.Value)
                     .Where(n => n.Args.Count == 1 &&
-                        ((userId != null && n.Args[0] is UUID restrictedId && userId == restrictedId) ||
+                        ((userId != null && n.Args[0] is Guid restrictedId && userId == restrictedId) ||
                         (groupName != null && n.Args[0] is string restrictedGroupName && (restrictedGroupName == "allgroups" || restrictedGroupName == groupName)))
                     ).Any();
                 if (isRestrictedBySendImTo)
@@ -88,7 +88,7 @@ namespace LibRLV
             var sendImRestrictions = _restrictionProvider.GetRestrictions(normalType);
             var sendImExceptions = sendImRestrictions
                 .Where(n => n.IsException && n.Args.Count == 1 &&
-                    ((userId != null && n.Args[0] is UUID restrictedId && userId == restrictedId) ||
+                    ((userId != null && n.Args[0] is Guid restrictedId && userId == restrictedId) ||
                     (groupName != null && n.Args[0] is string restrictedGroupName && (restrictedGroupName == "allgroups" || restrictedGroupName == groupName)))
                 ).ToList();
 
@@ -181,17 +181,17 @@ namespace LibRLV
             return !_restrictionProvider.GetRestrictions(RLVRestrictionType.StandTp).Any();
         }
 
-        public bool CanTPLure(UUID? userId)
+        public bool CanTPLure(Guid? userId)
         {
             return CheckSecureRestriction(userId, null, RLVRestrictionType.TpLure, RLVRestrictionType.TpLureSec, null);
         }
 
-        public bool CanTpRequest(UUID? userId)
+        public bool CanTpRequest(Guid? userId)
         {
             return CheckSecureRestriction(userId, null, RLVRestrictionType.TpRequest, RLVRestrictionType.TpRequestSec, null);
         }
 
-        public bool IsAutoAcceptTp(UUID? userId = null)
+        public bool IsAutoAcceptTp(Guid? userId = null)
         {
             var restrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.AcceptTp);
             foreach (var restriction in restrictions)
@@ -201,7 +201,7 @@ namespace LibRLV
                     return true;
                 }
 
-                if (restriction.Args[0] is UUID allowedUserID && allowedUserID == userId)
+                if (restriction.Args[0] is Guid allowedUserID && allowedUserID == userId)
                 {
                     return true;
                 }
@@ -210,7 +210,7 @@ namespace LibRLV
             return false;
         }
 
-        public bool IsAutoAcceptTpRequest(UUID? userId = null)
+        public bool IsAutoAcceptTpRequest(Guid? userId = null)
         {
             var restrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.AcceptTpRequest);
             foreach (var restriction in restrictions)
@@ -220,7 +220,7 @@ namespace LibRLV
                     return true;
                 }
 
-                if (restriction.Args[0] is UUID allowedUserID && allowedUserID == userId)
+                if (restriction.Args[0] is Guid allowedUserID && allowedUserID == userId)
                 {
                     return true;
                 }
@@ -370,7 +370,7 @@ namespace LibRLV
 
             return true;
         }
-        public bool HasSetCamtextures(out UUID? textureUUID)
+        public bool HasSetCamtextures(out Guid? textureUUID)
         {
             textureUUID = null;
 
@@ -384,15 +384,15 @@ namespace LibRLV
             {
                 if (restriction.Args.Count == 0)
                 {
-                    textureUUID = UUID.Zero;
+                    textureUUID = Guid.Empty;
                 }
-                else if (restriction.Args.Count == 1 && restriction.Args[0] is UUID restrictionTexture)
+                else if (restriction.Args.Count == 1 && restriction.Args[0] is Guid restrictionTexture)
                 {
                     textureUUID = restrictionTexture;
                 }
                 else
                 {
-                    textureUUID = UUID.Zero;
+                    textureUUID = Guid.Empty;
                     return false;
                 }
             }
@@ -403,22 +403,22 @@ namespace LibRLV
         #endregion
 
         #region Chat
-        public bool CanStartIM(UUID? userId)
+        public bool CanStartIM(Guid? userId)
         {
             return CheckSecureRestriction(userId, null, RLVRestrictionType.StartIm, null, RLVRestrictionType.StartImTo);
         }
 
-        public bool CanSendIM(string message, UUID? userId, string groupName = null)
+        public bool CanSendIM(string message, Guid? userId, string groupName = null)
         {
             return CheckSecureRestriction(userId, groupName, RLVRestrictionType.SendIm, RLVRestrictionType.SendImSec, RLVRestrictionType.SendImTo);
         }
 
-        public bool CanReceiveIM(string message, UUID? userId, string groupName = null)
+        public bool CanReceiveIM(string message, Guid? userId, string groupName = null)
         {
             return CheckSecureRestriction(userId, groupName, RLVRestrictionType.RecvIm, RLVRestrictionType.RecvImSec, RLVRestrictionType.RecvImFrom);
         }
 
-        public bool CanReceiveChat(string message, UUID? userId)
+        public bool CanReceiveChat(string message, Guid? userId)
         {
             if (message.StartsWith("/me "))
             {
@@ -590,17 +590,17 @@ namespace LibRLV
 
         #endregion
 
-        public bool CanShowNames(UUID? userId)
+        public bool CanShowNames(Guid? userId)
         {
             return CheckSecureRestriction(userId, null, RLVRestrictionType.ShowNames, RLVRestrictionType.ShowNamesSec, null);
         }
 
-        public bool CanShowNameTags(UUID? userId)
+        public bool CanShowNameTags(Guid? userId)
         {
             return CheckSecureRestriction(userId, null, RLVRestrictionType.ShowNameTags, null, null);
         }
 
-        public bool CanShare(UUID? userId)
+        public bool CanShare(Guid? userId)
         {
             return CheckSecureRestriction(userId, null, RLVRestrictionType.Share, RLVRestrictionType.ShareSec, null);
         }
@@ -637,7 +637,7 @@ namespace LibRLV
             Attached,
             RezzedInWorld
         }
-        public bool CanEdit(ObjectLocation objectLocation, UUID? objectId)
+        public bool CanEdit(ObjectLocation objectLocation, Guid? objectId)
         {
             if (!CanInteract())
             {
@@ -645,8 +645,8 @@ namespace LibRLV
             }
 
             // @edit=<y/n>
-            // @edit:<UUID>=<rem/add>
-            // @editobj:<UUID>=<y/n>
+            // @edit:<Guid>=<rem/add>
+            // @editobj:<Guid>=<y/n>
             var canEditObject = CheckSecureRestriction(objectId, null, RLVRestrictionType.Edit, null, RLVRestrictionType.EditObj);
             if (!canEditObject)
             {
@@ -686,7 +686,7 @@ namespace LibRLV
             return GetOptionalRestrictionValueMin(RLVRestrictionType.FarTouch, 1.5f, out farTouchDist);
         }
 
-        private bool CanTouchHud(UUID objectId)
+        private bool CanTouchHud(Guid objectId)
         {
             if (!CanInteract())
             {
@@ -695,11 +695,11 @@ namespace LibRLV
 
             return !_restrictionProvider
                 .GetRestrictions(RLVRestrictionType.TouchHud)
-                .Where(n => n.Args.Count == 0 || (n.Args[0] is UUID restrictedObjectId && restrictedObjectId == objectId))
+                .Where(n => n.Args.Count == 0 || (n.Args[0] is Guid restrictedObjectId && restrictedObjectId == objectId))
                 .Any();
         }
 
-        private bool CanTouchAttachment(bool isAttachedToSelf, UUID? otherUserId)
+        private bool CanTouchAttachment(bool isAttachedToSelf, Guid? otherUserId)
         {
             // @touchattach
             if (_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAttach).Any())
@@ -719,7 +719,7 @@ namespace LibRLV
             {
                 // @touchattachother
                 var isForbiddenFromTouchingOthers = _restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAttachOther)
-                    .Where(n => n.Args.Count == 0 || (n.Args[0] is UUID restrictedUserId && restrictedUserId == otherUserId))
+                    .Where(n => n.Args.Count == 0 || (n.Args[0] is Guid restrictedUserId && restrictedUserId == otherUserId))
                     .Any();
                 if (isForbiddenFromTouchingOthers)
                 {
@@ -737,7 +737,7 @@ namespace LibRLV
             AttachedOther,
             RezzedInWorld
         }
-        public bool CanTouch(TouchLocation location, UUID objectId, UUID? userId, float? distance)
+        public bool CanTouch(TouchLocation location, Guid objectId, Guid? userId, float? distance)
         {
             // @FarTouch | TouchFar ?
             if (distance != null)
@@ -768,7 +768,7 @@ namespace LibRLV
             // @TouchThis
             if (_restrictionProvider
                 .GetRestrictions(RLVRestrictionType.TouchThis)
-                .Where(n => n.Args.Count == 1 && n.Args[0] is UUID restrictedItemId && restrictedItemId == objectId)
+                .Where(n => n.Args.Count == 1 && n.Args[0] is Guid restrictedItemId && restrictedItemId == objectId)
                 .Any())
             {
                 return false;
@@ -788,7 +788,7 @@ namespace LibRLV
                 // @touchworld
                 var touchWorldRestrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.TouchWorld);
                 var hasException = touchWorldRestrictions
-                    .Where(n => n.IsException && n.Args.Count == 1 && n.Args[0] is UUID allowedObjectId && allowedObjectId == objectId)
+                    .Where(n => n.IsException && n.Args.Count == 1 && n.Args[0] is Guid allowedObjectId && allowedObjectId == objectId)
                     .Any();
 
                 if (!hasException && touchWorldRestrictions.Any(n => n.Args.Count == 0))
@@ -825,7 +825,7 @@ namespace LibRLV
             World,
             Hud
         }
-        public bool CanShowHoverText(HoverTextLocation location, UUID? objectId)
+        public bool CanShowHoverText(HoverTextLocation location, Guid? objectId)
         {
             // @showhovertextall
             if (_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowHoverTextAll).Any())
@@ -833,10 +833,10 @@ namespace LibRLV
                 return false;
             }
 
-            // @showhovertext:<UUID>
+            // @showhovertext:<Guid>
             if (_restrictionProvider
                 .GetRestrictions(RLVRestrictionType.ShowHoverText)
-                .Where(n => n.Args.Count == 1 && n.Args[0] is UUID restrictedObjectId && restrictedObjectId == objectId)
+                .Where(n => n.Args.Count == 1 && n.Args[0] is Guid restrictedObjectId && restrictedObjectId == objectId)
                 .Any())
             {
                 return false;
@@ -918,7 +918,7 @@ namespace LibRLV
                 item.WornOn
             );
         }
-        public bool CanAttach(UUID objectFolderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        public bool CanAttach(Guid objectFolderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
             if (wearableType != null && !CanAttachWearable(wearableType))
             {
@@ -965,7 +965,7 @@ namespace LibRLV
                 item.WornOn
             );
         }
-        public bool CanDetach(UUID folderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        public bool CanDetach(Guid folderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
             // @remoutfit[:<part>]=<y/n>
             if (wearableType != null && !CanDetachWearable(wearableType))

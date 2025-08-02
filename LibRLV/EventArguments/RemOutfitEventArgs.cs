@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using OpenMetaverse;
 
 namespace LibRLV.EventArguments
 {
     public class RemOutfitEventArgs : EventArgs
     {
-        public List<UUID> ItemIds { get; }
+        public List<Guid> ItemIds { get; }
 
-        public RemOutfitEventArgs(List<UUID> itemIds)
+        public RemOutfitEventArgs(List<Guid> itemIds)
         {
             ItemIds = itemIds;
         }

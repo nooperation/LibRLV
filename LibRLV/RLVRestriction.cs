@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using OpenMetaverse;
 
 namespace LibRLV
 {
     public class RLVRestriction
     {
-        public RLVRestriction(RLVRestrictionType behavior, UUID sender, string senderName, ICollection<object> args)
+        public RLVRestriction(RLVRestrictionType behavior, Guid sender, string senderName, ICollection<object> args)
         {
             Behavior = GetRealRestriction(behavior);
             OriginalBehavior = behavior;
@@ -20,7 +19,7 @@ namespace LibRLV
         public RLVRestrictionType Behavior { get; }
         public RLVRestrictionType OriginalBehavior { get; }
         public bool IsException => IsRestrictionAnException(this);
-        public UUID Sender { get; }
+        public Guid Sender { get; }
         public string SenderName { get; }
         public ImmutableList<object> Args { get; }
 
@@ -208,13 +207,13 @@ namespace LibRLV
                 case RLVRestrictionType.SendImTo:           // CanSendIM
                 case RLVRestrictionType.RecvImFrom:         // CanReceiveIM
                 {
-                    // [UUID | string]
+                    // [Guid | string]
                     if (args.Length != 1)
                     {
                         return false;
                     }
 
-                    if (UUID.TryParse(args[0], out var val))
+                    if (Guid.TryParse(args[0], out var val))
                     {
                         parsedArgs.Add(val);
                     }
@@ -229,7 +228,7 @@ namespace LibRLV
                 case RLVRestrictionType.SendIm:             // CanSendIM
                 case RLVRestrictionType.RecvIm:             // CanReceiveIM
                 {
-                    // [] | [UUID | string]
+                    // [] | [Guid | string]
                     if (args.Length == 0)
                     {
                         return true;
@@ -240,7 +239,7 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (UUID.TryParse(args[0], out var val))
+                    if (Guid.TryParse(args[0], out var val))
                     {
                         parsedArgs.Add(val);
                     }
@@ -385,7 +384,7 @@ namespace LibRLV
                 case RLVRestrictionType.ShowNamesSec:       // CanShowNames
                 case RLVRestrictionType.ShowNameTags:       // CanShowNameTags
                 {
-                    // [] [UUID]
+                    // [] [Guid]
                     if (args.Length == 0)
                     {
                         return true;
@@ -396,7 +395,7 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (!UUID.TryParse(args[0], out var uuid))
+                    if (!Guid.TryParse(args[0], out var uuid))
                     {
                         return false;
                     }
@@ -412,13 +411,13 @@ namespace LibRLV
                 case RLVRestrictionType.TouchThis:          // CanTouch
                 case RLVRestrictionType.ShowHoverText:      // ShowHoverText
                 {
-                    // [UUID]
+                    // [Guid]
                     if (args.Length != 1)
                     {
                         return false;
                     }
 
-                    if (!UUID.TryParse(args[0], out var uuid))
+                    if (!Guid.TryParse(args[0], out var uuid))
                     {
                         return false;
                     }
