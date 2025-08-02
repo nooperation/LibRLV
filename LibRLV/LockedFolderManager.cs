@@ -213,7 +213,7 @@ namespace LibRLV
             return ProcessFolderRestrictions(restriction, sharedFolder, inventoryMap.Folders);
         }
 
-        private bool TryGetItem(Guid itemId, IDictionary<Guid, InventoryTree> sharedFolderMap, out InventoryTree.InventoryItem outItem)
+        private static bool TryGetItem(Guid itemId, IDictionary<Guid, InventoryTree> sharedFolderMap, out InventoryTree.InventoryItem outItem)
         {
             foreach (var folder in sharedFolderMap.Values)
             {

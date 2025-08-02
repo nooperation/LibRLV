@@ -137,6 +137,7 @@ namespace LibRLV
         public event EventHandler<RestrictionUpdatedEventArgs> RestrictionUpdated;
 
         private readonly Dictionary<RLVRestrictionType, HashSet<RLVRestriction>> _currentRestrictions = new Dictionary<RLVRestrictionType, HashSet<RLVRestriction>>();
+        private readonly object _currentRestrictionsLock = new object();
 
         private readonly IRLVCallbacks _callbacks;
         private readonly LockedFolderManager _lockedFolderManager;
@@ -167,9 +168,16 @@ namespace LibRLV
 
         private void NotifyRestrictionChange(string restrictionName, string notificationMessage)
         {
-            if (!_currentRestrictions.TryGetValue(RLVRestrictionType.Notify, out var notificationRestrictions))
+            List<RLVRestriction> notificationRestrictions;
+
+            lock (_currentRestrictionsLock)
             {
-                return;
+                if (!_currentRestrictions.TryGetValue(RLVRestrictionType.Notify, out var notificationRestrictionsTemp))
+                {
+                    return;
+                }
+
+                notificationRestrictions = notificationRestrictionsTemp.ToList();
             }
 
             foreach (var notificationRestriction in notificationRestrictions)
@@ -203,66 +211,83 @@ namespace LibRLV
         {
             restrictionType = RLVRestriction.GetRealRestriction(restrictionType);
 
-            if (!_currentRestrictions.TryGetValue(restrictionType, out var restrictions))
+            lock (_currentRestrictionsLock)
             {
-                return ImmutableList<RLVRestriction>.Empty;
-            }
+                if (!_currentRestrictions.TryGetValue(restrictionType, out var restrictions))
+                {
+                    return ImmutableList<RLVRestriction>.Empty;
+                }
 
-            return restrictions.ToImmutableList();
+                return restrictions.ToImmutableList();
+            }
         }
 
         public ImmutableList<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null)
         {
             var restrictions = new List<RLVRestriction>();
 
-            foreach (var item in _currentRestrictions)
+            lock (_currentRestrictionsLock)
             {
-                if (!RestrictionToNameMap.TryGetValue(item.Key, out var behaviorName))
+                foreach (var item in _currentRestrictions)
                 {
-                    throw new Exception($"_currentRestrictions has a behavior '{item.Key}' that is not defined in the reverse behavior map");
-                }
+                    if (!RestrictionToNameMap.TryGetValue(item.Key, out var behaviorName))
+                    {
+                        throw new Exception($"_currentRestrictions has a behavior '{item.Key}' that is not defined in the reverse behavior map");
+                    }
 
-                if (!behaviorName.Contains(behaviorNameFilter))
-                {
-                    continue;
-                }
-
-                if (!_currentRestrictions.TryGetValue(item.Key, out var realRestrictions))
-                {
-                    continue;
-                }
-
-                foreach (var restriction in realRestrictions)
-                {
-                    if (senderFilter != null && restriction.Sender != senderFilter)
+                    if (!behaviorName.Contains(behaviorNameFilter))
                     {
                         continue;
                     }
 
-                    restrictions.Add(restriction);
+                    foreach (var restriction in item.Value)
+                    {
+                        if (senderFilter != null && restriction.Sender != senderFilter)
+                        {
+                            continue;
+                        }
+
+                        restrictions.Add(restriction);
+                    }
+                }
+
+                return restrictions.ToImmutableList();
+            }
+        }
+
+        private bool RemoveRestriction_InternalUnsafe(RLVRestriction restriction)
+        {
+            var removedRestriction = false;
+
+            if (_currentRestrictions.TryGetValue(restriction.Behavior, out var restrictions))
+            {
+                if (restrictions.Contains(restriction))
+                {
+                    removedRestriction = true;
+                    restrictions.Remove(restriction);
+                }
+
+                if (restrictions.Count == 0)
+                {
+                    _currentRestrictions.Remove(restriction.Behavior);
                 }
             }
 
-            return restrictions.ToImmutableList();
+            return removedRestriction;
         }
 
         private void RemoveRestriction(RLVRestriction restriction)
         {
-            if (!_currentRestrictions.TryGetValue(restriction.Behavior, out var restrictions))
+            var removedRestriction = false;
+
+            lock (_currentRestrictionsLock)
             {
-                NotifyRestrictionChange(restriction, false);
-                return;
+                removedRestriction = RemoveRestriction_InternalUnsafe(restriction);
             }
 
-            if (restrictions.Contains(restriction))
+            if (removedRestriction)
             {
                 RestrictionUpdated?.Invoke(this, new RestrictionUpdatedEventArgs(restriction, false, true));
-                restrictions.Remove(restriction);
-            }
-
-            if (restrictions.Count == 0)
-            {
-                _currentRestrictions.Remove(restriction.Behavior);
             }
 
             NotifyRestrictionChange(restriction, false);
@@ -270,17 +295,25 @@ namespace LibRLV
 
         private void AddRestriction(RLVRestriction newRestriction)
         {
-            if (!_currentRestrictions.TryGetValue(newRestriction.Behavior, out var restrictions))
+            var restrictionAdded = false;
+
+            lock (_currentRestrictionsLock)
             {
-                restrictions = new HashSet<RLVRestriction>();
-                _currentRestrictions.Add(newRestriction.Behavior, restrictions);
+                if (!_currentRestrictions.TryGetValue(newRestriction.Behavior, out var restrictions))
+                {
+                    restrictions = new HashSet<RLVRestriction>();
+                    _currentRestrictions.Add(newRestriction.Behavior, restrictions);
+                }
+
+                if (!restrictions.Contains(newRestriction))
+                {
+                    restrictionAdded = true;
+                    restrictions.Add(newRestriction);
+                }
             }
 
-            if (!restrictions.Contains(newRestriction))
+            if (restrictionAdded)
             {
-                // TODO: Check newRestriction args to confirm they're within bounds (like camdrawmin must be at least 0.40f)?
-
-                restrictions.Add(newRestriction);
                 RestrictionUpdated?.Invoke(this, new RestrictionUpdatedEventArgs(newRestriction, true, false));
             }
 
@@ -294,24 +327,38 @@ namespace LibRLV
                 .Select(n => n.Key)
                 .ToList();
 
-            foreach (var restrictionType in filteredRestrictions)
+            var removedRestrictions = new List<RLVRestriction>();
+            lock (_currentRestrictionsLock)
             {
-                if (!_currentRestrictions.TryGetValue(restrictionType, out var restrictionsToRemove))
+                foreach (var restrictionType in filteredRestrictions)
                 {
-                    continue;
-                }
-
-                foreach (var restrictionToRemove in restrictionsToRemove)
-                {
-                    if (restrictionToRemove.Sender != command.Sender)
+                    if (!_currentRestrictions.TryGetValue(restrictionType, out var restrictionsToRemove))
                     {
                         continue;
                     }
 
-                    RemoveRestriction(restrictionToRemove);
+                    var restrictionsToRemoveSnapshot = restrictionsToRemove.ToList();
+                    foreach (var restrictionToRemove in restrictionsToRemoveSnapshot)
+                    {
+                        if (restrictionToRemove.Sender != command.Sender)
+                        {
+                            continue;
+                        }
+
+                        if (RemoveRestriction_InternalUnsafe(restrictionToRemove))
+                        {
+                            removedRestrictions.Add(restrictionToRemove);
+                        }
+                    }
                 }
             }
+            _lockedFolderManager.RebuildLockedFolders();
 
+            foreach (var removedRestriction in removedRestrictions)
+            {
+                RestrictionUpdated?.Invoke(this, new RestrictionUpdatedEventArgs(removedRestriction, false, true));
+                NotifyRestrictionChange(removedRestriction, false);
+            }
 
             var notificationMessage = "clear";
             if (command.Param != "")
@@ -320,6 +367,7 @@ namespace LibRLV
             }
 
             NotifyRestrictionChange("clear", notificationMessage);
+
             return true;
         }
 
