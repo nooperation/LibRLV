@@ -94,19 +94,20 @@ namespace LibRLV.Tests
 
         #region General
         [Theory]
-        [InlineData("@versionnew=1234", RLV.RLVVersion)]
-        [InlineData("@versionnew=-1234", RLV.RLVVersion)]
-        public void CheckChannelResponseGood(string command, string expectedReply)
+        [InlineData(1234, RLV.RLVVersion)]
+        [InlineData(-1234, RLV.RLVVersion)]
+        public void CheckChannelResponseGood(int channel, string expectedReply)
         {
-            var expectedChannel = int.Parse(command.Substring(command.IndexOf('=') + 1));
+            var actual = _callbacks.RecordReplies();
 
-            _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"@versionnew={channel}", _sender.Id, _sender.Name);
 
-            _callbacks.Verify(c =>
-                c.SendReplyAsync(expectedChannel, expectedReply, It.IsAny<CancellationToken>()),
-                Times.Once);
+            var expected = new List<(int Channel, string Text)>
+            {
+                (channel, expectedReply),
+            };
 
-            _callbacks.VerifyNoOtherCalls();
+            Assert.Equal(expected, actual);
         }
 
         [Theory]
@@ -144,20 +145,21 @@ namespace LibRLV.Tests
         #region @version @versionnew @versionnum
 
         [Theory]
-        [InlineData("@version=1234", RLV.RLVVersion)]
-        [InlineData("@versionnew=1234", RLV.RLVVersion)]
-        [InlineData("@versionnum=1234", RLV.RLVVersionNum)]
-        public void CheckVersions(string command, string expectedReply)
+        [InlineData("@version", 1234, RLV.RLVVersion)]
+        [InlineData("@versionnew", 1234, RLV.RLVVersion)]
+        [InlineData("@versionnum", 1234, RLV.RLVVersionNum)]
+        public void CheckVersions(string command, int channel, string expectedResponse)
         {
-            var expectedChannel = int.Parse(command.Substring(command.IndexOf('=') + 1));
+            var actual = _callbacks.RecordReplies();
 
-            _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"{command}={channel}", _sender.Id, _sender.Name);
 
-            _callbacks.Verify(c =>
-                c.SendReplyAsync(expectedChannel, expectedReply, It.IsAny<CancellationToken>()),
-                Times.Once);
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, expectedResponse),
+            };
 
-            _callbacks.VerifyNoOtherCalls();
+            Assert.Equal(expected, actual);
         }
         #endregion
 
@@ -168,43 +170,44 @@ namespace LibRLV.Tests
         #region @versionnumbl=<channel_number>
 
         [Theory]
-        [InlineData("@versionnumbl=1234", "", RLV.RLVVersionNum)]
-        [InlineData("@versionnumbl=1234", "sendim,recvim", RLV.RLVVersionNum + ",sendim,recvim")]
-        public void VersionNumBL(string command, string seed, string expected)
+        [InlineData("", RLV.RLVVersionNum)]
+        [InlineData("sendim,recvim", RLV.RLVVersionNum + ",recvim,sendim")]
+        public void VersionNumBL(string seed, string expectedResponse)
         {
-            var expectedChannel = int.Parse(command.Substring(command.IndexOf('=') + 1));
-
+            var actual = _callbacks.RecordReplies();
             SeedBlacklist(seed);
 
-            _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@versionnumbl=1234", _sender.Id, _sender.Name);
 
-            _callbacks.Verify(c =>
-                c.SendReplyAsync(expectedChannel, expected, It.IsAny<CancellationToken>()),
-                Times.Once);
+            var expected = new List<(int Channel, string Text)>
+            {
+                (1234, expectedResponse),
+            };
 
-            _callbacks.VerifyNoOtherCalls();
+            Assert.Equal(expected, actual);
         }
         #endregion
 
         #region @getblacklist[:filter]=<channel_number>
         [Theory]
-        [InlineData("@getblacklist=1234", "sendim,recvim", "sendim,recvim")]
-        [InlineData("@getblacklist:im=1234", "sendim,recvim", "sendim,recvim")]
-        [InlineData("@getblacklist:send=1234", "sendim,recvim", "sendim")]
-        [InlineData("@getblacklist:tpto=1234", "sendim,recvim", "")]
-        [InlineData("@getblacklist=1234", "", "")]
-        public void GetBlacklist(string command, string seed, string expected)
+        [InlineData("@getblacklist", 1234, "sendim,recvim", "recvim,sendim")]
+        [InlineData("@getblacklist:im", 1234, "sendim,recvim", "recvim,sendim")]
+        [InlineData("@getblacklist:send", 1234, "sendim,recvim", "sendim")]
+        [InlineData("@getblacklist:tpto", 1234, "sendim,recvim", "")]
+        [InlineData("@getblacklist", 1234, "", "")]
+        public void GetBlacklist(string command, int channel, string seed, string expectedResponse)
         {
-            var expectedChannel = int.Parse(command.Substring(command.IndexOf('=') + 1));
+            var actual = _callbacks.RecordReplies();
             SeedBlacklist(seed);
 
-            _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
+            _rlv.ProcessMessage($"{command}={channel}", _sender.Id, _sender.Name);
 
-            _callbacks.Verify(c =>
-                c.SendReplyAsync(expectedChannel, expected, It.IsAny<CancellationToken>()),
-                Times.Once);
+            var expected = new List<(int Channel, string Text)>
+            {
+                (channel, expectedResponse),
+            };
 
-            _callbacks.VerifyNoOtherCalls();
+            Assert.Equal(expected, actual);
         }
         #endregion
 
@@ -219,7 +222,7 @@ namespace LibRLV.Tests
         }
 
         [Theory]
-        [InlineData("@getblacklist", "sendim,recvim", "sendim,recvim")]
+        [InlineData("@getblacklist", "sendim,recvim", "recvim,sendim")]
         [InlineData("@getblacklist", "", "")]
         public void ManualBlacklist(string command, string seed, string expected)
         {

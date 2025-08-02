@@ -24,7 +24,7 @@ namespace LibRLV
         public string SenderName { get; }
         public ImmutableList<object> Args { get; }
 
-        public static RLVRestrictionType GetRealRestriction(RLVRestrictionType restrictionType)
+        internal static RLVRestrictionType GetRealRestriction(RLVRestrictionType restrictionType)
         {
             switch (restrictionType)
             {
@@ -43,7 +43,7 @@ namespace LibRLV
             return restrictionType;
         }
 
-        public static bool IsRestrictionAnException(RLVRestriction restriction)
+        private static bool IsRestrictionAnException(RLVRestriction restriction)
         {
             switch (restriction.Behavior)
             {
@@ -75,7 +75,7 @@ namespace LibRLV
             return false;
         }
 
-        public static bool ParseOptions(RLVRestrictionType behavior, string options, out List<object> parsedArgs)
+        internal static bool ParseOptions(RLVRestrictionType behavior, string options, out List<object> parsedArgs)
         {
             parsedArgs = new List<object>();
             var args = options.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
@@ -487,11 +487,6 @@ namespace LibRLV
                 default:
                     throw new NotImplementedException();
             }
-        }
-
-        public override string ToString()
-        {
-            return $"[{SenderName}] {Behavior}{(Args.Count == 0 ? "" : ":")}{string.Join(",", Args)}";
         }
 
         public override bool Equals(object obj)

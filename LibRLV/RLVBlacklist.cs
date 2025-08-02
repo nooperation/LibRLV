@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace LibRLV
 {
@@ -8,11 +9,18 @@ namespace LibRLV
         private readonly HashSet<string> _blacklist = new HashSet<string>();
         private readonly object _blacklistLock = new object();
 
+        internal RLVBlacklist()
+        {
+
+        }
+
         public IReadOnlyCollection<string> GetBlacklist()
         {
             lock (_blacklistLock)
             {
-                return _blacklist.ToImmutableHashSet();
+                return _blacklist
+                    .OrderBy(n => n)
+                    .ToImmutableList();
             }
         }
 

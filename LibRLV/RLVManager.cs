@@ -9,7 +9,7 @@ namespace LibRLV
     {
         private readonly IRestrictionProvider _restrictionProvider;
 
-        public RLVManager(IRestrictionProvider restrictionProvider)
+        internal RLVManager(IRestrictionProvider restrictionProvider)
         {
             _restrictionProvider = restrictionProvider;
         }
@@ -229,7 +229,6 @@ namespace LibRLV
             return false;
         }
         #endregion
-
 
         public bool CanShowInv()
         {

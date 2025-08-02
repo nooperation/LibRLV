@@ -8,7 +8,7 @@ using OpenMetaverse;
 
 namespace LibRLV
 {
-    public class RLVGetRequestHandler
+    internal class RLVGetRequestHandler
     {
         private readonly ImmutableDictionary<string, RLVDataRequest> RLVDataRequestToNameMap;
         private readonly IRestrictionProvider _restrictions;
@@ -169,7 +169,7 @@ namespace LibRLV
             return true;
         }
 
-        public bool ProcessGetCommand(RLVMessage rlvMessage, int channel)
+        internal bool ProcessGetCommand(RLVMessage rlvMessage, int channel)
         {
             var blacklist = _blacklist.GetBlacklist();
 
@@ -419,6 +419,7 @@ namespace LibRLV
                 }
             }
         }
+
         private string GetInvWornInfo(InventoryTree folder)
         {
             // 0 : No item is present in that folder
