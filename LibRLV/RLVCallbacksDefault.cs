@@ -12,11 +12,6 @@ namespace LibRLV
             return Task.CompletedTask;
         }
 
-        public virtual Task<string> ProvideDataAsync(RLVDataRequest request, List<object> data, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(string.Empty);
-        }
-
         public virtual Task<string> GetEnvironmentAsync(string settingName)
         {
             if (!Enum.TryParse(settingName, true, out RLVGetEnvType settingType))

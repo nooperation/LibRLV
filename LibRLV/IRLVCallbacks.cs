@@ -9,7 +9,6 @@ namespace LibRLV
     {
         Task SendReplyAsync(int channel, string message, CancellationToken cancellationToken);
         Task SendInstantMessageAsync(Guid targetUser, string message, CancellationToken cancellationToken);
-        Task<string> ProvideDataAsync(RLVDataRequest request, List<object> data, CancellationToken cancellationToken);
         Task<string> GetEnvironmentAsync(string envType);
         Task<string> GetDebugInfoAsync(string debugType);
         Task<bool> TryGetSitId(out Guid sitId);

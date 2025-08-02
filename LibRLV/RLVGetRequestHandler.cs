@@ -363,11 +363,6 @@ namespace LibRLV
                         break;
                     }
                 }
-
-                if (response == null)
-                {
-                    response = _callbacks.ProvideDataAsync(name, args, CancellationToken.None).Result;
-                }
             }
             else if (rlvMessage.Behavior.StartsWith("getdebug_"))
             {
