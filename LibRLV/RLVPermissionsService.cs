@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace LibRLV
 {
@@ -14,7 +13,7 @@ namespace LibRLV
             _restrictionProvider = restrictionProvider;
         }
 
-        private bool GetRestrictionValueMax<T>(RLVRestrictionType restrictionType, out T val)
+        internal static bool GetRestrictionValueMax<T>(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, out T val)
         {
             var restriction = _restrictionProvider.GetRestrictions(restrictionType);
             if (restriction.Count == 0)
@@ -30,7 +29,8 @@ namespace LibRLV
 
             return true;
         }
-        private bool GetRestrictionValueMin<T>(RLVRestrictionType restrictionType, out T val)
+
+        internal static bool GetRestrictionValueMin<T>(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, out T val)
         {
             var restriction = _restrictionProvider.GetRestrictions(restrictionType);
             if (restriction.Count == 0)
@@ -46,7 +46,8 @@ namespace LibRLV
 
             return true;
         }
-        private bool GetOptionalRestrictionValueMin<T>(RLVRestrictionType restrictionType, T defaultVal, out T val)
+
+        internal static bool GetOptionalRestrictionValueMin<T>(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, T defaultVal, out T val)
         {
             var restrictions = _restrictionProvider.GetRestrictions(restrictionType);
             if (restrictions.Count == 0)
@@ -69,6 +70,7 @@ namespace LibRLV
 
             return true;
         }
+
         private bool CheckSecureRestriction(Guid? userId, string groupName, RLVRestrictionType normalType, RLVRestrictionType? secureType, RLVRestrictionType? fromToType)
         {
             // Explicit restrictions
@@ -170,11 +172,11 @@ namespace LibRLV
         }
         public bool CanSitTp(out float sitTpDist)
         {
-            return GetOptionalRestrictionValueMin(RLVRestrictionType.SitTp, 1.5f, out sitTpDist);
+            return GetOptionalRestrictionValueMin(_restrictionProvider, RLVRestrictionType.SitTp, 1.5f, out sitTpDist);
         }
         public bool CanTpLocal(out float tpLocalDist)
         {
-            return GetOptionalRestrictionValueMin(RLVRestrictionType.TpLocal, 0.0f, out tpLocalDist);
+            return GetOptionalRestrictionValueMin(_restrictionProvider, RLVRestrictionType.TpLocal, 0.0f, out tpLocalDist);
         }
         public bool CanStandTp()
         {
@@ -294,110 +296,11 @@ namespace LibRLV
         }
 
         #region Camera
-        public bool IsCamLocked()
-        {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SetCamUnlock).Any();
-        }
-        public bool HasCamZoomMin(out float camZoomMin)
-        {
-            return GetRestrictionValueMax(RLVRestrictionType.CamZoomMin, out camZoomMin);
-        }
-        public bool HasSetCamFovMin(out float setCamFovMin)
-        {
-            return GetRestrictionValueMax(RLVRestrictionType.SetCamFovMin, out setCamFovMin);
-        }
-        public bool HasSetCamAvDistMin(out float setCamAvDistMin)
-        {
-            return GetRestrictionValueMax(RLVRestrictionType.SetCamAvDistMin, out setCamAvDistMin);
-        }
-        public bool HasCamZoomMax(out float camZoomMax)
-        {
-            return GetRestrictionValueMin(RLVRestrictionType.CamZoomMax, out camZoomMax);
-        }
-        public bool HasCamDrawMin(out float camDrawMin)
-        {
-            return GetRestrictionValueMin(RLVRestrictionType.CamDrawMin, out camDrawMin);
-        }
-        public bool HasCamDrawMax(out float camDrawMax)
-        {
-            return GetRestrictionValueMin(RLVRestrictionType.CamDrawMax, out camDrawMax);
-        }
-        public bool HasCamDrawAlphaMin(out float camDrawAlphaMin)
-        {
-            return GetRestrictionValueMin(RLVRestrictionType.CamDrawAlphaMin, out camDrawAlphaMin);
-        }
-        public bool HasCamDrawAlphaMax(out float camDrawAlphaMax)
-        {
-            return GetRestrictionValueMin(RLVRestrictionType.CamDrawAlphaMax, out camDrawAlphaMax);
-        }
-        public bool HasSetCamFovMax(out float setCamFovMax)
-        {
-            return GetRestrictionValueMin(RLVRestrictionType.SetCamFovMax, out setCamFovMax);
-        }
-        public bool HasSetCamAvDistMax(out float setCamAvDistMax)
-        {
-            return GetRestrictionValueMin(RLVRestrictionType.SetCamAvDistMax, out setCamAvDistMax);
-        }
-        public bool HasCamAvDist(out float camAvDist)
-        {
-            return GetRestrictionValueMin(RLVRestrictionType.CamAvDist, out camAvDist);
-        }
-        public bool HasCamDrawColor(out Vector3 camDrawColor)
-        {
-            camDrawColor.X = 0;
-            camDrawColor.Y = 0;
-            camDrawColor.Z = 0;
 
-            var restrictions = _restrictionProvider
-                .GetRestrictions(RLVRestrictionType.CamDrawColor)
-                .Where(n => n.Args.Count == 3)
-                .ToList();
-            if (restrictions.Count == 0)
-            {
-                return false;
-            }
-
-            foreach (var restriction in restrictions)
-            {
-                camDrawColor.X += Math.Min(1.0f, Math.Max(0.0f, (float)restriction.Args[0]));
-                camDrawColor.Y += Math.Min(1.0f, Math.Max(0.0f, (float)restriction.Args[1]));
-                camDrawColor.Z += Math.Min(1.0f, Math.Max(0.0f, (float)restriction.Args[2]));
-            }
-
-            camDrawColor.X /= restrictions.Count;
-            camDrawColor.Y /= restrictions.Count;
-            camDrawColor.Z /= restrictions.Count;
-
-            return true;
-        }
-        public bool HasSetCamtextures(out Guid? textureUUID)
+        public CameraRestrictions GetCameraRestrictions()
         {
-            textureUUID = null;
-
-            var restrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.SetCamTextures);
-            if (restrictions.Count == 0)
-            {
-                return false;
-            }
-
-            foreach (var restriction in restrictions)
-            {
-                if (restriction.Args.Count == 0)
-                {
-                    textureUUID = Guid.Empty;
-                }
-                else if (restriction.Args.Count == 1 && restriction.Args[0] is Guid restrictionTexture)
-                {
-                    textureUUID = restrictionTexture;
-                }
-                else
-                {
-                    textureUUID = Guid.Empty;
-                    return false;
-                }
-            }
-
-            return true;
+            var restrictions = new CameraRestrictions(_restrictionProvider);
+            return restrictions;
         }
 
         #endregion
@@ -683,7 +586,7 @@ namespace LibRLV
         #region Touch
         public bool CanFarTouch(out float farTouchDist)
         {
-            return GetOptionalRestrictionValueMin(RLVRestrictionType.FarTouch, 1.5f, out farTouchDist);
+            return GetOptionalRestrictionValueMin(_restrictionProvider, RLVRestrictionType.FarTouch, 1.5f, out farTouchDist);
         }
 
         private bool CanTouchHud(Guid objectId)
@@ -742,7 +645,7 @@ namespace LibRLV
             // @FarTouch | TouchFar ?
             if (distance != null)
             {
-                if (GetRestrictionValueMin(RLVRestrictionType.CamZoomMax, out float? maxTouchDistance))
+                if (GetRestrictionValueMin(_restrictionProvider, RLVRestrictionType.FarTouch, out float? maxTouchDistance))
                 {
                     if (distance > maxTouchDistance)
                     {

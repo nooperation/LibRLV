@@ -619,7 +619,8 @@ namespace LibRLV
 
         private bool HandleSetCamFOV(RLVMessage command)
         {
-            if (_manager.IsCamLocked())
+            var cameraRestrictions = _manager.GetCameraRestrictions();
+            if (cameraRestrictions.IsLocked)
             {
                 return false;
             }
