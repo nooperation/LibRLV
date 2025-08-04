@@ -637,6 +637,20 @@ namespace LibRLV.Tests
         }
 
         [Fact]
+        public void Clear_CaseInSensitive()
+        {
+            _rlv.ProcessMessage("@tploc=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@tplm=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
+            _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
+
+            _rlv.ProcessMessage("@cLEaR", _sender.Id, _sender.Name);
+
+            var restrictions = _rlv.Restrictions.GetRestrictions();
+            Assert.Empty(restrictions);
+        }
+
+        [Fact]
         public void Clear_SenderBased()
         {
             var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));

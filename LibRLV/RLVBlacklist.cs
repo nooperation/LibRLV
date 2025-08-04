@@ -28,7 +28,7 @@ namespace LibRLV
         {
             lock (_blacklistLock)
             {
-                _blacklist.Add(command);
+                _blacklist.Add(command.ToLowerInvariant());
             }
         }
 
@@ -36,7 +36,7 @@ namespace LibRLV
         {
             lock (_blacklistLock)
             {
-                _blacklist.Remove(command);
+                _blacklist.Remove(command.ToLowerInvariant());
             }
         }
 
@@ -44,7 +44,7 @@ namespace LibRLV
         {
             lock (_blacklistLock)
             {
-                return _blacklist.Contains(behavior);
+                return _blacklist.Contains(behavior.ToLowerInvariant());
             }
         }
     }

@@ -457,7 +457,7 @@ namespace LibRLV
                 //      @emote=<rem/add>
 
                 var canEmote = _restrictionProvider.GetRestrictions(RLVRestrictionType.Emote).Count == 0;
-                if (message.StartsWith("/me ", StringComparison.InvariantCultureIgnoreCase) && !canEmote)
+                if (message.StartsWith("/me ", StringComparison.OrdinalIgnoreCase) && !canEmote)
                 {
                     return false;
                 }
@@ -476,7 +476,7 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (!message.StartsWith("/", StringComparison.InvariantCulture))
+                    if (!message.StartsWith("/", StringComparison.OrdinalIgnoreCase))
                     {
                         return false;
                     }

@@ -9,8 +9,20 @@ namespace LibRLV
         public const string RLVVersion = "RestrainedLove viewer v3.4.3 (RLVa 2.4.2)";
         public const string RLVVersionNum = "2040213";
 
-        public bool Enabled { get; set; }
-        public bool EnableInstantMessageProcessing { get; set; }
+        private volatile bool _enabled;
+        private volatile bool _enableInstantMessageProcessing;
+
+        public bool Enabled
+        {
+            get => _enabled;
+            set => _enabled = value;
+        }
+
+        public bool EnableInstantMessageProcessing
+        {
+            get => _enableInstantMessageProcessing;
+            set => _enableInstantMessageProcessing = value;
+        }
 
         public RLVCommandProcessor Commands { get; }
         public RLVRestrictionManager Restrictions { get; }
@@ -73,11 +85,11 @@ namespace LibRLV
         private bool ProcessSingleMessage(string message, Guid senderId, string senderName)
         {
             // Special hack for @clear, which doesn't match the standard pattern of @behavior=param
-            if (message == "clear")
+            if (message.Equals("clear", StringComparison.OrdinalIgnoreCase))
             {
                 return ProcessRLVMessage(new RLVMessage()
                 {
-                    Behavior = message,
+                    Behavior = "clear",
                     Option = "",
                     Param = "",
                     Sender = senderId,
@@ -93,9 +105,9 @@ namespace LibRLV
 
             var rlvMessage = new RLVMessage
             {
-                Behavior = match.Groups["behavior"].ToString().ToLower(),
-                Option = match.Groups["option"].ToString(),
-                Param = match.Groups["param"].ToString().ToLower(),
+                Behavior = match.Groups["behavior"].Value.ToLowerInvariant(),
+                Option = match.Groups["option"].Value,
+                Param = match.Groups["param"].Value.ToLowerInvariant(),
                 Sender = senderId,
                 SenderName = senderName
             };
@@ -105,7 +117,7 @@ namespace LibRLV
 
         public bool ProcessMessage(string message, Guid senderId, string senderName)
         {
-            if (!Enabled || !message.StartsWith("@"))
+            if (!Enabled || !message.StartsWith("@", StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
@@ -125,7 +137,7 @@ namespace LibRLV
 
         public bool ProcessInstantMessage(string message, Guid senderId, string senderName)
         {
-            if (!EnableInstantMessageProcessing || !Enabled || !message.StartsWith("@"))
+            if (!EnableInstantMessageProcessing || !Enabled || !message.StartsWith("@", StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
@@ -135,12 +147,12 @@ namespace LibRLV
                 return false;
             }
 
-            return GetRequestHandler.ProcessInstantMessageCommand(message.ToLower(), senderId, senderName);
+            return GetRequestHandler.ProcessInstantMessageCommand(message.ToLowerInvariant(), senderId, senderName);
         }
 
         public void ReportSendPublicMessage(string message)
         {
-            if (message.StartsWith("/me"))
+            if (message.StartsWith("/me ", StringComparison.OrdinalIgnoreCase))
             {
                 if (!Permissions.IsRedirEmote(out var channels))
                 {
@@ -175,7 +187,7 @@ namespace LibRLV
         {
             var isSharedFolder = false;
 
-            if (itemOrFolderPath.StartsWith("#RLV/"))
+            if (itemOrFolderPath.StartsWith("#RLV/", StringComparison.Ordinal))
             {
                 itemOrFolderPath = itemOrFolderPath.Substring("#RLV/".Length);
                 isSharedFolder = true;
@@ -216,11 +228,11 @@ namespace LibRLV
 
                 if (isLegal)
                 {
-                    notificationText = $"/worn legally {wearableType.ToString().ToLower()}";
+                    notificationText = $"/worn legally {wearableType.ToString().ToLowerInvariant()}";
                 }
                 else
                 {
-                    notificationText = $"/worn illegally {wearableType.ToString().ToLower()}";
+                    notificationText = $"/worn illegally {wearableType.ToString().ToLowerInvariant()}";
                 }
             }
             else if (changeType == WornItemChange.Detached)
@@ -229,11 +241,11 @@ namespace LibRLV
 
                 if (isLegal)
                 {
-                    notificationText = $"/unworn legally {wearableType.ToString().ToLower()}";
+                    notificationText = $"/unworn legally {wearableType.ToString().ToLowerInvariant()}";
                 }
                 else
                 {
-                    notificationText = $"/unworn illegally {wearableType.ToString().ToLower()}";
+                    notificationText = $"/unworn illegally {wearableType.ToString().ToLowerInvariant()}";
                 }
             }
             else
@@ -259,11 +271,11 @@ namespace LibRLV
 
                 if (isLegal)
                 {
-                    notificationText = $"/attached legally {attachmentPoint.ToString().ToLower()}";
+                    notificationText = $"/attached legally {attachmentPoint.ToString().ToLowerInvariant()}";
                 }
                 else
                 {
-                    notificationText = $"/attached illegally {attachmentPoint.ToString().ToLower()}";
+                    notificationText = $"/attached illegally {attachmentPoint.ToString().ToLowerInvariant()}";
                 }
             }
             else if (changeType == AttachedItemChange.Detached)
@@ -272,11 +284,11 @@ namespace LibRLV
 
                 if (isLegal)
                 {
-                    notificationText = $"/detached legally {attachmentPoint.ToString().ToLower()}";
+                    notificationText = $"/detached legally {attachmentPoint.ToString().ToLowerInvariant()}";
                 }
                 else
                 {
-                    notificationText = $"/detached illegally {attachmentPoint.ToString().ToLower()}";
+                    notificationText = $"/detached illegally {attachmentPoint.ToString().ToLowerInvariant()}";
                 }
             }
             else

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -51,7 +52,7 @@ namespace LibRLV
 
             if (parts.Length > 0)
             {
-                filter = parts[0].ToLower(System.Globalization.CultureInfo.InvariantCulture);
+                filter = parts[0].ToLowerInvariant();
             }
             if (parts.Length > 1)
             {
@@ -226,21 +227,21 @@ namespace LibRLV
                         {
                             return false;
                         }
-                        response = camAvDistMin.ToString();
+                        response = camAvDistMin.ToString(CultureInfo.InvariantCulture);
                         break;
                     case RLVDataRequest.GetCamAvDistMax:
                         if (!_callbacks.TryGetCamAvDistMax(out var camAvDistMax).Result)
                         {
                             return false;
                         }
-                        response = camAvDistMax.ToString();
+                        response = camAvDistMax.ToString(CultureInfo.InvariantCulture);
                         break;
                     case RLVDataRequest.GetCamFovMin:
                         if (!_callbacks.TryGetCamFovMin(out var camFovMin).Result)
                         {
                             return false;
                         }
-                        response = camFovMin.ToString();
+                        response = camFovMin.ToString(CultureInfo.InvariantCulture);
                         break;
 
                     case RLVDataRequest.GetCamFovMax:
@@ -248,21 +249,21 @@ namespace LibRLV
                         {
                             return false;
                         }
-                        response = camFovMax.ToString();
+                        response = camFovMax.ToString(CultureInfo.InvariantCulture);
                         break;
                     case RLVDataRequest.GetCamZoomMin:
                         if (!_callbacks.TryGetCamZoomMin(out var camZoomMin).Result)
                         {
                             return false;
                         }
-                        response = camZoomMin.ToString();
+                        response = camZoomMin.ToString(CultureInfo.InvariantCulture);
                         break;
                     case RLVDataRequest.GetCamFov:
                         if (!_callbacks.TryGetCamFov(out var camFov).Result)
                         {
                             return false;
                         }
-                        response = camFov.ToString();
+                        response = camFov.ToString(CultureInfo.InvariantCulture);
                         break;
                     case RLVDataRequest.GetGroup:
                         if (!_callbacks.TryGetGroup(out var activeGroupName).Result)
@@ -363,12 +364,12 @@ namespace LibRLV
                     }
                 }
             }
-            else if (rlvMessage.Behavior.StartsWith("getdebug_", StringComparison.InvariantCultureIgnoreCase))
+            else if (rlvMessage.Behavior.StartsWith("getdebug_", StringComparison.OrdinalIgnoreCase))
             {
                 var commandRaw = rlvMessage.Behavior.Substring("getdebug_".Length);
                 response = _callbacks.GetDebugInfoAsync(commandRaw).Result;
             }
-            else if (rlvMessage.Behavior.StartsWith("getenv_", StringComparison.InvariantCultureIgnoreCase))
+            else if (rlvMessage.Behavior.StartsWith("getenv_", StringComparison.OrdinalIgnoreCase))
             {
                 var commandRaw = rlvMessage.Behavior.Substring("getenv_".Length);
                 response = _callbacks.GetEnvironmentAsync(commandRaw).Result;
@@ -491,7 +492,7 @@ namespace LibRLV
             };
 
             var foldersInInv = target.Children
-                .Where(n => !n.Name.StartsWith(".", StringComparison.InvariantCultureIgnoreCase));
+                .Where(n => !n.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase));
 
             foreach (var folder in foldersInInv)
             {
@@ -517,8 +518,8 @@ namespace LibRLV
 
             foreach (var child in root.Children)
             {
-                if (child.Name.StartsWith(".", StringComparison.InvariantCultureIgnoreCase) ||
-                    child.Name.StartsWith("~", StringComparison.InvariantCultureIgnoreCase))
+                if (child.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase) ||
+                    child.Name.StartsWith("~", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -573,7 +574,7 @@ namespace LibRLV
             }
 
             var foldersNamesInInv = target.Children
-                .Where(n => !n.Name.StartsWith(".", StringComparison.InvariantCultureIgnoreCase))
+                .Where(n => !n.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
                 .Select(n => n.Name);
 
             var result = string.Join(",", foldersNamesInInv);
