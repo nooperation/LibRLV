@@ -10,8 +10,8 @@ namespace LibRLV
     {
         internal static readonly ImmutableDictionary<string, RLVRestrictionType> NameToRestrictionMap = new Dictionary<string, RLVRestrictionType>(StringComparer.OrdinalIgnoreCase)
         {
-            { "notify", RLVRestrictionType.Notify }, // Not a restriction - move to internal use
-            { "permissive", RLVRestrictionType.Permissive }, // Not a restriction - exception to a restriction will be ignored if it is not issued by the same object that issued the restriction
+            { "notify", RLVRestrictionType.Notify },
+            { "permissive", RLVRestrictionType.Permissive },
             { "fly", RLVRestrictionType.Fly },
             { "jump", RLVRestrictionType.Jump },
             { "temprun", RLVRestrictionType.TempRun },
@@ -26,69 +26,69 @@ namespace LibRLV
             { "camdistmin", RLVRestrictionType.CamDistMin },
             { "camdrawalphamin", RLVRestrictionType.CamDrawAlphaMin },
             { "camdrawalphamax", RLVRestrictionType.CamDrawAlphaMax },
-            { "setcam_avdistmax", RLVRestrictionType.SetCamAvDistMax }, // synonym of camdistmax
-            { "setcam_avdistmin", RLVRestrictionType.SetCamAvDistMin }, // synonym of camdistmin
+            { "setcam_avdistmax", RLVRestrictionType.SetCamAvDistMax },
+            { "setcam_avdistmin", RLVRestrictionType.SetCamAvDistMin },
             { "camdrawcolor", RLVRestrictionType.CamDrawColor },
             { "camunlock", RLVRestrictionType.CamUnlock },
-            { "setcam_unlock", RLVRestrictionType.SetCamUnlock }, // synonym of camunlock
+            { "setcam_unlock", RLVRestrictionType.SetCamUnlock },
             { "camavdist", RLVRestrictionType.CamAvDist },
             { "camtextures", RLVRestrictionType.CamTextures },
-            { "setcam_textures", RLVRestrictionType.SetCamTextures }, // synonym of camtextures
+            { "setcam_textures", RLVRestrictionType.SetCamTextures },
             { "sendchat", RLVRestrictionType.SendChat },
             { "chatshout", RLVRestrictionType.ChatShout },
             { "chatnormal", RLVRestrictionType.ChatNormal },
             { "chatwhisper", RLVRestrictionType.ChatWhisper },
             { "redirchat", RLVRestrictionType.RedirChat },
-            { "recvchat", RLVRestrictionType.RecvChat }, // Has exception if Guid specified
-            { "recvchat_sec", RLVRestrictionType.RecvChatSec }, // Uses exceptions from recvchat, but only from same object
+            { "recvchat", RLVRestrictionType.RecvChat },
+            { "recvchat_sec", RLVRestrictionType.RecvChatSec },
             { "recvchatfrom", RLVRestrictionType.RecvChatFrom },
             { "sendgesture", RLVRestrictionType.SendGesture },
             { "emote", RLVRestrictionType.Emote },
             { "rediremote", RLVRestrictionType.RedirEmote },
-            { "recvemote", RLVRestrictionType.RecvEmote }, // Has exception if Guid specified
+            { "recvemote", RLVRestrictionType.RecvEmote },
             { "recvemotefrom", RLVRestrictionType.RecvEmoteFrom },
-            { "recvemote_sec", RLVRestrictionType.RecvEmoteSec }, // Uses exceptions from recvemote, but only from same object
-            { "sendchannel", RLVRestrictionType.SendChannel }, // Has exception if channel is specified
-            { "sendchannel_sec", RLVRestrictionType.SendChannelSec },// Uses exceptions from sendchannel, but only from same object
+            { "recvemote_sec", RLVRestrictionType.RecvEmoteSec },
+            { "sendchannel", RLVRestrictionType.SendChannel },
+            { "sendchannel_sec", RLVRestrictionType.SendChannelSec },
             { "sendchannel_except", RLVRestrictionType.SendChannelExcept },
-            { "sendim", RLVRestrictionType.SendIm },  // Has exception if Guid or group name specified, "allgroups" will block all groups
-            { "sendim_sec", RLVRestrictionType.SendImSec }, // Uses exceptions from sendim, but only from same object
-            { "sendimto", RLVRestrictionType.SendImTo }, // "allgroups" for group name will block all groups
-            { "startim", RLVRestrictionType.StartIm },  // Has exception if Guid is specified
+            { "sendim", RLVRestrictionType.SendIm },
+            { "sendim_sec", RLVRestrictionType.SendImSec },
+            { "sendimto", RLVRestrictionType.SendImTo },
+            { "startim", RLVRestrictionType.StartIm },
             { "startimto", RLVRestrictionType.StartImTo },
-            { "recvim", RLVRestrictionType.RecvIm },  // Has exception if Guid or group name specified, "allgroups" will block all groups
-            { "recvim_sec", RLVRestrictionType.RecvImSec }, // Uses exceptions from recvim, but only from same object
-            { "recvimfrom", RLVRestrictionType.RecvImFrom }, // "allgroups" for group name will block all groups
+            { "recvim", RLVRestrictionType.RecvIm },
+            { "recvim_sec", RLVRestrictionType.RecvImSec },
+            { "recvimfrom", RLVRestrictionType.RecvImFrom },
             { "tplocal", RLVRestrictionType.TpLocal },
             { "tplm", RLVRestrictionType.TpLm },
             { "tploc", RLVRestrictionType.TpLoc },
-            { "tplure", RLVRestrictionType.TpLure }, // Has exception if Guid specified
-            { "tplure_sec", RLVRestrictionType.TpLureSec }, // Uses exceptions from tplure, but only from same object
+            { "tplure", RLVRestrictionType.TpLure },
+            { "tplure_sec", RLVRestrictionType.TpLureSec },
             { "sittp", RLVRestrictionType.SitTp },
             { "standtp", RLVRestrictionType.StandTp },
-            { "accepttp", RLVRestrictionType.AcceptTp }, // NOT A RESTRICTION - enables auto-accept teleport. uuid is optional
-            { "accepttprequest", RLVRestrictionType.AcceptTpRequest }, // NOT A RESTRICTION - enables auto-accept teleport request. uuid is optional
-            { "tprequest", RLVRestrictionType.TpRequest }, // Has exception if Guid specified
-            { "tprequest_sec", RLVRestrictionType.TpRequestSec }, // Uses exceptions from tprequest, but only from same object
+            { "accepttp", RLVRestrictionType.AcceptTp },
+            { "accepttprequest", RLVRestrictionType.AcceptTpRequest },
+            { "tprequest", RLVRestrictionType.TpRequest },
+            { "tprequest_sec", RLVRestrictionType.TpRequestSec },
             { "showinv", RLVRestrictionType.ShowInv },
             { "viewnote", RLVRestrictionType.ViewNote },
             { "viewscript", RLVRestrictionType.ViewScript },
             { "viewtexture", RLVRestrictionType.ViewTexture },
-            { "edit", RLVRestrictionType.Edit }, // Has exception if Guid specified
+            { "edit", RLVRestrictionType.Edit },
             { "rez", RLVRestrictionType.Rez },
             { "editobj", RLVRestrictionType.EditObj },
             { "editworld", RLVRestrictionType.EditWorld },
             { "editattach", RLVRestrictionType.EditAttach },
-            { "share", RLVRestrictionType.Share }, // Has exception if Guid specified
-            { "share_sec", RLVRestrictionType.ShareSec }, // Uses exceptions from share, but only from same object
+            { "share", RLVRestrictionType.Share },
+            { "share_sec", RLVRestrictionType.ShareSec },
             { "unsit", RLVRestrictionType.Unsit },
             { "sit", RLVRestrictionType.Sit },
-            { "detach", RLVRestrictionType.Detach }, // sender cannot be detached when 'n', attachment point in general locked if attachment point name specified 
+            { "detach", RLVRestrictionType.Detach },
             { "addattach", RLVRestrictionType.AddAttach },
             { "remattach", RLVRestrictionType.RemAttach },
             { "defaultwear", RLVRestrictionType.DefaultWear },
-            { "addoutfit", RLVRestrictionType.AddOutfit }, // If part is not specified, prevents from wearing anything beyond what the avatar is already wearing. 
-            { "remoutfit", RLVRestrictionType.RemOutfit }, // If part is not specified, prevents from removing anything in what the avatar is wearing. 
+            { "addoutfit", RLVRestrictionType.AddOutfit },
+            { "remoutfit", RLVRestrictionType.RemOutfit },
             { "acceptpermission", RLVRestrictionType.AcceptPermission },
             { "denypermission", RLVRestrictionType.DenyPermission },
             { "unsharedwear", RLVRestrictionType.UnsharedWear },
@@ -99,26 +99,26 @@ namespace LibRLV
             { "detachallthis", RLVRestrictionType.DetachAllThis },
             { "attachthis", RLVRestrictionType.AttachThis },
             { "attachallthis", RLVRestrictionType.AttachAllThis },
-            { "detachthis_except", RLVRestrictionType.DetachThisExcept }, // single folder exception for detachthis 
-            { "detachallthis_except", RLVRestrictionType.DetachAllThisExcept }, // single folder exception for detachallthis 
-            { "attachthis_except", RLVRestrictionType.AttachThisExcept }, // single folder exception for attachthis
-            { "attachallthis_except", RLVRestrictionType.AttachAllThisExcept }, // single folder exception for attachallthis
+            { "detachthis_except", RLVRestrictionType.DetachThisExcept },
+            { "detachallthis_except", RLVRestrictionType.DetachAllThisExcept },
+            { "attachthis_except", RLVRestrictionType.AttachThisExcept },
+            { "attachallthis_except", RLVRestrictionType.AttachAllThisExcept },
             { "fartouch", RLVRestrictionType.FarTouch },
-            { "touchfar", RLVRestrictionType.TouchFar }, // synonym of fartouch
+            { "touchfar", RLVRestrictionType.TouchFar },
             { "touchall", RLVRestrictionType.TouchAll },
-            { "touchworld", RLVRestrictionType.TouchWorld }, // Has exception if Guid specified
+            { "touchworld", RLVRestrictionType.TouchWorld },
             { "touchthis", RLVRestrictionType.TouchThis },
             { "touchme", RLVRestrictionType.TouchMe },
-            { "touchattach", RLVRestrictionType.TouchAttach }, // does not apply to HUD's
-            { "touchattachself", RLVRestrictionType.TouchAttachSelf }, // does not apply to HUD's
-            { "touchattachother", RLVRestrictionType.TouchAttachOther }, // Guid is a single restriction, no Guid = global restriction
-            { "touchhud", RLVRestrictionType.TouchHud }, // Guid is a single restriction, no Guid = global restriction
+            { "touchattach", RLVRestrictionType.TouchAttach },
+            { "touchattachself", RLVRestrictionType.TouchAttachSelf },
+            { "touchattachother", RLVRestrictionType.TouchAttachOther },
+            { "touchhud", RLVRestrictionType.TouchHud },
             { "interact", RLVRestrictionType.Interact },
             { "showworldmap", RLVRestrictionType.ShowWorldMap },
             { "showminimap", RLVRestrictionType.ShowMiniMap },
             { "showloc", RLVRestrictionType.ShowLoc },
-            { "shownames", RLVRestrictionType.ShowNames }, // Has exception if Guid specified
-            { "shownames_sec", RLVRestrictionType.ShowNamesSec }, // Has exception if Guid specified and from the same object
+            { "shownames", RLVRestrictionType.ShowNames },
+            { "shownames_sec", RLVRestrictionType.ShowNamesSec },
             { "shownametags", RLVRestrictionType.ShowNameTags },
             { "shownearby", RLVRestrictionType.ShowNearby },
             { "showhovertextall", RLVRestrictionType.ShowHoverTextAll },
@@ -129,7 +129,7 @@ namespace LibRLV
             { "setdebug", RLVRestrictionType.SetDebug },
             { "setenv", RLVRestrictionType.SetEnv },
             { "allowidle", RLVRestrictionType.AllowIdle },
-        }.ToImmutableDictionary();
+        }.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
 
         internal static readonly ImmutableDictionary<RLVRestrictionType, string> RestrictionToNameMap = NameToRestrictionMap
             .ToImmutableDictionary(k => k.Value, v => v.Key);
@@ -184,6 +184,11 @@ namespace LibRLV
             {
                 var filter = "";
 
+                if (notificationRestriction.Args.Count == 0)
+                {
+                    continue;
+                }
+
                 if (!(notificationRestriction.Args[0] is int notificationChannel))
                 {
                     continue;
@@ -194,7 +199,7 @@ namespace LibRLV
                     filter = notificationRestriction.Args[1].ToString();
                 }
 
-                if (!restrictionName.Contains(filter))
+                if (!restrictionName.Contains(filter.ToLowerInvariant()))
                 {
                     continue;
                 }
@@ -207,7 +212,52 @@ namespace LibRLV
             }
         }
 
-        public ImmutableList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType)
+        public IEnumerable<Guid> GetTrackedObjectIds()
+        {
+            lock (_currentRestrictionsLock)
+            {
+                return _currentRestrictions
+                    .SelectMany(n => n.Value)
+                    .Select(n => n.Sender)
+                    .Distinct()
+                    .ToList();
+            }
+        }
+
+        public void RemoveRestrictionsForObjects(IEnumerable<Guid> objectIds)
+        {
+            var objectIdMap = objectIds.ToImmutableHashSet();
+            var removedRestrictions = new List<RLVRestriction>();
+
+            lock (_currentRestrictionsLock)
+            {
+                var restrictionsToRemove = _currentRestrictions
+                    .SelectMany(n => n.Value)
+                    .Where(n => objectIdMap.Contains(n.Sender))
+                    .ToList();
+
+                foreach (var restriction in restrictionsToRemove)
+                {
+                    var removedRestriction = false;
+
+                    removedRestriction = RemoveRestriction_InternalUnsafe(restriction);
+                    if (removedRestriction)
+                    {
+                        removedRestrictions.Add(restriction);
+                    }
+                }
+            }
+
+            foreach (var restriction in removedRestrictions)
+            {
+                var handler = RestrictionUpdated;
+                handler?.Invoke(this, new RestrictionUpdatedEventArgs(restriction, false, true));
+
+                NotifyRestrictionChange(restriction, false);
+            }
+        }
+
+        public IReadOnlyList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType)
         {
             restrictionType = RLVRestriction.GetRealRestriction(restrictionType);
 
@@ -222,7 +272,7 @@ namespace LibRLV
             }
         }
 
-        public ImmutableList<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null)
+        public IReadOnlyList<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null)
         {
             var restrictions = new List<RLVRestriction>();
 
@@ -232,10 +282,10 @@ namespace LibRLV
                 {
                     if (!RestrictionToNameMap.TryGetValue(item.Key, out var behaviorName))
                     {
-                        throw new Exception($"_currentRestrictions has a behavior '{item.Key}' that is not defined in the reverse behavior map");
+                        throw new KeyNotFoundException($"_currentRestrictions has a behavior '{item.Key}' that is not defined in the reverse behavior map");
                     }
 
-                    if (!behaviorName.Contains(behaviorNameFilter))
+                    if (!behaviorName.Contains(behaviorNameFilter.ToLowerInvariant()))
                     {
                         continue;
                     }
@@ -261,11 +311,7 @@ namespace LibRLV
 
             if (_currentRestrictions.TryGetValue(restriction.Behavior, out var restrictions))
             {
-                if (restrictions.Contains(restriction))
-                {
-                    removedRestriction = true;
-                    restrictions.Remove(restriction);
-                }
+                removedRestriction = restrictions.Remove(restriction);
 
                 if (restrictions.Count == 0)
                 {
@@ -287,7 +333,8 @@ namespace LibRLV
 
             if (removedRestriction)
             {
-                RestrictionUpdated?.Invoke(this, new RestrictionUpdatedEventArgs(restriction, false, true));
+                var handler = RestrictionUpdated;
+                handler?.Invoke(this, new RestrictionUpdatedEventArgs(restriction, false, true));
             }
 
             NotifyRestrictionChange(restriction, false);
@@ -305,16 +352,16 @@ namespace LibRLV
                     _currentRestrictions.Add(newRestriction.Behavior, restrictions);
                 }
 
-                if (!restrictions.Contains(newRestriction))
+                if (restrictions.Add(newRestriction))
                 {
                     restrictionAdded = true;
-                    restrictions.Add(newRestriction);
                 }
             }
 
             if (restrictionAdded)
             {
-                RestrictionUpdated?.Invoke(this, new RestrictionUpdatedEventArgs(newRestriction, true, false));
+                var handler = RestrictionUpdated;
+                handler?.Invoke(this, new RestrictionUpdatedEventArgs(newRestriction, true, false));
             }
 
             NotifyRestrictionChange(newRestriction, true);
@@ -323,7 +370,7 @@ namespace LibRLV
         internal bool ProcessClearCommand(RLVMessage command)
         {
             var filteredRestrictions = RestrictionToNameMap
-                .Where(n => n.Value.Contains(command.Param))
+                .Where(n => n.Value.Contains(command.Param.ToLowerInvariant()))
                 .Select(n => n.Key)
                 .ToList();
 
@@ -356,7 +403,9 @@ namespace LibRLV
 
             foreach (var removedRestriction in removedRestrictions)
             {
-                RestrictionUpdated?.Invoke(this, new RestrictionUpdatedEventArgs(removedRestriction, false, true));
+                var handler = RestrictionUpdated;
+                handler?.Invoke(this, new RestrictionUpdatedEventArgs(removedRestriction, false, true));
+
                 NotifyRestrictionChange(removedRestriction, false);
             }
 
@@ -388,41 +437,44 @@ namespace LibRLV
             if (isAddingRestriction)
             {
                 AddRestriction(newCommand);
-
-                switch (newCommand.Behavior)
-                {
-                    case RLVRestrictionType.DetachThis:
-                    case RLVRestrictionType.DetachAllThis:
-                    case RLVRestrictionType.AttachThis:
-                    case RLVRestrictionType.AttachAllThis:
-                        _lockedFolderManager.ProcessFolderRestrictions(newCommand);
-                        break;
-                    case RLVRestrictionType.DetachThisExcept:
-                    case RLVRestrictionType.DetachAllThisExcept:
-                    case RLVRestrictionType.AttachThisExcept:
-                    case RLVRestrictionType.AttachAllThisExcept:
-                        _lockedFolderManager.ProcessFolderException(newCommand);
-                        break;
-                }
             }
             else
             {
                 RemoveRestriction(newCommand);
+            }
 
-                switch (newCommand.Behavior)
+            switch (newCommand.Behavior)
+            {
+                case RLVRestrictionType.DetachThis:
+                case RLVRestrictionType.DetachAllThis:
+                case RLVRestrictionType.AttachThis:
+                case RLVRestrictionType.AttachAllThis:
                 {
-                    case RLVRestrictionType.DetachThis:
-                    case RLVRestrictionType.DetachAllThis:
-                    case RLVRestrictionType.AttachThis:
-                    case RLVRestrictionType.AttachAllThis:
+                    if (isAddingRestriction)
+                    {
+                        _lockedFolderManager.ProcessFolderRestrictions(newCommand);
+                    }
+                    else
+                    {
                         _lockedFolderManager.RebuildLockedFolders();
-                        break;
-                    case RLVRestrictionType.DetachThisExcept:
-                    case RLVRestrictionType.DetachAllThisExcept:
-                    case RLVRestrictionType.AttachThisExcept:
-                    case RLVRestrictionType.AttachAllThisExcept:
+                    }
+                    break;
+                }
+                case RLVRestrictionType.DetachThisExcept:
+                case RLVRestrictionType.DetachAllThisExcept:
+                case RLVRestrictionType.AttachThisExcept:
+                case RLVRestrictionType.AttachAllThisExcept:
+                {
+                    if (isAddingRestriction)
+                    {
+                        _lockedFolderManager.ProcessFolderException(newCommand);
+                    }
+                    else
+                    {
                         _lockedFolderManager.RebuildLockedFolders();
-                        break;
+
+                    }
+                    break;
                 }
             }
 
@@ -434,7 +486,7 @@ namespace LibRLV
             return _lockedFolderManager.TryGetLockedFolder(folderId, out lockedFolder);
         }
 
-        public ImmutableDictionary<Guid, LockedFolderPublic> GetLockedFolders()
+        public IReadOnlyDictionary<Guid, LockedFolderPublic> GetLockedFolders()
         {
             return _lockedFolderManager.GetLockedFolders();
         }

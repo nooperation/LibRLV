@@ -7,6 +7,7 @@ namespace LibRLV
     public class RLVPermissionsService
     {
         private readonly IRestrictionProvider _restrictionProvider;
+        private static readonly char[] anyOf = new char[] { '(', ')', '"', '-', '*', '=', '_', '^' };
 
         internal RLVPermissionsService(IRestrictionProvider restrictionProvider)
         {
@@ -132,23 +133,23 @@ namespace LibRLV
 
         public bool CanFly()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Fly).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Fly).Count == 0;
         }
         public bool CanJump()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Jump).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Jump).Count == 0;
         }
         public bool CanTempRun()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.TempRun).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.TempRun).Count == 0;
         }
         public bool CanAlwaysRun()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.AlwaysRun).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.AlwaysRun).Count == 0;
         }
         public bool CanUnsit()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Unsit).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Unsit).Count == 0;
         }
         public bool CanSit()
         {
@@ -157,18 +158,18 @@ namespace LibRLV
                 return false;
             }
 
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Sit).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Sit).Count == 0;
         }
 
         #region TP
 
         public bool CanTpLm()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.TpLm).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.TpLm).Count == 0;
         }
         public bool CanTpLoc()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.TpLoc).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.TpLoc).Count == 0;
         }
         public bool CanSitTp(out float sitTpDist)
         {
@@ -180,7 +181,7 @@ namespace LibRLV
         }
         public bool CanStandTp()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.StandTp).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.StandTp).Count == 0;
         }
 
         public bool CanTPLure(Guid? userId)
@@ -234,65 +235,65 @@ namespace LibRLV
 
         public bool CanShowInv()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowInv).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ShowInv).Count == 0;
         }
         public bool CanViewNote()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ViewNote).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ViewNote).Count == 0;
         }
         public bool CanViewScript()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ViewScript).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ViewScript).Count == 0;
         }
         public bool CanViewTexture()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ViewTexture).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ViewTexture).Count == 0;
         }
 
         public bool CanDefaultWear()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.DefaultWear).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.DefaultWear).Count == 0;
         }
         public bool CanSetGroup()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SetGroup).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SetGroup).Count == 0;
         }
         public bool CanSetDebug()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SetDebug).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SetDebug).Count == 0;
         }
         public bool CanSetEnv()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SetEnv).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SetEnv).Count == 0;
         }
         public bool CanAllowIdle()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.AllowIdle).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.AllowIdle).Count == 0;
         }
         public bool CanInteract()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Interact).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Interact).Count == 0;
         }
         public bool CanShowWorldMap()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowWorldMap).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ShowWorldMap).Count == 0;
         }
         public bool CanShowMiniMap()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowMiniMap).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ShowMiniMap).Count == 0;
         }
         public bool CanShowLoc()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowLoc).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ShowLoc).Count == 0;
         }
         public bool CanShowNearby()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowNearby).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ShowNearby).Count == 0;
         }
 
         public bool IsAutoDenyPermissions()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.DenyPermission).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.DenyPermission).Count != 0;
         }
 
         #region Camera
@@ -335,27 +336,27 @@ namespace LibRLV
 
         public bool CanChatShout()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ChatShout).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ChatShout).Count == 0;
         }
         public bool CanChatWhisper()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ChatWhisper).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ChatWhisper).Count == 0;
         }
         public bool CanChatNormal()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.ChatNormal).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ChatNormal).Count == 0;
         }
         public bool CanSendChat()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SendChat).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SendChat).Count == 0;
         }
         public bool CanEmote()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Emote).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Emote).Count == 0;
         }
         public bool CanSendGesture()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SendGesture).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SendGesture).Count == 0;
         }
 
         public bool IsRedirChat(out List<int> channels)
@@ -420,7 +421,8 @@ namespace LibRLV
             foreach (var restriction in sendChannelRestrictionsSecure)
             {
                 var hasSecureException = channelExceptions
-                    .Where(n => n.Sender == restriction.Sender).Any();
+                    .Where(n => n.Sender == restriction.Sender)
+                    .Any();
                 if (hasSecureException)
                 {
                     continue;
@@ -454,8 +456,8 @@ namespace LibRLV
                 // @sendchat=<y/n>
                 //      @emote=<rem/add>
 
-                var canEmote = !_restrictionProvider.GetRestrictions(RLVRestrictionType.Emote).Any();
-                if (message.StartsWith("/me ") && !canEmote)
+                var canEmote = _restrictionProvider.GetRestrictions(RLVRestrictionType.Emote).Count == 0;
+                if (message.StartsWith("/me ", StringComparison.InvariantCultureIgnoreCase) && !canEmote)
                 {
                     return false;
                 }
@@ -469,12 +471,12 @@ namespace LibRLV
                     //  and will be discarded. When a period ('.') is present, the rest of the
                     //  message is discarded. 
 
-                    if (message.IndexOfAny(new char[] { '(', ')', '"', '-', '*', '=', '_', '^' }) != -1)
+                    if (message.IndexOfAny(anyOf) != -1)
                     {
                         return false;
                     }
 
-                    if (!message.StartsWith("/"))
+                    if (!message.StartsWith("/", StringComparison.InvariantCulture))
                     {
                         return false;
                     }
@@ -515,13 +517,13 @@ namespace LibRLV
                 return false;
             }
 
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.AcceptPermission).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.AcceptPermission).Count != 0;
         }
 
 
         public bool IsPermissive()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Permissive).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Permissive).Count == 0;
         }
 
         public bool CanRez()
@@ -531,7 +533,7 @@ namespace LibRLV
                 return false;
             }
 
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.Rez).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Rez).Count == 0;
         }
 
         public enum ObjectLocation
@@ -561,7 +563,7 @@ namespace LibRLV
                 // @editworld=<y/n>
                 var hasEditWorldRestriction = _restrictionProvider
                     .GetRestrictions(RLVRestrictionType.EditWorld)
-                    .Any();
+                    .Count != 0;
                 if (hasEditWorldRestriction)
                 {
                     return false;
@@ -573,7 +575,7 @@ namespace LibRLV
                 // @editattach=<y/n>
                 var hasEditAttachRestriction = _restrictionProvider
                     .GetRestrictions(RLVRestrictionType.EditAttach)
-                    .Any();
+                    .Count != 0;
                 if (hasEditAttachRestriction)
                 {
                     return false;
@@ -605,7 +607,7 @@ namespace LibRLV
         private bool CanTouchAttachment(bool isAttachedToSelf, Guid? otherUserId)
         {
             // @touchattach
-            if (_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAttach).Any())
+            if (_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAttach).Count != 0)
             {
                 return false;
             }
@@ -613,7 +615,7 @@ namespace LibRLV
             if (isAttachedToSelf)
             {
                 // @touchattachself
-                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAttachSelf).Any())
+                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAttachSelf).Count != 0)
                 {
                     return false;
                 }
@@ -680,7 +682,7 @@ namespace LibRLV
             if (location != TouchLocation.Hud)
             {
                 // @TouchAll
-                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAll).Any())
+                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAll).Count != 0)
                 {
                     return false;
                 }
@@ -731,7 +733,7 @@ namespace LibRLV
         public bool CanShowHoverText(HoverTextLocation location, Guid? objectId)
         {
             // @showhovertextall
-            if (_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowHoverTextAll).Any())
+            if (_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowHoverTextAll).Count != 0)
             {
                 return false;
             }
@@ -748,7 +750,7 @@ namespace LibRLV
             if (location == HoverTextLocation.Hud)
             {
                 // @showhovertexthud
-                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowHoverTextHud).Any())
+                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowHoverTextHud).Count != 0)
                 {
                     return false;
                 }
@@ -756,7 +758,7 @@ namespace LibRLV
             else if (location == HoverTextLocation.World)
             {
                 // @showhovertexthud
-                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowHoverTextWorld).Any())
+                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowHoverTextWorld).Count != 0)
                 {
                     return false;
                 }
@@ -768,19 +770,19 @@ namespace LibRLV
         #region Attach / Detach
         private bool CanUnsharedWear()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.UnsharedWear).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.UnsharedWear).Count == 0;
         }
         private bool CanUnsharedUnwear()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.UnsharedUnwear).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.UnsharedUnwear).Count == 0;
         }
         private bool CanSharedWear()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SharedWear).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SharedWear).Count == 0;
         }
         private bool CanSharedUnwear()
         {
-            return !_restrictionProvider.GetRestrictions(RLVRestrictionType.SharedUnwear).Any();
+            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SharedUnwear).Count == 0;
         }
 
         private bool CanAttachWearable(WearableType? typeToRemove)

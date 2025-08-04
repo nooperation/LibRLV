@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 
 namespace LibRLV
 {
     public interface IRestrictionProvider
     {
-        ImmutableList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType);
-        ImmutableList<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null);
+        IReadOnlyList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType);
+        IReadOnlyList<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null);
         bool TryGetLockedFolder(Guid folderId, out LockedFolderPublic lockedFolder);
-        ImmutableDictionary<Guid, LockedFolderPublic> GetLockedFolders();
+        IReadOnlyDictionary<Guid, LockedFolderPublic> GetLockedFolders();
     }
 }
