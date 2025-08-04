@@ -32,11 +32,11 @@ namespace LibRLV.EventArguments
             }
         }
 
-        public AttachmentEventArgs(List<AttachmentRequest> itemsToAttach)
+        public AttachmentEventArgs(IList<AttachmentRequest> itemsToAttach)
         {
             ItemsToAttach = itemsToAttach;
         }
 
-        public List<AttachmentRequest> ItemsToAttach { get; }
+        public IList<AttachmentRequest> ItemsToAttach { get; }
     }
 }

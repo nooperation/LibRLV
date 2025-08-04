@@ -41,7 +41,7 @@ namespace LibRLV
                 { "getpath", RLVDataRequest.GetPath },
                 { "getpathnew", RLVDataRequest.GetPathNew },
                 { "getgroup", RLVDataRequest.GetGroup }
-            }.ToImmutableDictionary();
+            }.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
         }
 
         private string HandleGetStatus(string option, Guid? sender)
@@ -63,7 +63,7 @@ namespace LibRLV
             StringBuilder sb = new StringBuilder();
             foreach (var restriction in restrictions)
             {
-                if (!RLVRestrictionManager.RestrictionToNameMap.TryGetValue(restriction.OriginalBehavior, out var behaviorName))
+                if (!RLVRestrictionManager.TryGetRestrictionNameFromType(restriction.OriginalBehavior, out var behaviorName))
                 {
                     continue;
                 }
@@ -613,7 +613,7 @@ namespace LibRLV
             return sb.ToString();
         }
 
-        internal bool ProcessInstantMessageCommand(string message, Guid senderId, string senderName)
+        internal bool ProcessInstantMessageCommand(string message, Guid senderId)
         {
             switch (message)
             {

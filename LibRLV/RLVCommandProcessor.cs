@@ -116,7 +116,8 @@ namespace LibRLV
                 return false;
             }
 
-            SetDebug?.Invoke(this, new SetSettingEventArgs(settingName, command.Option));
+            var handler = SetDebug;
+            handler?.Invoke(this, new SetSettingEventArgs(settingName, command.Option));
 
             return true;
         }
@@ -135,7 +136,8 @@ namespace LibRLV
                 return false;
             }
 
-            SetEnv?.Invoke(this, new SetSettingEventArgs(settingName, command.Option));
+            var handler = SetEnv;
+            handler?.Invoke(this, new SetSettingEventArgs(settingName, command.Option));
 
             return true;
         }
@@ -156,11 +158,13 @@ namespace LibRLV
 
             if (Guid.TryParse(argParts[0], out var groupId))
             {
-                SetGroup?.Invoke(this, new SetGroupEventArgs(groupId, groupRole));
+                var handler = SetGroup;
+                handler?.Invoke(this, new SetGroupEventArgs(groupId, groupRole));
             }
             else
             {
-                SetGroup?.Invoke(this, new SetGroupEventArgs(argParts[0], groupRole));
+                var handler = SetGroup;
+                handler?.Invoke(this, new SetGroupEventArgs(argParts[0], groupRole));
             }
 
             return true;
@@ -273,15 +277,21 @@ namespace LibRLV
 
             if (!inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
             {
-                Attach?.Invoke(this, new AttachmentEventArgs(new List<AttachmentEventArgs.AttachmentRequest>()));
+                var handler = Attach;
+                handler?.Invoke(this, new AttachmentEventArgs(new List<AttachmentEventArgs.AttachmentRequest>()));
+
                 return false;
             }
+            else
+            {
+                var itemsToAttach = new List<AttachmentEventArgs.AttachmentRequest>();
+                CollectItemsToAttach(folder, replaceExistingAttachments, recursive, itemsToAttach);
 
-            var itemsToAttach = new List<AttachmentEventArgs.AttachmentRequest>();
-            CollectItemsToAttach(folder, replaceExistingAttachments, recursive, itemsToAttach);
+                var handler = Attach;
+                handler?.Invoke(this, new AttachmentEventArgs(itemsToAttach));
 
-            Attach?.Invoke(this, new AttachmentEventArgs(itemsToAttach));
-            return true;
+                return true;
+            }
         }
 
         private bool HandleAttachThis(RLVMessage command, bool replaceExistingAttachments, bool recursive)
@@ -320,7 +330,9 @@ namespace LibRLV
                 CollectItemsToAttach(item, replaceExistingAttachments, recursive, itemsToAttach);
             }
 
-            Attach?.Invoke(this, new AttachmentEventArgs(itemsToAttach));
+            var handler = Attach;
+            handler?.Invoke(this, new AttachmentEventArgs(itemsToAttach));
+
             return true;
         }
 
@@ -414,7 +426,9 @@ namespace LibRLV
                 return false;
             }
 
-            Detach?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
+            var handler = Detach;
+            handler?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
+
             return true;
         }
 
@@ -434,7 +448,9 @@ namespace LibRLV
             var itemIdsToDetach = new List<Guid>();
             CollectItemsToDetach(folder, inventoryMap, true, itemIdsToDetach);
 
-            Detach?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
+            var handler = Detach;
+            handler?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
+
             return true;
         }
 
@@ -483,7 +499,9 @@ namespace LibRLV
                 CollectItemsToDetach(item, inventoryMap, recursive, itemIdsToDetach);
             }
 
-            Detach?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
+            var handler = Detach;
+            handler?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
+
             return true;
         }
 
@@ -505,7 +523,9 @@ namespace LibRLV
                 }
             }
 
-            Detach?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
+            var handler = Detach;
+            handler?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
+
             return true;
         }
 
@@ -554,7 +574,9 @@ namespace LibRLV
                 .Distinct()
                 .ToList();
 
-            RemOutfit?.Invoke(this, new RemOutfitEventArgs(itemIdsToDetach));
+            var handler = RemOutfit;
+            handler?.Invoke(this, new RemOutfitEventArgs(itemIdsToDetach));
+
             return true;
         }
 
@@ -565,7 +587,9 @@ namespace LibRLV
                 return false;
             }
 
-            Unsit?.Invoke(this, new EventArgs());
+            var handler = Unsit;
+            handler?.Invoke(this, new EventArgs());
+
             return true;
         }
 
@@ -576,7 +600,9 @@ namespace LibRLV
                 return false;
             }
 
-            SitGround?.Invoke(this, new EventArgs());
+            var handler = SitGround;
+            handler?.Invoke(this, new EventArgs());
+
             return true;
         }
 
@@ -587,7 +613,9 @@ namespace LibRLV
                 return false;
             }
 
-            SetRot?.Invoke(this, new SetRotEventArgs(angleInRadians));
+            var handler = SetRot;
+            handler?.Invoke(this, new SetRotEventArgs(angleInRadians));
+
             return true;
         }
 
@@ -617,7 +645,9 @@ namespace LibRLV
                 deltaInMeters = 0;
             }
 
-            AdjustHeight?.Invoke(this, new AdjustHeightEventArgs(distance, factor, deltaInMeters));
+            var handler = AdjustHeight;
+            handler?.Invoke(this, new AdjustHeightEventArgs(distance, factor, deltaInMeters));
+
             return true;
         }
 
@@ -634,7 +664,9 @@ namespace LibRLV
                 return false;
             }
 
-            SetCamFOV?.Invoke(this, new SetCamFOVEventArgs(fov));
+            var handler = SetCamFOV;
+            handler?.Invoke(this, new SetCamFOVEventArgs(fov));
+
             return true;
         }
 
@@ -668,7 +700,9 @@ namespace LibRLV
                 }
             }
 
-            Sit?.Invoke(this, new SitEventArgs(sitTarget));
+            var handler = Sit;
+            handler?.Invoke(this, new SitEventArgs(sitTarget));
+
             return true;
         }
 
@@ -718,7 +752,9 @@ namespace LibRLV
                     return false;
                 }
 
-                TpTo?.Invoke(this, new TpToEventArgs(x, y, z, null, lookat));
+                var handler = TpTo;
+                handler?.Invoke(this, new TpToEventArgs(x, y, z, null, lookat));
+
                 return true;
             }
             else if (locationArgs.Length == 4)
@@ -738,7 +774,9 @@ namespace LibRLV
                     return false;
                 }
 
-                TpTo?.Invoke(this, new TpToEventArgs(x, y, z, regionName, lookat));
+                var handler = TpTo;
+                handler?.Invoke(this, new TpToEventArgs(x, y, z, regionName, lookat));
+
                 return true;
             }
 

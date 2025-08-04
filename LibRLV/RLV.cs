@@ -32,7 +32,7 @@ namespace LibRLV
         internal IRLVCallbacks Callbacks { get; }
         internal RLVGetRequestHandler GetRequestHandler { get; }
 
-        private readonly Regex RLVRegexPattern = new Regex(@"(?<behavior>[^:=]+)(:(?<option>[^=]*))?=(?<param>.+)", RegexOptions.Compiled);
+        private readonly Regex _rlvRegexPattern = new Regex(@"(?<behavior>[^:=]+)(:(?<option>[^=]*))?=(?<param>.+)", RegexOptions.Compiled);
 
         public RLV(IRLVCallbacks callbacks, bool enabled)
         {
@@ -97,7 +97,7 @@ namespace LibRLV
                 });
             }
 
-            var match = RLVRegexPattern.Match(message);
+            var match = _rlvRegexPattern.Match(message);
             if (!match.Success)
             {
                 return false;
@@ -135,7 +135,7 @@ namespace LibRLV
             return result;
         }
 
-        public bool ProcessInstantMessage(string message, Guid senderId, string senderName)
+        public bool ProcessInstantMessage(string message, Guid senderId)
         {
             if (!EnableInstantMessageProcessing || !Enabled || !message.StartsWith("@", StringComparison.OrdinalIgnoreCase))
             {
@@ -147,7 +147,7 @@ namespace LibRLV
                 return false;
             }
 
-            return GetRequestHandler.ProcessInstantMessageCommand(message.ToLowerInvariant(), senderId, senderName);
+            return GetRequestHandler.ProcessInstantMessageCommand(message.ToLowerInvariant(), senderId);
         }
 
         public void ReportSendPublicMessage(string message)

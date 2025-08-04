@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -25,7 +26,7 @@ namespace LibRLV
             {"alpha", WearableType.Alpha},
             {"tattoo", WearableType.Tattoo},
             {"physics", WearableType.Physics },
-        }.ToImmutableDictionary();
+        }.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
 
         internal static readonly ImmutableDictionary<string, AttachmentPoint> RLVAttachmentPointMap = new Dictionary<string, AttachmentPoint>()
         {
@@ -86,7 +87,7 @@ namespace LibRLV
             {"groin", AttachmentPoint.Groin},
             {"left hind foot", AttachmentPoint.LeftHindFoot},
             {"right hind foot", AttachmentPoint.RightHindFoot},
-        }.ToImmutableDictionary();
+        }.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
 
         private static readonly Regex _attachmentPointTagRegex = new Regex(@"\((?<tag>[^\)]+)\)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         public static bool TryGetAttachmentPointFromItemName(string itemName, out AttachmentPoint attachmentPoint)

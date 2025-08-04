@@ -47,7 +47,7 @@ namespace LibRLV.Tests
         {
             _rlv.EnableInstantMessageProcessing = true;
 
-            _rlv.ProcessInstantMessage("@version", _sender.Id, _sender.Name);
+            _rlv.ProcessInstantMessage("@version", _sender.Id);
 
             _callbacks.Verify(c =>
                 c.SendInstantMessageAsync(_sender.Id, RLV.RLVVersion, It.IsAny<CancellationToken>()),
@@ -145,7 +145,7 @@ namespace LibRLV.Tests
 
             SeedBlacklist(seed);
 
-            _rlv.ProcessInstantMessage(command, _sender.Id, _sender.Name);
+            _rlv.ProcessInstantMessage(command, _sender.Id);
 
             _callbacks.Verify(c =>
                 c.SendInstantMessageAsync(_sender.Id, expected, It.IsAny<CancellationToken>()),
@@ -778,23 +778,6 @@ namespace LibRLV.Tests
         #endregion
 
         //
-        // Movement
-        //
-
-        //
-        // Camera and view
-        //
-
-        //
-        // Chat, Emotes and Instant Messages
-        //
-
-        //
-        // Teleportation
-        //
-
-
-        //
         // Inventory, Editing and Rezzing
         //
 
@@ -1016,15 +999,6 @@ namespace LibRLV.Tests
         }
 
         #endregion
-
-        //
-        // Sitting
-        //
-
-
-        //
-        // Clothing and Attachments
-        //
 
         //
         // Touch
@@ -1417,10 +1391,6 @@ namespace LibRLV.Tests
         }
 
         #endregion
-
-        //
-        // Viewer Control
-        //
 
         //
         // Unofficial Commands

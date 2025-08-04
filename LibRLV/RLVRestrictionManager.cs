@@ -8,7 +8,7 @@ namespace LibRLV
 {
     public partial class RLVRestrictionManager : IRestrictionProvider
     {
-        internal static readonly ImmutableDictionary<string, RLVRestrictionType> NameToRestrictionMap = new Dictionary<string, RLVRestrictionType>(StringComparer.OrdinalIgnoreCase)
+        private static readonly ImmutableDictionary<string, RLVRestrictionType> _nameToRestrictionMap = new Dictionary<string, RLVRestrictionType>(StringComparer.OrdinalIgnoreCase)
         {
             { "notify", RLVRestrictionType.Notify },
             { "permissive", RLVRestrictionType.Permissive },
@@ -131,10 +131,8 @@ namespace LibRLV
             { "allowidle", RLVRestrictionType.AllowIdle },
         }.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
 
-        internal static readonly ImmutableDictionary<RLVRestrictionType, string> RestrictionToNameMap = NameToRestrictionMap
+        private static readonly ImmutableDictionary<RLVRestrictionType, string> _restrictionToNameMap = _nameToRestrictionMap
             .ToImmutableDictionary(k => k.Value, v => v.Key);
-
-        public event EventHandler<RestrictionUpdatedEventArgs> RestrictionUpdated;
 
         private readonly Dictionary<RLVRestrictionType, HashSet<RLVRestriction>> _currentRestrictions = new Dictionary<RLVRestrictionType, HashSet<RLVRestriction>>();
         private readonly object _currentRestrictionsLock = new object();
@@ -142,15 +140,27 @@ namespace LibRLV
         private readonly IRLVCallbacks _callbacks;
         private readonly LockedFolderManager _lockedFolderManager;
 
+        public event EventHandler<RestrictionUpdatedEventArgs> RestrictionUpdated;
+
         internal RLVRestrictionManager(IRLVCallbacks callbacks)
         {
             _callbacks = callbacks;
             _lockedFolderManager = new LockedFolderManager(callbacks, this);
         }
 
+        internal static bool TryGetRestrictionFromName(string name, out RLVRestrictionType restrictionType)
+        {
+            return _nameToRestrictionMap.TryGetValue(name, out restrictionType);
+        }
+
+        internal static bool TryGetRestrictionNameFromType(RLVRestrictionType restrictionType, out string name)
+        {
+            return _restrictionToNameMap.TryGetValue(restrictionType, out name);
+        }
+
         private void NotifyRestrictionChange(RLVRestriction restriction, bool wasAdded)
         {
-            if (!RestrictionToNameMap.TryGetValue(restriction.OriginalBehavior, out var restrictionName))
+            if (!TryGetRestrictionNameFromType(restriction.OriginalBehavior, out var restrictionName))
             {
                 return;
             }
@@ -280,7 +290,7 @@ namespace LibRLV
             {
                 foreach (var item in _currentRestrictions)
                 {
-                    if (!RestrictionToNameMap.TryGetValue(item.Key, out var behaviorName))
+                    if (!TryGetRestrictionNameFromType(item.Key, out var behaviorName))
                     {
                         throw new KeyNotFoundException($"_currentRestrictions has a behavior '{item.Key}' that is not defined in the reverse behavior map");
                     }
@@ -369,7 +379,7 @@ namespace LibRLV
 
         internal bool ProcessClearCommand(RLVMessage command)
         {
-            var filteredRestrictions = RestrictionToNameMap
+            var filteredRestrictions = _restrictionToNameMap
                 .Where(n => n.Value.Contains(command.Param.ToLowerInvariant()))
                 .Select(n => n.Key)
                 .ToList();
@@ -422,7 +432,7 @@ namespace LibRLV
 
         internal bool ProcessRestrictionCommand(RLVMessage message, string option, bool isAddingRestriction)
         {
-            if (!NameToRestrictionMap.TryGetValue(message.Behavior, out var behavior))
+            if (!TryGetRestrictionFromName(message.Behavior, out var behavior))
             {
                 return false;
             }
