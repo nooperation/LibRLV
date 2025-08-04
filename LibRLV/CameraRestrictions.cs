@@ -45,7 +45,7 @@ namespace LibRLV
             GetCamDrawColor(restrictionProvider, out var camDrawColor);
             GetCamTexture(restrictionProvider, out var camtextures);
 
-            IsLocked = restrictionProvider.GetRestrictions(RLVRestrictionType.SetCamUnlock).Any();
+            IsLocked = restrictionProvider.GetRestrictions(RLVRestrictionType.SetCamUnlock).Count != 0;
             ZoomMin = camZoomMin;
             FovMin = setCamFovMin;
             AvDistMin = setCamAvDistMin;

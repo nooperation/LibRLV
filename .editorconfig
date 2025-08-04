@@ -11,6 +11,25 @@ insert_final_newline = true
 indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true
+dotnet_style_operator_placement_when_wrapping = end_of_line
+tab_width = 4
+end_of_line = crlf
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+dotnet_style_prefer_auto_properties = true:suggestion
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
+dotnet_style_prefer_conditional_expression_over_assignment = false:silent
+dotnet_style_prefer_conditional_expression_over_return = false:silent
+dotnet_style_explicit_tuple_names = true:suggestion
+dotnet_style_prefer_inferred_tuple_names = false:suggestion
+dotnet_style_prefer_inferred_anonymous_type_member_names = false:silent
+dotnet_style_prefer_compound_assignment = true:suggestion
+dotnet_style_prefer_simplified_interpolation = true:suggestion
+dotnet_style_prefer_collection_expression = when_types_loosely_match:suggestion
+dotnet_style_namespace_match_folder = true:suggestion
 
 # C# files
 [*.cs]
@@ -58,7 +77,7 @@ dotnet_naming_style.pascal_case_style.capitalization = pascal_case
 # static fields should have s_ prefix
 dotnet_naming_rule.static_fields_should_have_prefix.severity = suggestion
 dotnet_naming_rule.static_fields_should_have_prefix.symbols  = static_fields
-dotnet_naming_rule.static_fields_should_have_prefix.style = static_prefix_style
+dotnet_naming_rule.static_fields_should_have_prefix.style = camel_case_underscore_style
 dotnet_naming_symbols.static_fields.applicable_kinds   = field
 dotnet_naming_symbols.static_fields.required_modifiers = static
 dotnet_naming_symbols.static_fields.applicable_accessibilities = private, internal, private_protected
@@ -166,6 +185,8 @@ csharp_style_unused_value_expression_statement_preference = unused_local_variabl
 
 # IDE0058: Expression value is never used
 dotnet_diagnostic.IDE0058.severity = none
+csharp_style_prefer_primary_constructors = true:suggestion
+csharp_prefer_system_threading_lock = true:suggestion
 
 # C++ Files
 [*.{cpp,h,in}]

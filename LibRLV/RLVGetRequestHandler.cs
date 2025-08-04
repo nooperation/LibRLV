@@ -13,6 +13,8 @@ namespace LibRLV
         private readonly IRestrictionProvider _restrictions;
         private readonly IBlacklistProvider _blacklist;
         private readonly IRLVCallbacks _callbacks;
+        private static readonly string[] _findFolderSeparator = new[] { "&&" };
+        private static readonly char[] _restrictionOptionSeparator = new[] { ';' };
 
         internal RLVGetRequestHandler(IBlacklistProvider blacklist, IRestrictionProvider restrictions, IRLVCallbacks callbacks)
         {
@@ -49,7 +51,7 @@ namespace LibRLV
 
             if (parts.Length > 0)
             {
-                filter = parts[0].ToLower();
+                filter = parts[0].ToLower(System.Globalization.CultureInfo.InvariantCulture);
             }
             if (parts.Length > 1)
             {
@@ -207,8 +209,6 @@ namespace LibRLV
 
             if (RLVDataRequestToNameMap.TryGetValue(rlvMessage.Behavior, out var name))
             {
-                var args = new List<object>();
-
                 switch (name)
                 {
                     case RLVDataRequest.GetSitId:
@@ -315,8 +315,7 @@ namespace LibRLV
                         var findFolderParts = rlvMessage.Option.Split(';');
                         var separator = ",";
                         var searchTerms = findFolderParts[0]
-                            .Split(new[] { "&&" }, StringSplitOptions.RemoveEmptyEntries)
-                            .ToList();
+                            .Split(_findFolderSeparator, StringSplitOptions.RemoveEmptyEntries);
 
                         if (findFolderParts.Length > 1)
                         {
@@ -332,7 +331,7 @@ namespace LibRLV
                         // [] | [uuid | layer | attachpt ]
 
                         var result = new List<object>();
-                        var parsedOptions = rlvMessage.Option.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                        var parsedOptions = rlvMessage.Option.Split(_restrictionOptionSeparator, StringSplitOptions.RemoveEmptyEntries).ToList();
 
                         if (parsedOptions.Count > 1)
                         {
@@ -364,12 +363,12 @@ namespace LibRLV
                     }
                 }
             }
-            else if (rlvMessage.Behavior.StartsWith("getdebug_"))
+            else if (rlvMessage.Behavior.StartsWith("getdebug_", StringComparison.InvariantCultureIgnoreCase))
             {
                 var commandRaw = rlvMessage.Behavior.Substring("getdebug_".Length);
                 response = _callbacks.GetDebugInfoAsync(commandRaw).Result;
             }
-            else if (rlvMessage.Behavior.StartsWith("getenv_"))
+            else if (rlvMessage.Behavior.StartsWith("getenv_", StringComparison.InvariantCultureIgnoreCase))
             {
                 var commandRaw = rlvMessage.Behavior.Substring("getenv_".Length);
                 response = _callbacks.GetEnvironmentAsync(commandRaw).Result;
@@ -400,7 +399,7 @@ namespace LibRLV
                 return $"{FolderName}|{CountIndicator}";
             }
         }
-        private void GetInvWornInfo_Internal(InventoryTree folder, bool recursive, ref int totalItems, ref int totalItemsWorn)
+        private static void GetInvWornInfo_Internal(InventoryTree folder, bool recursive, ref int totalItems, ref int totalItemsWorn)
         {
             totalItemsWorn += folder.Items.Count(n => n.AttachedTo != null || n.WornOn != null);
             totalItems += folder.Items.Count;
@@ -414,7 +413,7 @@ namespace LibRLV
             }
         }
 
-        private string GetInvWornInfo(InventoryTree folder)
+        private static string GetInvWornInfo(InventoryTree folder)
         {
             // 0 : No item is present in that folder
             // 1 : Some items are present in that folder, but none of them is worn
@@ -492,7 +491,7 @@ namespace LibRLV
             };
 
             var foldersInInv = target.Children
-                .Where(n => !n.Name.StartsWith("."));
+                .Where(n => !n.Name.StartsWith(".", StringComparison.InvariantCultureIgnoreCase));
 
             foreach (var folder in foldersInInv)
             {
@@ -504,7 +503,7 @@ namespace LibRLV
             return result;
         }
 
-        private void SearchFoldersForName(InventoryTree root, bool stopOnFirstResult, List<string> searchTerms, List<InventoryTree> outFoundFolders)
+        private static void SearchFoldersForName(InventoryTree root, bool stopOnFirstResult, IEnumerable<string> searchTerms, List<InventoryTree> outFoundFolders)
         {
             if (searchTerms.All(n => root.Name.Contains(n)))
             {
@@ -518,7 +517,8 @@ namespace LibRLV
 
             foreach (var child in root.Children)
             {
-                if (child.Name.StartsWith(".") || child.Name.StartsWith("~"))
+                if (child.Name.StartsWith(".", StringComparison.InvariantCultureIgnoreCase) ||
+                    child.Name.StartsWith("~", StringComparison.InvariantCultureIgnoreCase))
                 {
                     continue;
                 }
@@ -531,7 +531,7 @@ namespace LibRLV
             }
         }
 
-        private string HandleFindFolders(bool stopOnFirstResult, List<string> searchTerms, string separator = ",")
+        private string HandleFindFolders(bool stopOnFirstResult, IEnumerable<string> searchTerms, string separator = ",")
         {
             if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
             {
@@ -573,7 +573,7 @@ namespace LibRLV
             }
 
             var foldersNamesInInv = target.Children
-                .Where(n => !n.Name.StartsWith("."))
+                .Where(n => !n.Name.StartsWith(".", StringComparison.InvariantCultureIgnoreCase))
                 .Select(n => n.Name);
 
             var result = string.Join(",", foldersNamesInInv);
@@ -595,7 +595,7 @@ namespace LibRLV
             {
                 if (sb.Length > 0)
                 {
-                    sb.Append(",");
+                    sb.Append(',');
                 }
 
                 var path = inventoryMap.BuildPathToFolder(folder.Id);
