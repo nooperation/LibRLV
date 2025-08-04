@@ -10,7 +10,7 @@ namespace LibRLV
 {
     internal class RLVGetRequestHandler
     {
-        private readonly ImmutableDictionary<string, RLVDataRequest> RLVDataRequestToNameMap;
+        private readonly ImmutableDictionary<string, RLVDataRequest> _rlvDataRequestToNameMap;
         private readonly IRestrictionProvider _restrictions;
         private readonly IBlacklistProvider _blacklist;
         private readonly IRLVCallbacks _callbacks;
@@ -23,7 +23,7 @@ namespace LibRLV
             _blacklist = blacklist;
             _callbacks = callbacks;
 
-            RLVDataRequestToNameMap = new Dictionary<string, RLVDataRequest>()
+            _rlvDataRequestToNameMap = new Dictionary<string, RLVDataRequest>()
             {
                 { "getcam_avdistmin", RLVDataRequest.GetCamAvDistMin },
                 { "getcam_avdistmax", RLVDataRequest.GetCamAvDistMax },
@@ -208,7 +208,7 @@ namespace LibRLV
                     break;
             }
 
-            if (RLVDataRequestToNameMap.TryGetValue(rlvMessage.Behavior, out var name))
+            if (_rlvDataRequestToNameMap.TryGetValue(rlvMessage.Behavior, out var name))
             {
                 switch (name)
                 {
@@ -545,9 +545,14 @@ namespace LibRLV
             SearchFoldersForName(sharedFolder, stopOnFirstResult, searchTerms, foundFolders);
 
             // TODO: Just add full path to the InventoryTree so we don't have to calculate it every time?
-            var foundFolderPaths = foundFolders
-                .Select(n => inventoryMap.BuildPathToFolder(n.Id))
-                .ToList();
+            var foundFolderPaths = new List<string>();
+            foreach (var folder in foundFolders)
+            {
+                if (inventoryMap.TryBuildPathToFolder(folder.Id, out var foundPath))
+                {
+                    foundFolderPaths.Add(foundPath);
+                }
+            }
 
             var result = string.Join(separator, foundFolderPaths);
 
@@ -599,10 +604,9 @@ namespace LibRLV
                     sb.Append(',');
                 }
 
-                var path = inventoryMap.BuildPathToFolder(folder.Id);
-                if (path != null)
+                if (inventoryMap.TryBuildPathToFolder(folder.Id, out var foundPath))
                 {
-                    sb.Append(path);
+                    sb.Append(foundPath);
                 }
             }
 

@@ -7,6 +7,15 @@ namespace LibRLV
 {
     public class RLVRestriction
     {
+        private static readonly char[] _restrictionOptionSeparator = new[] { ';' };
+
+        public RLVRestrictionType Behavior { get; }
+        public RLVRestrictionType OriginalBehavior { get; }
+        public bool IsException => IsRestrictionAnException(this);
+        public Guid Sender { get; }
+        public string SenderName { get; }
+        public ImmutableList<object> Args { get; }
+
         public RLVRestriction(RLVRestrictionType behavior, Guid sender, string senderName, ICollection<object> args)
         {
             Behavior = GetRealRestriction(behavior);
@@ -15,13 +24,6 @@ namespace LibRLV
             SenderName = senderName;
             Args = args.ToImmutableList();
         }
-
-        public RLVRestrictionType Behavior { get; }
-        public RLVRestrictionType OriginalBehavior { get; }
-        public bool IsException => IsRestrictionAnException(this);
-        public Guid Sender { get; }
-        public string SenderName { get; }
-        public ImmutableList<object> Args { get; }
 
         internal static RLVRestrictionType GetRealRestriction(RLVRestrictionType restrictionType)
         {
@@ -77,7 +79,7 @@ namespace LibRLV
         internal static bool ParseOptions(RLVRestrictionType behavior, string options, out List<object> parsedArgs)
         {
             parsedArgs = new List<object>();
-            var args = options.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var args = options.Split(_restrictionOptionSeparator, StringSplitOptions.RemoveEmptyEntries);
 
             switch (behavior)
             {

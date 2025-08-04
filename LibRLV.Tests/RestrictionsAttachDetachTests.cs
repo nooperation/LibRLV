@@ -278,24 +278,20 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
-            var externalWearable = new InventoryTree.InventoryItem()
-            {
-                Name = "External Tattoo",
-                Folder = null,
-                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                WornOn = WearableType.Tattoo,
-                AttachedTo = null,
-                Id = new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
-            };
-            var externalAttachable = new InventoryTree.InventoryItem()
-            {
-                Name = "External Jaw Thing",
-                Folder = null,
-                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                AttachedTo = AttachmentPoint.Jaw,
-                WornOn = null,
-                Id = new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
-            };
+            var externalWearable = new InventoryTree.InventoryItem(
+                new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa"),
+                "External Tattoo",
+                null,
+                WearableType.Tattoo,
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
+            );
+            var externalAttachable = new InventoryTree.InventoryItem(
+                new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
+                "External Jaw Thing",
+                AttachmentPoint.Jaw,
+                null,
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
+            );
 
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
@@ -331,24 +327,20 @@ namespace LibRLV.Tests
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
             var sharedFolder = sampleTree.Root;
 
-            var externalWearable = new InventoryTree.InventoryItem()
-            {
-                Name = "External Tattoo",
-                Folder = null,
-                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                WornOn = WearableType.Tattoo,
-                AttachedTo = null,
-                Id = new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
-            };
-            var externalAttachable = new InventoryTree.InventoryItem()
-            {
-                Name = "External Jaw Thing",
-                Folder = null,
-                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                AttachedTo = AttachmentPoint.Jaw,
-                WornOn = null,
-                Id = new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
-            };
+            var externalWearable = new InventoryTree.InventoryItem(
+                new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa"),
+                "External Tattoo",
+                null,
+                WearableType.Tattoo,
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
+            );
+            var externalAttachable = new InventoryTree.InventoryItem(
+                new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
+                "External Jaw Thing",
+                AttachmentPoint.Jaw,
+                null,
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
+            );
 
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
@@ -494,24 +486,21 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
 
             var currentOutfit = new List<InventoryTree.InventoryItem>();
-            var externalWearable = new InventoryTree.InventoryItem()
-            {
-                Name = "External Tattoo",
-                Folder = null,
-                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                WornOn = WearableType.Tattoo,
-                AttachedTo = null,
-                Id = new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
-            };
-            var externalAttachable = new InventoryTree.InventoryItem()
-            {
-                Name = "External Jaw Thing",
-                Folder = null,
-                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                AttachedTo = AttachmentPoint.Jaw,
-                WornOn = null,
-                Id = new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
-            };
+
+            var externalWearable = new InventoryTree.InventoryItem(
+                new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa"),
+                "External Tattoo",
+                null,
+                WearableType.Tattoo,
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
+            );
+            var externalAttachable = new InventoryTree.InventoryItem(
+                new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
+                "External Jaw Thing",
+                AttachmentPoint.Jaw,
+                null,
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
+            );
 
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
@@ -535,22 +524,8 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
             var currentOutfit = new List<InventoryTree.InventoryItem>()
             {
-                new()
-                {
-                    WornOn = WearableType.Socks,
-                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
-                    AttachedTo = null,
-                    Name = $"My Socks",
-                    Id = new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
-                },
-                new()
-                {
-                    WornOn = WearableType.Hair,
-                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
-                    AttachedTo = null,
-                    Name = $"My Hair",
-                    Id = new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
-                },
+                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", null, WearableType.Socks, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc")),
+                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", null, WearableType.Hair, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"))
             };
 
             _callbacks.Setup(e =>
@@ -578,16 +553,14 @@ namespace LibRLV.Tests
                     continue;
                 }
 
-                currentOutfit.Add(new InventoryTree.InventoryItem()
-                {
-                    WornOn = item,
-                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
-                    AttachedTo = null,
-                    Name = $"My {item}",
-                    Id = new Guid($"c{(int)item:D7}-cccc-4ccc-8ccc-cccccccccccc")
-                });
+                currentOutfit.Add(new InventoryTree.InventoryItem(
+                    new Guid($"c{(int)item:D7}-cccc-4ccc-8ccc-cccccccccccc"),
+                    $"My {item}",
+                    null,
+                    item,
+                    new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc")
+                ));
             }
-            ;
 
             _callbacks.Setup(e =>
                 e.TryGetCurrentOutfit(out currentOutfit)
@@ -608,14 +581,7 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
             var currentOutfit = new List<InventoryTree.InventoryItem>()
             {
-                new()
-                {
-                    WornOn = WearableType.Socks,
-                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
-                    AttachedTo = null,
-                    Name = $"My Socks",
-                    Id = new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
-                },
+                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", null, WearableType.Socks, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc")),
             };
 
             _callbacks.Setup(e =>
@@ -637,14 +603,7 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
             var currentOutfit = new List<InventoryTree.InventoryItem>()
             {
-                new()
-                {
-                    WornOn = WearableType.Hair,
-                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
-                    AttachedTo = null,
-                    Name = $"My Hair",
-                    Id = new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
-                },
+                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", null, WearableType.Hair, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"))
             };
 
             _callbacks.Setup(e =>
@@ -689,24 +648,20 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
 
             var currentOutfit = new List<InventoryTree.InventoryItem>();
-            var externalWearable = new InventoryTree.InventoryItem()
-            {
-                Name = "External Tattoo",
-                Folder = null,
-                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                WornOn = WearableType.Tattoo,
-                AttachedTo = null,
-                Id = new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
-            };
-            var externalAttachable = new InventoryTree.InventoryItem()
-            {
-                Name = "External Jaw Thing",
-                Folder = null,
-                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                AttachedTo = AttachmentPoint.Jaw,
-                WornOn = null,
-                Id = new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
-            };
+            var externalWearable = new InventoryTree.InventoryItem(
+                new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa"),
+                "External Tattoo",
+                null,
+                WearableType.Tattoo,
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
+            );
+            var externalAttachable = new InventoryTree.InventoryItem(
+                new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
+                "External Jaw Thing",
+                AttachmentPoint.Jaw,
+                null,
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
+            );
 
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
@@ -730,22 +685,8 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
             var currentAttach = new List<InventoryTree.InventoryItem>()
             {
-                new()
-                {
-                    WornOn = null,
-                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
-                    AttachedTo = AttachmentPoint.LeftFoot,
-                    Name = $"My Socks",
-                    Id = new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
-                },
-                new()
-                {
-                    WornOn = null,
-                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
-                    AttachedTo = AttachmentPoint.Skull,
-                    Name = $"My Hair",
-                    Id = new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
-                },
+                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", AttachmentPoint.LeftFoot, null, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc")),
+                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", AttachmentPoint.Skull, null, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"))
             };
 
             _callbacks.Setup(e =>
@@ -768,16 +709,14 @@ namespace LibRLV.Tests
             var currentAttach = new List<InventoryTree.InventoryItem>();
             foreach (var item in Enum.GetValues<AttachmentPoint>())
             {
-                currentAttach.Add(new InventoryTree.InventoryItem()
-                {
-                    WornOn = null,
-                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
-                    AttachedTo = item,
-                    Name = $"My {item}",
-                    Id = new Guid($"c{(int)item:D7}-cccc-4ccc-8ccc-cccccccccccc")
-                });
+                currentAttach.Add(new InventoryTree.InventoryItem(
+                    new Guid($"c{(int)item:D7}-cccc-4ccc-8ccc-cccccccccccc"),
+                    $"My {item}",
+                    item,
+                    null,
+                    new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc")
+                ));
             }
-            ;
 
             _callbacks.Setup(e =>
                 e.TryGetCurrentOutfit(out currentAttach)
@@ -798,14 +737,7 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
             var currentAttach = new List<InventoryTree.InventoryItem>()
             {
-                new()
-                {
-                    WornOn = null,
-                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
-                    AttachedTo = AttachmentPoint.LeftFoot,
-                    Name = $"My Sock",
-                    Id = new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc")
-                },
+                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", AttachmentPoint.LeftFoot, null, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc")),
             };
 
             _callbacks.Setup(e =>
@@ -827,14 +759,7 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
             var currentAttach = new List<InventoryTree.InventoryItem>()
             {
-                new()
-                {
-                    WornOn = null,
-                    FolderId = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
-                    AttachedTo = AttachmentPoint.Skull,
-                    Name = $"My Hair",
-                    Id = new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc")
-                },
+                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", AttachmentPoint.Skull, null, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"))
             };
 
             _callbacks.Setup(e =>
@@ -2577,24 +2502,20 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
-            var externalWearable = new InventoryTree.InventoryItem()
-            {
-                Name = "External Tattoo",
-                Folder = null,
-                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                WornOn = WearableType.Tattoo,
-                AttachedTo = null,
-                Id = new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
-            };
-            var externalAttachable = new InventoryTree.InventoryItem()
-            {
-                Name = "External Jaw Thing",
-                Folder = null,
-                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                AttachedTo = AttachmentPoint.Jaw,
-                WornOn = null,
-                Id = new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
-            };
+            var externalWearable = new InventoryTree.InventoryItem(
+                new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa"),
+                "External Tattoo",
+                null,
+                WearableType.Tattoo,
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
+            );
+            var externalAttachable = new InventoryTree.InventoryItem(
+                new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
+                "External Jaw Thing",
+                AttachmentPoint.Jaw,
+                null,
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
+            );
 
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
@@ -2668,15 +2589,13 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
-            var externalAttachable = new InventoryTree.InventoryItem()
-            {
-                Name = "External Groin Thing",
-                Folder = null,
-                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                AttachedTo = AttachmentPoint.Groin,
-                WornOn = null,
-                Id = new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
-            };
+            var externalAttachable = new InventoryTree.InventoryItem(
+                new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
+                "External Groin Thing",
+                AttachmentPoint.Groin,
+                null,
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
+             );
 
             currentOutfit.Add(externalAttachable);
 
@@ -2774,24 +2693,20 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
-            var externalWearable = new InventoryTree.InventoryItem()
-            {
-                Name = "External Tattoo",
-                Folder = null,
-                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                WornOn = WearableType.Tattoo,
-                AttachedTo = null,
-                Id = new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa")
-            };
-            var externalAttachable = new InventoryTree.InventoryItem()
-            {
-                Name = "External Jaw Thing",
-                Folder = null,
-                FolderId = new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                AttachedTo = AttachmentPoint.Jaw,
-                WornOn = null,
-                Id = new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa")
-            };
+            var externalWearable = new InventoryTree.InventoryItem(
+                new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa"),
+                "External Tattoo",
+                null,
+                WearableType.Tattoo,
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
+            );
+            var externalAttachable = new InventoryTree.InventoryItem(
+                new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
+                "External Jaw Thing",
+                AttachmentPoint.Jaw,
+                null,
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
+            );
 
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
@@ -2867,7 +2782,7 @@ namespace LibRLV.Tests
                  testCode: () => _rlv.ProcessMessage("@detachthis=force", sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, sampleTree.Root_Clothing_HappyShirt_AttachChest.Name)
             );
 
-            // Everything under the clothing folder will be detached because happyshirt exists in the clothing folder
+            // Everything under the clothing folder will be detached because happy shirt exists in the clothing folder
             var expected = new List<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,

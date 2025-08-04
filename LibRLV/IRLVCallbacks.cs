@@ -9,8 +9,8 @@ namespace LibRLV
     {
         Task SendReplyAsync(int channel, string message, CancellationToken cancellationToken);
         Task SendInstantMessageAsync(Guid targetUser, string message, CancellationToken cancellationToken);
-        Task<string> GetEnvironmentAsync(string envType);
-        Task<string> GetDebugInfoAsync(string debugType);
+        Task<string> GetEnvironmentAsync(string settingName);
+        Task<string> GetDebugInfoAsync(string settingName);
         Task<bool> TryGetSitId(out Guid sitId);
         Task<bool> TryGetObjectExists(Guid objectID, out bool isCurrentlySitting);
         Task<bool> TryGetRlvInventoryTree(out InventoryTree sharedFolder);

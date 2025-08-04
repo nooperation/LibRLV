@@ -79,30 +79,9 @@
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            var contendingTree1 = new InventoryTree
-            {
-                Id = new Guid("12345678-1ddd-4ddd-8ddd-dddddddddddd"),
-                Name = "Clothing",
-                Parent = sharedFolder,
-                Children = [],
-                Items = [],
-            };
-            var contendingTree3 = new InventoryTree
-            {
-                Id = new Guid("12345678-123d-4ddd-8ddd-dddddddddddd"),
-                Name = "+Clothing///",
-                Parent = sharedFolder,
-                Children = [],
-                Items = [],
-            };
-            var contendingTree4 = new InventoryTree
-            {
-                Id = new Guid("12345678-123d-4ddd-8ddd-dddddddddddd"),
-                Name = "+Clothing///",
-                Parent = sharedFolder,
-                Children = [],
-                Items = [],
-            };
+            var contendingTree1 = sharedFolder.AddChild(new Guid("12345678-1ddd-4ddd-8ddd-dddddddddddd"), "Clothing");
+            var contendingTree3 = sharedFolder.AddChild(new Guid("12345678-123d-4ddd-8ddd-dddddddddddd"), "+Clothing///");
+            var contendingTree4 = sharedFolder.AddChild(new Guid("12345678-123d-4ddd-8ddd-dddddddddddd"), "+Clothing///");
 
             var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
             clothingFolder.Name = "Clothing///";

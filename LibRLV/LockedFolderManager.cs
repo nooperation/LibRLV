@@ -19,14 +19,14 @@ namespace LibRLV
             _restrictionManager = restrictionManager;
         }
 
-        private static List<InventoryTree> GetFoldersForItems(IDictionary<Guid, InventoryTree> rootMap, List<InventoryTree.InventoryItem> items)
+        private static List<InventoryTree> GetFoldersForItems(ImmutableDictionary<Guid, InventoryTree> rootMap, List<InventoryTree.InventoryItem> items)
         {
             // TODO: What is this - remove?
             var result = new Dictionary<Guid, InventoryTree>();
 
             foreach (var item in items)
             {
-                if (!rootMap.TryGetValue(item.FolderId, out var folder))
+                if (!item.FolderId.HasValue || !rootMap.TryGetValue(item.FolderId.Value, out var folder))
                 {
                     continue;
                 }
@@ -37,7 +37,7 @@ namespace LibRLV
             return result.Values.ToList();
         }
 
-        public ImmutableDictionary<Guid, LockedFolderPublic> GetLockedFolders()
+        public IReadOnlyDictionary<Guid, LockedFolderPublic> GetLockedFolders()
         {
             lock (_lockedFoldersLock)
             {
@@ -213,7 +213,7 @@ namespace LibRLV
             return ProcessFolderRestrictions(restriction, sharedFolder, inventoryMap.Folders);
         }
 
-        private static bool TryGetItem(Guid itemId, IDictionary<Guid, InventoryTree> sharedFolderMap, out InventoryTree.InventoryItem outItem)
+        private static bool TryGetItem(Guid itemId, ImmutableDictionary<Guid, InventoryTree> sharedFolderMap, out InventoryTree.InventoryItem outItem)
         {
             foreach (var folder in sharedFolderMap.Values)
             {
@@ -231,7 +231,7 @@ namespace LibRLV
             return false;
         }
 
-        private bool ProcessFolderRestrictions(RLVRestriction restriction, InventoryTree sharedFolder, IDictionary<Guid, InventoryTree> sharedFolderMap)
+        private bool ProcessFolderRestrictions(RLVRestriction restriction, InventoryTree sharedFolder, ImmutableDictionary<Guid, InventoryTree> sharedFolderMap)
         {
             if (restriction.Args.Count == 0)
             {
@@ -240,7 +240,7 @@ namespace LibRLV
                     return false;
                 }
 
-                if (!sharedFolderMap.TryGetValue(item.FolderId, out var folder))
+                if (!item.FolderId.HasValue || !sharedFolderMap.TryGetValue(item.FolderId.Value, out var folder))
                 {
                     return false;
                 }

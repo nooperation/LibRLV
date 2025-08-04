@@ -7,7 +7,7 @@ namespace LibRLV
     public class RLVPermissionsService
     {
         private readonly IRestrictionProvider _restrictionProvider;
-        private static readonly char[] anyOf = new char[] { '(', ')', '"', '-', '*', '=', '_', '^' };
+        private static readonly char[] _invalidMessageCharacters = new char[] { '(', ')', '"', '-', '*', '=', '_', '^' };
 
         internal RLVPermissionsService(IRestrictionProvider restrictionProvider)
         {
@@ -324,7 +324,7 @@ namespace LibRLV
 
         public bool CanReceiveChat(string message, Guid? userId)
         {
-            if (message.StartsWith("/me "))
+            if (message.StartsWith("/me ", StringComparison.OrdinalIgnoreCase))
             {
                 return CheckSecureRestriction(userId, null, RLVRestrictionType.RecvEmote, RLVRestrictionType.RecvEmoteSec, RLVRestrictionType.RecvEmoteFrom);
             }
@@ -471,7 +471,7 @@ namespace LibRLV
                     //  and will be discarded. When a period ('.') is present, the rest of the
                     //  message is discarded. 
 
-                    if (message.IndexOfAny(anyOf) != -1)
+                    if (message.IndexOfAny(_invalidMessageCharacters) != -1)
                     {
                         return false;
                     }
@@ -823,7 +823,7 @@ namespace LibRLV
                 item.WornOn
             );
         }
-        public bool CanAttach(Guid objectFolderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        public bool CanAttach(Guid? objectFolderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
             if (wearableType != null && !CanAttachWearable(wearableType))
             {
@@ -842,7 +842,12 @@ namespace LibRLV
                     return false;
                 }
 
-                if (_restrictionProvider.TryGetLockedFolder(objectFolderId, out var lockedFolder))
+                if (!objectFolderId.HasValue)
+                {
+                    return false;
+                }
+
+                if (_restrictionProvider.TryGetLockedFolder(objectFolderId.Value, out var lockedFolder))
                 {
                     if (!lockedFolder.CanAttach)
                     {
@@ -870,7 +875,7 @@ namespace LibRLV
                 item.WornOn
             );
         }
-        public bool CanDetach(Guid folderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        public bool CanDetach(Guid? folderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
             // @remoutfit[:<part>]=<y/n>
             if (wearableType != null && !CanDetachWearable(wearableType))
@@ -907,7 +912,12 @@ namespace LibRLV
                     return false;
                 }
 
-                if (_restrictionProvider.TryGetLockedFolder(folderId, out var lockedFolder))
+                if (!folderId.HasValue)
+                {
+                    return false;
+                }
+
+                if (_restrictionProvider.TryGetLockedFolder(folderId.Value, out var lockedFolder))
                 {
                     if (!lockedFolder.CanDetach)
                     {

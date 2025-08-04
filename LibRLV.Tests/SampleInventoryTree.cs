@@ -47,132 +47,25 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo')
             //        \= Glasses (attached to 'chin')
 
-            var root = new InventoryTree()
-            {
-                Id = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                Name = "#RLV",
-                Parent = null,
-                Children = [],
-                Items = [],
-            };
+            var root = new InventoryTree(new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"), "#RLV");
+            var clothingTree = root.AddChild(new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Clothing");
+            var hatsTree = clothingTree.AddChild(new Guid("dddddddd-dddd-4ddd-8ddd-dddddddddddd"), "Hats");
+            var subHatsTree = hatsTree.AddChild(new Guid("ffffffff-0000-4000-8000-000000000000"), "Sub Hats");
+            var privateTree = root.AddChild(new Guid("eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"), ".private");
+            var accessoriesTree = root.AddChild(new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), "Accessories");
 
-            var clothingTree = new InventoryTree()
-            {
-                Id = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
-                Name = "Clothing",
-                Parent = root,
-                Children = [],
-                Items = [],
+            var watch_tattoo = accessoriesTree.AddItem(new Guid("c0000000-cccc-4ccc-8ccc-cccccccccccc"), "Watch", null, WearableType.Tattoo);
+            var glasses_chin = accessoriesTree.AddItem(new Guid("c1111111-cccc-4ccc-8ccc-cccccccccccc"), "Glasses", AttachmentPoint.Chin, null);
 
-            };
-            root.Children.Add(clothingTree);
+            var businessPants_groin = clothingTree.AddItem(new Guid("b0000000-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Business Pants", AttachmentPoint.Groin, null);
+            var happyShirt_chest = clothingTree.AddItem(new Guid("b1111111-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Happy Shirt", AttachmentPoint.Chest, null);
+            var retroPants_pants = clothingTree.AddItem(new Guid("b2222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Retro Pants", null, WearableType.Pants);
 
-            var hatsTree = new InventoryTree
-            {
-                Id = new Guid("dddddddd-dddd-4ddd-8ddd-dddddddddddd"),
-                Name = "Hats",
-                Parent = clothingTree,
-                Children = [],
-                Items = [],
-            };
-            clothingTree.Children.Add(hatsTree);
+            var partyHat_groin = hatsTree.AddItem(new Guid("d0000000-dddd-4ddd-8ddd-dddddddddddd"), "Party Hat", AttachmentPoint.Groin, null);
+            var fancyHat_chin = hatsTree.AddItem(new Guid("d1111111-dddd-4ddd-8ddd-dddddddddddd"), "Fancy Hat", AttachmentPoint.Chin, null);
 
-            var subHatsTree = new InventoryTree
-            {
-                Id = new Guid("ffffffff-0000-4000-8000-000000000000"),
-                Name = "Sub Hats",
-                Parent = hatsTree,
-                Children = [],
-                Items = [],
-            };
-            hatsTree.Children.Add(subHatsTree);
-
-            var privateTree = new InventoryTree
-            {
-                Id = new Guid("eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"),
-                Name = ".private",
-                Parent = root,
-                Children = [],
-                Items = [],
-            };
-            root.Children.Add(privateTree);
-
-            var AccessoriesTree = new InventoryTree
-            {
-                Id = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
-                Name = "Accessories",
-                Parent = root,
-                Children = [],
-                Items = [],
-            };
-            root.Children.Add(AccessoriesTree);
-
-            var watch_tattoo = new InventoryTree.InventoryItem()
-            {
-                Id = new Guid("c0000000-cccc-4ccc-8ccc-cccccccccccc"),
-                Name = "Watch",
-                AttachedTo = null,
-                WornOn = WearableType.Tattoo,
-                Folder = AccessoriesTree,
-                FolderId = AccessoriesTree.Id
-            };
-            var glasses_chin = new InventoryTree.InventoryItem()
-            {
-                Id = new Guid("c1111111-cccc-4ccc-8ccc-cccccccccccc"),
-                Name = "Glasses",
-                AttachedTo = AttachmentPoint.Chin,
-                WornOn = null,
-                Folder = AccessoriesTree,
-                FolderId = AccessoriesTree.Id
-            };
-            var businessPants_groin = new InventoryTree.InventoryItem()
-            {
-                Id = new Guid("b0000000-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
-                Name = "Business Pants",
-                AttachedTo = AttachmentPoint.Groin,
-                WornOn = null,
-                Folder = clothingTree,
-                FolderId = clothingTree.Id
-            };
-            var happyShirt_chest = new InventoryTree.InventoryItem()
-            {
-                Id = new Guid("b1111111-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
-                Name = "Happy Shirt",
-                AttachedTo = AttachmentPoint.Chest,
-                WornOn = null,
-                Folder = clothingTree,
-                FolderId = clothingTree.Id
-            };
-            var retroPants_pants = new InventoryTree.InventoryItem()
-            {
-                Id = new Guid("b2222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb"),
-                Name = "Retro Pants",
-                AttachedTo = null,
-                WornOn = WearableType.Pants,
-                Folder = clothingTree,
-                FolderId = clothingTree.Id
-            };
-            var partyHat_groin = new InventoryTree.InventoryItem()
-            {
-                Id = new Guid("d0000000-dddd-4ddd-8ddd-dddddddddddd"),
-                Name = "Party Hat",
-                AttachedTo = AttachmentPoint.Groin,
-                WornOn = null,
-                Folder = hatsTree,
-                FolderId = hatsTree.Id
-            };
-            var fancyHat_chin = new InventoryTree.InventoryItem()
-            {
-                Id = new Guid("d1111111-dddd-4ddd-8ddd-dddddddddddd"),
-                Name = "Fancy Hat",
-                AttachedTo = AttachmentPoint.Chin,
-                WornOn = null,
-                Folder = hatsTree,
-                FolderId = hatsTree.Id
-            };
-
-            AccessoriesTree.Items.Add(watch_tattoo);
-            AccessoriesTree.Items.Add(glasses_chin);
+            accessoriesTree.Items.Add(watch_tattoo);
+            accessoriesTree.Items.Add(glasses_chin);
             clothingTree.Items.Add(businessPants_groin);
             clothingTree.Items.Add(happyShirt_chest);
             clothingTree.Items.Add(retroPants_pants);

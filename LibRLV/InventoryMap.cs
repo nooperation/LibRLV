@@ -28,26 +28,34 @@ namespace LibRLV
             while (true)
             {
                 InventoryTree candidate = null;
-                string candidateNameSelected = null;
-                string candidatePathRemaining = null;
+                var candidateNameLengthSelected = 0;
+                var candidatePathRemaining = string.Empty;
                 var candidateHasPrefix = false;
 
                 foreach (var child in iter.Children)
                 {
-                    if (child.Name.StartsWith(".") && skipPrivateFolders)
+                    if (child.Name.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    if (skipPrivateFolders && child.Name[0] == '.')
                     {
                         continue;
                     }
 
                     var fixedChildName = child.Name;
                     var hasPrefix = false;
-                    if (!path.StartsWith(child.Name) && (child.Name.StartsWith(".") || child.Name.StartsWith("~") || child.Name.StartsWith("+")))
+
+                    // Only fix the child name if we don't already have an exact match with path
+                    if ((child.Name[0] == '.' || child.Name[0] == '~' || child.Name[0] == '+') &&
+                        !path.StartsWith(child.Name, StringComparison.OrdinalIgnoreCase))
                     {
                         fixedChildName = fixedChildName.Substring(1);
                         hasPrefix = true;
                     }
 
-                    if (path.StartsWith(fixedChildName))
+                    if (path.StartsWith(fixedChildName, StringComparison.OrdinalIgnoreCase))
                     {
                         // This whole candidate system should probably be redone as a recursive search to find the best possible exact path, but this
                         //   should be good enough for now
@@ -63,14 +71,14 @@ namespace LibRLV
                         //  3. The first exact match is preferred. If there are multiple "Clothing" folders, just pick the first one that appears
 
                         if (candidate == null ||
-                            fixedChildName.Length > candidateNameSelected.Length ||
-                            (fixedChildName.Length == candidateNameSelected.Length && !hasPrefix && candidateHasPrefix))
+                            fixedChildName.Length > candidateNameLengthSelected ||
+                            (fixedChildName.Length == candidateNameLengthSelected && !hasPrefix && candidateHasPrefix))
                         {
                             if (path.Length == fixedChildName.Length)
                             {
                                 candidatePathRemaining = "";
                                 candidate = child;
-                                candidateNameSelected = fixedChildName;
+                                candidateNameLengthSelected = fixedChildName.Length;
                                 candidateHasPrefix = hasPrefix;
                                 break;
                             }
@@ -79,7 +87,7 @@ namespace LibRLV
                             {
                                 candidatePathRemaining = path.Substring(fixedChildName.Length + 1);
                                 candidate = child;
-                                candidateNameSelected = fixedChildName;
+                                candidateNameLengthSelected = fixedChildName.Length;
                                 candidateHasPrefix = hasPrefix;
                             }
                         }
@@ -103,85 +111,86 @@ namespace LibRLV
             }
         }
 
-        public List<InventoryTree> FindFoldersContaining(bool limitToOneResult, Guid? itemId, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        public IEnumerable<InventoryTree> FindFoldersContaining(bool limitToOneResult, Guid? itemId, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
             var folders = new List<InventoryTree>();
 
-            if (itemId != null)
+            if (itemId.HasValue)
             {
                 if (!Items.TryGetValue(itemId.Value, out var item))
                 {
-                    return new List<InventoryTree>();
+                    return Enumerable.Empty<InventoryTree>();
                 }
 
-                if (!Folders.TryGetValue(item.FolderId, out var folder))
+                if (!item.FolderId.HasValue || !Folders.TryGetValue(item.FolderId.Value, out var folder))
                 {
-                    return new List<InventoryTree>();
+                    return Enumerable.Empty<InventoryTree>();
                 }
 
                 folders.Add(folder);
             }
-            else if (attachmentPoint != null)
+            else if (attachmentPoint.HasValue)
             {
-                var folderIds = Items.Values
-                    .Where(n => n.AttachedTo == attachmentPoint)
-                    .Select(n => n.FolderId)
-                    .Distinct()
-                    .ToList();
-
-                var foundFolders = Folders
-                    .Where(n => folderIds.Contains(n.Key))
-                    .Select(n => n.Value);
-
-                if (limitToOneResult)
+                var foldersContainingAttachments = new HashSet<Guid>();
+                foreach (var item in Items.Values)
                 {
-                    var foundFolder = foundFolders.FirstOrDefault();
-                    if (foundFolder != null)
+                    if (item.Folder == null)
                     {
-                        folders.Add(foundFolder);
+                        // External folders are unknown to RLV
+                        continue;
                     }
-                }
-                else
-                {
-                    folders.AddRange(foundFolders);
+
+                    if (item.AttachedTo == attachmentPoint && item.FolderId.HasValue)
+                    {
+                        if (foldersContainingAttachments.Add(item.FolderId.Value))
+                        {
+                            folders.Add(item.Folder);
+
+                            if (limitToOneResult)
+                            {
+                                break;
+                            }
+                        }
+                    }
                 }
             }
-            else if (wearableType != null)
+            else if (wearableType.HasValue)
             {
-                var folderIds = Items.Values
-                    .Where(n => n.WornOn == wearableType)
-                    .Select(n => n.FolderId)
-                    .Distinct()
-                    .ToList();
-
-                var foundFolders = Folders
-                    .Where(n => folderIds.Contains(n.Key))
-                    .Select(n => n.Value);
-
-                if (limitToOneResult)
+                var foldersIdsContainingWearables = new HashSet<Guid>();
+                foreach (var item in Items.Values)
                 {
-                    var foundFolder = foundFolders.FirstOrDefault();
-                    if (foundFolder != null)
+                    if (item.Folder == null)
                     {
-                        folders.Add(foundFolder);
+                        // External folders are unknown to RLV
+                        continue;
                     }
-                }
-                else
-                {
-                    folders.AddRange(foundFolders);
+
+                    if (item.WornOn == wearableType && item.FolderId.HasValue)
+                    {
+                        if (foldersIdsContainingWearables.Add(item.FolderId.Value))
+                        {
+                            folders.Add(item.Folder);
+
+                            if (limitToOneResult)
+                            {
+                                break;
+                            }
+                        }
+                    }
                 }
             }
 
             return folders;
         }
 
-        public string BuildPathToFolder(Guid folderId)
+        public bool TryBuildPathToFolder(Guid folderId, out string finalPath)
         {
             var path = new Stack<string>();
 
             if (!Folders.TryGetValue(folderId, out var folder))
             {
-                return null;
+                finalPath = null;
+                return false;
             }
 
             var iter = folder;
@@ -197,7 +206,8 @@ namespace LibRLV
                 iter = iter.Parent;
             }
 
-            return string.Join("/", path);
+            finalPath = string.Join("/", path);
+            return true;
         }
 
         private static void CreateInventoryMap(InventoryTree root, Dictionary<Guid, InventoryTree> folders, Dictionary<Guid, InventoryTree.InventoryItem> items)

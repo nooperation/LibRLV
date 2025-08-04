@@ -96,7 +96,7 @@ namespace LibRLV
             //       the tag near the end of the string"
 
             var attachmentPointTag = _attachmentPointTagRegex
-                .Matches(itemName.ToLower())
+                .Matches(itemName)
                 .Cast<Match>()
                 .Where(n => n.Success && n.Groups["tag"].Success)
                 .Select(n => n.Groups["tag"].Value)
@@ -104,7 +104,7 @@ namespace LibRLV
 
             for (var i = attachmentPointTag.Count - 1; i >= 0; i--)
             {
-                if (RLVAttachmentPointMap.TryGetValue(attachmentPointTag[i], out attachmentPoint))
+                if (RLVAttachmentPointMap.TryGetValue(attachmentPointTag[i].ToLowerInvariant(), out attachmentPoint))
                 {
                     return true;
                 }

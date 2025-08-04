@@ -9,7 +9,7 @@ namespace LibRLV
 {
     public class RLVCommandProcessor
     {
-        private readonly ImmutableDictionary<string, Func<RLVMessage, bool>> RLVActionHandlers;
+        private readonly ImmutableDictionary<string, Func<RLVMessage, bool>> _rlvActionHandlers;
 
         public event EventHandler<SetRotEventArgs> SetRot;
         public event EventHandler<AdjustHeightEventArgs> AdjustHeight;
@@ -28,13 +28,14 @@ namespace LibRLV
         // TODO: Swap manager out with an interface once it's been solidified into only useful stuff
         private readonly RLVPermissionsService _manager;
         private readonly IRLVCallbacks _callbacks;
+        private static readonly char[] _restrictionOptionSeparator = new[] { ';' };
 
         internal RLVCommandProcessor(RLVPermissionsService manager, IRLVCallbacks callbacks)
         {
             _manager = manager;
             _callbacks = callbacks;
 
-            RLVActionHandlers = new Dictionary<string, Func<RLVMessage, bool>>()
+            _rlvActionHandlers = new Dictionary<string, Func<RLVMessage, bool>>()
             {
                 { "setrot", HandleSetRot },
                 { "adjustheight", HandleAdjustHeight},
@@ -85,17 +86,17 @@ namespace LibRLV
 
         internal bool ProcessActionCommand(RLVMessage command)
         {
-            if (RLVActionHandlers.TryGetValue(command.Behavior, out var func))
+            if (_rlvActionHandlers.TryGetValue(command.Behavior, out var func))
             {
                 return func(command);
             }
-            else if (command.Behavior.StartsWith("setdebug_"))
+            else if (command.Behavior.StartsWith("setdebug_", StringComparison.OrdinalIgnoreCase))
             {
-                return RLVActionHandlers["setdebug_"](command);
+                return _rlvActionHandlers["setdebug_"](command);
             }
-            else if (command.Behavior.StartsWith("setenv_"))
+            else if (command.Behavior.StartsWith("setenv_", StringComparison.OrdinalIgnoreCase))
             {
-                return RLVActionHandlers["setenv_"](command);
+                return _rlvActionHandlers["setenv_"](command);
             }
 
             return false;
@@ -141,7 +142,7 @@ namespace LibRLV
 
         private bool HandleSetGroup(RLVMessage command)
         {
-            var argParts = command.Option.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var argParts = command.Option.Split(_restrictionOptionSeparator, StringSplitOptions.RemoveEmptyEntries);
             if (argParts.Length == 0)
             {
                 return false;
@@ -172,12 +173,12 @@ namespace LibRLV
                 return false;
             }
 
-            if (item.Name.StartsWith("."))
+            if (item.Name.Length > 0 && item.Name[0] == '.')
             {
                 return false;
             }
 
-            if (enforceNostrip && item.Name.ToLower().Contains("nostrip"))
+            if (enforceNostrip && item.Name.ToLower(System.Globalization.CultureInfo.CurrentCulture).Contains("nostrip"))
             {
                 return false;
             }
@@ -200,11 +201,18 @@ namespace LibRLV
             return true;
         }
 
-        private void CollectItemsToAttach(InventoryTree folder, bool replaceExistingAttachments, bool recursive, List<AttachmentEventArgs.AttachmentRequest> itemsToAttach)
+        private static void CollectItemsToAttach(InventoryTree folder, bool replaceExistingAttachments, bool recursive, List<AttachmentEventArgs.AttachmentRequest> itemsToAttach)
         {
-            if (folder.Name.StartsWith("."))
+            if (folder.Name.Length > 0)
             {
-                return;
+                if (folder.Name[0] == '.')
+                {
+                    return;
+                }
+                if (folder.Name[0] == '+')
+                {
+                    replaceExistingAttachments = false;
+                }
             }
 
             AttachmentPoint? folderAttachmentPoint = null;
@@ -213,10 +221,6 @@ namespace LibRLV
                 folderAttachmentPoint = attachmentPointTemp;
             }
 
-            if (folder.Name.StartsWith("+"))
-            {
-                replaceExistingAttachments = false;
-            }
 
             foreach (var item in folder.Items)
             {
@@ -225,7 +229,7 @@ namespace LibRLV
                     continue;
                 }
 
-                if (item.Name.StartsWith("."))
+                if (item.Name.Length > 0 && item.Name[0] == '.')
                 {
                     continue;
                 }
@@ -248,7 +252,7 @@ namespace LibRLV
             {
                 foreach (var child in folder.Children)
                 {
-                    if (child.Name.StartsWith("."))
+                    if (child.Name.Length > 0 && child.Name[0] == '.')
                     {
                         continue;
                     }
@@ -322,7 +326,7 @@ namespace LibRLV
 
         private void CollectItemsToDetach(InventoryTree folder, InventoryMap inventoryMap, bool recursive, List<Guid> itemsToDetach)
         {
-            if (folder.Name.StartsWith("."))
+            if (folder.Name.Length > 0 && folder.Name[0] == '.')
             {
                 return;
             }
@@ -341,7 +345,7 @@ namespace LibRLV
             {
                 foreach (var child in folder.Children)
                 {
-                    if (child.Name.StartsWith("."))
+                    if (child.Name.Length > 0 && child.Name[0] == '.')
                     {
                         continue;
                     }
@@ -447,7 +451,7 @@ namespace LibRLV
             {
                 if (inventoryMap.Items.TryGetValue(uuid, out var item))
                 {
-                    if (inventoryMap.Folders.TryGetValue(item.FolderId, out var folder))
+                    if (item.FolderId.HasValue && inventoryMap.Folders.TryGetValue(item.FolderId.Value, out var folder))
                     {
                         folderPaths.Add(folder);
                     }
