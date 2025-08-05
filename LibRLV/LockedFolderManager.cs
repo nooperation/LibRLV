@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,8 +12,8 @@ namespace LibRLV
         private readonly IRLVCallbacks _callbacks;
         private readonly RLVRestrictionManager _restrictionManager;
 
-        private readonly Dictionary<Guid, LockedFolder> _lockedFolders = new Dictionary<Guid, LockedFolder>();
-        private readonly object _lockedFoldersLock = new object();
+        private readonly Dictionary<Guid, LockedFolder> _lockedFolders = [];
+        private readonly object _lockedFoldersLock = new();
 
         internal LockedFolderManager(IRLVCallbacks callbacks, RLVRestrictionManager restrictionManager)
         {
@@ -50,7 +51,7 @@ namespace LibRLV
             }
         }
 
-        public bool TryGetLockedFolder(Guid folderId, out LockedFolderPublic lockedFolder)
+        public bool TryGetLockedFolder(Guid folderId, [NotNullWhen(true)] out LockedFolderPublic? lockedFolder)
         {
             lock (_lockedFoldersLock)
             {
@@ -75,27 +76,27 @@ namespace LibRLV
                     _lockedFolders[folder.Id] = existingLockedFolder;
                 }
 
-                if (restriction.Behavior == RLVRestrictionType.DetachAllThis || restriction.Behavior == RLVRestrictionType.DetachThis)
+                if (restriction.Behavior is RLVRestrictionType.DetachAllThis or RLVRestrictionType.DetachThis)
                 {
                     existingLockedFolder.DetachRestrictions.Add(restriction);
                 }
-                else if (restriction.Behavior == RLVRestrictionType.AttachAllThis || restriction.Behavior == RLVRestrictionType.AttachThis)
+                else if (restriction.Behavior is RLVRestrictionType.AttachAllThis or RLVRestrictionType.AttachThis)
                 {
                     existingLockedFolder.AttachRestrictions.Add(restriction);
                 }
-                else if (restriction.Behavior == RLVRestrictionType.DetachAllThisExcept || restriction.Behavior == RLVRestrictionType.DetachThisExcept)
+                else if (restriction.Behavior is RLVRestrictionType.DetachAllThisExcept or RLVRestrictionType.DetachThisExcept)
                 {
                     existingLockedFolder.DetachExceptions.Add(restriction);
                 }
-                else if (restriction.Behavior == RLVRestrictionType.AttachAllThisExcept || restriction.Behavior == RLVRestrictionType.AttachThisExcept)
+                else if (restriction.Behavior is RLVRestrictionType.AttachAllThisExcept or RLVRestrictionType.AttachThisExcept)
                 {
                     existingLockedFolder.AttachExceptions.Add(restriction);
                 }
 
-                if (restriction.Behavior == RLVRestrictionType.DetachAllThis ||
-                    restriction.Behavior == RLVRestrictionType.AttachAllThis ||
-                    restriction.Behavior == RLVRestrictionType.AttachAllThisExcept ||
-                    restriction.Behavior == RLVRestrictionType.DetachAllThisExcept)
+                if (restriction.Behavior is RLVRestrictionType.DetachAllThis or
+                    RLVRestrictionType.AttachAllThis or
+                    RLVRestrictionType.AttachAllThisExcept or
+                    RLVRestrictionType.DetachAllThisExcept)
                 {
                     foreach (var child in folder.Children)
                     {
@@ -120,7 +121,7 @@ namespace LibRLV
             //      Add those folders to the locked folder list
 
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
-            if (!hasSharedFolder)
+            if (!hasSharedFolder || sharedFolder == null)
             {
                 return;
             }
@@ -178,7 +179,7 @@ namespace LibRLV
         internal async Task<bool> ProcessFolderException(RLVRestriction exception)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
-            if (!hasSharedFolder)
+            if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
             }
@@ -210,7 +211,7 @@ namespace LibRLV
         internal async Task<bool> ProcessFolderRestrictions(RLVRestriction restriction)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
-            if (!hasSharedFolder)
+            if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
             }
@@ -219,7 +220,7 @@ namespace LibRLV
             return ProcessFolderRestrictions(restriction, sharedFolder, inventoryMap.Folders);
         }
 
-        private static bool TryGetItem(Guid itemId, ImmutableDictionary<Guid, InventoryTree> sharedFolderMap, out InventoryItem outItem)
+        private static bool TryGetItem(Guid itemId, ImmutableDictionary<Guid, InventoryTree> sharedFolderMap, [NotNullWhen(true)] out InventoryItem? outItem)
         {
             foreach (var folder in sharedFolderMap.Values)
             {

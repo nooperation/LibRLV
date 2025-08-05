@@ -15,8 +15,6 @@ namespace LibRLV
         private readonly IRestrictionProvider _restrictions;
         private readonly IBlacklistProvider _blacklist;
         private readonly IRLVCallbacks _callbacks;
-        private static readonly string[] _findFolderSeparator = new[] { "&&" };
-        private static readonly char[] _restrictionOptionSeparator = new[] { ';' };
 
         internal RLVGetRequestHandler(IBlacklistProvider blacklist, IRestrictionProvider restrictions, IRLVCallbacks callbacks)
         {
@@ -82,7 +80,7 @@ namespace LibRLV
         private async Task<string> ProcessGetOutfit(WearableType? specificType)
         {
             var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync();
-            if (!hasCurrentOutfit)
+            if (!hasCurrentOutfit || currentOutfit == null)
             {
                 return string.Empty;
             }
@@ -100,10 +98,10 @@ namespace LibRLV
             }
 
             var wornTypes = currentOutfit
-                .Where(n => n.WornOn != null)
-                .Select(n => n.WornOn)
+                .Where(n => n.WornOn.HasValue)
+                .Select(n => n.WornOn!.Value)
                 .Distinct()
-                .ToDictionary(k => k.Value, v => v.Value);
+                .ToDictionary(k => k, v => v);
 
             var sb = new StringBuilder();
 
@@ -131,7 +129,7 @@ namespace LibRLV
         private async Task<string> ProcessGetAttach(AttachmentPoint? specificType)
         {
             var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync();
-            if (!hasCurrentOutfit)
+            if (!hasCurrentOutfit || currentOutfit == null)
             {
                 return string.Empty;
             }
@@ -149,10 +147,10 @@ namespace LibRLV
             }
 
             var wornTypes = currentOutfit
-                .Where(n => n.AttachedTo != null)
-                .Select(n => n.AttachedTo)
+                .Where(n => n.AttachedTo.HasValue)
+                .Select(n => n.AttachedTo!.Value)
                 .Distinct()
-                .ToDictionary(k => k.Value, v => v.Value);
+                .ToDictionary(k => k, v => v);
 
             var attachmentPointTypes = Enum.GetValues(typeof(AttachmentPoint));
             var sb = new StringBuilder(attachmentPointTypes.Length);
@@ -170,7 +168,7 @@ namespace LibRLV
         {
             var blacklist = _blacklist.GetBlacklist();
 
-            string response = null;
+            string? response = null;
             switch (rlvMessage.Behavior)
             {
                 case "version":
@@ -335,7 +333,7 @@ namespace LibRLV
                         var findFolderParts = rlvMessage.Option.Split(';');
                         var separator = ",";
                         var searchTerms = findFolderParts[0]
-                            .Split(_findFolderSeparator, StringSplitOptions.RemoveEmptyEntries);
+                            .Split(["&&"], StringSplitOptions.RemoveEmptyEntries);
 
                         if (findFolderParts.Length > 1)
                         {
@@ -351,7 +349,7 @@ namespace LibRLV
                         // [] | [uuid | layer | attachpt ]
 
                         var result = new List<object>();
-                        var parsedOptions = rlvMessage.Option.Split(_restrictionOptionSeparator, StringSplitOptions.RemoveEmptyEntries).ToList();
+                        var parsedOptions = rlvMessage.Option.Split([';'], StringSplitOptions.RemoveEmptyEntries).ToList();
 
                         if (parsedOptions.Count > 1)
                         {
@@ -413,7 +411,7 @@ namespace LibRLV
             return false;
         }
 
-        private class InvWornInfoContainer
+        private sealed class InvWornInfoContainer
         {
             public string FolderName { get; }
             public string CountIndicator { get; }
@@ -499,7 +497,7 @@ namespace LibRLV
         private async Task<string> HandleGetInvWorn(string args)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
-            if (!hasSharedFolder)
+            if (!hasSharedFolder || sharedFolder == null)
             {
                 return string.Empty;
             }
@@ -518,7 +516,7 @@ namespace LibRLV
 
             var resultItems = new List<InvWornInfoContainer>
             {
-                new InvWornInfoContainer("", GetInvWornInfo(target))
+                new("", GetInvWornInfo(target))
             };
 
             var foldersInInv = target.Children
@@ -536,7 +534,7 @@ namespace LibRLV
 
         private static void SearchFoldersForName(InventoryTree root, bool stopOnFirstResult, IEnumerable<string> searchTerms, List<InventoryTree> outFoundFolders)
         {
-            if (searchTerms.All(n => root.Name.Contains(n)))
+            if (searchTerms.All(root.Name.Contains))
             {
                 outFoundFolders.Add(root);
 
@@ -565,7 +563,7 @@ namespace LibRLV
         private async Task<string> HandleFindFolders(bool stopOnFirstResult, IEnumerable<string> searchTerms, string separator = ",")
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
-            if (!hasSharedFolder)
+            if (!hasSharedFolder || sharedFolder == null)
             {
                 return string.Empty;
             }
@@ -593,7 +591,7 @@ namespace LibRLV
         private async Task<string> HandleGetInv(string args)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
-            if (!hasSharedFolder)
+            if (!hasSharedFolder || sharedFolder == null)
             {
                 return string.Empty;
             }
@@ -621,7 +619,7 @@ namespace LibRLV
         private async Task<string> HandleGetPath(bool limitToOneResult, Guid? itemId, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
-            if (!hasSharedFolder)
+            if (!hasSharedFolder || sharedFolder == null)
             {
                 return string.Empty;
             }

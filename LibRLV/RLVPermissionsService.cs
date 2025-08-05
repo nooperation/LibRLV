@@ -14,7 +14,7 @@ namespace LibRLV
             _restrictionProvider = restrictionProvider;
         }
 
-        internal static bool GetRestrictionValueMax<T>(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, out T val)
+        internal static bool TryGetRestrictionValueMax(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, out float val)
         {
             var restriction = _restrictionProvider.GetRestrictionsByType(restrictionType);
             if (restriction.Count == 0)
@@ -24,14 +24,14 @@ namespace LibRLV
             }
 
             val = restriction
-                .Where(n => n.Args.Count > 0 && n.Args[0] is T)
-                .Select(n => (T)n.Args[0])
+                .Where(n => n.Args.Count > 0 && n.Args[0] is float)
+                .Select(n => (float)n.Args[0])
                 .Max();
 
             return true;
         }
 
-        internal static bool GetRestrictionValueMin<T>(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, out T val)
+        internal static bool GetRestrictionValueMin(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, out float val)
         {
             var restriction = _restrictionProvider.GetRestrictionsByType(restrictionType);
             if (restriction.Count == 0)
@@ -41,14 +41,14 @@ namespace LibRLV
             }
 
             val = restriction
-                .Where(n => n.Args.Count > 0 && n.Args[0] is T)
-                .Select(n => (T)n.Args[0])
+                .Where(n => n.Args.Count > 0 && n.Args[0] is float)
+                .Select(n => (float)n.Args[0])
                 .Min();
 
             return true;
         }
 
-        internal static bool GetOptionalRestrictionValueMin<T>(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, T defaultVal, out T val)
+        internal static bool GetOptionalRestrictionValueMin(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, float defaultVal, out float val)
         {
             var restrictions = _restrictionProvider.GetRestrictionsByType(restrictionType);
             if (restrictions.Count == 0)
@@ -64,15 +64,15 @@ namespace LibRLV
             else
             {
                 val = restrictions
-                    .Where(n => n.Args.Count > 0 && n.Args[0] is T)
-                    .Select(n => (T)n.Args[0])
+                    .Where(n => n.Args.Count > 0 && n.Args[0] is float)
+                    .Select(n => (float)n.Args[0])
                     .Min();
             }
 
             return true;
         }
 
-        private bool CheckSecureRestriction(Guid? userId, string groupName, RLVRestrictionType normalType, RLVRestrictionType? secureType, RLVRestrictionType? fromToType)
+        private bool CheckSecureRestriction(Guid? userId, string? groupName, RLVRestrictionType normalType, RLVRestrictionType? secureType, RLVRestrictionType? fromToType)
         {
             // Explicit restrictions
             if (fromToType != null)
@@ -312,12 +312,12 @@ namespace LibRLV
             return CheckSecureRestriction(userId, null, RLVRestrictionType.StartIm, null, RLVRestrictionType.StartImTo);
         }
 
-        public bool CanSendIM(string message, Guid? userId, string groupName = null)
+        public bool CanSendIM(string message, Guid? userId, string? groupName = null)
         {
             return CheckSecureRestriction(userId, groupName, RLVRestrictionType.SendIm, RLVRestrictionType.SendImSec, RLVRestrictionType.SendImTo);
         }
 
-        public bool CanReceiveIM(string message, Guid? userId, string groupName = null)
+        public bool CanReceiveIM(string message, Guid? userId, string? groupName = null)
         {
             return CheckSecureRestriction(userId, groupName, RLVRestrictionType.RecvIm, RLVRestrictionType.RecvImSec, RLVRestrictionType.RecvImFrom);
         }
@@ -387,7 +387,6 @@ namespace LibRLV
         {
             var sendChannelExceptRestrictions = _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SendChannelExcept);
 
-            // @sendchannel_except
             foreach (var restriction in sendChannelExceptRestrictions)
             {
                 if (restriction.Args.Count == 0)
@@ -395,7 +394,7 @@ namespace LibRLV
                     continue;
                 }
 
-                if (!(restriction.Args[0] is int restrictedChannel))
+                if (restriction.Args[0] is not int restrictedChannel)
                 {
                     continue;
                 }
@@ -417,7 +416,6 @@ namespace LibRLV
                 )
                 .ToList();
 
-            // @sendchannel_sec
             foreach (var restriction in sendChannelRestrictionsSecure)
             {
                 var hasSecureException = channelExceptions
@@ -431,7 +429,6 @@ namespace LibRLV
                 return false;
             }
 
-            // @sendchannel
             var permissiveMode = IsPermissive();
             foreach (var restriction in sendChannelRestrictions.Where(n => !n.IsException && n.Args.Count == 0))
             {
@@ -453,9 +450,6 @@ namespace LibRLV
         {
             if (channel == 0)
             {
-                // @sendchat=<y/n>
-                //      @emote=<rem/add>
-
                 var canEmote = _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.Emote).Count == 0;
                 if (message.StartsWith("/me ", StringComparison.OrdinalIgnoreCase) && !canEmote)
                 {
@@ -549,9 +543,6 @@ namespace LibRLV
                 return false;
             }
 
-            // @edit=<y/n>
-            // @edit:<Guid>=<rem/add>
-            // @editobj:<Guid>=<y/n>
             var canEditObject = CheckSecureRestriction(objectId, null, RLVRestrictionType.Edit, null, RLVRestrictionType.EditObj);
             if (!canEditObject)
             {
@@ -560,7 +551,6 @@ namespace LibRLV
 
             if (objectLocation == ObjectLocation.RezzedInWorld)
             {
-                // @editworld=<y/n>
                 var hasEditWorldRestriction = _restrictionProvider
                     .GetRestrictionsByType(RLVRestrictionType.EditWorld)
                     .Count != 0;
@@ -572,7 +562,6 @@ namespace LibRLV
 
             if (objectLocation == ObjectLocation.Attached)
             {
-                // @editattach=<y/n>
                 var hasEditAttachRestriction = _restrictionProvider
                     .GetRestrictionsByType(RLVRestrictionType.EditAttach)
                     .Count != 0;
@@ -606,7 +595,6 @@ namespace LibRLV
 
         private bool CanTouchAttachment(bool isAttachedToSelf, Guid? otherUserId)
         {
-            // @touchattach
             if (_restrictionProvider.GetRestrictionsByType(RLVRestrictionType.TouchAttach).Count != 0)
             {
                 return false;
@@ -614,7 +602,6 @@ namespace LibRLV
 
             if (isAttachedToSelf)
             {
-                // @touchattachself
                 if (_restrictionProvider.GetRestrictionsByType(RLVRestrictionType.TouchAttachSelf).Count != 0)
                 {
                     return false;
@@ -622,7 +609,6 @@ namespace LibRLV
             }
             else
             {
-                // @touchattachother
                 var isForbiddenFromTouchingOthers = _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.TouchAttachOther)
                     .Where(n => n.Args.Count == 0 || (n.Args[0] is Guid restrictedUserId && restrictedUserId == otherUserId))
                     .Any();
@@ -644,10 +630,9 @@ namespace LibRLV
         }
         public bool CanTouch(TouchLocation location, Guid objectId, Guid? userId, float? distance)
         {
-            // @FarTouch | TouchFar ?
             if (distance != null)
             {
-                if (GetRestrictionValueMin(_restrictionProvider, RLVRestrictionType.FarTouch, out float? maxTouchDistance))
+                if (GetRestrictionValueMin(_restrictionProvider, RLVRestrictionType.FarTouch, out var maxTouchDistance))
                 {
                     if (distance > maxTouchDistance)
                     {
@@ -661,7 +646,6 @@ namespace LibRLV
                 return false;
             }
 
-            // @TouchMe
             if (_restrictionProvider
                 .GetRestrictionsByType(RLVRestrictionType.TouchMe)
                 .Where(n => n.Sender == objectId)
@@ -670,7 +654,6 @@ namespace LibRLV
                 return true;
             }
 
-            // @TouchThis
             if (_restrictionProvider
                 .GetRestrictionsByType(RLVRestrictionType.TouchThis)
                 .Where(n => n.Args.Count == 1 && n.Args[0] is Guid restrictedItemId && restrictedItemId == objectId)
@@ -681,7 +664,6 @@ namespace LibRLV
 
             if (location != TouchLocation.Hud)
             {
-                // @TouchAll
                 if (_restrictionProvider.GetRestrictionsByType(RLVRestrictionType.TouchAll).Count != 0)
                 {
                     return false;
@@ -690,7 +672,6 @@ namespace LibRLV
 
             if (location == TouchLocation.RezzedInWorld)
             {
-                // @touchworld
                 var touchWorldRestrictions = _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.TouchWorld);
                 var hasException = touchWorldRestrictions
                     .Where(n => n.IsException && n.Args.Count == 1 && n.Args[0] is Guid allowedObjectId && allowedObjectId == objectId)
@@ -701,11 +682,8 @@ namespace LibRLV
                     return false;
                 }
             }
-            else if (location == TouchLocation.AttachedSelf || location == TouchLocation.AttachedOther)
+            else if (location is TouchLocation.AttachedSelf or TouchLocation.AttachedOther)
             {
-                // @TouchAttachOther
-                // @TouchAttach
-                // @TouchAttachSelf
                 if (!CanTouchAttachment(location == TouchLocation.AttachedSelf, userId))
                 {
                     return false;
@@ -714,7 +692,6 @@ namespace LibRLV
 
             if (location == TouchLocation.Hud)
             {
-                // @TouchHud
                 if (!CanTouchHud(objectId))
                 {
                     return false;
@@ -732,13 +709,11 @@ namespace LibRLV
         }
         public bool CanShowHoverText(HoverTextLocation location, Guid? objectId)
         {
-            // @showhovertextall
             if (_restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ShowHoverTextAll).Count != 0)
             {
                 return false;
             }
 
-            // @showhovertext:<Guid>
             if (_restrictionProvider
                 .GetRestrictionsByType(RLVRestrictionType.ShowHoverText)
                 .Where(n => n.Args.Count == 1 && n.Args[0] is Guid restrictedObjectId && restrictedObjectId == objectId)
@@ -749,7 +724,6 @@ namespace LibRLV
 
             if (location == HoverTextLocation.Hud)
             {
-                // @showhovertexthud
                 if (_restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ShowHoverTextHud).Count != 0)
                 {
                     return false;
@@ -757,7 +731,6 @@ namespace LibRLV
             }
             else if (location == HoverTextLocation.World)
             {
-                // @showhovertexthud
                 if (_restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ShowHoverTextWorld).Count != 0)
                 {
                     return false;
@@ -877,20 +850,16 @@ namespace LibRLV
         }
         public bool CanDetach(Guid? folderId, bool isShared, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
-            // @remoutfit[:<part>]=<y/n>
             if (wearableType != null && !CanDetachWearable(wearableType))
             {
                 return false;
             }
 
-            // @remattach[:<attach_point_name>]=<y/n>
             if (attachmentPoint != null && !CanDetachAttached(attachmentPoint))
             {
                 return false;
             }
 
-            // @detach=<y/n>
-            // @detach:<attach_point_name>=<y/n>
             var detachRestrictions = _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.Detach);
             foreach (var restriction in detachRestrictions)
             {

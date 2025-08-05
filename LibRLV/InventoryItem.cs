@@ -5,7 +5,7 @@ namespace LibRLV
     public class InventoryItem
     {
         public Guid Id { get; }
-        public InventoryTree Folder { get; }
+        public InventoryTree? Folder { get; }
         public Guid? FolderId { get; }
         public string Name { get; set; }
         public WearableType? WornOn { get; set; }

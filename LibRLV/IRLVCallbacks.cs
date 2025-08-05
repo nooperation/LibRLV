@@ -15,7 +15,7 @@ namespace LibRLV
         Task<(bool Success, string EnvInfo)> TryGetEnvironmentAsync(string settingName);
         Task<(bool Success, string DebugInfo)> TryGetDebugInfoAsync(string settingName);
         Task<(bool Success, Guid SitID)> TryGetSitIdAsync();
-        Task<(bool Success, InventoryTree SharedFolder)> TryGetRlvInventoryTreeAsync();
+        Task<(bool Success, InventoryTree? SharedFolder)> TryGetRlvInventoryTreeAsync();
         Task<(bool Success, float CamAvDistMin)> TryGetCamAvDistMinAsync();
         Task<(bool Success, float CamAvDistMax)> TryGetCamAvDistMaxAsync();
         Task<(bool Success, float CamFovMin)> TryGetCamFovMinAsync();
@@ -23,6 +23,6 @@ namespace LibRLV
         Task<(bool Success, float CamZoomMin)> TryGetCamZoomMinAsync();
         Task<(bool Success, float CamFov)> TryGetCamFovAsync();
         Task<(bool Success, string ActiveGroupName)> TryGetActiveGroupNameAsync();
-        Task<(bool Success, IReadOnlyList<InventoryItem> CurrentOutfit)> TryGetCurrentOutfitAsync();
+        Task<(bool Success, IReadOnlyList<InventoryItem>? CurrentOutfit)> TryGetCurrentOutfitAsync();
     }
 }

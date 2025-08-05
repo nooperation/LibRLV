@@ -28,7 +28,7 @@ dotnet_style_prefer_inferred_tuple_names = false:suggestion
 dotnet_style_prefer_inferred_anonymous_type_member_names = false:silent
 dotnet_style_prefer_compound_assignment = true:suggestion
 dotnet_style_prefer_simplified_interpolation = true:suggestion
-dotnet_style_prefer_collection_expression = when_types_loosely_match:suggestion
+dotnet_style_prefer_collection_expression = false
 dotnet_style_namespace_match_folder = true:suggestion
 
 # C# files
@@ -185,7 +185,7 @@ csharp_style_unused_value_expression_statement_preference = unused_local_variabl
 
 # IDE0058: Expression value is never used
 dotnet_diagnostic.IDE0058.severity = none
-csharp_style_prefer_primary_constructors = true:suggestion
+csharp_style_prefer_primary_constructors = false
 csharp_prefer_system_threading_lock = true:suggestion
 
 # C++ Files

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -89,12 +90,13 @@ namespace LibRLV
             {"right hind foot", AttachmentPoint.RightHindFoot},
         }.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
 
-        private static readonly Regex _attachmentPointTagRegex = new Regex(@"\((?<tag>[^\)]+)\)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        public static bool TryGetAttachmentPointFromItemName(string itemName, out AttachmentPoint attachmentPoint)
+        private static readonly Regex _attachmentPointTagRegex = new(@"\((?<tag>[^\)]+)\)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        public static bool TryGetAttachmentPointFromItemName(string itemName, [NotNullWhen(true)] out AttachmentPoint? attachmentPoint)
         {
             // TODO: There's a lot of odd logic in the original RLV method for finding the attachment point.
             //       I'm not doing any of that outside of "Use the exact matching tag. if multiple tags exist, use
             //       the tag near the end of the string"
+            attachmentPoint = null;
 
             var attachmentPointTag = _attachmentPointTagRegex
                 .Matches(itemName)
@@ -105,8 +107,9 @@ namespace LibRLV
 
             for (var i = attachmentPointTag.Count - 1; i >= 0; i--)
             {
-                if (RLVAttachmentPointMap.TryGetValue(attachmentPointTag[i].ToLowerInvariant(), out attachmentPoint))
+                if (RLVAttachmentPointMap.TryGetValue(attachmentPointTag[i].ToLowerInvariant(), out var attachmentPointTemp))
                 {
+                    attachmentPoint = attachmentPointTemp;
                     return true;
                 }
             }

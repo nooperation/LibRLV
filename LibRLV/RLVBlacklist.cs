@@ -6,8 +6,8 @@ namespace LibRLV
 {
     public class RLVBlacklist : IBlacklistProvider
     {
-        private readonly HashSet<string> _blacklist = new HashSet<string>();
-        private readonly object _blacklistLock = new object();
+        private readonly HashSet<string> _blacklist = new();
+        private readonly object _blacklistLock = new();
 
         internal RLVBlacklist()
         {

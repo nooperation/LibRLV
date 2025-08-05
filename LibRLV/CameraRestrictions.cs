@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 
@@ -30,43 +31,64 @@ namespace LibRLV
 
         internal CameraRestrictions(IRestrictionProvider restrictionProvider)
         {
-            if (restrictionProvider == null)
+            if (RLVPermissionsService.TryGetRestrictionValueMax(restrictionProvider, RLVRestrictionType.CamZoomMin, out var camZoomMin))
             {
-                throw new ArgumentNullException(nameof(restrictionProvider));
+                ZoomMin = camZoomMin;
+            }
+            if (RLVPermissionsService.TryGetRestrictionValueMax(restrictionProvider, RLVRestrictionType.SetCamFovMin, out var setCamFovMin))
+            {
+                FovMin = setCamFovMin;
+            }
+            if (RLVPermissionsService.TryGetRestrictionValueMax(restrictionProvider, RLVRestrictionType.SetCamAvDistMin, out var setCamAvDistMin))
+            {
+                AvDistMin = setCamAvDistMin;
+            }
+            if (RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamZoomMax, out var camZoomMax))
+            {
+                ZoomMax = camZoomMax;
+            }
+            if (RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamDrawMin, out var camDrawMin))
+            {
+                DrawMin = camDrawMin;
+            }
+            if (RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamDrawMax, out var camDrawMax))
+            {
+                DrawMax = camDrawMax;
+            }
+            if (RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamDrawAlphaMin, out var camDrawAlphaMin))
+            {
+                DrawAlphaMin = camDrawAlphaMin;
+            }
+            if (RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamDrawAlphaMax, out var camDrawAlphaMax))
+            {
+                DrawAlphaMax = camDrawAlphaMax;
+            }
+            if (RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.SetCamFovMax, out var setCamFovMax))
+            {
+                FovMax = setCamFovMax;
+            }
+            if (RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.SetCamAvDistMax, out var setCamAvDistMax))
+            {
+                AvDistMax = setCamAvDistMax;
+            }
+            if (RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamAvDist, out var camAvDist))
+            {
+                AvDist = camAvDist;
             }
 
-            RLVPermissionsService.GetRestrictionValueMax(restrictionProvider, RLVRestrictionType.CamZoomMin, out float? camZoomMin);
-            RLVPermissionsService.GetRestrictionValueMax(restrictionProvider, RLVRestrictionType.SetCamFovMin, out float? setCamFovMin);
-            RLVPermissionsService.GetRestrictionValueMax(restrictionProvider, RLVRestrictionType.SetCamAvDistMin, out float? setCamAvDistMin);
-            RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamZoomMax, out float? camZoomMax);
-            RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamDrawMin, out float? camDrawMin);
-            RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamDrawMax, out float? camDrawMax);
-            RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamDrawAlphaMin, out float? camDrawAlphaMin);
-            RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamDrawAlphaMax, out float? camDrawAlphaMax);
-            RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.SetCamFovMax, out float? setCamFovMax);
-            RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.SetCamAvDistMax, out float? setCamAvDistMax);
-            RLVPermissionsService.GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamAvDist, out float? camAvDist);
-
-            GetCamDrawColor(restrictionProvider, out var camDrawColor);
-            GetCamTexture(restrictionProvider, out var camtextures);
+            if (TryGetCamDrawColor(restrictionProvider, out var camDrawColor))
+            {
+                DrawColor = camDrawColor;
+            }
+            if (TryGetCamTexture(restrictionProvider, out var camtextures))
+            {
+                Texture = camtextures;
+            }
 
             IsLocked = restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SetCamUnlock).Count != 0;
-            ZoomMin = camZoomMin;
-            FovMin = setCamFovMin;
-            AvDistMin = setCamAvDistMin;
-            ZoomMax = camZoomMax;
-            DrawMin = camDrawMin;
-            DrawMax = camDrawMax;
-            DrawAlphaMin = camDrawAlphaMin;
-            DrawAlphaMax = camDrawAlphaMax;
-            FovMax = setCamFovMax;
-            AvDistMax = setCamAvDistMax;
-            AvDist = camAvDist;
-            DrawColor = camDrawColor;
-            Texture = camtextures;
         }
 
-        private static bool GetCamDrawColor(IRestrictionProvider restrictionProvider, out Vector3? camDrawColor)
+        private static bool TryGetCamDrawColor(IRestrictionProvider restrictionProvider, out Vector3? camDrawColor)
         {
             camDrawColor = default;
 
@@ -96,7 +118,7 @@ namespace LibRLV
             return true;
         }
 
-        private static bool GetCamTexture(IRestrictionProvider restrictionProvider, out Guid? textureUUID)
+        private static bool TryGetCamTexture(IRestrictionProvider restrictionProvider, [NotNullWhen(true)] out Guid? textureUUID)
         {
             textureUUID = default;
 
@@ -106,6 +128,7 @@ namespace LibRLV
                 return false;
             }
 
+            textureUUID = Guid.Empty;
             foreach (var restriction in restrictions)
             {
                 if (restriction.Args.Count == 0)

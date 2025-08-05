@@ -35,7 +35,7 @@ namespace LibRLV
         internal IRLVCallbacks Callbacks { get; }
         internal RLVGetRequestHandler GetRequestHandler { get; }
 
-        private readonly Regex _rlvRegexPattern = new Regex(@"(?<behavior>[^:=]+)(:(?<option>[^=]*))?=(?<param>.+)", RegexOptions.Compiled);
+        private readonly Regex _rlvRegexPattern = new(@"(?<behavior>[^:=]+)(:(?<option>[^=]*))?=(?<param>.+)", RegexOptions.Compiled);
 
         public RLV(IRLVCallbacks callbacks, bool enabled)
         {
@@ -68,9 +68,9 @@ namespace LibRLV
             {
                 return await Commands.ProcessActionCommand(rlvMessage);
             }
-            else if (rlvMessage.Param == "y" || rlvMessage.Param == "n" || rlvMessage.Param == "add" || rlvMessage.Param == "rem")
+            else if (rlvMessage.Param is "y" or "n" or "add" or "rem")
             {
-                return await Restrictions.ProcessRestrictionCommand(rlvMessage, rlvMessage.Option, rlvMessage.Param == "n" || rlvMessage.Param == "add");
+                return await Restrictions.ProcessRestrictionCommand(rlvMessage, rlvMessage.Option, rlvMessage.Param is "n" or "add");
             }
             else if (int.TryParse(rlvMessage.Param, out var channel))
             {
@@ -90,14 +90,13 @@ namespace LibRLV
             // Special hack for @clear, which doesn't match the standard pattern of @behavior=param
             if (message.Equals("clear", StringComparison.OrdinalIgnoreCase))
             {
-                return await ProcessRLVMessage(new RLVMessage()
-                {
-                    Behavior = "clear",
-                    Option = "",
-                    Param = "",
-                    Sender = senderId,
-                    SenderName = senderName
-                });
+                return await ProcessRLVMessage(new RLVMessage(
+                    behavior: "clear",
+                    option: "",
+                    param: "",
+                    sender: senderId,
+                    senderName: senderName
+                ));
             }
 
             var match = _rlvRegexPattern.Match(message);
@@ -106,14 +105,13 @@ namespace LibRLV
                 return false;
             }
 
-            var rlvMessage = new RLVMessage
-            {
-                Behavior = match.Groups["behavior"].Value.ToLowerInvariant(),
-                Option = match.Groups["option"].Value,
-                Param = match.Groups["param"].Value.ToLowerInvariant(),
-                Sender = senderId,
-                SenderName = senderName
-            };
+            var rlvMessage = new RLVMessage(
+                behavior: match.Groups["behavior"].Value.ToLowerInvariant(),
+                option: match.Groups["option"].Value,
+                param: match.Groups["param"].Value.ToLowerInvariant(),
+                sender: senderId,
+                senderName: senderName
+            );
 
             return await ProcessRLVMessage(rlvMessage);
         }
@@ -383,7 +381,7 @@ namespace LibRLV
 
             foreach (var notificationRestriction in notificationRestrictions)
             {
-                if (!(notificationRestriction.Args[0] is int channel))
+                if (notificationRestriction.Args[0] is not int channel)
                 {
                     continue;
                 }

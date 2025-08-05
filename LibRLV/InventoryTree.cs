@@ -7,7 +7,7 @@ namespace LibRLV
     {
         public Guid Id { get; }
         public string Name { get; set; }
-        public InventoryTree Parent { get; private set; }
+        public InventoryTree? Parent { get; private set; }
         public IReadOnlyList<InventoryTree> Children => _children;
         public IReadOnlyList<InventoryItem> Items => _items;
 
@@ -24,8 +24,8 @@ namespace LibRLV
             Id = id;
             Name = name;
             Parent = null;
-            _children = new List<InventoryTree>();
-            _items = new List<InventoryItem>();
+            _children = [];
+            _items = [];
         }
 
         public InventoryTree AddChild(Guid id, string name)

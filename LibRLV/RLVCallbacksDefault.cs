@@ -122,12 +122,12 @@ namespace LibRLV
                     return Task.FromResult((true, "1"));
             }
 
-            return null;
+            return Task.FromResult((false, string.Empty));
         }
 
-        public virtual Task<(bool Success, InventoryTree SharedFolder)> TryGetRlvInventoryTreeAsync()
+        public virtual Task<(bool Success, InventoryTree? SharedFolder)> TryGetRlvInventoryTreeAsync()
         {
-            return Task.FromResult((false, (InventoryTree)null));
+            return Task.FromResult((false, (InventoryTree?)null));
         }
 
         public virtual Task SendInstantMessageAsync(Guid targetUser, string message, CancellationToken cancellationToken)
@@ -185,10 +185,10 @@ namespace LibRLV
             return Task.FromResult((false, "None"));
         }
 
-        public Task<(bool Success, IReadOnlyList<InventoryItem> CurrentOutfit)> TryGetCurrentOutfitAsync()
+        public Task<(bool Success, IReadOnlyList<InventoryItem>? CurrentOutfit)> TryGetCurrentOutfitAsync()
         {
-            IReadOnlyList<InventoryItem> currentOutfit = new List<InventoryItem>();
-            return Task.FromResult((false, currentOutfit));
+            IReadOnlyList<InventoryItem> currentOutfit = [];
+            return Task.FromResult((false, (IReadOnlyList<InventoryItem>?)currentOutfit));
         }
     }
 }

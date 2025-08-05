@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using LibRLV.EventArguments;
 
 namespace LibRLV
 {
-    public partial class RLVRestrictionManager : IRestrictionProvider
+    public class RLVRestrictionManager : IRestrictionProvider
     {
         private static readonly ImmutableDictionary<string, RLVRestrictionType> _nameToRestrictionMap = new Dictionary<string, RLVRestrictionType>(StringComparer.OrdinalIgnoreCase)
         {
@@ -135,13 +136,13 @@ namespace LibRLV
         private static readonly ImmutableDictionary<RLVRestrictionType, string> _restrictionToNameMap = _nameToRestrictionMap
             .ToImmutableDictionary(k => k.Value, v => v.Key);
 
-        private readonly Dictionary<RLVRestrictionType, HashSet<RLVRestriction>> _currentRestrictions = new Dictionary<RLVRestrictionType, HashSet<RLVRestriction>>();
-        private readonly object _currentRestrictionsLock = new object();
+        private readonly Dictionary<RLVRestrictionType, HashSet<RLVRestriction>> _currentRestrictions = [];
+        private readonly object _currentRestrictionsLock = new();
 
         private readonly IRLVCallbacks _callbacks;
         private readonly LockedFolderManager _lockedFolderManager;
 
-        public event EventHandler<RestrictionUpdatedEventArgs> RestrictionUpdated;
+        public event EventHandler<RestrictionUpdatedEventArgs>? RestrictionUpdated;
 
         internal RLVRestrictionManager(IRLVCallbacks callbacks)
         {
@@ -149,12 +150,19 @@ namespace LibRLV
             _lockedFolderManager = new LockedFolderManager(callbacks, this);
         }
 
-        internal static bool TryGetRestrictionFromName(string name, out RLVRestrictionType restrictionType)
+        internal static bool TryGetRestrictionFromName(string name, [NotNullWhen(true)] out RLVRestrictionType? restrictionType)
         {
-            return _nameToRestrictionMap.TryGetValue(name, out restrictionType);
+            if (!_nameToRestrictionMap.TryGetValue(name, out var restrictionTypeTemp))
+            {
+                restrictionType = null;
+                return false;
+            }
+
+            restrictionType = restrictionTypeTemp;
+            return true;
         }
 
-        internal static bool TryGetRestrictionNameFromType(RLVRestrictionType restrictionType, out string name)
+        internal static bool TryGetRestrictionNameFromType(RLVRestrictionType restrictionType, [NotNullWhen(true)] out string? name)
         {
             return _restrictionToNameMap.TryGetValue(restrictionType, out name);
         }
@@ -200,7 +208,7 @@ namespace LibRLV
                     continue;
                 }
 
-                if (!(notificationRestriction.Args[0] is int notificationChannel))
+                if (notificationRestriction.Args[0] is not int notificationChannel)
                 {
                     continue;
                 }
@@ -362,7 +370,7 @@ namespace LibRLV
             {
                 if (!_currentRestrictions.TryGetValue(newRestriction.Behavior, out var restrictions))
                 {
-                    restrictions = new HashSet<RLVRestriction>();
+                    restrictions = [];
                     _currentRestrictions.Add(newRestriction.Behavior, restrictions);
                 }
 
@@ -441,12 +449,12 @@ namespace LibRLV
                 return false;
             }
 
-            if (!RLVRestriction.ParseOptions(behavior, option, out var args))
+            if (!RLVRestriction.ParseOptions(behavior.Value, option, out var args))
             {
                 return false;
             }
 
-            var newCommand = new RLVRestriction(behavior, message.Sender, message.SenderName, args);
+            var newCommand = new RLVRestriction(behavior.Value, message.Sender, message.SenderName, args);
 
             if (isAddingRestriction)
             {
@@ -494,7 +502,7 @@ namespace LibRLV
             return true;
         }
 
-        public bool TryGetLockedFolder(Guid folderId, out LockedFolderPublic lockedFolder)
+        public bool TryGetLockedFolder(Guid folderId, [NotNullWhen(true)] out LockedFolderPublic? lockedFolder)
         {
             return _lockedFolderManager.TryGetLockedFolder(folderId, out lockedFolder);
         }

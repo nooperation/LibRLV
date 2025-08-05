@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LibRLV
 {
@@ -47,7 +47,7 @@ namespace LibRLV
         /// <param name="skipPrivateFolders">If true, ignores folders starting with '.'</param>
         /// <param name="folder">The found folder, or null if not found</param>
         /// <returns>True if folder was found, false otherwise</returns>
-        public bool TryGetFolderFromPath(string path, bool skipPrivateFolders, out InventoryTree folder)
+        public bool TryGetFolderFromPath(string path, bool skipPrivateFolders, [NotNullWhen(returnValue: true)] out InventoryTree? folder)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -58,19 +58,14 @@ namespace LibRLV
             var iter = Root;
             while (true)
             {
-                InventoryTree candidate = null;
+                InventoryTree? candidate = null;
                 var candidateNameLengthSelected = 0;
                 var candidatePathRemaining = string.Empty;
                 var candidateHasPrefix = false;
 
                 foreach (var child in iter.Children)
                 {
-                    if (child.Name.Length == 0)
-                    {
-                        continue;
-                    }
-
-                    if (skipPrivateFolders && child.Name[0] == '.')
+                    if (skipPrivateFolders && child.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
@@ -79,8 +74,12 @@ namespace LibRLV
                     var hasPrefix = false;
 
                     // Only fix the child name if we don't already have an exact match with path
-                    if ((child.Name[0] == '.' || child.Name[0] == '~' || child.Name[0] == '+') &&
-                        !path.StartsWith(child.Name, StringComparison.OrdinalIgnoreCase))
+                    if (!path.StartsWith(child.Name, StringComparison.OrdinalIgnoreCase) &&
+                        (
+                            child.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase) ||
+                            child.Name.StartsWith("~", StringComparison.OrdinalIgnoreCase) ||
+                            child.Name.StartsWith("+", StringComparison.OrdinalIgnoreCase)
+                        ))
                     {
                         fixedChildName = fixedChildName.Substring(1);
                         hasPrefix = true;
@@ -165,12 +164,12 @@ namespace LibRLV
             {
                 if (!Items.TryGetValue(itemId.Value, out var item))
                 {
-                    return Enumerable.Empty<InventoryTree>();
+                    return [];
                 }
 
                 if (!item.FolderId.HasValue || !Folders.TryGetValue(item.FolderId.Value, out var folder))
                 {
-                    return Enumerable.Empty<InventoryTree>();
+                    return [];
                 }
 
                 folders.Add(folder);
@@ -237,7 +236,7 @@ namespace LibRLV
         /// <param name="folderId">ID of the folder to get the path to</param>
         /// <param name="finalPath">The path to the folder if function is successful, otherwise null</param>
         /// <returns>True if the folder was found and a path was generated, otherwise false</returns>
-        public bool TryBuildPathToFolder(Guid folderId, out string finalPath)
+        public bool TryBuildPathToFolder(Guid folderId, [NotNullWhen(true)] out string? finalPath)
         {
             var path = new Stack<string>();
 

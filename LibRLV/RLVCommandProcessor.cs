@@ -11,24 +11,23 @@ namespace LibRLV
     {
         private readonly ImmutableDictionary<string, Func<RLVMessage, Task<bool>>> _rlvActionHandlers;
 
-        public event EventHandler<SetRotEventArgs> SetRot;
-        public event EventHandler<AdjustHeightEventArgs> AdjustHeight;
-        public event EventHandler<SetCamFOVEventArgs> SetCamFOV;
-        public event EventHandler<TpToEventArgs> TpTo;
-        public event EventHandler<SitEventArgs> Sit;
-        public event EventHandler Unsit;
-        public event EventHandler SitGround;
-        public event EventHandler<RemOutfitEventArgs> RemOutfit;
-        public event EventHandler<AttachmentEventArgs> Attach;
-        public event EventHandler<DetachEventArgs> Detach;
-        public event EventHandler<SetGroupEventArgs> SetGroup;
-        public event EventHandler<SetSettingEventArgs> SetEnv;
-        public event EventHandler<SetSettingEventArgs> SetDebug;
+        public event EventHandler<SetRotEventArgs>? SetRot;
+        public event EventHandler<AdjustHeightEventArgs>? AdjustHeight;
+        public event EventHandler<SetCamFOVEventArgs>? SetCamFOV;
+        public event EventHandler<TpToEventArgs>? TpTo;
+        public event EventHandler<SitEventArgs>? Sit;
+        public event EventHandler? Unsit;
+        public event EventHandler? SitGround;
+        public event EventHandler<RemOutfitEventArgs>? RemOutfit;
+        public event EventHandler<AttachmentEventArgs>? Attach;
+        public event EventHandler<DetachEventArgs>? Detach;
+        public event EventHandler<SetGroupEventArgs>? SetGroup;
+        public event EventHandler<SetSettingEventArgs>? SetEnv;
+        public event EventHandler<SetSettingEventArgs>? SetDebug;
 
         // TODO: Swap manager out with an interface once it's been solidified into only useful stuff
         private readonly RLVPermissionsService _manager;
         private readonly IRLVCallbacks _callbacks;
-        private static readonly char[] _restrictionOptionSeparator = new[] { ';' };
 
         internal RLVCommandProcessor(RLVPermissionsService manager, IRLVCallbacks callbacks)
         {
@@ -48,7 +47,7 @@ namespace LibRLV
                 { "detachme", HandleDetachMe},
                 { "remattach", HandleRemAttach},
                 { "detach", HandleRemAttach},
-                { "detachall", n => HandleDetachAll(n)},
+                { "detachall", HandleDetachAll},
                 { "detachthis", n => HandleDetachThis(n, false)},
                 { "detachallthis", n => HandleDetachThis(n, true)},
                 { "setgroup", HandleSetGroup},
@@ -144,7 +143,7 @@ namespace LibRLV
 
         private Task<bool> HandleSetGroup(RLVMessage command)
         {
-            var argParts = command.Option.Split(_restrictionOptionSeparator, StringSplitOptions.RemoveEmptyEntries);
+            var argParts = command.Option.Split([';'], StringSplitOptions.RemoveEmptyEntries);
             if (argParts.Length == 0)
             {
                 return Task.FromResult(false);
@@ -177,7 +176,7 @@ namespace LibRLV
                 return false;
             }
 
-            if (item.Name.Length > 0 && item.Name[0] == '.')
+            if (item.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
@@ -197,7 +196,7 @@ namespace LibRLV
                 return false;
             }
 
-            if (item.WornOn == WearableType.Skin || item.WornOn == WearableType.Shape || item.WornOn == WearableType.Eyes || item.WornOn == WearableType.Hair)
+            if (item.WornOn is WearableType.Skin or WearableType.Shape or WearableType.Eyes or WearableType.Hair)
             {
                 return false;
             }
@@ -209,11 +208,11 @@ namespace LibRLV
         {
             if (folder.Name.Length > 0)
             {
-                if (folder.Name[0] == '.')
+                if (folder.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
                 {
                     return;
                 }
-                if (folder.Name[0] == '+')
+                if (folder.Name.StartsWith("+", StringComparison.OrdinalIgnoreCase))
                 {
                     replaceExistingAttachments = false;
                 }
@@ -225,7 +224,6 @@ namespace LibRLV
                 folderAttachmentPoint = attachmentPointTemp;
             }
 
-
             foreach (var item in folder.Items)
             {
                 if (item.AttachedTo != null || item.WornOn != null)
@@ -233,14 +231,14 @@ namespace LibRLV
                     continue;
                 }
 
-                if (item.Name.Length > 0 && item.Name[0] == '.')
+                if (item.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
                 if (RLVCommon.TryGetAttachmentPointFromItemName(item.Name, out var attachmentPoint))
                 {
-                    itemsToAttach.Add(new AttachmentEventArgs.AttachmentRequest(item.Id, attachmentPoint, replaceExistingAttachments));
+                    itemsToAttach.Add(new AttachmentEventArgs.AttachmentRequest(item.Id, attachmentPoint.Value, replaceExistingAttachments));
                 }
                 else if (folderAttachmentPoint != null)
                 {
@@ -256,7 +254,7 @@ namespace LibRLV
             {
                 foreach (var child in folder.Children)
                 {
-                    if (child.Name.Length > 0 && child.Name[0] == '.')
+                    if (child.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
@@ -270,7 +268,7 @@ namespace LibRLV
         private async Task<bool> HandleAttach(RLVMessage command, bool replaceExistingAttachments, bool recursive)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
-            if (!hasSharedFolder)
+            if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
             }
@@ -279,7 +277,7 @@ namespace LibRLV
             if (!inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
             {
                 var handler = Attach;
-                handler?.Invoke(this, new AttachmentEventArgs(new List<AttachmentEventArgs.AttachmentRequest>()));
+                handler?.Invoke(this, new AttachmentEventArgs([]));
 
                 return false;
             }
@@ -298,10 +296,11 @@ namespace LibRLV
         private async Task<bool> HandleAttachThis(RLVMessage command, bool replaceExistingAttachments, bool recursive)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
-            if (!hasSharedFolder)
+            if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
             }
+
             var inventoryMap = new InventoryMap(sharedFolder);
             var folderPaths = new List<InventoryTree>();
 
@@ -340,7 +339,7 @@ namespace LibRLV
 
         private void CollectItemsToDetach(InventoryTree folder, InventoryMap inventoryMap, bool recursive, List<Guid> itemsToDetach)
         {
-            if (folder.Name.Length > 0 && folder.Name[0] == '.')
+            if (folder.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
@@ -359,7 +358,7 @@ namespace LibRLV
             {
                 foreach (var child in folder.Children)
                 {
-                    if (child.Name.Length > 0 && child.Name[0] == '.')
+                    if (child.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
@@ -374,13 +373,13 @@ namespace LibRLV
         private async Task<bool> HandleRemAttach(RLVMessage command)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
-            if (!hasSharedFolder)
+            if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
             }
 
             var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync();
-            if (!hasCurrentOutfit)
+            if (!hasCurrentOutfit || currentOutfit == null)
             {
                 return false;
             }
@@ -440,7 +439,7 @@ namespace LibRLV
         private async Task<bool> HandleDetachAll(RLVMessage command)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
-            if (!hasSharedFolder)
+            if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
             }
@@ -463,7 +462,7 @@ namespace LibRLV
         private async Task<bool> HandleDetachThis(RLVMessage command, bool recursive)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
-            if (!hasSharedFolder)
+            if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
             }
@@ -516,7 +515,7 @@ namespace LibRLV
         private async Task<bool> HandleDetachMe(RLVMessage command)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
-            if (!hasSharedFolder)
+            if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
             }
@@ -542,12 +541,12 @@ namespace LibRLV
         private async Task<bool> HandleRemOutfit(RLVMessage command)
         {
             var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync();
-            if (!hasCurrentOutfit)
+            if (!hasCurrentOutfit || currentOutfit == null)
             {
                 return false;
             }
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
-            if (!hasSharedFolder)
+            if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
             }
@@ -631,7 +630,7 @@ namespace LibRLV
 
         private Task<bool> HandleAdjustHeight(RLVMessage command)
         {
-            var args = command.Option.Split(';');
+            var args = command.Option.Split([';'], StringSplitOptions.RemoveEmptyEntries);
             if (args.Length < 1)
             {
                 return Task.FromResult(false);
@@ -730,10 +729,10 @@ namespace LibRLV
                 return Task.FromResult(false);
             }
 
-            var commandArgs = command.Option.Split(';');
+            var commandArgs = command.Option.Split([';'], StringSplitOptions.RemoveEmptyEntries);
             var locationArgs = commandArgs[0].Split('/');
 
-            if (locationArgs.Length < 3 || locationArgs.Length > 4)
+            if (locationArgs.Length is < 3 or > 4)
             {
                 return Task.FromResult(false);
             }

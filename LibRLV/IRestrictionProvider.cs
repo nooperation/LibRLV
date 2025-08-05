@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LibRLV
 {
@@ -7,7 +8,7 @@ namespace LibRLV
     {
         IReadOnlyList<RLVRestriction> GetRestrictionsByType(RLVRestrictionType restrictionType);
         IReadOnlyList<RLVRestriction> FindRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null);
-        bool TryGetLockedFolder(Guid folderId, out LockedFolderPublic lockedFolder);
+        bool TryGetLockedFolder(Guid folderId, [NotNullWhen(true)] out LockedFolderPublic? lockedFolder);
         IReadOnlyDictionary<Guid, LockedFolderPublic> GetLockedFolders();
     }
 }

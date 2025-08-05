@@ -7,10 +7,10 @@ namespace LibRLV.EventArguments
         public float X { get; }
         public float Y { get; }
         public float Z { get; }
-        public string RegionName { get; }
+        public string? RegionName { get; }
         public float? Lookat { get; }
 
-        public TpToEventArgs(float x, float y, float z, string regionName, float? lookat)
+        public TpToEventArgs(float x, float y, float z, string? regionName, float? lookat)
         {
             X = x;
             Y = y;

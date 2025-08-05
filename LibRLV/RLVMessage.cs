@@ -4,10 +4,19 @@ namespace LibRLV
 {
     internal sealed class RLVMessage
     {
-        public string Behavior { get; set; }
-        public string Option { get; set; }
-        public string Param { get; set; }
-        public Guid Sender { get; set; }
-        public string SenderName { get; set; }
+        public string Behavior { get; }
+        public Guid Sender { get; }
+        public string SenderName { get; }
+        public string Option { get; }
+        public string Param { get; }
+
+        public RLVMessage(string behavior, Guid sender, string senderName, string option, string param)
+        {
+            Behavior = behavior;
+            Sender = sender;
+            SenderName = senderName;
+            Option = option;
+            Param = param;
+        }
     }
 }
