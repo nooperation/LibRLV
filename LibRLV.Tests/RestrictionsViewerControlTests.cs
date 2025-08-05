@@ -8,9 +8,9 @@ namespace LibRLV.Tests
 
         #region @setdebug=<y/n>
         [Fact]
-        public void CanSetDebug()
+        public async Task CanSetDebug()
         {
-            CheckSimpleCommand("setDebug", m => m.CanSetDebug());
+            await CheckSimpleCommand("setDebug", m => m.CanSetDebug());
         }
         #endregion
 
@@ -18,9 +18,9 @@ namespace LibRLV.Tests
         [Theory]
         [InlineData("RenderResolutionDivisor", "RenderResolutionDivisor Success")]
         [InlineData("Unknown Setting", "Unknown Setting Success")]
-        public void SetDebug_Default(string settingName, string settingValue)
+        public async Task SetDebug_Default(string settingName, string settingValue)
         {
-            var raised = Assert.Raises<SetSettingEventArgs>(
+            var raised = await Assert.RaisesAsync<SetSettingEventArgs>(
                  attach: n => _rlv.Commands.SetDebug += n,
                  detach: n => _rlv.Commands.SetDebug -= n,
                  testCode: () => _rlv.ProcessMessage($"@setdebug_{settingName}:{settingValue}=force", _sender.Id, _sender.Name)
@@ -31,7 +31,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void SetDebug_Invalid()
+        public async Task SetDebug_Invalid()
         {
             var eventRaised = false;
             _rlv.Commands.SetDebug += (sender, args) =>
@@ -39,7 +39,7 @@ namespace LibRLV.Tests
                 eventRaised = true;
             };
 
-            Assert.False(_rlv.ProcessMessage($"@setdebug_:42=force", _sender.Id, _sender.Name));
+            Assert.False(await _rlv.ProcessMessage($"@setdebug_:42=force", _sender.Id, _sender.Name));
             Assert.False(eventRaised);
         }
         #endregion
@@ -48,7 +48,7 @@ namespace LibRLV.Tests
         [Theory]
         [InlineData("RenderResolutionDivisor", "RenderResolutionDivisor Success")]
         [InlineData("Unknown Setting", "Unknown Setting Success")]
-        public void GetDebug_Default(string settingName, string settingValue)
+        public async Task GetDebug_Default(string settingName, string settingValue)
         {
             var actual = _callbacks.RecordReplies();
 
@@ -61,16 +61,16 @@ namespace LibRLV.Tests
                 (1234, settingValue),
             };
 
-            Assert.True(_rlv.ProcessMessage($"@getdebug_{settingName}=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage($"@getdebug_{settingName}=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
         #endregion
 
         #region @setenv=<y/n>
         [Fact]
-        public void CanSetEnv()
+        public async Task CanSetEnv()
         {
-            CheckSimpleCommand("setEnv", m => m.CanSetEnv());
+            await CheckSimpleCommand("setEnv", m => m.CanSetEnv());
         }
         #endregion
 
@@ -79,9 +79,9 @@ namespace LibRLV.Tests
         [Theory]
         [InlineData("Daytime", "Daytime Success")]
         [InlineData("Unknown Setting", "Unknown Setting Success")]
-        public void SetEnv_Default(string settingName, string settingValue)
+        public async Task SetEnv_Default(string settingName, string settingValue)
         {
-            var raised = Assert.Raises<SetSettingEventArgs>(
+            var raised = await Assert.RaisesAsync<SetSettingEventArgs>(
                  attach: n => _rlv.Commands.SetEnv += n,
                  detach: n => _rlv.Commands.SetEnv -= n,
                  testCode: () => _rlv.ProcessMessage($"@setenv_{settingName}:{settingValue}=force", _sender.Id, _sender.Name)
@@ -98,7 +98,7 @@ namespace LibRLV.Tests
         [Theory]
         [InlineData("Daytime", "Daytime Success")]
         [InlineData("Unknown Setting", "Unknown Setting Success")]
-        public void GetEnv_Default(string settingName, string settingValue)
+        public async Task GetEnv_Default(string settingName, string settingValue)
         {
             var actual = _callbacks.RecordReplies();
 
@@ -111,7 +111,7 @@ namespace LibRLV.Tests
                 (1234, settingValue),
             };
 
-            Assert.True(_rlv.ProcessMessage($"@getenv_{settingName}=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage($"@getenv_{settingName}=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 

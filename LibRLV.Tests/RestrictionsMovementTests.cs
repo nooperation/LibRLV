@@ -7,41 +7,41 @@ namespace LibRLV.Tests
     {
         #region @fly
         [Fact]
-        public void CanFly()
+        public async Task CanFly()
         {
-            CheckSimpleCommand("fly", m => m.CanFly());
+            await CheckSimpleCommand("fly", m => m.CanFly());
         }
         #endregion
 
         #region @jump (RLVa)
         [Fact]
-        public void CanJump()
+        public async Task CanJump()
         {
-            CheckSimpleCommand("jump", m => m.CanJump());
+            await CheckSimpleCommand("jump", m => m.CanJump());
         }
         #endregion
 
         #region @temprun
         [Fact]
-        public void CanTempRun()
+        public async Task CanTempRun()
         {
-            CheckSimpleCommand("tempRun", m => m.CanTempRun());
+            await CheckSimpleCommand("tempRun", m => m.CanTempRun());
         }
         #endregion
 
         #region @alwaysrun
         [Fact]
-        public void CanAlwaysRun()
+        public async Task CanAlwaysRun()
         {
-            CheckSimpleCommand("alwaysRun", m => m.CanAlwaysRun());
+            await CheckSimpleCommand("alwaysRun", m => m.CanAlwaysRun());
         }
         #endregion
 
         #region @setrot:<angle_in_radians>=force
         [Fact]
-        public void SetRot()
+        public async Task SetRot()
         {
-            var raised = Assert.Raises<SetRotEventArgs>(
+            var raised = await Assert.RaisesAsync<SetRotEventArgs>(
                  attach: n => _rlv.Commands.SetRot += n,
                  detach: n => _rlv.Commands.SetRot -= n,
                  testCode: () => _rlv.ProcessMessage("@setrot:1.5=force", _sender.Id, _sender.Name)
@@ -53,9 +53,9 @@ namespace LibRLV.Tests
 
         #region @adjustheight:<distance_pelvis_to_foot_in_meters>;<factor>[;delta_in_meters]=force
         [Fact]
-        public void AdjustHeight()
+        public async Task AdjustHeight()
         {
-            var raised = Assert.Raises<AdjustHeightEventArgs>(
+            var raised = await Assert.RaisesAsync<AdjustHeightEventArgs>(
                  attach: n => _rlv.Commands.AdjustHeight += n,
                  detach: n => _rlv.Commands.AdjustHeight -= n,
                  testCode: () => _rlv.ProcessMessage("@adjustheight:4.3;1.25=force", _sender.Id, _sender.Name)
@@ -67,9 +67,9 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void AdjustHeight_WithDelta()
+        public async Task AdjustHeight_WithDelta()
         {
-            var raised = Assert.Raises<AdjustHeightEventArgs>(
+            var raised = await Assert.RaisesAsync<AdjustHeightEventArgs>(
                  attach: n => _rlv.Commands.AdjustHeight += n,
                  detach: n => _rlv.Commands.AdjustHeight -= n,
                  testCode: () => _rlv.ProcessMessage("@adjustheight:4.3;1.25;12.34=force", _sender.Id, _sender.Name)
@@ -85,9 +85,9 @@ namespace LibRLV.Tests
 
         #region @unsit
         [Fact]
-        public void CanUnsit()
+        public async Task CanUnsit()
         {
-            CheckSimpleCommand("unsit", m => m.CanUnsit());
+            await CheckSimpleCommand("unsit", m => m.CanUnsit());
         }
         #endregion
 
@@ -107,12 +107,12 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void ForceSit_Default()
+        public async Task ForceSit_Default()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             SetObjectExists(objectId1, false);
 
-            var raised = Assert.Raises<SitEventArgs>(
+            var raised = await Assert.RaisesAsync<SitEventArgs>(
                 attach: n => _rlv.Commands.Sit += n,
                 detach: n => _rlv.Commands.Sit -= n,
                 testCode: () => _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name)
@@ -122,14 +122,14 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void ForceSit_RestrictedUnsit_WhileStanding()
+        public async Task ForceSit_RestrictedUnsit_WhileStanding()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             SetObjectExists(objectId1, false);
 
-            _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
-            var raised = Assert.Raises<SitEventArgs>(
+            var raised = await Assert.RaisesAsync<SitEventArgs>(
                 attach: n => _rlv.Commands.Sit += n,
                 detach: n => _rlv.Commands.Sit -= n,
                 testCode: () => _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name)
@@ -139,12 +139,12 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void ForceSit_RestrictedUnsit_WhileSeated()
+        public async Task ForceSit_RestrictedUnsit_WhileSeated()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             SetObjectExists(objectId1, true);
 
-            _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
             var raisedEvent = false;
             _rlv.Commands.TpTo += (sender, args) =>
@@ -152,18 +152,18 @@ namespace LibRLV.Tests
                 raisedEvent = true;
             };
 
-            Assert.False(_rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
+            Assert.False(await _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
             Assert.False(raisedEvent);
         }
 
 
         [Fact]
-        public void ForceSit_RestrictedSit()
+        public async Task ForceSit_RestrictedSit()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             SetObjectExists(objectId1, true);
 
-            _rlv.ProcessMessage("@sit=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@sit=n", _sender.Id, _sender.Name);
 
             var raisedEvent = false;
             _rlv.Commands.TpTo += (sender, args) =>
@@ -171,17 +171,17 @@ namespace LibRLV.Tests
                 raisedEvent = true;
             };
 
-            Assert.False(_rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
+            Assert.False(await _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
             Assert.False(raisedEvent);
         }
 
         [Fact]
-        public void ForceSit_RestrictedStandTp()
+        public async Task ForceSit_RestrictedStandTp()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             SetObjectExists(objectId1, true);
 
-            _rlv.ProcessMessage("@standtp=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@standtp=n", _sender.Id, _sender.Name);
 
             var raisedEvent = false;
             _rlv.Commands.TpTo += (sender, args) =>
@@ -189,12 +189,12 @@ namespace LibRLV.Tests
                 raisedEvent = true;
             };
 
-            Assert.False(_rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
+            Assert.False(await _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
             Assert.False(raisedEvent);
         }
 
         [Fact]
-        public void ForceSit_InvalidObject()
+        public async Task ForceSit_InvalidObject()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             // SetupSitTarget(objectId1, true); <-- Don't setup sit target for this test
@@ -205,7 +205,7 @@ namespace LibRLV.Tests
                 raisedEvent = true;
             };
 
-            Assert.False(_rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
+            Assert.False(await _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
             Assert.False(raisedEvent);
         }
         #endregion
@@ -213,12 +213,12 @@ namespace LibRLV.Tests
         #region @getsitid=<channel_number>
 
         [Fact]
-        public void GetSitID()
+        public async Task GetSitID()
         {
             var actual = _callbacks.RecordReplies();
             SetCurrentSitId(Guid.Empty);
 
-            _rlv.ProcessMessage("@getsitid=1234", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@getsitid=1234", _sender.Id, _sender.Name);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -229,13 +229,13 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void GetSitID_Default()
+        public async Task GetSitID_Default()
         {
             var actual = _callbacks.RecordReplies();
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             SetCurrentSitId(objectId1);
 
-            _rlv.ProcessMessage("@getsitid=1234", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@getsitid=1234", _sender.Id, _sender.Name);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -250,44 +250,44 @@ namespace LibRLV.Tests
         #region @unsit=force
 
         [Fact]
-        public void ForceUnSit()
+        public async Task ForceUnSit()
         {
-            Assert.True(_rlv.ProcessMessage("@unsit=force", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@unsit=force", _sender.Id, _sender.Name));
         }
 
         [Fact]
-        public void ForceUnSit_RestrictedUnsit()
+        public async Task ForceUnSit_RestrictedUnsit()
         {
-            _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.ProcessMessage("@unsit=force", _sender.Id, _sender.Name));
+            Assert.False(await _rlv.ProcessMessage("@unsit=force", _sender.Id, _sender.Name));
         }
 
         #endregion
 
         #region @sit
         [Fact]
-        public void CanSit()
+        public async Task CanSit()
         {
-            CheckSimpleCommand("sit", m => m.CanSit());
+            await CheckSimpleCommand("sit", m => m.CanSit());
         }
         #endregion
 
         #region @sitground=force
 
         [Fact]
-        public void ForceSitGround()
+        public async Task ForceSitGround()
         {
             // TODO: Check reaction
-            Assert.True(_rlv.ProcessMessage("@sitground=force", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@sitground=force", _sender.Id, _sender.Name));
         }
 
         [Fact]
-        public void ForceSitGround_RestrictedSit()
+        public async Task ForceSitGround_RestrictedSit()
         {
-            _rlv.ProcessMessage("@sit=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@sit=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.ProcessMessage("@sitground=force", _sender.Id, _sender.Name));
+            Assert.False(await _rlv.ProcessMessage("@sitground=force", _sender.Id, _sender.Name));
         }
 
         #endregion

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LibRLV
 {
@@ -102,7 +103,7 @@ namespace LibRLV
             }
         }
 
-        internal void RebuildLockedFolders()
+        internal async Task RebuildLockedFolders()
         {
             // AttachThis/DetachThis - Only search within the #RLV root
             //  Attachment:
@@ -116,7 +117,7 @@ namespace LibRLV
             //      Find and all all the folders for all of the attachments in the specified attachment point or of the wearable type.
             //      Add those folders to the locked folder list
 
-            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
             {
                 return;
             }
@@ -171,9 +172,9 @@ namespace LibRLV
             }
         }
 
-        internal bool ProcessFolderException(RLVRestriction exception)
+        internal async Task<bool> ProcessFolderException(RLVRestriction exception)
         {
-            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
             {
                 return false;
             }
@@ -202,9 +203,9 @@ namespace LibRLV
             return true;
         }
 
-        internal bool ProcessFolderRestrictions(RLVRestriction restriction)
+        internal async Task<bool> ProcessFolderRestrictions(RLVRestriction restriction)
         {
-            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
             {
                 return false;
             }

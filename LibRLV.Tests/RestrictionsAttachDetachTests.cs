@@ -26,14 +26,14 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void Detach()
+        public async Task Detach()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             var folderId1 = new Guid("99999999-9999-4999-8999-999999999999");
 
-            Assert.True(_rlv.ProcessMessage("@detach=n", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@detach=n", _sender.Id, _sender.Name));
 
             Assert.False(_rlv.Permissions.CanDetach(folderId1, false, null, null));
             Assert.False(_rlv.Permissions.CanDetach(folderId1, false, AttachmentPoint.Chest, null));
@@ -45,14 +45,14 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void Detach_AttachPoint()
+        public async Task Detach_AttachPoint()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
 
             var folderId1 = new Guid("99999999-9999-4999-8999-999999999999");
 
-            Assert.True(_rlv.ProcessMessage("@detach:skull=n", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@detach:skull=n", _sender.Id, _sender.Name));
 
             Assert.True(_rlv.Permissions.CanDetach(folderId1, false, null, null));
             Assert.True(_rlv.Permissions.CanDetach(folderId1, false, AttachmentPoint.Chest, null));
@@ -69,7 +69,7 @@ namespace LibRLV.Tests
 
         #region @addattach[:<attach_point_name>]=<y/n>
         [Fact]
-        public void AddAttach()
+        public async Task AddAttach()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -78,7 +78,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@addattach=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@addattach=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Fancy Hat
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
@@ -88,7 +88,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void AddAttach_Specific()
+        public async Task AddAttach_Specific()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -97,7 +97,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@addattach:groin=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@addattach:groin=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Fancy Hat
             Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
@@ -109,7 +109,7 @@ namespace LibRLV.Tests
 
         #region @remattach[:<attach_point_name>]=<y/n>
         [Fact]
-        public void RemAttach()
+        public async Task RemAttach()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -118,7 +118,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@remattach=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@remattach=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Fancy Hat
             Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
@@ -128,7 +128,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void RemAttach_Specific()
+        public async Task RemAttach_Specific()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -137,7 +137,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@remattach:groin=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@remattach:groin=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Fancy Hat
             Assert.True(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
@@ -150,15 +150,15 @@ namespace LibRLV.Tests
 
         #region @defaultwear=<y/n>
         [Fact]
-        public void CanDefaultWear()
+        public async Task CanDefaultWear()
         {
-            CheckSimpleCommand("defaultWear", m => m.CanDefaultWear());
+            await CheckSimpleCommand("defaultWear", m => m.CanDefaultWear());
         }
         #endregion
 
         #region @addoutfit[:<part>]=<y/n>
         [Fact]
-        public void AddOutfit()
+        public async Task AddOutfit()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -167,7 +167,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@addoutfit=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@addoutfit=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Retro Pants
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
@@ -177,7 +177,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void AddOutfit_part()
+        public async Task AddOutfit_part()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -186,7 +186,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@addoutfit:pants=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@addoutfit:pants=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Retro Pants
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
@@ -198,7 +198,7 @@ namespace LibRLV.Tests
 
         #region @remoutfit[:<part>]=<y/n>
         [Fact]
-        public void RemOutfit()
+        public async Task RemOutfit()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -207,7 +207,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@remoutfit=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@remoutfit=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Retro Pants
             Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
@@ -217,7 +217,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void RemOutfit_part()
+        public async Task RemOutfit_part()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -226,7 +226,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@remoutfit:pants=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@remoutfit:pants=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Retro Pants
             Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
@@ -238,7 +238,7 @@ namespace LibRLV.Tests
 
         #region @remoutfit[:<folder|layer>]=force
         [Fact]
-        public void RemOutfitForce()
+        public async Task RemOutfitForce()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
@@ -256,7 +256,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<RemOutfitEventArgs>(
+            var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
                  attach: n => _rlv.Commands.RemOutfit += n,
                  detach: n => _rlv.Commands.RemOutfit -= n,
                  testCode: () => _rlv.ProcessMessage("@remoutfit=force", _sender.Id, _sender.Name)
@@ -272,7 +272,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void RemOutfitForce_ExternalItems()
+        public async Task RemOutfitForce_ExternalItems()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -304,7 +304,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<RemOutfitEventArgs>(
+            var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
                  attach: n => _rlv.Commands.RemOutfit += n,
                  detach: n => _rlv.Commands.RemOutfit -= n,
                  testCode: () => _rlv.ProcessMessage("@remoutfit=force", _sender.Id, _sender.Name)
@@ -321,7 +321,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void RemOutfitForce_ExternalItems_ByType()
+        public async Task RemOutfitForce_ExternalItems_ByType()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
@@ -353,7 +353,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<RemOutfitEventArgs>(
+            var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
                  attach: n => _rlv.Commands.RemOutfit += n,
                  detach: n => _rlv.Commands.RemOutfit -= n,
                  testCode: () => _rlv.ProcessMessage("@remoutfit:tattoo=force", _sender.Id, _sender.Name)
@@ -369,7 +369,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void RemOutfitForce_Folder()
+        public async Task RemOutfitForce_Folder()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
@@ -386,7 +386,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<RemOutfitEventArgs>(
+            var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
                  attach: n => _rlv.Commands.RemOutfit += n,
                  detach: n => _rlv.Commands.RemOutfit -= n,
                  testCode: () => _rlv.ProcessMessage("@remoutfit:Clothing/Hats=force", _sender.Id, _sender.Name)
@@ -401,7 +401,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void RemOutfitForce_Specific()
+        public async Task RemOutfitForce_Specific()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
@@ -415,7 +415,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<RemOutfitEventArgs>(
+            var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
                  attach: n => _rlv.Commands.RemOutfit += n,
                  detach: n => _rlv.Commands.RemOutfit -= n,
                  testCode: () => _rlv.ProcessMessage("@remoutfit:tattoo=force", _sender.Id, _sender.Name)
@@ -430,7 +430,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void RemOutfitForce_BodyPart_Specific()
+        public async Task RemOutfitForce_BodyPart_Specific()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
@@ -446,7 +446,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<RemOutfitEventArgs>(
+            var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
                  attach: n => _rlv.Commands.RemOutfit += n,
                  detach: n => _rlv.Commands.RemOutfit -= n,
                  testCode: () => _rlv.ProcessMessage("@remoutfit:skin=force", _sender.Id, _sender.Name)
@@ -462,7 +462,7 @@ namespace LibRLV.Tests
 
         #region @getoutfit[:part]=<channel_number>
         [Fact]
-        public void GetOutfit_WearingNothing()
+        public async Task GetOutfit_WearingNothing()
         {
             var actual = _callbacks.RecordReplies();
             var currentOutfit = new List<InventoryTree.InventoryItem>();
@@ -476,12 +476,12 @@ namespace LibRLV.Tests
                 (1234, "0000000000000000"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getoutfit=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@getoutfit=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetOutfit_ExternalItems()
+        public async Task GetOutfit_ExternalItems()
         {
             var actual = _callbacks.RecordReplies();
 
@@ -514,12 +514,12 @@ namespace LibRLV.Tests
                 (1234, "0000000000000010"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getoutfit=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@getoutfit=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetOutfit_WearingSomeItems()
+        public async Task GetOutfit_WearingSomeItems()
         {
             var actual = _callbacks.RecordReplies();
             var currentOutfit = new List<InventoryTree.InventoryItem>()
@@ -537,12 +537,12 @@ namespace LibRLV.Tests
                 (1234, "0000001000010000"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getoutfit=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@getoutfit=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetOutfit_WearingEverything()
+        public async Task GetOutfit_WearingEverything()
         {
             var actual = _callbacks.RecordReplies();
             var currentOutfit = new List<InventoryTree.InventoryItem>();
@@ -571,12 +571,12 @@ namespace LibRLV.Tests
                 (1234, "1111111111111111"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getoutfit=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@getoutfit=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetOutfit_Specific_Exists()
+        public async Task GetOutfit_Specific_Exists()
         {
             var actual = _callbacks.RecordReplies();
             var currentOutfit = new List<InventoryTree.InventoryItem>()
@@ -593,12 +593,12 @@ namespace LibRLV.Tests
                 (1234, "1"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getoutfit:socks=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@getoutfit:socks=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetOutfit_Specific_NotExists()
+        public async Task GetOutfit_Specific_NotExists()
         {
             var actual = _callbacks.RecordReplies();
             var currentOutfit = new List<InventoryTree.InventoryItem>()
@@ -615,7 +615,7 @@ namespace LibRLV.Tests
                 (1234, "0"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getoutfit:socks=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@getoutfit:socks=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
         #endregion
@@ -624,7 +624,7 @@ namespace LibRLV.Tests
 
         #region @getattach[:attachpt]=<channel_number>
         [Fact]
-        public void GetAttach_WearingNothing()
+        public async Task GetAttach_WearingNothing()
         {
             var actual = _callbacks.RecordReplies();
             var currentAttach = new List<InventoryTree.InventoryItem>();
@@ -638,12 +638,12 @@ namespace LibRLV.Tests
                 (1234, "00000000000000000000000000000000000000000000000000000000"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getattach=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@getattach=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetAttach_ExternalItems()
+        public async Task GetAttach_ExternalItems()
         {
             var actual = _callbacks.RecordReplies();
 
@@ -675,12 +675,12 @@ namespace LibRLV.Tests
                 (1234, "00000000000000000000000000000000000000000000000100000000"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getattach=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@getattach=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetAttach_WearingSomeItems()
+        public async Task GetAttach_WearingSomeItems()
         {
             var actual = _callbacks.RecordReplies();
             var currentAttach = new List<InventoryTree.InventoryItem>()
@@ -698,12 +698,12 @@ namespace LibRLV.Tests
                 (1234, "00100001000000000000000000000000000000000000000000000000"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getattach=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@getattach=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetAttach_WearingEverything()
+        public async Task GetAttach_WearingEverything()
         {
             var actual = _callbacks.RecordReplies();
             var currentAttach = new List<InventoryTree.InventoryItem>();
@@ -727,12 +727,12 @@ namespace LibRLV.Tests
                 (1234, "11111111111111111111111111111111111111111111111111111111"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getattach=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@getattach=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetAttach_Specific_Exists()
+        public async Task GetAttach_Specific_Exists()
         {
             var actual = _callbacks.RecordReplies();
             var currentAttach = new List<InventoryTree.InventoryItem>()
@@ -749,12 +749,12 @@ namespace LibRLV.Tests
                 (1234, "1"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getattach:left foot=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@getattach:left foot=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetAttach_Specific_NotExists()
+        public async Task GetAttach_Specific_NotExists()
         {
             var actual = _callbacks.RecordReplies();
             var currentAttach = new List<InventoryTree.InventoryItem>()
@@ -771,38 +771,38 @@ namespace LibRLV.Tests
                 (1234, "0"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getattach:left foot=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@getattach:left foot=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
         #endregion
 
         #region @acceptpermission=<rem/add>
         [Fact]
-        public void AcceptPermission()
+        public async Task AcceptPermission()
         {
-            Assert.True(_rlv.ProcessMessage($"@acceptpermission=add", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage($"@acceptpermission=add", _sender.Id, _sender.Name));
             Assert.True(_rlv.Permissions.IsAutoAcceptPermissions());
 
-            Assert.True(_rlv.ProcessMessage($"@acceptpermission=rem", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage($"@acceptpermission=rem", _sender.Id, _sender.Name));
             Assert.False(_rlv.Permissions.IsAutoAcceptPermissions());
         }
         #endregion
 
         #region @denypermission=<rem/add>
         [Fact]
-        public void DenyPermission()
+        public async Task DenyPermission()
         {
-            Assert.True(_rlv.ProcessMessage($"@denypermission=add", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage($"@denypermission=add", _sender.Id, _sender.Name));
             Assert.True(_rlv.Permissions.IsAutoDenyPermissions());
 
-            Assert.True(_rlv.ProcessMessage($"@denypermission=rem", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage($"@denypermission=rem", _sender.Id, _sender.Name));
             Assert.False(_rlv.Permissions.IsAutoDenyPermissions());
         }
         #endregion
 
         #region @detachme=force
         [Fact]
-        public void DetachMeForce()
+        public async Task DetachMeForce()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -811,7 +811,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage("@detachme=force", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name)
@@ -826,7 +826,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachMeForce_IgnoreNoStrip()
+        public async Task DetachMeForce_IgnoreNoStrip()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -837,7 +837,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage("@detachme=force", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name)
@@ -858,7 +858,7 @@ namespace LibRLV.Tests
 
         #region @getinv[:folder1/.../folderN]=<channel_number>
         [Fact]
-        public void GetInv()
+        public async Task GetInv()
         {
             var actual = _callbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -873,12 +873,12 @@ namespace LibRLV.Tests
                 (1234, "Clothing,Accessories"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getinv=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinv=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetInv_Subfolder()
+        public async Task GetInv_Subfolder()
         {
             var actual = _callbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -893,12 +893,12 @@ namespace LibRLV.Tests
                 (1234, "Sub Hats"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getinv:Clothing/Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinv:Clothing/Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetInv_Empty()
+        public async Task GetInv_Empty()
         {
             var actual = _callbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -913,12 +913,12 @@ namespace LibRLV.Tests
                 (1234, ""),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getinv:Clothing/Hats/Sub Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinv:Clothing/Hats/Sub Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetInv_Invalid()
+        public async Task GetInv_Invalid()
         {
             var actual = _callbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -933,14 +933,14 @@ namespace LibRLV.Tests
                 (1234, ""),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getinv:Invalid Folder=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinv:Invalid Folder=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
             Assert.Equal(expected, actual);
         }
         #endregion
 
         #region @getinvworn[:folder1/.../folderN]=<channel_number>
         [Fact]
-        public void GetInvWorn()
+        public async Task GetInvWorn()
         {
             // #RLV
             //  |
@@ -979,12 +979,12 @@ namespace LibRLV.Tests
                 (1234, "|03,Clothing|33,Accessories|33"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetInvWorn_PartialRoot()
+        public async Task GetInvWorn_PartialRoot()
         {
             // #RLV
             //  |
@@ -1031,12 +1031,12 @@ namespace LibRLV.Tests
                 (1234, "|02,Clothing|22,Accessories|22"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetInvWorn_Naked()
+        public async Task GetInvWorn_Naked()
         {
             // #RLV
             //  |
@@ -1083,12 +1083,12 @@ namespace LibRLV.Tests
                 (1234, "|01,Clothing|11,Accessories|11"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetInvWorn_EmptyFolder()
+        public async Task GetInvWorn_EmptyFolder()
         {
             // #RLV
             //  |
@@ -1127,12 +1127,12 @@ namespace LibRLV.Tests
                 (1234, "|00"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getinvworn:Clothing/Hats/Sub Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn:Clothing/Hats/Sub Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetInvWorn_PartialWorn()
+        public async Task GetInvWorn_PartialWorn()
         {
             // #RLV
             //  |
@@ -1171,14 +1171,14 @@ namespace LibRLV.Tests
                 (1234, "|33,Sub Hats|00"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getinvworn:Clothing/Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn:Clothing/Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
             Assert.Equal(expected, actual);
         }
         #endregion
 
         #region @findfolder:part1[&&...&&partN]=<channel_number>
         [Fact]
-        public void FindFolder_MultipleTerms()
+        public async Task FindFolder_MultipleTerms()
         {
             // #RLV
             //  |
@@ -1212,11 +1212,11 @@ namespace LibRLV.Tests
                 (1234, "Clothing/Hats/Sub Hats"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@findfolder:at&&ub=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@findfolder:at&&ub=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
         [Fact]
-        public void FindFolder_SearchOrder()
+        public async Task FindFolder_SearchOrder()
         {
             var actual = _callbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -1231,12 +1231,12 @@ namespace LibRLV.Tests
                 (1234, "Clothing/Hats"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@findfolder:at=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@findfolder:at=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void FindFolder_IgnorePrivate()
+        public async Task FindFolder_IgnorePrivate()
         {
             var actual = _callbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -1255,12 +1255,12 @@ namespace LibRLV.Tests
                 (1234, ""),
             };
 
-            Assert.True(_rlv.ProcessMessage("@findfolder:at=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@findfolder:at=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void FindFolder_IgnoreTildePrefix()
+        public async Task FindFolder_IgnoreTildePrefix()
         {
             var actual = _callbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -1279,14 +1279,14 @@ namespace LibRLV.Tests
                 (1234, ""),
             };
 
-            Assert.True(_rlv.ProcessMessage("@findfolder:at=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@findfolder:at=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
         #endregion
 
         #region @findfolders:part1[&&...&&partN][;output_separator]=<channel_number>
         [Fact]
-        public void FindFolders()
+        public async Task FindFolders()
         {
             // #RLV
             //  |
@@ -1320,12 +1320,12 @@ namespace LibRLV.Tests
                 (1234, "Clothing/Hats,Clothing/Hats/Sub Hats"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@findfolders:at=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@findfolders:at=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void FindFolders_Separator()
+        public async Task FindFolders_Separator()
         {
             // #RLV
             //  |
@@ -1359,7 +1359,7 @@ namespace LibRLV.Tests
                 (1234, "Clothing/Hats AND Clothing/Hats/Sub Hats"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@findfolders:at; AND =1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@findfolders:at; AND =1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
         #endregion
@@ -1367,7 +1367,7 @@ namespace LibRLV.Tests
         #region @getpath @getpathnew[:<attachpt> or <clothing_layer> or <uuid>]=<channel_number>
 
         [Fact]
-        public void GetPathNew_BySender()
+        public async Task GetPathNew_BySender()
         {
             var actual = _callbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -1382,12 +1382,12 @@ namespace LibRLV.Tests
                 (1234, "Clothing/Hats"),
             };
 
-            Assert.True(_rlv.ProcessMessage("@getpathnew=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getpathnew=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetPathNew_ByUUID()
+        public async Task GetPathNew_ByUUID()
         {
             var actual = _callbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -1402,12 +1402,12 @@ namespace LibRLV.Tests
                 (1234, "Accessories"),
             };
 
-            Assert.True(_rlv.ProcessMessage($"@getpathnew:{sampleTree.Root_Accessories_Glasses_AttachChin.Id}=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage($"@getpathnew:{sampleTree.Root_Accessories_Glasses_AttachChin.Id}=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetPathNew_ByUUID_Unknown()
+        public async Task GetPathNew_ByUUID_Unknown()
         {
             var actual = _callbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -1430,12 +1430,12 @@ namespace LibRLV.Tests
                 (1234, ""),
             };
 
-            Assert.True(_rlv.ProcessMessage($"@getpathnew:BADBADBA-DBAD-4BAD-8BAD-BADBADBADBAD=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage($"@getpathnew:BADBADBA-DBAD-4BAD-8BAD-BADBADBADBAD=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetPathNew_ByAttach()
+        public async Task GetPathNew_ByAttach()
         {
             var actual = _callbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -1458,12 +1458,12 @@ namespace LibRLV.Tests
                 (1234, "Accessories,Clothing/Hats"),
             };
 
-            Assert.True(_rlv.ProcessMessage($"@getpathnew:groin=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage($"@getpathnew:groin=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void GetPathNew_ByWorn()
+        public async Task GetPathNew_ByWorn()
         {
             var actual = _callbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -1483,7 +1483,7 @@ namespace LibRLV.Tests
                 (1234, "Accessories,Clothing/Hats"),
             };
 
-            Assert.True(_rlv.ProcessMessage($"@getpathnew:pants=1234", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage($"@getpathnew:pants=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -1494,7 +1494,7 @@ namespace LibRLV.Tests
         [InlineData("attach", true)]
         [InlineData("attachoverorreplace", true)]
         [InlineData("attachover", false)]
-        public void AttachForce(string command, bool replaceExistingAttachments)
+        public async Task AttachForce(string command, bool replaceExistingAttachments)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -1514,7 +1514,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:Clothing/Hats=force", _sender.Id, _sender.Name)
@@ -1534,7 +1534,7 @@ namespace LibRLV.Tests
         [InlineData("attach", true)]
         [InlineData("attachoverorreplace", true)]
         [InlineData("attachover", false)]
-        public void AttachForce_WithClothing(string command, bool replaceExistingAttachments)
+        public async Task AttachForce_WithClothing(string command, bool replaceExistingAttachments)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -1548,7 +1548,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name)
@@ -1569,7 +1569,7 @@ namespace LibRLV.Tests
         [InlineData("attach")]
         [InlineData("attachoverorreplace")]
         [InlineData("attachover")]
-        public void AttachForce_AlreadyAttached(string command)
+        public async Task AttachForce_AlreadyAttached(string command)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -1582,7 +1582,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name)
@@ -1600,7 +1600,7 @@ namespace LibRLV.Tests
         [InlineData("attach", true)]
         [InlineData("attachoverorreplace", true)]
         [InlineData("attachover", false)]
-        public void AttachForce_PositionFromFolderName(string command, bool replaceExistingAttachments)
+        public async Task AttachForce_PositionFromFolderName(string command, bool replaceExistingAttachments)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -1624,7 +1624,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:{clothingFolder.Name}/{hatsFolder.Name}=force", _sender.Id, _sender.Name)
@@ -1645,7 +1645,7 @@ namespace LibRLV.Tests
         [InlineData("attach")]
         [InlineData("attachoverorreplace")]
         [InlineData("attachover")]
-        public void AttachForce_FolderNameSpecifiesToAddInsteadOfReplace(string command)
+        public async Task AttachForce_FolderNameSpecifiesToAddInsteadOfReplace(string command)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -1669,7 +1669,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:{clothingFolder.Name}/{hatsFolder.Name}=force", _sender.Id, _sender.Name)
@@ -1689,7 +1689,7 @@ namespace LibRLV.Tests
         [InlineData("attach")]
         [InlineData("attachoverorreplace")]
         [InlineData("attachover")]
-        public void AttachForce_AttachPrivateParentFolder(string command)
+        public async Task AttachForce_AttachPrivateParentFolder(string command)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -1713,7 +1713,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:{clothingFolder.Name}/{hatsFolder.Name}=force", _sender.Id, _sender.Name)
@@ -1734,7 +1734,7 @@ namespace LibRLV.Tests
         [InlineData("attachall", true)]
         [InlineData("attachalloverorreplace", true)]
         [InlineData("attachallover", false)]
-        public void AttachForce_Recursive(string command, bool replaceExistingAttachments)
+        public async Task AttachForce_Recursive(string command, bool replaceExistingAttachments)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -1755,7 +1755,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name)
@@ -1778,7 +1778,7 @@ namespace LibRLV.Tests
         [InlineData("attachall", true)]
         [InlineData("attachalloverorreplace", true)]
         [InlineData("attachallover", false)]
-        public void AttachForce_Recursive_WithHiddenSubfolder(string command, bool replaceExistingAttachments)
+        public async Task AttachForce_Recursive_WithHiddenSubfolder(string command, bool replaceExistingAttachments)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -1803,7 +1803,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name)
@@ -1825,7 +1825,7 @@ namespace LibRLV.Tests
         [InlineData("attachall", true)]
         [InlineData("attachalloverorreplace", true)]
         [InlineData("attachallover", false)]
-        public void AttachForce_Recursive_FolderNameSpecifiesToAddInsteadOfReplace(string command, bool replaceExistingAttachments)
+        public async Task AttachForce_Recursive_FolderNameSpecifiesToAddInsteadOfReplace(string command, bool replaceExistingAttachments)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -1850,7 +1850,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name)
@@ -1877,7 +1877,7 @@ namespace LibRLV.Tests
         [InlineData("attachthis", true)]
         [InlineData("attachthisoverorreplace", true)]
         [InlineData("attachthisover", false)]
-        public void AttachThis_Default(string command, bool replaceExistingAttachments)
+        public async Task AttachThis_Default(string command, bool replaceExistingAttachments)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -1897,7 +1897,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name)
@@ -1917,7 +1917,7 @@ namespace LibRLV.Tests
         [InlineData("attachthis")]
         [InlineData("attachthisoverorreplace")]
         [InlineData("attachthisover")]
-        public void AttachThis_FolderNameSpecifiesToAddInsteadOfReplace(string command)
+        public async Task AttachThis_FolderNameSpecifiesToAddInsteadOfReplace(string command)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -1941,7 +1941,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name)
@@ -1963,7 +1963,7 @@ namespace LibRLV.Tests
         [InlineData("attachthis", true)]
         [InlineData("attachthisoverorreplace", true)]
         [InlineData("attachthisover", false)]
-        public void AttachThis_FolderNameSpecifiesAttachmentPoint(string command, bool replaceExistingAttachments)
+        public async Task AttachThis_FolderNameSpecifiesAttachmentPoint(string command, bool replaceExistingAttachments)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -1987,7 +1987,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name)
@@ -2008,7 +2008,7 @@ namespace LibRLV.Tests
         [InlineData("attachthis")]
         [InlineData("attachthisoverorreplace")]
         [InlineData("attachthisover")]
-        public void AttachThis_FromHiddenSubfolder(string command)
+        public async Task AttachThis_FromHiddenSubfolder(string command)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -2032,7 +2032,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name)
@@ -2050,7 +2050,7 @@ namespace LibRLV.Tests
         [InlineData("attachthis", true)]
         [InlineData("attachthisoverorreplace", true)]
         [InlineData("attachthisover", false)]
-        public void AttachThis_AttachPoint(string command, bool replaceExistingAttachments)
+        public async Task AttachThis_AttachPoint(string command, bool replaceExistingAttachments)
         {
             // #RLV
             //  |
@@ -2096,7 +2096,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:spine=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name)
@@ -2120,7 +2120,7 @@ namespace LibRLV.Tests
         [InlineData("attachthis", true)]
         [InlineData("attachthisoverorreplace", true)]
         [InlineData("attachthisover", false)]
-        public void AttachThis_WearableType(string command, bool replaceExistingAttachments)
+        public async Task AttachThis_WearableType(string command, bool replaceExistingAttachments)
         {
             // #RLV
             //  |
@@ -2157,7 +2157,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:tattoo=force", _sender.Id, _sender.Name)
@@ -2180,7 +2180,7 @@ namespace LibRLV.Tests
         [InlineData("attachallthis", true)]
         [InlineData("attachallthisoverorreplace", true)]
         [InlineData("attachallthisover", false)]
-        public void AttachAllThisForce_Recursive(string command, bool replaceExistingAttachments)
+        public async Task AttachAllThisForce_Recursive(string command, bool replaceExistingAttachments)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -2201,7 +2201,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_RetroPants_WornPants.Id, sampleTree.Root_Clothing_RetroPants_WornPants.Name)
@@ -2224,7 +2224,7 @@ namespace LibRLV.Tests
         [InlineData("attachallthis", true)]
         [InlineData("attachallthisoverorreplace", true)]
         [InlineData("attachallthisover", false)]
-        public void AttachAllThisForce_Recursive_WithHiddenSubfolder(string command, bool replaceExistingAttachments)
+        public async Task AttachAllThisForce_Recursive_WithHiddenSubfolder(string command, bool replaceExistingAttachments)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -2249,7 +2249,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_RetroPants_WornPants.Id, sampleTree.Root_Clothing_RetroPants_WornPants.Name)
@@ -2271,7 +2271,7 @@ namespace LibRLV.Tests
         [InlineData("attachallthis", true)]
         [InlineData("attachallthisoverorreplace", true)]
         [InlineData("attachallthisover", false)]
-        public void AttachAllThisForce_Recursive_FolderNameSpecifiesToAddInsteadOfReplace(string command, bool replaceExistingAttachments)
+        public async Task AttachAllThisForce_Recursive_FolderNameSpecifiesToAddInsteadOfReplace(string command, bool replaceExistingAttachments)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -2296,7 +2296,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_RetroPants_WornPants.Id, sampleTree.Root_Clothing_RetroPants_WornPants.Name)
@@ -2320,7 +2320,7 @@ namespace LibRLV.Tests
         [InlineData("attachallthis", true)]
         [InlineData("attachallthisoverorreplace", true)]
         [InlineData("attachallthisover", false)]
-        public void AttachAllThisForce_AttachPoint(string command, bool replaceExistingAttachments)
+        public async Task AttachAllThisForce_AttachPoint(string command, bool replaceExistingAttachments)
         {
             // #RLV
             //  |
@@ -2364,7 +2364,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:spine=force", _sender.Id, _sender.Name)
@@ -2390,7 +2390,7 @@ namespace LibRLV.Tests
         [InlineData("attachallthis", true)]
         [InlineData("attachallthisoverorreplace", true)]
         [InlineData("attachallthisover", false)]
-        public void AttachAllThisForce_WearableType(string command, bool replaceExistingAttachments)
+        public async Task AttachAllThisForce_WearableType(string command, bool replaceExistingAttachments)
         {
             // #RLV
             //  |
@@ -2433,7 +2433,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<AttachmentEventArgs>(
+            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
                  detach: n => _rlv.Commands.Attach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:tattoo=force", _sender.Id, _sender.Name)
@@ -2460,7 +2460,7 @@ namespace LibRLV.Tests
         [Theory]
         [InlineData("@detach=force")]
         [InlineData("@remattach=force")]
-        public void RemAttach_RemoveAllAttachments(string command)
+        public async Task RemAttach_RemoveAllAttachments(string command)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -2474,7 +2474,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
@@ -2496,7 +2496,7 @@ namespace LibRLV.Tests
         [Theory]
         [InlineData("@detach=force")]
         [InlineData("@remattach=force")]
-        public void RemAttach_RemoveAllAttachments_ExternalItems(string command)
+        public async Task RemAttach_RemoveAllAttachments_ExternalItems(string command)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -2528,7 +2528,7 @@ namespace LibRLV.Tests
                 e.TryGetCurrentOutfit(out currentOutfit)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
@@ -2551,7 +2551,7 @@ namespace LibRLV.Tests
         [Theory]
         [InlineData("@detach:Clothing/Hats=force")]
         [InlineData("@remattach:Clothing/Hats=force")]
-        public void RemAttach_ByFolder(string command)
+        public async Task RemAttach_ByFolder(string command)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -2565,7 +2565,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
@@ -2583,7 +2583,7 @@ namespace LibRLV.Tests
         [Theory]
         [InlineData("@detach:groin=force")]
         [InlineData("@remattach:groin=force")]
-        public void RemAttach_RemoveAttachmentPoint(string command)
+        public async Task RemAttach_RemoveAttachmentPoint(string command)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -2607,7 +2607,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
@@ -2626,7 +2626,7 @@ namespace LibRLV.Tests
         [Theory]
         [InlineData("@detach:skull=force")]
         [InlineData("@remattach:skull=force")]
-        public void RemAttach_RemoveNone(string command)
+        public async Task RemAttach_RemoveNone(string command)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -2640,7 +2640,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
@@ -2656,7 +2656,7 @@ namespace LibRLV.Tests
         [Theory]
         [InlineData("detach")]
         [InlineData("remattach")]
-        public void RemAttach_RemoveByUUID(string command)
+        public async Task RemAttach_RemoveByUUID(string command)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -2670,7 +2670,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id}=force", _sender.Id, _sender.Name)
@@ -2687,7 +2687,7 @@ namespace LibRLV.Tests
         [Theory]
         [InlineData("detach")]
         [InlineData("remattach")]
-        public void RemAttach_RemoveByUUID_External(string command)
+        public async Task RemAttach_RemoveByUUID_External(string command)
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -2719,7 +2719,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id}=force", _sender.Id, _sender.Name)
@@ -2736,7 +2736,7 @@ namespace LibRLV.Tests
 
         #region @detachall:<folder1/.../folderN>=force
         [Fact]
-        public void DetachAllForce_Recursive()
+        public async Task DetachAllForce_Recursive()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -2745,7 +2745,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage("@detachall:Clothing=force", _sender.Id, _sender.Name)
@@ -2767,7 +2767,7 @@ namespace LibRLV.Tests
 
         #region @detachthis[:<attachpt> or <clothing_layer> or <uuid>]=force
         [Fact]
-        public void DetachThisForce_Default()
+        public async Task DetachThisForce_Default()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -2776,7 +2776,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage("@detachthis=force", sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, sampleTree.Root_Clothing_HappyShirt_AttachChest.Name)
@@ -2794,7 +2794,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachThisForce_ByAttachmentPoint()
+        public async Task DetachThisForce_ByAttachmentPoint()
         {
             // #RLV
             //  |
@@ -2824,7 +2824,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage("@detachthis:chest=force", _sender.Id, _sender.Name)
@@ -2844,7 +2844,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachThisForce_ByWearableType()
+        public async Task DetachThisForce_ByWearableType()
         {
             // #RLV
             //  |
@@ -2874,7 +2874,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage("@detachthis:pants=force", _sender.Id, _sender.Name)
@@ -2894,7 +2894,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachThisForce_ByWearableType_PrivateFolder()
+        public async Task DetachThisForce_ByWearableType_PrivateFolder()
         {
             // #RLV
             //  |
@@ -2927,7 +2927,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage("@detachthis:pants=force", _sender.Id, _sender.Name)
@@ -2946,7 +2946,7 @@ namespace LibRLV.Tests
 
         #region @detachallthis[:<attachpt> or <clothing_layer>]=force
         [Fact]
-        public void DetachAllThisForce_Default()
+        public async Task DetachAllThisForce_Default()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -2955,7 +2955,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage("@detachallthis=force", sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, sampleTree.Root_Clothing_HappyShirt_AttachChest.Name)
@@ -2975,7 +2975,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachThisAllForce_ByAttachmentPoint()
+        public async Task DetachThisAllForce_ByAttachmentPoint()
         {
             // #RLV
             //  |
@@ -3005,7 +3005,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage("@detachallthis:chest=force", _sender.Id, _sender.Name)
@@ -3028,7 +3028,7 @@ namespace LibRLV.Tests
 
 
         [Fact]
-        public void DetachAllThisForce_ByWearableType()
+        public async Task DetachAllThisForce_ByWearableType()
         {
             // #RLV
             //  |
@@ -3058,7 +3058,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage("@detachallthis:pants=force", _sender.Id, _sender.Name)
@@ -3080,7 +3080,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachAllThisForce_ByWearableType_PrivateFolder()
+        public async Task DetachAllThisForce_ByWearableType_PrivateFolder()
         {
             // #RLV
             //  |
@@ -3114,7 +3114,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            var raised = Assert.Raises<DetachEventArgs>(
+            var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
                  detach: n => _rlv.Commands.Detach -= n,
                  testCode: () => _rlv.ProcessMessage("@detachallthis:pants=force", _sender.Id, _sender.Name)
@@ -3138,7 +3138,7 @@ namespace LibRLV.Tests
         #region @detachthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
 
         [Fact]
-        public void DetachThis()
+        public async Task DetachThis()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3147,7 +3147,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@detachthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
             Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3172,7 +3172,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachThis_NotRecursive()
+        public async Task DetachThis_NotRecursive()
         {
             // TryGetRlvInventoryTree
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -3184,7 +3184,7 @@ namespace LibRLV.Tests
 
             // This should lock the #RLV/Clothing folder because the Business Pants are issuing the command, which is in the Clothing folder.
             //   Business Pants cannot be detached, but hats are still detachable.
-            Assert.True(_rlv.ProcessMessage("@detachthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat ()
             Assert.True(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3209,7 +3209,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachThis_ByPath()
+        public async Task DetachThis_ByPath()
         {
             // TryGetRlvInventoryTree
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -3220,7 +3220,7 @@ namespace LibRLV.Tests
             ).ReturnsAsync(true);
 
             // This should lock the Hats folder, all hats are no longer detachable
-            Assert.True(_rlv.ProcessMessage("@detachthis:Clothing/Hats=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachthis:Clothing/Hats=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
             Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3245,7 +3245,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachThis_ByAttachmentPoint()
+        public async Task DetachThis_ByAttachmentPoint()
         {
             // TryGetRlvInventoryTree
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -3256,7 +3256,7 @@ namespace LibRLV.Tests
             ).ReturnsAsync(true);
 
             // This should lock the Hats folder, all hats are no longer detachable
-            Assert.True(_rlv.ProcessMessage("@detachthis:groin=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachthis:groin=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
             Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3281,7 +3281,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachThis_ByWornLayer()
+        public async Task DetachThis_ByWornLayer()
         {
             // TryGetRlvInventoryTree
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -3292,7 +3292,7 @@ namespace LibRLV.Tests
             ).ReturnsAsync(true);
 
             // This should lock the Hats folder, all hats are no longer detachable
-            Assert.True(_rlv.ProcessMessage("@detachthis:tattoo=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachthis:tattoo=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat ()
             Assert.True(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3321,7 +3321,7 @@ namespace LibRLV.Tests
         #region @detachallthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
 
         [Fact]
-        public void DetachAllThis()
+        public async Task DetachAllThis()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3330,7 +3330,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
             Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3355,7 +3355,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachAllThis_Recursive()
+        public async Task DetachAllThis_Recursive()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3364,7 +3364,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
             Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3389,7 +3389,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachAllThis_Recursive_Path()
+        public async Task DetachAllThis_Recursive_Path()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3398,7 +3398,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@detachallthis:Clothing=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachallthis:Clothing=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
             Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3423,7 +3423,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachAllThis_Recursive_Worn()
+        public async Task DetachAllThis_Recursive_Worn()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3432,7 +3432,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@detachallthis:pants=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachallthis:pants=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
             Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3457,7 +3457,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachAllThis_Recursive_Attached()
+        public async Task DetachAllThis_Recursive_Attached()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3466,7 +3466,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@detachallthis:chest=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachallthis:chest=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
             Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3495,7 +3495,7 @@ namespace LibRLV.Tests
         #region @detachthis_except:<folder>=<rem/add>
 
         [Fact]
-        public void DetachAllThis_Recursive_Except()
+        public async Task DetachAllThis_Recursive_Except()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3504,8 +3504,8 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
-            Assert.True(_rlv.ProcessMessage($"@detachthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage($"@detachthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
             Assert.True(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3534,7 +3534,7 @@ namespace LibRLV.Tests
         #region @detachallthis_except:<folder>=<rem/add>
 
         [Fact]
-        public void DetachAllThis_Recursive_ExceptAll()
+        public async Task DetachAllThis_Recursive_ExceptAll()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3543,8 +3543,8 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
-            Assert.True(_rlv.ProcessMessage($"@detachallthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage($"@detachallthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat () - Parent folder locked recursively, but has exception
             Assert.True(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3569,7 +3569,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void DetachAllThis_Recursive_ExceptAll_Recursive()
+        public async Task DetachAllThis_Recursive_ExceptAll_Recursive()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3578,8 +3578,8 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
-            Assert.True(_rlv.ProcessMessage($"@detachallthis_except:Clothing=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage($"@detachallthis_except:Clothing=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat () - Parent folder locked recursively, but parent has recursive exception
             Assert.True(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3607,7 +3607,7 @@ namespace LibRLV.Tests
 
         #region @attachthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
         [Fact]
-        public void AttachThis()
+        public async Task AttachThis()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3616,7 +3616,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@attachthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3641,7 +3641,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void AttachThis_NotRecursive()
+        public async Task AttachThis_NotRecursive()
         {
             // TryGetRlvInventoryTree
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -3653,7 +3653,7 @@ namespace LibRLV.Tests
 
             // This should lock the #RLV/Clothing folder because the Business Pants are issuing the command, which is in the Clothing folder.
             //   Business Pants cannot be attached, but hats are still attachable.
-            Assert.True(_rlv.ProcessMessage("@attachthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat ()
             Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3678,7 +3678,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void AttachThis_ByPath()
+        public async Task AttachThis_ByPath()
         {
             // TryGetRlvInventoryTree
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -3689,7 +3689,7 @@ namespace LibRLV.Tests
             ).ReturnsAsync(true);
 
             // This should lock the Hats folder, all hats are no longer attachable
-            Assert.True(_rlv.ProcessMessage("@attachthis:Clothing/Hats=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachthis:Clothing/Hats=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3714,7 +3714,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void AttachThis_ByAttachmentPoint()
+        public async Task AttachThis_ByAttachmentPoint()
         {
             // TryGetRlvInventoryTree
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -3725,7 +3725,7 @@ namespace LibRLV.Tests
             ).ReturnsAsync(true);
 
             // This should lock the Hats folder, all hats are no longer attachable
-            Assert.True(_rlv.ProcessMessage("@attachthis:groin=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachthis:groin=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3750,7 +3750,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void AttachThis_ByWornLayer()
+        public async Task AttachThis_ByWornLayer()
         {
             // TryGetRlvInventoryTree
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -3761,7 +3761,7 @@ namespace LibRLV.Tests
             ).ReturnsAsync(true);
 
             // This should lock the Hats folder, all hats are no longer attachable
-            Assert.True(_rlv.ProcessMessage("@attachthis:tattoo=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachthis:tattoo=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat ()
             Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3789,7 +3789,7 @@ namespace LibRLV.Tests
         #region @attachallthis[:<layer>|<attachpt>|<path_to_folder>]=<y/n>
 
         [Fact]
-        public void AttachAllThis()
+        public async Task AttachAllThis()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3798,7 +3798,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3823,7 +3823,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void AttachAllThis_Recursive()
+        public async Task AttachAllThis_Recursive()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3832,7 +3832,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3857,7 +3857,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void AttachAllThis_Recursive_Path()
+        public async Task AttachAllThis_Recursive_Path()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3866,7 +3866,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@attachallthis:Clothing=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachallthis:Clothing=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3891,7 +3891,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void AttachAllThis_Recursive_Worn()
+        public async Task AttachAllThis_Recursive_Worn()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3900,7 +3900,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@attachallthis:pants=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachallthis:pants=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3925,7 +3925,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void AttachAllThis_Recursive_Attached()
+        public async Task AttachAllThis_Recursive_Attached()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3934,7 +3934,7 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@attachallthis:chest=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachallthis:chest=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -3963,7 +3963,7 @@ namespace LibRLV.Tests
         #region @attachthis_except:<folder>=<rem/add>
 
         [Fact]
-        public void AttachAllThis_Recursive_Except()
+        public async Task AttachAllThis_Recursive_Except()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -3972,8 +3972,8 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
-            Assert.True(_rlv.ProcessMessage($"@attachthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage($"@attachthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
             Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -4002,7 +4002,7 @@ namespace LibRLV.Tests
         #region @attachallthis_except:<folder>=<rem/add>
 
         [Fact]
-        public void AttachAllThis_Recursive_ExceptAll()
+        public async Task AttachAllThis_Recursive_ExceptAll()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -4011,8 +4011,8 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
-            Assert.True(_rlv.ProcessMessage($"@attachallthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage($"@attachallthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat () - Parent folder locked recursively, but has exception
             Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
@@ -4037,7 +4037,7 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public void AttachAllThis_Recursive_ExceptAll_Recursive()
+        public async Task AttachAllThis_Recursive_ExceptAll_Recursive()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
@@ -4046,8 +4046,8 @@ namespace LibRLV.Tests
                 e.TryGetRlvInventoryTree(out sharedFolder)
             ).ReturnsAsync(true);
 
-            Assert.True(_rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
-            Assert.True(_rlv.ProcessMessage($"@attachallthis_except:Clothing=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage($"@attachallthis_except:Clothing=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
             // #RLV/Clothing/Hats/Party Hat () - Parent folder locked recursively, but parent has recursive exception
             Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));

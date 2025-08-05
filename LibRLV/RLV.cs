@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace LibRLV
 {
@@ -45,13 +48,13 @@ namespace LibRLV
             Enabled = enabled;
         }
 
-        private bool ProcessRLVMessage(RLVMessage rlvMessage)
+        private async Task<bool> ProcessRLVMessage(RLVMessage rlvMessage)
         {
             if (Blacklist.IsBlacklisted(rlvMessage.Behavior))
             {
                 if (int.TryParse(rlvMessage.Param, out var channel))
                 {
-                    Callbacks.SendReplyAsync(channel, "", CancellationToken.None);
+                    await Callbacks.SendReplyAsync(channel, "", CancellationToken.None);
                 }
 
                 return false;
@@ -59,15 +62,15 @@ namespace LibRLV
 
             if (rlvMessage.Behavior == "clear")
             {
-                return Restrictions.ProcessClearCommand(rlvMessage);
+                return await Restrictions.ProcessClearCommand(rlvMessage);
             }
             else if (rlvMessage.Param == "force")
             {
-                return Commands.ProcessActionCommand(rlvMessage);
+                return await Commands.ProcessActionCommand(rlvMessage);
             }
             else if (rlvMessage.Param == "y" || rlvMessage.Param == "n" || rlvMessage.Param == "add" || rlvMessage.Param == "rem")
             {
-                return Restrictions.ProcessRestrictionCommand(rlvMessage, rlvMessage.Option, rlvMessage.Param == "n" || rlvMessage.Param == "add");
+                return await Restrictions.ProcessRestrictionCommand(rlvMessage, rlvMessage.Option, rlvMessage.Param == "n" || rlvMessage.Param == "add");
             }
             else if (int.TryParse(rlvMessage.Param, out var channel))
             {
@@ -76,18 +79,18 @@ namespace LibRLV
                     return false;
                 }
 
-                return GetRequestHandler.ProcessGetCommand(rlvMessage, channel);
+                return await GetRequestHandler.ProcessGetCommand(rlvMessage, channel);
             }
 
             return false;
         }
 
-        private bool ProcessSingleMessage(string message, Guid senderId, string senderName)
+        private async Task<bool> ProcessSingleMessage(string message, Guid senderId, string senderName)
         {
             // Special hack for @clear, which doesn't match the standard pattern of @behavior=param
             if (message.Equals("clear", StringComparison.OrdinalIgnoreCase))
             {
-                return ProcessRLVMessage(new RLVMessage()
+                return await ProcessRLVMessage(new RLVMessage()
                 {
                     Behavior = "clear",
                     Option = "",
@@ -112,10 +115,10 @@ namespace LibRLV
                 SenderName = senderName
             };
 
-            return ProcessRLVMessage(rlvMessage);
+            return await ProcessRLVMessage(rlvMessage);
         }
 
-        public bool ProcessMessage(string message, Guid senderId, string senderName)
+        public async Task<bool> ProcessMessage(string message, Guid senderId, string senderName)
         {
             if (!Enabled || !message.StartsWith("@", StringComparison.OrdinalIgnoreCase))
             {
@@ -125,7 +128,7 @@ namespace LibRLV
             var result = true;
             foreach (var singleMessage in message.Substring(1).Split(','))
             {
-                var isSuccessful = ProcessSingleMessage(singleMessage, senderId, senderName);
+                var isSuccessful = await ProcessSingleMessage(singleMessage, senderId, senderName);
                 if (!isSuccessful)
                 {
                     result = false;
@@ -135,7 +138,7 @@ namespace LibRLV
             return result;
         }
 
-        public bool ProcessInstantMessage(string message, Guid senderId)
+        public async Task<bool> ProcessInstantMessage(string message, Guid senderId)
         {
             if (!EnableInstantMessageProcessing || !Enabled || !message.StartsWith("@", StringComparison.OrdinalIgnoreCase))
             {
@@ -147,35 +150,32 @@ namespace LibRLV
                 return false;
             }
 
-            return GetRequestHandler.ProcessInstantMessageCommand(message.ToLowerInvariant(), senderId);
+            return await GetRequestHandler.ProcessInstantMessageCommand(message.ToLowerInvariant(), senderId);
         }
 
-        public void ReportSendPublicMessage(string message)
+        public async Task ReportSendPublicMessage(string message)
         {
+            IReadOnlyList<int> channels;
+
             if (message.StartsWith("/me ", StringComparison.OrdinalIgnoreCase))
             {
-                if (!Permissions.IsRedirEmote(out var channels))
+                if (!Permissions.IsRedirEmote(out channels))
                 {
                     return;
-                }
-
-                foreach (var channel in channels)
-                {
-                    Callbacks.SendReplyAsync(channel, message, System.Threading.CancellationToken.None);
                 }
             }
             else
             {
-                if (!Permissions.IsRedirChat(out var channels))
+                if (!Permissions.IsRedirChat(out channels))
                 {
                     return;
                 }
-
-                foreach (var channel in channels)
-                {
-                    Callbacks.SendReplyAsync(channel, message, System.Threading.CancellationToken.None);
-                }
             }
+
+            var tasks = channels
+                .Select(channel => Callbacks.SendReplyAsync(channel, message, System.Threading.CancellationToken.None));
+
+            await Task.WhenAll(tasks);
         }
 
         public enum InventoryOfferAction
@@ -183,7 +183,7 @@ namespace LibRLV
             Accepted = 1,
             Denied = 2
         }
-        public void ReportInventoryOffer(string itemOrFolderPath, InventoryOfferAction action)
+        public async Task ReportInventoryOffer(string itemOrFolderPath, InventoryOfferAction action)
         {
             var isSharedFolder = false;
 
@@ -210,7 +210,7 @@ namespace LibRLV
                 notificationText = $"/declined inv_offer {itemOrFolderPath}";
             }
 
-            SendNotification(notificationText);
+            await SendNotification(notificationText);
         }
 
         public enum WornItemChange
@@ -218,7 +218,7 @@ namespace LibRLV
             Attached = 1,
             Detached = 2
         }
-        public void ReportWornItemChange(Guid objectFolderId, bool isShared, WearableType wearableType, WornItemChange changeType)
+        public async Task ReportWornItemChange(Guid objectFolderId, bool isShared, WearableType wearableType, WornItemChange changeType)
         {
             var notificationText = "";
 
@@ -253,7 +253,7 @@ namespace LibRLV
                 return;
             }
 
-            SendNotification(notificationText);
+            await SendNotification(notificationText);
         }
 
         public enum AttachedItemChange
@@ -261,7 +261,7 @@ namespace LibRLV
             Attached = 1,
             Detached = 2
         }
-        public void ReportAttachedItemChange(Guid objectFolderId, bool isShared, AttachmentPoint attachmentPoint, AttachedItemChange changeType)
+        public async Task ReportAttachedItemChange(Guid objectFolderId, bool isShared, AttachmentPoint attachmentPoint, AttachedItemChange changeType)
         {
             var notificationText = "";
 
@@ -296,7 +296,7 @@ namespace LibRLV
                 return;
             }
 
-            SendNotification(notificationText);
+            await SendNotification(notificationText);
         }
 
         public enum SitType
@@ -304,7 +304,7 @@ namespace LibRLV
             Sit = 1,
             Stand,
         }
-        public void ReportSit(SitType sitType, Guid? objectId, float? objectDistance)
+        public async Task ReportSit(SitType sitType, Guid? objectId, float? objectDistance)
         {
             var notificationText = "";
 
@@ -373,12 +373,13 @@ namespace LibRLV
                 return;
             }
 
-            SendNotification(notificationText);
+            await SendNotification(notificationText);
         }
 
-        private void SendNotification(string notificationText)
+        private async Task SendNotification(string notificationText)
         {
             var notificationRestrictions = Restrictions.GetRestrictions(RLVRestrictionType.Notify);
+            var tasks = new List<Task>(notificationRestrictions.Count);
 
             foreach (var notificationRestriction in notificationRestrictions)
             {
@@ -394,9 +395,11 @@ namespace LibRLV
 
                 if (notificationText.Contains(filter))
                 {
-                    Callbacks.SendReplyAsync(channel, notificationText, System.Threading.CancellationToken.None);
+                    tasks.Add(Callbacks.SendReplyAsync(channel, notificationText, System.Threading.CancellationToken.None));
                 }
             }
+
+            await Task.WhenAll(tasks);
         }
     }
 }

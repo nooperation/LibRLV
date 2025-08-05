@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 using LibRLV.EventArguments;
 using static LibRLV.InventoryTree;
 
@@ -9,7 +10,7 @@ namespace LibRLV
 {
     public class RLVCommandProcessor
     {
-        private readonly ImmutableDictionary<string, Func<RLVMessage, bool>> _rlvActionHandlers;
+        private readonly ImmutableDictionary<string, Func<RLVMessage, Task<bool>>> _rlvActionHandlers;
 
         public event EventHandler<SetRotEventArgs> SetRot;
         public event EventHandler<AdjustHeightEventArgs> AdjustHeight;
@@ -35,7 +36,7 @@ namespace LibRLV
             _manager = manager;
             _callbacks = callbacks;
 
-            _rlvActionHandlers = new Dictionary<string, Func<RLVMessage, bool>>()
+            _rlvActionHandlers = new Dictionary<string, Func<RLVMessage, Task<bool>>>()
             {
                 { "setrot", HandleSetRot },
                 { "adjustheight", HandleAdjustHeight},
@@ -84,70 +85,70 @@ namespace LibRLV
             }.ToImmutableDictionary();
         }
 
-        internal bool ProcessActionCommand(RLVMessage command)
+        internal async Task<bool> ProcessActionCommand(RLVMessage command)
         {
             if (_rlvActionHandlers.TryGetValue(command.Behavior, out var func))
             {
-                return func(command);
+                return await func(command);
             }
             else if (command.Behavior.StartsWith("setdebug_", StringComparison.OrdinalIgnoreCase))
             {
-                return _rlvActionHandlers["setdebug_"](command);
+                return await _rlvActionHandlers["setdebug_"](command);
             }
             else if (command.Behavior.StartsWith("setenv_", StringComparison.OrdinalIgnoreCase))
             {
-                return _rlvActionHandlers["setenv_"](command);
+                return await _rlvActionHandlers["setenv_"](command);
             }
 
             return false;
         }
 
-        private bool HandleSetDebug(RLVMessage command)
+        private Task<bool> HandleSetDebug(RLVMessage command)
         {
             var separatorIndex = command.Behavior.IndexOf('_');
             if (separatorIndex == -1)
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             var settingName = command.Behavior.Substring(separatorIndex + 1);
             if (settingName.Length == 0)
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             var handler = SetDebug;
             handler?.Invoke(this, new SetSettingEventArgs(settingName, command.Option));
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        private bool HandleSetEnv(RLVMessage command)
+        private Task<bool> HandleSetEnv(RLVMessage command)
         {
             var separatorIndex = command.Behavior.IndexOf('_');
             if (separatorIndex == -1)
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             var settingName = command.Behavior.Substring(separatorIndex + 1);
             if (settingName.Length == 0)
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             var handler = SetEnv;
             handler?.Invoke(this, new SetSettingEventArgs(settingName, command.Option));
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        private bool HandleSetGroup(RLVMessage command)
+        private Task<bool> HandleSetGroup(RLVMessage command)
         {
             var argParts = command.Option.Split(_restrictionOptionSeparator, StringSplitOptions.RemoveEmptyEntries);
             if (argParts.Length == 0)
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             var groupRole = string.Empty;
@@ -167,7 +168,7 @@ namespace LibRLV
                 handler?.Invoke(this, new SetGroupEventArgs(argParts[0], groupRole));
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
         private bool CanRemAttachItem(InventoryItem item, bool enforceNostrip)
@@ -267,9 +268,9 @@ namespace LibRLV
         }
 
         // @attach:[folder]=force
-        private bool HandleAttach(RLVMessage command, bool replaceExistingAttachments, bool recursive)
+        private async Task<bool> HandleAttach(RLVMessage command, bool replaceExistingAttachments, bool recursive)
         {
-            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
             {
                 return false;
             }
@@ -294,9 +295,9 @@ namespace LibRLV
             }
         }
 
-        private bool HandleAttachThis(RLVMessage command, bool replaceExistingAttachments, bool recursive)
+        private async Task<bool> HandleAttachThis(RLVMessage command, bool replaceExistingAttachments, bool recursive)
         {
-            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
             {
                 return false;
             }
@@ -369,13 +370,13 @@ namespace LibRLV
 
         // @remattach[:<folder|attachpt|uuid>]=force
         // TODO: Add support for Attachment groups (RLVa)
-        private bool HandleRemAttach(RLVMessage command)
+        private async Task<bool> HandleRemAttach(RLVMessage command)
         {
-            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
             {
                 return false;
             }
-            if (!_callbacks.TryGetCurrentOutfit(out var currentOutfit).Result)
+            if (!await _callbacks.TryGetCurrentOutfit(out var currentOutfit))
             {
                 return false;
             }
@@ -432,9 +433,9 @@ namespace LibRLV
             return true;
         }
 
-        private bool HandleDetachAll(RLVMessage command)
+        private async Task<bool> HandleDetachAll(RLVMessage command)
         {
-            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
             {
                 return false;
             }
@@ -454,9 +455,9 @@ namespace LibRLV
             return true;
         }
 
-        private bool HandleDetachThis(RLVMessage command, bool recursive)
+        private async Task<bool> HandleDetachThis(RLVMessage command, bool recursive)
         {
-            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
             {
                 return false;
             }
@@ -506,9 +507,9 @@ namespace LibRLV
         }
 
         // @detachme=force
-        private bool HandleDetachMe(RLVMessage command)
+        private async Task<bool> HandleDetachMe(RLVMessage command)
         {
-            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
             {
                 return false;
             }
@@ -531,13 +532,13 @@ namespace LibRLV
 
         // @remoutfit[:<folder|layer>]=force
         // TODO: Add support for Attachment groups (RLVa)
-        private bool HandleRemOutfit(RLVMessage command)
+        private async Task<bool> HandleRemOutfit(RLVMessage command)
         {
-            if (!_callbacks.TryGetCurrentOutfit(out var currentOutfit).Result)
+            if (!await _callbacks.TryGetCurrentOutfit(out var currentOutfit))
             {
                 return false;
             }
-            if (!_callbacks.TryGetRlvInventoryTree(out var sharedFolder).Result)
+            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
             {
                 return false;
             }
@@ -580,56 +581,56 @@ namespace LibRLV
             return true;
         }
 
-        private bool HandleUnsit(RLVMessage command)
+        private Task<bool> HandleUnsit(RLVMessage command)
         {
             if (!_manager.CanUnsit())
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             var handler = Unsit;
             handler?.Invoke(this, new EventArgs());
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        private bool HandleSitGround(RLVMessage command)
+        private Task<bool> HandleSitGround(RLVMessage command)
         {
             if (!_manager.CanSit())
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             var handler = SitGround;
             handler?.Invoke(this, new EventArgs());
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        private bool HandleSetRot(RLVMessage command)
+        private Task<bool> HandleSetRot(RLVMessage command)
         {
             if (!float.TryParse(command.Option, out var angleInRadians))
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             var handler = SetRot;
             handler?.Invoke(this, new SetRotEventArgs(angleInRadians));
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        private bool HandleAdjustHeight(RLVMessage command)
+        private Task<bool> HandleAdjustHeight(RLVMessage command)
         {
             var args = command.Option.Split(';');
             if (args.Length < 1)
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             if (!float.TryParse(args[0], out var distance))
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             var factor = 1.0f;
@@ -648,29 +649,29 @@ namespace LibRLV
             var handler = AdjustHeight;
             handler?.Invoke(this, new AdjustHeightEventArgs(distance, factor, deltaInMeters));
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        private bool HandleSetCamFOV(RLVMessage command)
+        private Task<bool> HandleSetCamFOV(RLVMessage command)
         {
             var cameraRestrictions = _manager.GetCameraRestrictions();
             if (cameraRestrictions.IsLocked)
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             if (!float.TryParse(command.Option, out var fov))
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             var handler = SetCamFOV;
             handler?.Invoke(this, new SetCamFOVEventArgs(fov));
 
-            return true;
+            return Task.FromResult(true);
         }
 
-        private bool HandleSit(RLVMessage command)
+        private async Task<bool> HandleSit(RLVMessage command)
         {
             if (command.Option != string.Empty && !Guid.TryParse(command.Option, out var sitTarget))
             {
@@ -682,7 +683,7 @@ namespace LibRLV
                 return false;
             }
 
-            if (!_callbacks.TryGetObjectExists(sitTarget, out var isCurrentlySitting).Result)
+            if (!await _callbacks.TryGetObjectExists(sitTarget, out var isCurrentlySitting))
             {
                 return false;
             }
@@ -706,16 +707,16 @@ namespace LibRLV
             return true;
         }
 
-        private bool HandleTpTo(RLVMessage command)
+        private Task<bool> HandleTpTo(RLVMessage command)
         {
             // @tpto is inhibited by @tploc=n, by @unsit too.
             if (!_manager.CanTpLoc())
             {
-                return false;
+                return Task.FromResult(false);
             }
             if (!_manager.CanUnsit())
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             var commandArgs = command.Option.Split(';');
@@ -723,7 +724,7 @@ namespace LibRLV
 
             if (locationArgs.Length < 3 || locationArgs.Length > 4)
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             float? lookat = null;
@@ -731,7 +732,7 @@ namespace LibRLV
             {
                 if (!float.TryParse(commandArgs[1], out var val))
                 {
-                    return false;
+                    return Task.FromResult(false);
                 }
 
                 lookat = val;
@@ -741,21 +742,21 @@ namespace LibRLV
             {
                 if (!float.TryParse(locationArgs[0], out var x))
                 {
-                    return false;
+                    return Task.FromResult(false);
                 }
                 if (!float.TryParse(locationArgs[1], out var y))
                 {
-                    return false;
+                    return Task.FromResult(false);
                 }
                 if (!float.TryParse(locationArgs[2], out var z))
                 {
-                    return false;
+                    return Task.FromResult(false);
                 }
 
                 var handler = TpTo;
                 handler?.Invoke(this, new TpToEventArgs(x, y, z, null, lookat));
 
-                return true;
+                return Task.FromResult(true);
             }
             else if (locationArgs.Length == 4)
             {
@@ -763,24 +764,24 @@ namespace LibRLV
 
                 if (!float.TryParse(locationArgs[1], out var x))
                 {
-                    return false;
+                    return Task.FromResult(false);
                 }
                 if (!float.TryParse(locationArgs[2], out var y))
                 {
-                    return false;
+                    return Task.FromResult(false);
                 }
                 if (!float.TryParse(locationArgs[3], out var z))
                 {
-                    return false;
+                    return Task.FromResult(false);
                 }
 
                 var handler = TpTo;
                 handler?.Invoke(this, new TpToEventArgs(x, y, z, regionName, lookat));
 
-                return true;
+                return Task.FromResult(true);
             }
 
-            return false;
+            return Task.FromResult(false);
         }
     }
 }

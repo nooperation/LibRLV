@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 using LibRLV.EventArguments;
 
 namespace LibRLV
@@ -158,7 +159,7 @@ namespace LibRLV
             return _restrictionToNameMap.TryGetValue(restrictionType, out name);
         }
 
-        private void NotifyRestrictionChange(RLVRestriction restriction, bool wasAdded)
+        private async Task NotifyRestrictionChange(RLVRestriction restriction, bool wasAdded)
         {
             if (!TryGetRestrictionNameFromType(restriction.OriginalBehavior, out var restrictionName))
             {
@@ -173,10 +174,10 @@ namespace LibRLV
 
             notification += wasAdded ? "=n" : "=y";
 
-            NotifyRestrictionChange(restrictionName, notification);
+            await NotifyRestrictionChange(restrictionName, notification);
         }
 
-        private void NotifyRestrictionChange(string restrictionName, string notificationMessage)
+        private async Task NotifyRestrictionChange(string restrictionName, string notificationMessage)
         {
             List<RLVRestriction> notificationRestrictions;
 
@@ -214,11 +215,11 @@ namespace LibRLV
                     continue;
                 }
 
-                _callbacks.SendReplyAsync(
+                await _callbacks.SendReplyAsync(
                     notificationChannel,
                     $"/{notificationMessage}",
                     System.Threading.CancellationToken.None
-                ).Wait();
+                );
             }
         }
 
@@ -234,7 +235,7 @@ namespace LibRLV
             }
         }
 
-        public void RemoveRestrictionsForObjects(IEnumerable<Guid> objectIds)
+        public async Task RemoveRestrictionsForObjects(IEnumerable<Guid> objectIds)
         {
             var objectIdMap = objectIds.ToImmutableHashSet();
             var removedRestrictions = new List<RLVRestriction>();
@@ -258,13 +259,16 @@ namespace LibRLV
                 }
             }
 
+            var notificationTasks = new List<Task>(removedRestrictions.Count);
             foreach (var restriction in removedRestrictions)
             {
                 var handler = RestrictionUpdated;
                 handler?.Invoke(this, new RestrictionUpdatedEventArgs(restriction, false, true));
 
-                NotifyRestrictionChange(restriction, false);
+                notificationTasks.Add(NotifyRestrictionChange(restriction, false));
             }
+
+            await Task.WhenAll(notificationTasks);
         }
 
         public IReadOnlyList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType)
@@ -332,7 +336,7 @@ namespace LibRLV
             return removedRestriction;
         }
 
-        private void RemoveRestriction(RLVRestriction restriction)
+        private async Task RemoveRestriction(RLVRestriction restriction)
         {
             var removedRestriction = false;
 
@@ -347,10 +351,10 @@ namespace LibRLV
                 handler?.Invoke(this, new RestrictionUpdatedEventArgs(restriction, false, true));
             }
 
-            NotifyRestrictionChange(restriction, false);
+            await NotifyRestrictionChange(restriction, false);
         }
 
-        private void AddRestriction(RLVRestriction newRestriction)
+        private async Task AddRestriction(RLVRestriction newRestriction)
         {
             var restrictionAdded = false;
 
@@ -374,10 +378,10 @@ namespace LibRLV
                 handler?.Invoke(this, new RestrictionUpdatedEventArgs(newRestriction, true, false));
             }
 
-            NotifyRestrictionChange(newRestriction, true);
+            await NotifyRestrictionChange(newRestriction, true);
         }
 
-        internal bool ProcessClearCommand(RLVMessage command)
+        internal async Task<bool> ProcessClearCommand(RLVMessage command)
         {
             var filteredRestrictions = _restrictionToNameMap
                 .Where(n => n.Value.Contains(command.Param.ToLowerInvariant()))
@@ -409,14 +413,14 @@ namespace LibRLV
                     }
                 }
             }
-            _lockedFolderManager.RebuildLockedFolders();
+            await _lockedFolderManager.RebuildLockedFolders();
 
             foreach (var removedRestriction in removedRestrictions)
             {
                 var handler = RestrictionUpdated;
                 handler?.Invoke(this, new RestrictionUpdatedEventArgs(removedRestriction, false, true));
 
-                NotifyRestrictionChange(removedRestriction, false);
+                await NotifyRestrictionChange(removedRestriction, false);
             }
 
             var notificationMessage = "clear";
@@ -425,12 +429,12 @@ namespace LibRLV
                 notificationMessage += $":{command.Param}";
             }
 
-            NotifyRestrictionChange("clear", notificationMessage);
+            await NotifyRestrictionChange("clear", notificationMessage);
 
             return true;
         }
 
-        internal bool ProcessRestrictionCommand(RLVMessage message, string option, bool isAddingRestriction)
+        internal async Task<bool> ProcessRestrictionCommand(RLVMessage message, string option, bool isAddingRestriction)
         {
             if (!TryGetRestrictionFromName(message.Behavior, out var behavior))
             {
@@ -446,11 +450,11 @@ namespace LibRLV
 
             if (isAddingRestriction)
             {
-                AddRestriction(newCommand);
+                await AddRestriction(newCommand);
             }
             else
             {
-                RemoveRestriction(newCommand);
+                await RemoveRestriction(newCommand);
             }
 
             switch (newCommand.Behavior)
@@ -462,11 +466,11 @@ namespace LibRLV
                 {
                     if (isAddingRestriction)
                     {
-                        _lockedFolderManager.ProcessFolderRestrictions(newCommand);
+                        await _lockedFolderManager.ProcessFolderRestrictions(newCommand);
                     }
                     else
                     {
-                        _lockedFolderManager.RebuildLockedFolders();
+                        await _lockedFolderManager.RebuildLockedFolders();
                     }
                     break;
                 }
@@ -477,12 +481,11 @@ namespace LibRLV
                 {
                     if (isAddingRestriction)
                     {
-                        _lockedFolderManager.ProcessFolderException(newCommand);
+                        await _lockedFolderManager.ProcessFolderException(newCommand);
                     }
                     else
                     {
-                        _lockedFolderManager.RebuildLockedFolders();
-
+                        await _lockedFolderManager.RebuildLockedFolders();
                     }
                     break;
                 }

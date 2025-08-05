@@ -359,7 +359,7 @@ namespace LibRLV
             return _restrictionProvider.GetRestrictions(RLVRestrictionType.SendGesture).Count == 0;
         }
 
-        public bool IsRedirChat(out List<int> channels)
+        public bool IsRedirChat(out IReadOnlyList<int> channels)
         {
             channels = _restrictionProvider
                 .GetRestrictions(RLVRestrictionType.RedirChat)
@@ -371,7 +371,7 @@ namespace LibRLV
             return channels.Count > 0;
         }
 
-        public bool IsRedirEmote(out List<int> channels)
+        public bool IsRedirEmote(out IReadOnlyList<int> channels)
         {
             channels = _restrictionProvider
                 .GetRestrictions(RLVRestrictionType.RedirEmote)

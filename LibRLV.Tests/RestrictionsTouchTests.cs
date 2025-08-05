@@ -8,9 +8,9 @@
         [Theory]
         [InlineData("fartouch")]
         [InlineData("touchfar")]
-        public void CanFarTouch(string command)
+        public async Task CanFarTouch(string command)
         {
-            _rlv.ProcessMessage($"@{command}:0.9=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@{command}:0.9=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.Permissions.CanFarTouch(out var distance));
             Assert.Equal(0.9f, distance);
@@ -19,9 +19,9 @@
         [Theory]
         [InlineData("fartouch")]
         [InlineData("touchfar")]
-        public void CanFarTouch_Synonym(string command)
+        public async Task CanFarTouch_Synonym(string command)
         {
-            _rlv.ProcessMessage($"@{command}:0.9=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@{command}:0.9=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.Permissions.CanFarTouch(out var distance));
             Assert.Equal(0.9f, distance);
@@ -30,9 +30,9 @@
         [Theory]
         [InlineData("fartouch")]
         [InlineData("touchfar")]
-        public void CanFarTouch_Default(string command)
+        public async Task CanFarTouch_Default(string command)
         {
-            _rlv.ProcessMessage($"@{command}=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@{command}=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.Permissions.CanFarTouch(out var distance));
             Assert.Equal(1.5f, distance);
@@ -43,14 +43,14 @@
         [InlineData("fartouch", "touchfar")]
         [InlineData("touchfar", "touchfar")]
         [InlineData("touchfar", "fartouch")]
-        public void CanFarTouch_Multiple_Synonyms(string command1, string command2)
+        public async Task CanFarTouch_Multiple_Synonyms(string command1, string command2)
         {
-            _rlv.ProcessMessage($"@{command1}:12.34=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage($"@{command2}:6.78=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@{command1}:12.34=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@{command2}:6.78=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.Permissions.CanFarTouch(out var actualDistance2));
 
-            _rlv.ProcessMessage($"@{command1}:6.78=y", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@{command1}:6.78=y", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.Permissions.CanFarTouch(out var actualDistance1));
 
@@ -75,12 +75,12 @@
         }
 
         [Fact]
-        public void TouchAll_default()
+        public async Task TouchAll_default()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var userId1 = new Guid("11111111-1111-4111-8111-111111111111");
 
-            _rlv.ProcessMessage("@touchall=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@touchall=n", _sender.Id, _sender.Name);
 
             Assert.False(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedSelf, objectId1, null, null));
             Assert.False(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedOther, objectId1, userId1, null));
@@ -93,13 +93,13 @@
         #region @touchworld=<y/n> @touchworld:<Guid>=<rem/add>
 
         [Fact]
-        public void TouchWorld_default()
+        public async Task TouchWorld_default()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
             var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
-            _rlv.ProcessMessage("@touchworld=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@touchworld=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedSelf, objectId1, null, null));
             Assert.True(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedOther, objectId1, userId1, null));
@@ -108,14 +108,14 @@
         }
 
         [Fact]
-        public void TouchWorld_Exception()
+        public async Task TouchWorld_Exception()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
             var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
-            _rlv.ProcessMessage("@touchworld=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage($"@touchworld:{objectId2}=add", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@touchworld=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@touchworld:{objectId2}=add", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedSelf, objectId1, null, null));
             Assert.True(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedOther, objectId1, userId1, null));
@@ -133,13 +133,13 @@
         #region @touchthis:<Guid>=<rem/add>
 
         [Fact]
-        public void TouchThis_default()
+        public async Task TouchThis_default()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
             var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
-            _rlv.ProcessMessage($"@touchthis:{objectId1}=add", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@touchthis:{objectId1}=add", _sender.Id, _sender.Name);
 
             Assert.False(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedSelf, objectId1, null, null));
             Assert.False(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedOther, objectId1, userId1, null));
@@ -157,13 +157,13 @@
         #region @touchme=<rem/add>
 
         [Fact]
-        public void TouchMe_default()
+        public async Task TouchMe_default()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
-            _rlv.ProcessMessage("@touchall=n", _sender.Id, _sender.Name);
-            _rlv.ProcessMessage("@touchme=add", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@touchall=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@touchme=add", _sender.Id, _sender.Name);
 
             Assert.False(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedSelf, objectId1, null, null));
             Assert.False(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedOther, objectId1, userId1, null));
@@ -181,12 +181,12 @@
         #region @touchattach=<y/n>
 
         [Fact]
-        public void TouchAttach_default()
+        public async Task TouchAttach_default()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
-            _rlv.ProcessMessage("@touchattach=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@touchattach=n", _sender.Id, _sender.Name);
 
             Assert.False(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedSelf, objectId1, null, null));
             Assert.False(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedOther, objectId1, userId1, null));
@@ -199,12 +199,12 @@
         #region @touchattachself=<y/n>
 
         [Fact]
-        public void TouchAttachSelf_default()
+        public async Task TouchAttachSelf_default()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
-            _rlv.ProcessMessage("@touchattachself=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@touchattachself=n", _sender.Id, _sender.Name);
 
             Assert.False(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedSelf, objectId1, null, null));
             Assert.True(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedOther, objectId1, userId1, null));
@@ -217,12 +217,12 @@
         #region @touchattachother=<y/n> @touchattachother:<Guid>=<y/n>
 
         [Fact]
-        public void TouchAttachOther_default()
+        public async Task TouchAttachOther_default()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
-            _rlv.ProcessMessage("@touchattachother=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage("@touchattachother=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedSelf, objectId1, null, null));
             Assert.False(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedOther, objectId1, userId1, null));
@@ -231,13 +231,13 @@
         }
 
         [Fact]
-        public void TouchAttachOther_Specific()
+        public async Task TouchAttachOther_Specific()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
             var userId2 = new Guid("66666666-6666-4666-8666-666666666666");
 
-            _rlv.ProcessMessage($"@touchattachother:{userId2}=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@touchattachother:{userId2}=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedSelf, objectId1, null, null));
             Assert.True(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedOther, objectId1, userId1, null));
@@ -251,12 +251,12 @@
         #region @touchhud[:<Guid>]=<y/n>
 
         [Fact]
-        public void TouchHud_default()
+        public async Task TouchHud_default()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
-            _rlv.ProcessMessage($"@touchhud=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@touchhud=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedSelf, objectId1, null, null));
             Assert.True(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedOther, objectId1, userId1, null));
@@ -265,13 +265,13 @@
         }
 
         [Fact]
-        public void TouchHud_specific()
+        public async Task TouchHud_specific()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
             var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
-            _rlv.ProcessMessage($"@touchhud:{objectId2}=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@touchhud:{objectId2}=n", _sender.Id, _sender.Name);
 
             Assert.True(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedSelf, objectId1, null, null));
             Assert.True(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedOther, objectId1, userId1, null));
