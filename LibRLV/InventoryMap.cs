@@ -7,13 +7,24 @@ namespace LibRLV
 {
     public class InventoryMap
     {
-        public ImmutableDictionary<Guid, InventoryTree.InventoryItem> Items { get; }
+        public ImmutableDictionary<Guid, InventoryItem> Items { get; }
         public ImmutableDictionary<Guid, InventoryTree> Folders { get; }
         public InventoryTree Root { get; }
 
+        /// <summary>
+        /// Creates a mapping of all items and folders for a given InventoryTree and exposes several
+        /// methods for exploring this tree.
+        /// </summary>
+        /// <param name="root">Root of the tree. Generally the #RLV folder.</param>
+        /// <exception cref="ArgumentNullException">root is null</exception>
         public InventoryMap(InventoryTree root)
         {
-            var itemsTemp = new Dictionary<Guid, InventoryTree.InventoryItem>();
+            if (root == null)
+            {
+                throw new ArgumentNullException(nameof(root));
+            }
+
+            var itemsTemp = new Dictionary<Guid, InventoryItem>();
             var foldersTemp = new Dictionary<Guid, InventoryTree>();
             CreateInventoryMap(root, foldersTemp, itemsTemp);
 
@@ -22,8 +33,28 @@ namespace LibRLV
             Folders = foldersTemp.ToImmutableDictionary();
         }
 
+        /// <summary>
+        /// Attempts to find a folder under the root rlv folder #RLV by the given path.
+        /// Folders are not case sensitive. Folders may containing a special prefix (~, +),
+        /// which will be treated as if the folder did not have the prefix, unless the path
+        /// contains the prefix as well then an exact match will be made.
+        /// Example:
+        ///     Existing shared folder path: #RLV/Clothing/+Hats/+Fancy
+        ///     search term: "clothing/hats/fancy"
+        ///     results: The object representing Clothing/+Hats/+Fancy
+        /// </summary>
+        /// <param name="path">Forward-slash separated folder path. Do not include "#RLV/" as part of the path. Do not start with or end with a forward slash.</param>
+        /// <param name="skipPrivateFolders">If true, ignores folders starting with '.'</param>
+        /// <param name="folder">The found folder, or null if not found</param>
+        /// <returns>True if folder was found, false otherwise</returns>
         public bool TryGetFolderFromPath(string path, bool skipPrivateFolders, out InventoryTree folder)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                folder = null;
+                return false;
+            }
+
             var iter = Root;
             while (true)
             {
@@ -111,7 +142,22 @@ namespace LibRLV
             }
         }
 
-        public IEnumerable<InventoryTree> FindFoldersContaining(bool limitToOneResult, Guid? itemId, AttachmentPoint? attachmentPoint, WearableType? wearableType)
+        /// <summary>
+        /// Finds all folders containing the specified itemId, all folders containing an item
+        /// that is attached to the specified attachment point, or all folders containing an
+        /// item that is worn as the specified wearable type. Only one search criteria may be
+        /// specified.
+        /// </summary>
+        /// <param name="limitToOneResult">Deprecated, should always be false. Returns only the first found folder. This only exists to support the deprecated @GetPath command</param>
+        /// <param name="itemId">If specified, find the folder containing this item ID</param>
+        /// <param name="attachmentPoint">If specified, find all folders containing an item currently attached to this attachment point</param>
+        /// <param name="wearableType">If specified, find all folders containing an item currently worn as this type</param>
+        /// <returns>Collection of folders matching the search criteria</returns>
+        public IEnumerable<InventoryTree> FindFoldersContaining(
+            bool limitToOneResult,
+            Guid? itemId,
+            AttachmentPoint? attachmentPoint,
+            WearableType? wearableType)
         {
             var folders = new List<InventoryTree>();
 
@@ -140,9 +186,9 @@ namespace LibRLV
                         continue;
                     }
 
-                    if (item.AttachedTo == attachmentPoint && item.FolderId.HasValue)
+                    if (item.AttachedTo == attachmentPoint)
                     {
-                        if (foldersContainingAttachments.Add(item.FolderId.Value))
+                        if (foldersContainingAttachments.Add(item.Folder.Id))
                         {
                             folders.Add(item.Folder);
 
@@ -165,9 +211,9 @@ namespace LibRLV
                         continue;
                     }
 
-                    if (item.WornOn == wearableType && item.FolderId.HasValue)
+                    if (item.WornOn == wearableType)
                     {
-                        if (foldersIdsContainingWearables.Add(item.FolderId.Value))
+                        if (foldersIdsContainingWearables.Add(item.Folder.Id))
                         {
                             folders.Add(item.Folder);
 
@@ -183,6 +229,14 @@ namespace LibRLV
             return folders;
         }
 
+        /// <summary>
+        /// Attempts to create a path to the specified folder ID
+        /// Example result:
+        ///     ID of folder (#RLV/Clothing/Hats/Fancy) sets finalPath to "Clothing/Hats/Fancy"
+        /// </summary>
+        /// <param name="folderId">ID of the folder to get the path to</param>
+        /// <param name="finalPath">The path to the folder if function is successful, otherwise null</param>
+        /// <returns>True if the folder was found and a path was generated, otherwise false</returns>
         public bool TryBuildPathToFolder(Guid folderId, out string finalPath)
         {
             var path = new Stack<string>();
@@ -210,8 +264,16 @@ namespace LibRLV
             return true;
         }
 
-        private static void CreateInventoryMap(InventoryTree root, Dictionary<Guid, InventoryTree> folders, Dictionary<Guid, InventoryTree.InventoryItem> items)
+        private static void CreateInventoryMap(
+            InventoryTree root,
+            Dictionary<Guid, InventoryTree> folders,
+            Dictionary<Guid, InventoryItem> items)
         {
+            if (folders.ContainsKey(root.Id))
+            {
+                return;
+            }
+
             folders[root.Id] = root;
             foreach (var item in root.Items)
             {

@@ -632,7 +632,7 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage("@clear", _sender.Id, _sender.Name);
 
-            var restrictions = _rlv.Restrictions.GetRestrictions();
+            var restrictions = _rlv.Restrictions.FindRestrictions();
             Assert.Empty(restrictions);
         }
 
@@ -646,7 +646,7 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage("@cLEaR", _sender.Id, _sender.Name);
 
-            var restrictions = _rlv.Restrictions.GetRestrictions();
+            var restrictions = _rlv.Restrictions.FindRestrictions();
             Assert.Empty(restrictions);
         }
 
@@ -1359,8 +1359,8 @@ namespace LibRLV.Tests
             var actualGroupName = "Group Name";
 
             _callbacks.Setup(e =>
-                e.TryGetGroup(out actualGroupName)
-            ).ReturnsAsync(true);
+                e.TryGetActiveGroupNameAsync()
+            ).ReturnsAsync((true, actualGroupName));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1378,8 +1378,8 @@ namespace LibRLV.Tests
             var actualGroupName = "";
 
             _callbacks.Setup(e =>
-                e.TryGetGroup(out actualGroupName)
-            ).ReturnsAsync(false);
+                e.TryGetActiveGroupNameAsync()
+            ).ReturnsAsync((false, actualGroupName));
 
             var expected = new List<(int Channel, string Text)>
             {

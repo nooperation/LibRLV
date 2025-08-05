@@ -38,6 +38,21 @@
         }
 
         [Fact]
+        public void TryGetFolderFromPath_EmptyPath()
+        {
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
+            var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
+
+            var inventoryMap = new InventoryMap(sharedFolder);
+
+            Assert.False(inventoryMap.TryGetFolderFromPath("", true, out var foundFolder));
+            Assert.Null(foundFolder);
+        }
+
+        [Fact]
         public void TryGetFolderFromPath_FolderNameContainsForwardSlash()
         {
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
@@ -85,12 +100,6 @@
 
             var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
             clothingFolder.Name = "Clothing///";
-
-            sharedFolder.Children.RemoveAt(0);
-            sharedFolder.Children.Add(contendingTree1);
-            sharedFolder.Children.Add(contendingTree3);
-            sharedFolder.Children.Add(clothingFolder);
-            sharedFolder.Children.Add(contendingTree4);
 
             var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
             hatsFolder.Name = "//h/ats/";

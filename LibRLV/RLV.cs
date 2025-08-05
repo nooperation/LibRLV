@@ -378,7 +378,7 @@ namespace LibRLV
 
         private async Task SendNotification(string notificationText)
         {
-            var notificationRestrictions = Restrictions.GetRestrictions(RLVRestrictionType.Notify);
+            var notificationRestrictions = Restrictions.GetRestrictionsByType(RLVRestrictionType.Notify);
             var tasks = new List<Task>(notificationRestrictions.Count);
 
             foreach (var notificationRestriction in notificationRestrictions)

@@ -16,7 +16,7 @@ namespace LibRLV
 
         internal static bool GetRestrictionValueMax<T>(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, out T val)
         {
-            var restriction = _restrictionProvider.GetRestrictions(restrictionType);
+            var restriction = _restrictionProvider.GetRestrictionsByType(restrictionType);
             if (restriction.Count == 0)
             {
                 val = default;
@@ -33,7 +33,7 @@ namespace LibRLV
 
         internal static bool GetRestrictionValueMin<T>(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, out T val)
         {
-            var restriction = _restrictionProvider.GetRestrictions(restrictionType);
+            var restriction = _restrictionProvider.GetRestrictionsByType(restrictionType);
             if (restriction.Count == 0)
             {
                 val = default;
@@ -50,7 +50,7 @@ namespace LibRLV
 
         internal static bool GetOptionalRestrictionValueMin<T>(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, T defaultVal, out T val)
         {
-            var restrictions = _restrictionProvider.GetRestrictions(restrictionType);
+            var restrictions = _restrictionProvider.GetRestrictionsByType(restrictionType);
             if (restrictions.Count == 0)
             {
                 val = defaultVal;
@@ -77,7 +77,7 @@ namespace LibRLV
             // Explicit restrictions
             if (fromToType != null)
             {
-                var isRestrictedBySendImTo = _restrictionProvider.GetRestrictions(fromToType.Value)
+                var isRestrictedBySendImTo = _restrictionProvider.GetRestrictionsByType(fromToType.Value)
                     .Where(n => n.Args.Count == 1 &&
                         ((userId != null && n.Args[0] is Guid restrictedId && userId == restrictedId) ||
                         (groupName != null && n.Args[0] is string restrictedGroupName && (restrictedGroupName == "allgroups" || restrictedGroupName == groupName)))
@@ -88,7 +88,7 @@ namespace LibRLV
                 }
             }
 
-            var sendImRestrictions = _restrictionProvider.GetRestrictions(normalType);
+            var sendImRestrictions = _restrictionProvider.GetRestrictionsByType(normalType);
             var sendImExceptions = sendImRestrictions
                 .Where(n => n.IsException && n.Args.Count == 1 &&
                     ((userId != null && n.Args[0] is Guid restrictedId && userId == restrictedId) ||
@@ -98,7 +98,7 @@ namespace LibRLV
             // Secure restrictions
             if (secureType != null)
             {
-                var sendImRestrictionsSecure = _restrictionProvider.GetRestrictions(secureType.Value);
+                var sendImRestrictionsSecure = _restrictionProvider.GetRestrictionsByType(secureType.Value);
                 foreach (var item in sendImRestrictionsSecure)
                 {
                     var hasException = sendImExceptions
@@ -133,23 +133,23 @@ namespace LibRLV
 
         public bool CanFly()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Fly).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.Fly).Count == 0;
         }
         public bool CanJump()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Jump).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.Jump).Count == 0;
         }
         public bool CanTempRun()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.TempRun).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.TempRun).Count == 0;
         }
         public bool CanAlwaysRun()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.AlwaysRun).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.AlwaysRun).Count == 0;
         }
         public bool CanUnsit()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Unsit).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.Unsit).Count == 0;
         }
         public bool CanSit()
         {
@@ -158,18 +158,18 @@ namespace LibRLV
                 return false;
             }
 
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Sit).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.Sit).Count == 0;
         }
 
         #region TP
 
         public bool CanTpLm()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.TpLm).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.TpLm).Count == 0;
         }
         public bool CanTpLoc()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.TpLoc).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.TpLoc).Count == 0;
         }
         public bool CanSitTp(out float sitTpDist)
         {
@@ -181,7 +181,7 @@ namespace LibRLV
         }
         public bool CanStandTp()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.StandTp).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.StandTp).Count == 0;
         }
 
         public bool CanTPLure(Guid? userId)
@@ -196,7 +196,7 @@ namespace LibRLV
 
         public bool IsAutoAcceptTp(Guid? userId = null)
         {
-            var restrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.AcceptTp);
+            var restrictions = _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.AcceptTp);
             foreach (var restriction in restrictions)
             {
                 if (restriction.Args.Count == 0)
@@ -215,7 +215,7 @@ namespace LibRLV
 
         public bool IsAutoAcceptTpRequest(Guid? userId = null)
         {
-            var restrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.AcceptTpRequest);
+            var restrictions = _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.AcceptTpRequest);
             foreach (var restriction in restrictions)
             {
                 if (restriction.Args.Count == 0)
@@ -235,65 +235,65 @@ namespace LibRLV
 
         public bool CanShowInv()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ShowInv).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ShowInv).Count == 0;
         }
         public bool CanViewNote()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ViewNote).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ViewNote).Count == 0;
         }
         public bool CanViewScript()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ViewScript).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ViewScript).Count == 0;
         }
         public bool CanViewTexture()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ViewTexture).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ViewTexture).Count == 0;
         }
 
         public bool CanDefaultWear()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.DefaultWear).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.DefaultWear).Count == 0;
         }
         public bool CanSetGroup()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SetGroup).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SetGroup).Count == 0;
         }
         public bool CanSetDebug()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SetDebug).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SetDebug).Count == 0;
         }
         public bool CanSetEnv()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SetEnv).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SetEnv).Count == 0;
         }
         public bool CanAllowIdle()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.AllowIdle).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.AllowIdle).Count == 0;
         }
         public bool CanInteract()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Interact).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.Interact).Count == 0;
         }
         public bool CanShowWorldMap()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ShowWorldMap).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ShowWorldMap).Count == 0;
         }
         public bool CanShowMiniMap()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ShowMiniMap).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ShowMiniMap).Count == 0;
         }
         public bool CanShowLoc()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ShowLoc).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ShowLoc).Count == 0;
         }
         public bool CanShowNearby()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ShowNearby).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ShowNearby).Count == 0;
         }
 
         public bool IsAutoDenyPermissions()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.DenyPermission).Count != 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.DenyPermission).Count != 0;
         }
 
         #region Camera
@@ -336,33 +336,33 @@ namespace LibRLV
 
         public bool CanChatShout()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ChatShout).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ChatShout).Count == 0;
         }
         public bool CanChatWhisper()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ChatWhisper).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ChatWhisper).Count == 0;
         }
         public bool CanChatNormal()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.ChatNormal).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ChatNormal).Count == 0;
         }
         public bool CanSendChat()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SendChat).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SendChat).Count == 0;
         }
         public bool CanEmote()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Emote).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.Emote).Count == 0;
         }
         public bool CanSendGesture()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SendGesture).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SendGesture).Count == 0;
         }
 
         public bool IsRedirChat(out IReadOnlyList<int> channels)
         {
             channels = _restrictionProvider
-                .GetRestrictions(RLVRestrictionType.RedirChat)
+                .GetRestrictionsByType(RLVRestrictionType.RedirChat)
                 .Where(n => n.Args.Count == 1 && n.Args[0] is int)
                 .Select(n => (int)n.Args[0])
                 .Distinct()
@@ -374,7 +374,7 @@ namespace LibRLV
         public bool IsRedirEmote(out IReadOnlyList<int> channels)
         {
             channels = _restrictionProvider
-                .GetRestrictions(RLVRestrictionType.RedirEmote)
+                .GetRestrictionsByType(RLVRestrictionType.RedirEmote)
                 .Where(n => n.Args.Count == 1 && n.Args[0] is int)
                 .Select(n => (int)n.Args[0])
                 .Distinct()
@@ -385,7 +385,7 @@ namespace LibRLV
 
         private bool CanChatOnChannelPrivateChannel(int channel)
         {
-            var sendChannelExceptRestrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.SendChannelExcept);
+            var sendChannelExceptRestrictions = _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SendChannelExcept);
 
             // @sendchannel_except
             foreach (var restriction in sendChannelExceptRestrictions)
@@ -406,8 +406,8 @@ namespace LibRLV
                 }
             }
 
-            var sendChannelRestrictionsSecure = _restrictionProvider.GetRestrictions(RLVRestrictionType.SendChannelSec);
-            var sendChannelRestrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.SendChannel);
+            var sendChannelRestrictionsSecure = _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SendChannelSec);
+            var sendChannelRestrictions = _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SendChannel);
             var channelExceptions = sendChannelRestrictions
                 .Where(n =>
                     n.IsException &&
@@ -456,7 +456,7 @@ namespace LibRLV
                 // @sendchat=<y/n>
                 //      @emote=<rem/add>
 
-                var canEmote = _restrictionProvider.GetRestrictions(RLVRestrictionType.Emote).Count == 0;
+                var canEmote = _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.Emote).Count == 0;
                 if (message.StartsWith("/me ", StringComparison.OrdinalIgnoreCase) && !canEmote)
                 {
                     return false;
@@ -517,13 +517,13 @@ namespace LibRLV
                 return false;
             }
 
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.AcceptPermission).Count != 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.AcceptPermission).Count != 0;
         }
 
 
         public bool IsPermissive()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Permissive).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.Permissive).Count == 0;
         }
 
         public bool CanRez()
@@ -533,7 +533,7 @@ namespace LibRLV
                 return false;
             }
 
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.Rez).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.Rez).Count == 0;
         }
 
         public enum ObjectLocation
@@ -562,7 +562,7 @@ namespace LibRLV
             {
                 // @editworld=<y/n>
                 var hasEditWorldRestriction = _restrictionProvider
-                    .GetRestrictions(RLVRestrictionType.EditWorld)
+                    .GetRestrictionsByType(RLVRestrictionType.EditWorld)
                     .Count != 0;
                 if (hasEditWorldRestriction)
                 {
@@ -574,7 +574,7 @@ namespace LibRLV
             {
                 // @editattach=<y/n>
                 var hasEditAttachRestriction = _restrictionProvider
-                    .GetRestrictions(RLVRestrictionType.EditAttach)
+                    .GetRestrictionsByType(RLVRestrictionType.EditAttach)
                     .Count != 0;
                 if (hasEditAttachRestriction)
                 {
@@ -599,7 +599,7 @@ namespace LibRLV
             }
 
             return !_restrictionProvider
-                .GetRestrictions(RLVRestrictionType.TouchHud)
+                .GetRestrictionsByType(RLVRestrictionType.TouchHud)
                 .Where(n => n.Args.Count == 0 || (n.Args[0] is Guid restrictedObjectId && restrictedObjectId == objectId))
                 .Any();
         }
@@ -607,7 +607,7 @@ namespace LibRLV
         private bool CanTouchAttachment(bool isAttachedToSelf, Guid? otherUserId)
         {
             // @touchattach
-            if (_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAttach).Count != 0)
+            if (_restrictionProvider.GetRestrictionsByType(RLVRestrictionType.TouchAttach).Count != 0)
             {
                 return false;
             }
@@ -615,7 +615,7 @@ namespace LibRLV
             if (isAttachedToSelf)
             {
                 // @touchattachself
-                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAttachSelf).Count != 0)
+                if (_restrictionProvider.GetRestrictionsByType(RLVRestrictionType.TouchAttachSelf).Count != 0)
                 {
                     return false;
                 }
@@ -623,7 +623,7 @@ namespace LibRLV
             else
             {
                 // @touchattachother
-                var isForbiddenFromTouchingOthers = _restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAttachOther)
+                var isForbiddenFromTouchingOthers = _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.TouchAttachOther)
                     .Where(n => n.Args.Count == 0 || (n.Args[0] is Guid restrictedUserId && restrictedUserId == otherUserId))
                     .Any();
                 if (isForbiddenFromTouchingOthers)
@@ -663,7 +663,7 @@ namespace LibRLV
 
             // @TouchMe
             if (_restrictionProvider
-                .GetRestrictions(RLVRestrictionType.TouchMe)
+                .GetRestrictionsByType(RLVRestrictionType.TouchMe)
                 .Where(n => n.Sender == objectId)
                 .Any())
             {
@@ -672,7 +672,7 @@ namespace LibRLV
 
             // @TouchThis
             if (_restrictionProvider
-                .GetRestrictions(RLVRestrictionType.TouchThis)
+                .GetRestrictionsByType(RLVRestrictionType.TouchThis)
                 .Where(n => n.Args.Count == 1 && n.Args[0] is Guid restrictedItemId && restrictedItemId == objectId)
                 .Any())
             {
@@ -682,7 +682,7 @@ namespace LibRLV
             if (location != TouchLocation.Hud)
             {
                 // @TouchAll
-                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.TouchAll).Count != 0)
+                if (_restrictionProvider.GetRestrictionsByType(RLVRestrictionType.TouchAll).Count != 0)
                 {
                     return false;
                 }
@@ -691,7 +691,7 @@ namespace LibRLV
             if (location == TouchLocation.RezzedInWorld)
             {
                 // @touchworld
-                var touchWorldRestrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.TouchWorld);
+                var touchWorldRestrictions = _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.TouchWorld);
                 var hasException = touchWorldRestrictions
                     .Where(n => n.IsException && n.Args.Count == 1 && n.Args[0] is Guid allowedObjectId && allowedObjectId == objectId)
                     .Any();
@@ -733,14 +733,14 @@ namespace LibRLV
         public bool CanShowHoverText(HoverTextLocation location, Guid? objectId)
         {
             // @showhovertextall
-            if (_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowHoverTextAll).Count != 0)
+            if (_restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ShowHoverTextAll).Count != 0)
             {
                 return false;
             }
 
             // @showhovertext:<Guid>
             if (_restrictionProvider
-                .GetRestrictions(RLVRestrictionType.ShowHoverText)
+                .GetRestrictionsByType(RLVRestrictionType.ShowHoverText)
                 .Where(n => n.Args.Count == 1 && n.Args[0] is Guid restrictedObjectId && restrictedObjectId == objectId)
                 .Any())
             {
@@ -750,7 +750,7 @@ namespace LibRLV
             if (location == HoverTextLocation.Hud)
             {
                 // @showhovertexthud
-                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowHoverTextHud).Count != 0)
+                if (_restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ShowHoverTextHud).Count != 0)
                 {
                     return false;
                 }
@@ -758,7 +758,7 @@ namespace LibRLV
             else if (location == HoverTextLocation.World)
             {
                 // @showhovertexthud
-                if (_restrictionProvider.GetRestrictions(RLVRestrictionType.ShowHoverTextWorld).Count != 0)
+                if (_restrictionProvider.GetRestrictionsByType(RLVRestrictionType.ShowHoverTextWorld).Count != 0)
                 {
                     return false;
                 }
@@ -770,51 +770,51 @@ namespace LibRLV
         #region Attach / Detach
         private bool CanUnsharedWear()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.UnsharedWear).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.UnsharedWear).Count == 0;
         }
         private bool CanUnsharedUnwear()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.UnsharedUnwear).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.UnsharedUnwear).Count == 0;
         }
         private bool CanSharedWear()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SharedWear).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SharedWear).Count == 0;
         }
         private bool CanSharedUnwear()
         {
-            return _restrictionProvider.GetRestrictions(RLVRestrictionType.SharedUnwear).Count == 0;
+            return _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SharedUnwear).Count == 0;
         }
 
         private bool CanAttachWearable(WearableType? typeToRemove)
         {
             return !_restrictionProvider
-                .GetRestrictions(RLVRestrictionType.AddOutfit)
+                .GetRestrictionsByType(RLVRestrictionType.AddOutfit)
                 .Where(n => n.Args.Count == 0 || (n.Args[0] is WearableType restrictedType && typeToRemove == restrictedType))
                 .Any();
         }
         private bool CanDetachWearable(WearableType? typeToRemove)
         {
             return !_restrictionProvider
-                .GetRestrictions(RLVRestrictionType.RemOutfit)
+                .GetRestrictionsByType(RLVRestrictionType.RemOutfit)
                 .Where(n => n.Args.Count == 0 || (n.Args[0] is WearableType restrictedType && typeToRemove == restrictedType))
                 .Any();
         }
         private bool CanDetachAttached(AttachmentPoint? attachmentPoint)
         {
             return !_restrictionProvider
-                .GetRestrictions(RLVRestrictionType.RemAttach)
+                .GetRestrictionsByType(RLVRestrictionType.RemAttach)
                 .Where(n => n.Args.Count == 0 || (n.Args[0] is AttachmentPoint restrictedAttachmentPoint && attachmentPoint == restrictedAttachmentPoint))
                 .Any();
         }
         private bool CanAttachAttached(AttachmentPoint? attachmentPoint)
         {
             return !_restrictionProvider
-                .GetRestrictions(RLVRestrictionType.AddAttach)
+                .GetRestrictionsByType(RLVRestrictionType.AddAttach)
                 .Where(n => n.Args.Count == 0 || (n.Args[0] is AttachmentPoint restrictedAttachmentPoint && attachmentPoint == restrictedAttachmentPoint))
                 .Any();
         }
 
-        public bool CanAttach(InventoryTree.InventoryItem item, bool isShared)
+        public bool CanAttach(InventoryItem item, bool isShared)
         {
             return CanAttach(
                 item.FolderId,
@@ -866,7 +866,7 @@ namespace LibRLV
             return true;
         }
 
-        public bool CanDetach(InventoryTree.InventoryItem item, bool isShared)
+        public bool CanDetach(InventoryItem item, bool isShared)
         {
             return CanDetach(
                 item.FolderId,
@@ -891,7 +891,7 @@ namespace LibRLV
 
             // @detach=<y/n>
             // @detach:<attach_point_name>=<y/n>
-            var detachRestrictions = _restrictionProvider.GetRestrictions(RLVRestrictionType.Detach);
+            var detachRestrictions = _restrictionProvider.GetRestrictionsByType(RLVRestrictionType.Detach);
             foreach (var restriction in detachRestrictions)
             {
                 if (restriction.Args.Count == 0)

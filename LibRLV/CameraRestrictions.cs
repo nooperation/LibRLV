@@ -28,8 +28,13 @@ namespace LibRLV
 
         public Guid? Texture { get; }
 
-        public CameraRestrictions(IRestrictionProvider restrictionProvider)
+        internal CameraRestrictions(IRestrictionProvider restrictionProvider)
         {
+            if (restrictionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(restrictionProvider));
+            }
+
             RLVPermissionsService.GetRestrictionValueMax(restrictionProvider, RLVRestrictionType.CamZoomMin, out float? camZoomMin);
             RLVPermissionsService.GetRestrictionValueMax(restrictionProvider, RLVRestrictionType.SetCamFovMin, out float? setCamFovMin);
             RLVPermissionsService.GetRestrictionValueMax(restrictionProvider, RLVRestrictionType.SetCamAvDistMin, out float? setCamAvDistMin);
@@ -45,7 +50,7 @@ namespace LibRLV
             GetCamDrawColor(restrictionProvider, out var camDrawColor);
             GetCamTexture(restrictionProvider, out var camtextures);
 
-            IsLocked = restrictionProvider.GetRestrictions(RLVRestrictionType.SetCamUnlock).Count != 0;
+            IsLocked = restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SetCamUnlock).Count != 0;
             ZoomMin = camZoomMin;
             FovMin = setCamFovMin;
             AvDistMin = setCamAvDistMin;
@@ -66,8 +71,8 @@ namespace LibRLV
             camDrawColor = default;
 
             var restrictions = restrictionProvider
-                .GetRestrictions(RLVRestrictionType.CamDrawColor)
-                .Where(n => n.Args.Count == 3)
+                .GetRestrictionsByType(RLVRestrictionType.CamDrawColor)
+                .Where(n => n.Args.Count == 3 && n.Args.All(arg => arg is float))
                 .ToList();
             if (restrictions.Count == 0)
             {
@@ -95,7 +100,7 @@ namespace LibRLV
         {
             textureUUID = default;
 
-            var restrictions = restrictionProvider.GetRestrictions(RLVRestrictionType.SetCamTextures);
+            var restrictions = restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SetCamTextures);
             if (restrictions.Count == 0)
             {
                 return false;

@@ -12,11 +12,11 @@ namespace LibRLV
             return Task.CompletedTask;
         }
 
-        public virtual Task<string> GetEnvironmentAsync(string settingName)
+        public virtual Task<(bool Success, string EnvInfo)> TryGetEnvironmentAsync(string settingName)
         {
             if (!Enum.TryParse(settingName, true, out RLVGetEnvType settingType))
             {
-                return null;
+                return Task.FromResult((false, string.Empty));
             }
 
             switch (settingType)
@@ -73,7 +73,7 @@ namespace LibRLV
                 case RLVGetEnvType.SunMoonColorG:
                 case RLVGetEnvType.SunMoonColorB:
                 case RLVGetEnvType.SunMoonColorI:
-                    return Task.FromResult("0");
+                    return Task.FromResult((true, "0"));
 
                 case RLVGetEnvType.Ambient:
                 case RLVGetEnvType.BlueDensity:
@@ -82,32 +82,32 @@ namespace LibRLV
                 case RLVGetEnvType.Cloud:
                 case RLVGetEnvType.CloudDetail:
                 case RLVGetEnvType.SunMoonColor:
-                    return Task.FromResult("0;0;0");
+                    return Task.FromResult((true, "0;0;0"));
 
                 case RLVGetEnvType.CloudScroll:
-                    return Task.FromResult("0;0");
+                    return Task.FromResult((true, "0;0"));
 
                 case RLVGetEnvType.Preset:
                 case RLVGetEnvType.Asset:
-                    return Task.FromResult("");
+                    return Task.FromResult((true, ""));
 
                 case RLVGetEnvType.MoonImage:
                 case RLVGetEnvType.SunImage:
                 case RLVGetEnvType.CloudImage:
-                    return Task.FromResult(Guid.Empty.ToString());
+                    return Task.FromResult((true, Guid.Empty.ToString()));
 
                 case RLVGetEnvType.SunGlowSize:
-                    return Task.FromResult("1");
+                    return Task.FromResult((true, "1"));
             }
 
-            return null;
+            return Task.FromResult((false, string.Empty));
         }
 
-        public virtual Task<string> GetDebugInfoAsync(string settingName)
+        public virtual Task<(bool Success, string DebugInfo)> TryGetDebugInfoAsync(string settingName)
         {
             if (!Enum.TryParse(settingName, true, out RLVGetDebugType settingType))
             {
-                return null;
+                return Task.FromResult((false, string.Empty));
             }
 
             switch (settingType)
@@ -115,20 +115,19 @@ namespace LibRLV
                 case RLVGetDebugType.AvatarSex:
                 case RLVGetDebugType.RestrainedLoveForbidGiveToRLV:
                 case RLVGetDebugType.WindLightUseAtmosShaders:
-                    return Task.FromResult("0");
+                    return Task.FromResult((true, "0"));
 
                 case RLVGetDebugType.RenderResolutionDivisor:
                 case RLVGetDebugType.RestrainedLoveNoSetEnv:
-                    return Task.FromResult("1");
+                    return Task.FromResult((true, "1"));
             }
 
             return null;
         }
 
-        public virtual Task<bool> TryGetRlvInventoryTree(out InventoryTree sharedFolder)
+        public virtual Task<(bool Success, InventoryTree SharedFolder)> TryGetRlvInventoryTreeAsync()
         {
-            sharedFolder = null;
-            return Task.FromResult(false);
+            return Task.FromResult((false, (InventoryTree)null));
         }
 
         public virtual Task SendInstantMessageAsync(Guid targetUser, string message, CancellationToken cancellationToken)
@@ -137,64 +136,59 @@ namespace LibRLV
         }
 
         // TODO: Replace this, just temp hack to get the data i need right now for testing
-        public Task<bool> TryGetObjectExists(Guid objectID, out bool isCurrentlySitting)
+        public Task<bool> ObjectExistsAsync(Guid objectID)
         {
-            isCurrentlySitting = false;
+            return Task.FromResult(false);
+        }
+        public Task<bool> IsSittingAsync()
+        {
             return Task.FromResult(false);
         }
 
-        public virtual Task<bool> TryGetSitId(out Guid sitId)
+        public virtual Task<(bool Success, Guid SitID)> TryGetSitIdAsync()
         {
-            sitId = default;
-            return Task.FromResult(false);
+            return Task.FromResult((false, default(Guid)));
         }
 
-        public virtual Task<bool> TryGetCamAvDistMin(out float camAvDistMin)
+        public virtual Task<(bool Success, float CamAvDistMin)> TryGetCamAvDistMinAsync()
         {
-            camAvDistMin = default;
-            return Task.FromResult(false);
+            return Task.FromResult((false, default(float)));
         }
 
-        public virtual Task<bool> TryGetCamAvDistMax(out float camAvdistmax)
+        public virtual Task<(bool Success, float CamAvDistMax)> TryGetCamAvDistMaxAsync()
         {
-            camAvdistmax = default;
-            return Task.FromResult(false);
+            return Task.FromResult((false, default(float)));
         }
 
-        public virtual Task<bool> TryGetCamFovMin(out float camFovMin)
+        public virtual Task<(bool Success, float CamFovMin)> TryGetCamFovMinAsync()
         {
-            camFovMin = default;
-            return Task.FromResult(false);
+            return Task.FromResult((false, default(float)));
         }
 
-        public virtual Task<bool> TryGetCamFovMax(out float camFovMax)
+        public virtual Task<(bool Success, float CamFovMax)> TryGetCamFovMaxAsync()
         {
-            camFovMax = default;
-            return Task.FromResult(false);
+            return Task.FromResult((false, default(float)));
         }
 
-        public virtual Task<bool> TryGetCamZoomMin(out float camZoomMin)
+        public virtual Task<(bool Success, float CamZoomMin)> TryGetCamZoomMinAsync()
         {
-            camZoomMin = default;
-            return Task.FromResult(false);
+            return Task.FromResult((false, default(float)));
         }
 
-        public virtual Task<bool> TryGetCamFov(out float camFov)
+        public virtual Task<(bool Success, float CamFov)> TryGetCamFovAsync()
         {
-            camFov = default;
-            return Task.FromResult(false);
+            return Task.FromResult((false, default(float)));
         }
 
-        public virtual Task<bool> TryGetGroup(out string activeGroupName)
+        public virtual Task<(bool Success, string ActiveGroupName)> TryGetActiveGroupNameAsync()
         {
-            activeGroupName = "none";
-            return Task.FromResult(false);
+            return Task.FromResult((false, "None"));
         }
 
-        public Task<bool> TryGetCurrentOutfit(out List<InventoryTree.InventoryItem> currentOutfit)
+        public Task<(bool Success, IReadOnlyList<InventoryItem> CurrentOutfit)> TryGetCurrentOutfitAsync()
         {
-            currentOutfit = new List<InventoryTree.InventoryItem>();
-            return Task.FromResult(false);
+            IReadOnlyList<InventoryItem> currentOutfit = new List<InventoryItem>();
+            return Task.FromResult((false, currentOutfit));
         }
     }
 }

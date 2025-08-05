@@ -2,7 +2,7 @@
 
 namespace LibRLV
 {
-    internal class LockedFolder
+    internal sealed class LockedFolder
     {
         internal LockedFolder(InventoryTree folder)
         {

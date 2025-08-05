@@ -271,7 +271,7 @@ namespace LibRLV
             await Task.WhenAll(notificationTasks);
         }
 
-        public IReadOnlyList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType)
+        public IReadOnlyList<RLVRestriction> GetRestrictionsByType(RLVRestrictionType restrictionType)
         {
             restrictionType = RLVRestriction.GetRealRestriction(restrictionType);
 
@@ -286,7 +286,7 @@ namespace LibRLV
             }
         }
 
-        public IReadOnlyList<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null)
+        public IReadOnlyList<RLVRestriction> FindRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null)
         {
             var restrictions = new List<RLVRestriction>();
 

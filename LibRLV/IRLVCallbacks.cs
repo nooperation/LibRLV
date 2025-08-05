@@ -9,18 +9,20 @@ namespace LibRLV
     {
         Task SendReplyAsync(int channel, string message, CancellationToken cancellationToken);
         Task SendInstantMessageAsync(Guid targetUser, string message, CancellationToken cancellationToken);
-        Task<string> GetEnvironmentAsync(string settingName);
-        Task<string> GetDebugInfoAsync(string settingName);
-        Task<bool> TryGetSitId(out Guid sitId);
-        Task<bool> TryGetObjectExists(Guid objectID, out bool isCurrentlySitting);
-        Task<bool> TryGetRlvInventoryTree(out InventoryTree sharedFolder);
-        Task<bool> TryGetCamAvDistMin(out float camAvDistMin);
-        Task<bool> TryGetCamAvDistMax(out float camAvdistmax);
-        Task<bool> TryGetCamFovMin(out float camFovMin);
-        Task<bool> TryGetCamFovMax(out float camFovMax);
-        Task<bool> TryGetCamZoomMin(out float camZoomMin);
-        Task<bool> TryGetCamFov(out float camFov);
-        Task<bool> TryGetGroup(out string activeGroupName);
-        Task<bool> TryGetCurrentOutfit(out List<InventoryTree.InventoryItem> currentOutfit);
+        Task<bool> ObjectExistsAsync(Guid objectID);
+        Task<bool> IsSittingAsync();
+
+        Task<(bool Success, string EnvInfo)> TryGetEnvironmentAsync(string settingName);
+        Task<(bool Success, string DebugInfo)> TryGetDebugInfoAsync(string settingName);
+        Task<(bool Success, Guid SitID)> TryGetSitIdAsync();
+        Task<(bool Success, InventoryTree SharedFolder)> TryGetRlvInventoryTreeAsync();
+        Task<(bool Success, float CamAvDistMin)> TryGetCamAvDistMinAsync();
+        Task<(bool Success, float CamAvDistMax)> TryGetCamAvDistMaxAsync();
+        Task<(bool Success, float CamFovMin)> TryGetCamFovMinAsync();
+        Task<(bool Success, float CamFovMax)> TryGetCamFovMaxAsync();
+        Task<(bool Success, float CamZoomMin)> TryGetCamZoomMinAsync();
+        Task<(bool Success, float CamFov)> TryGetCamFovAsync();
+        Task<(bool Success, string ActiveGroupName)> TryGetActiveGroupNameAsync();
+        Task<(bool Success, IReadOnlyList<InventoryItem> CurrentOutfit)> TryGetCurrentOutfitAsync();
     }
 }

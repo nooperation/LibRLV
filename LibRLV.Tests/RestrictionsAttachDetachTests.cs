@@ -75,8 +75,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@addattach=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
@@ -94,8 +94,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@addattach:groin=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
@@ -115,8 +115,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@remattach=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
@@ -134,8 +134,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@remattach:groin=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
@@ -164,8 +164,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@addoutfit=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
@@ -183,8 +183,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@addoutfit:pants=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
@@ -204,8 +204,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@remoutfit=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
@@ -223,8 +223,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@remoutfit:pants=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
@@ -249,12 +249,12 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.WornOn = WearableType.Skin;
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
                  attach: n => _rlv.Commands.RemOutfit += n,
@@ -278,31 +278,29 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
-            var externalWearable = new InventoryTree.InventoryItem(
+            var externalWearable = new InventoryItem(
                 new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Tattoo",
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 null,
-                WearableType.Tattoo,
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
-            );
-            var externalAttachable = new InventoryTree.InventoryItem(
+                WearableType.Tattoo);
+            var externalAttachable = new InventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Jaw Thing",
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 AttachmentPoint.Jaw,
-                null,
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
-            );
+                null);
 
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
                  attach: n => _rlv.Commands.RemOutfit += n,
@@ -327,31 +325,29 @@ namespace LibRLV.Tests
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
             var sharedFolder = sampleTree.Root;
 
-            var externalWearable = new InventoryTree.InventoryItem(
+            var externalWearable = new InventoryItem(
                 new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Tattoo",
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 null,
-                WearableType.Tattoo,
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
-            );
-            var externalAttachable = new InventoryTree.InventoryItem(
+                WearableType.Tattoo);
+            var externalAttachable = new InventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Jaw Thing",
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 AttachmentPoint.Jaw,
-                null,
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
-            );
+                null);
 
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
                  attach: n => _rlv.Commands.RemOutfit += n,
@@ -379,12 +375,12 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.WornOn = WearableType.Tattoo;
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
                  attach: n => _rlv.Commands.RemOutfit += n,
@@ -408,12 +404,12 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
                  attach: n => _rlv.Commands.RemOutfit += n,
@@ -439,12 +435,12 @@ namespace LibRLV.Tests
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Skin;
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
                  attach: n => _rlv.Commands.RemOutfit += n,
@@ -465,11 +461,11 @@ namespace LibRLV.Tests
         public async Task GetOutfit_WearingNothing()
         {
             var actual = _callbacks.RecordReplies();
-            var currentOutfit = new List<InventoryTree.InventoryItem>();
+            var currentOutfit = new List<InventoryItem>();
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -485,29 +481,27 @@ namespace LibRLV.Tests
         {
             var actual = _callbacks.RecordReplies();
 
-            var currentOutfit = new List<InventoryTree.InventoryItem>();
+            var currentOutfit = new List<InventoryItem>();
 
-            var externalWearable = new InventoryTree.InventoryItem(
+            var externalWearable = new InventoryItem(
                 new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Tattoo",
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 null,
-                WearableType.Tattoo,
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
-            );
-            var externalAttachable = new InventoryTree.InventoryItem(
+                WearableType.Tattoo);
+            var externalAttachable = new InventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Jaw Thing",
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 AttachmentPoint.Jaw,
-                null,
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
-            );
+                null);
 
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -522,15 +516,15 @@ namespace LibRLV.Tests
         public async Task GetOutfit_WearingSomeItems()
         {
             var actual = _callbacks.RecordReplies();
-            var currentOutfit = new List<InventoryTree.InventoryItem>()
+            var currentOutfit = new List<InventoryItem>()
             {
-                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", null, WearableType.Socks, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc")),
-                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", null, WearableType.Hair, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"))
+                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, WearableType.Socks),
+                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, WearableType.Hair)
             };
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -545,7 +539,7 @@ namespace LibRLV.Tests
         public async Task GetOutfit_WearingEverything()
         {
             var actual = _callbacks.RecordReplies();
-            var currentOutfit = new List<InventoryTree.InventoryItem>();
+            var currentOutfit = new List<InventoryItem>();
             foreach (var item in Enum.GetValues<WearableType>())
             {
                 if (item == WearableType.Invalid)
@@ -553,18 +547,17 @@ namespace LibRLV.Tests
                     continue;
                 }
 
-                currentOutfit.Add(new InventoryTree.InventoryItem(
+                currentOutfit.Add(new InventoryItem(
                     new Guid($"c{(int)item:D7}-cccc-4ccc-8ccc-cccccccccccc"),
                     $"My {item}",
+                    new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     null,
-                    item,
-                    new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc")
-                ));
+                    item));
             }
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -579,14 +572,14 @@ namespace LibRLV.Tests
         public async Task GetOutfit_Specific_Exists()
         {
             var actual = _callbacks.RecordReplies();
-            var currentOutfit = new List<InventoryTree.InventoryItem>()
+            var currentOutfit = new List<InventoryItem>()
             {
-                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", null, WearableType.Socks, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc")),
+                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, WearableType.Socks)
             };
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -601,14 +594,14 @@ namespace LibRLV.Tests
         public async Task GetOutfit_Specific_NotExists()
         {
             var actual = _callbacks.RecordReplies();
-            var currentOutfit = new List<InventoryTree.InventoryItem>()
+            var currentOutfit = new List<InventoryItem>()
             {
-                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", null, WearableType.Hair, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"))
+                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, WearableType.Hair)
             };
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -627,11 +620,11 @@ namespace LibRLV.Tests
         public async Task GetAttach_WearingNothing()
         {
             var actual = _callbacks.RecordReplies();
-            var currentAttach = new List<InventoryTree.InventoryItem>();
+            var currentOutfit = new List<InventoryItem>();
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentAttach)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -647,28 +640,26 @@ namespace LibRLV.Tests
         {
             var actual = _callbacks.RecordReplies();
 
-            var currentOutfit = new List<InventoryTree.InventoryItem>();
-            var externalWearable = new InventoryTree.InventoryItem(
+            var currentOutfit = new List<InventoryItem>();
+            var externalWearable = new InventoryItem(
                 new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Tattoo",
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 null,
-                WearableType.Tattoo,
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
-            );
-            var externalAttachable = new InventoryTree.InventoryItem(
+                WearableType.Tattoo);
+            var externalAttachable = new InventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Jaw Thing",
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 AttachmentPoint.Jaw,
-                null,
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
-            );
+                null);
 
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -683,15 +674,15 @@ namespace LibRLV.Tests
         public async Task GetAttach_WearingSomeItems()
         {
             var actual = _callbacks.RecordReplies();
-            var currentAttach = new List<InventoryTree.InventoryItem>()
+            var currentOutfit = new List<InventoryItem>()
             {
-                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", AttachmentPoint.LeftFoot, null, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc")),
-                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", AttachmentPoint.Skull, null, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"))
+                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), AttachmentPoint.LeftFoot, null ),
+                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), AttachmentPoint.Skull, null)
             };
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentAttach)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -706,21 +697,20 @@ namespace LibRLV.Tests
         public async Task GetAttach_WearingEverything()
         {
             var actual = _callbacks.RecordReplies();
-            var currentAttach = new List<InventoryTree.InventoryItem>();
+            var currentOutfit = new List<InventoryItem>();
             foreach (var item in Enum.GetValues<AttachmentPoint>())
             {
-                currentAttach.Add(new InventoryTree.InventoryItem(
+                currentOutfit.Add(new InventoryItem(
                     new Guid($"c{(int)item:D7}-cccc-4ccc-8ccc-cccccccccccc"),
                     $"My {item}",
+                    new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     item,
-                    null,
-                    new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc")
-                ));
+                    null));
             }
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentAttach)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -735,14 +725,14 @@ namespace LibRLV.Tests
         public async Task GetAttach_Specific_Exists()
         {
             var actual = _callbacks.RecordReplies();
-            var currentAttach = new List<InventoryTree.InventoryItem>()
+            var currentOutfit = new List<InventoryItem>()
             {
-                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", AttachmentPoint.LeftFoot, null, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc")),
+                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), AttachmentPoint.LeftFoot, null ),
             };
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentAttach)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -757,14 +747,14 @@ namespace LibRLV.Tests
         public async Task GetAttach_Specific_NotExists()
         {
             var actual = _callbacks.RecordReplies();
-            var currentAttach = new List<InventoryTree.InventoryItem>()
+            var currentOutfit = new List<InventoryItem>()
             {
-                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", AttachmentPoint.Skull, null, new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"))
+                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), AttachmentPoint.Skull, null)
             };
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentAttach)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -808,8 +798,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -834,8 +824,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "nostrip Party Hat";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -865,8 +855,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -885,8 +875,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -905,8 +895,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -925,8 +915,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -971,8 +961,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1023,8 +1013,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Tattoo;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1075,8 +1065,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1119,8 +1109,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1163,8 +1153,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1204,8 +1194,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1223,8 +1213,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1247,8 +1237,8 @@ namespace LibRLV.Tests
             hatsFolder.Name = ".Hats";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1271,8 +1261,8 @@ namespace LibRLV.Tests
             hatsFolder.Name = "~Hats";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1312,8 +1302,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1351,8 +1341,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1374,8 +1364,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1394,8 +1384,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1422,8 +1412,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1450,8 +1440,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1475,8 +1465,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Pants;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -1511,8 +1501,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (Spine)";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -1545,8 +1535,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_HappyShirt_AttachChest.Name = "Happy Shirt (chest)";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -1579,8 +1569,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = WearableType.Pants;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -1621,8 +1611,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name = "Fancy Hat (skull)";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -1666,8 +1656,8 @@ namespace LibRLV.Tests
             hatsFolder.Name = "+Hats";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -1710,8 +1700,8 @@ namespace LibRLV.Tests
             clothingFolder.Name = ".clothing";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -1752,8 +1742,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (Spine)";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -1800,8 +1790,8 @@ namespace LibRLV.Tests
             hatsFolder.Name = ".hats";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -1847,8 +1837,8 @@ namespace LibRLV.Tests
             hatsFolder.Name = "+hats";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -1894,8 +1884,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (Spine)";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -1938,8 +1928,8 @@ namespace LibRLV.Tests
             clothingFolder.Name = "+clothing";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -1984,8 +1974,8 @@ namespace LibRLV.Tests
             hatsFolder.Name = "(skull) hats";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -2029,8 +2019,8 @@ namespace LibRLV.Tests
             hatsFolder.Name = ".hats";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -2093,8 +2083,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = AttachmentPoint.Spine;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -2154,8 +2144,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = WearableType.Tattoo;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -2198,8 +2188,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (Spine)";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -2246,8 +2236,8 @@ namespace LibRLV.Tests
             hatsFolder.Name = ".hats";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -2293,8 +2283,8 @@ namespace LibRLV.Tests
             hatsFolder.Name = "+hats";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -2361,8 +2351,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (neck)";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -2430,8 +2420,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (neck)";
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
                  attach: n => _rlv.Commands.Attach += n,
@@ -2467,12 +2457,12 @@ namespace LibRLV.Tests
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -2502,31 +2492,29 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
-            var externalWearable = new InventoryTree.InventoryItem(
+            var externalWearable = new InventoryItem(
                 new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Tattoo",
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 null,
-                WearableType.Tattoo,
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
-            );
-            var externalAttachable = new InventoryTree.InventoryItem(
+                WearableType.Tattoo);
+            var externalAttachable = new InventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Jaw Thing",
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 AttachmentPoint.Jaw,
-                null,
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
-            );
+                null);
 
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -2558,12 +2546,12 @@ namespace LibRLV.Tests
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -2589,23 +2577,22 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
-            var externalAttachable = new InventoryTree.InventoryItem(
+            var externalAttachable = new InventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Groin Thing",
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 AttachmentPoint.Groin,
-                null,
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
-             );
+                null);
 
             currentOutfit.Add(externalAttachable);
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -2633,12 +2620,12 @@ namespace LibRLV.Tests
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -2663,12 +2650,12 @@ namespace LibRLV.Tests
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -2693,31 +2680,29 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
-            var externalWearable = new InventoryTree.InventoryItem(
+            var externalWearable = new InventoryItem(
                 new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Tattoo",
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 null,
-                WearableType.Tattoo,
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
-            );
-            var externalAttachable = new InventoryTree.InventoryItem(
+                WearableType.Tattoo);
+            var externalAttachable = new InventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Jaw Thing",
+                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 AttachmentPoint.Jaw,
-                null,
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
-            );
+                null);
 
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
 
             _callbacks.Setup(e =>
-                e.TryGetCurrentOutfit(out currentOutfit)
-            ).ReturnsAsync(true);
+                e.TryGetCurrentOutfitAsync()
+            ).ReturnsAsync((true, currentOutfit));
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -2742,8 +2727,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -2773,8 +2758,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -2821,8 +2806,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = AttachmentPoint.Chest;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -2871,8 +2856,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Pants;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -2924,8 +2909,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Pants;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -2952,8 +2937,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -3002,8 +2987,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = AttachmentPoint.Chest;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -3055,8 +3040,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Pants;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -3111,8 +3096,8 @@ namespace LibRLV.Tests
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = WearableType.Pants;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             var raised = await Assert.RaisesAsync<DetachEventArgs>(
                  attach: n => _rlv.Commands.Detach += n,
@@ -3144,8 +3129,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@detachthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
@@ -3179,8 +3164,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             // This should lock the #RLV/Clothing folder because the Business Pants are issuing the command, which is in the Clothing folder.
             //   Business Pants cannot be detached, but hats are still detachable.
@@ -3216,8 +3201,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             // This should lock the Hats folder, all hats are no longer detachable
             Assert.True(await _rlv.ProcessMessage("@detachthis:Clothing/Hats=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
@@ -3252,8 +3237,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             // This should lock the Hats folder, all hats are no longer detachable
             Assert.True(await _rlv.ProcessMessage("@detachthis:groin=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
@@ -3288,8 +3273,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             // This should lock the Hats folder, all hats are no longer detachable
             Assert.True(await _rlv.ProcessMessage("@detachthis:tattoo=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
@@ -3327,8 +3312,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
@@ -3361,8 +3346,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
@@ -3395,8 +3380,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@detachallthis:Clothing=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
@@ -3429,8 +3414,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@detachallthis:pants=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
@@ -3463,8 +3448,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@detachallthis:chest=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
@@ -3501,8 +3486,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
             Assert.True(await _rlv.ProcessMessage($"@detachthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
@@ -3540,8 +3525,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
             Assert.True(await _rlv.ProcessMessage($"@detachallthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
@@ -3575,8 +3560,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@detachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
             Assert.True(await _rlv.ProcessMessage($"@detachallthis_except:Clothing=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
@@ -3613,8 +3598,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@attachthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
@@ -3648,8 +3633,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             // This should lock the #RLV/Clothing folder because the Business Pants are issuing the command, which is in the Clothing folder.
             //   Business Pants cannot be attached, but hats are still attachable.
@@ -3685,8 +3670,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             // This should lock the Hats folder, all hats are no longer attachable
             Assert.True(await _rlv.ProcessMessage("@attachthis:Clothing/Hats=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
@@ -3721,8 +3706,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             // This should lock the Hats folder, all hats are no longer attachable
             Assert.True(await _rlv.ProcessMessage("@attachthis:groin=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
@@ -3757,8 +3742,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             // This should lock the Hats folder, all hats are no longer attachable
             Assert.True(await _rlv.ProcessMessage("@attachthis:tattoo=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
@@ -3795,8 +3780,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
 
@@ -3829,8 +3814,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
@@ -3863,8 +3848,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@attachallthis:Clothing=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
@@ -3897,8 +3882,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@attachallthis:pants=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
@@ -3931,8 +3916,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@attachallthis:chest=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
 
@@ -3969,8 +3954,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
             Assert.True(await _rlv.ProcessMessage($"@attachthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
@@ -4008,8 +3993,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
             Assert.True(await _rlv.ProcessMessage($"@attachallthis_except:Clothing/Hats=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
@@ -4043,8 +4028,8 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
 
             _callbacks.Setup(e =>
-                e.TryGetRlvInventoryTree(out sharedFolder)
-            ).ReturnsAsync(true);
+                e.TryGetRlvInventoryTreeAsync()
+            ).ReturnsAsync((true, sharedFolder));
 
             Assert.True(await _rlv.ProcessMessage("@attachallthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
             Assert.True(await _rlv.ProcessMessage($"@attachallthis_except:Clothing=add", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));

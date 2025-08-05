@@ -92,25 +92,33 @@ namespace LibRLV.Tests
         #endregion
 
         #region @sit:<uuid>=force
-        private void SetObjectExists(Guid objectId, bool isCurrentlySitting)
+        private void SetObjectExists(Guid objectId)
         {
             _callbacks.Setup(e =>
-                e.TryGetObjectExists(objectId, out isCurrentlySitting)
+                e.ObjectExistsAsync(objectId)
             ).ReturnsAsync(true);
+        }
+
+        private void SetIsSitting(bool isCurrentlySitting)
+        {
+            _callbacks.Setup(e =>
+                e.IsSittingAsync()
+            ).ReturnsAsync(isCurrentlySitting);
         }
 
         private void SetCurrentSitId(Guid objectId)
         {
             _callbacks.Setup(e =>
-                e.TryGetSitId(out objectId)
-            ).ReturnsAsync(objectId != Guid.Empty);
+                e.TryGetSitIdAsync()
+            ).ReturnsAsync((objectId != Guid.Empty, objectId));
         }
 
         [Fact]
         public async Task ForceSit_Default()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
-            SetObjectExists(objectId1, false);
+            SetObjectExists(objectId1);
+            SetIsSitting(false);
 
             var raised = await Assert.RaisesAsync<SitEventArgs>(
                 attach: n => _rlv.Commands.Sit += n,
@@ -125,7 +133,8 @@ namespace LibRLV.Tests
         public async Task ForceSit_RestrictedUnsit_WhileStanding()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
-            SetObjectExists(objectId1, false);
+            SetObjectExists(objectId1);
+            SetIsSitting(false);
 
             await _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
@@ -142,7 +151,8 @@ namespace LibRLV.Tests
         public async Task ForceSit_RestrictedUnsit_WhileSeated()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
-            SetObjectExists(objectId1, true);
+            SetObjectExists(objectId1);
+            SetIsSitting(true);
 
             await _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
@@ -161,7 +171,8 @@ namespace LibRLV.Tests
         public async Task ForceSit_RestrictedSit()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
-            SetObjectExists(objectId1, true);
+            SetObjectExists(objectId1);
+            SetIsSitting(true);
 
             await _rlv.ProcessMessage("@sit=n", _sender.Id, _sender.Name);
 
@@ -179,7 +190,8 @@ namespace LibRLV.Tests
         public async Task ForceSit_RestrictedStandTp()
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
-            SetObjectExists(objectId1, true);
+            SetObjectExists(objectId1);
+            SetIsSitting(true);
 
             await _rlv.ProcessMessage("@standtp=n", _sender.Id, _sender.Name);
 

@@ -4,16 +4,16 @@ namespace LibRLV.Tests
     public class SampleInventoryTree
     {
         public InventoryTree Root { get; set; } = null!;
-        public InventoryTree.InventoryItem Root_Clothing_Hats_FancyHat_AttachChin { get; set; } = null!;
-        public InventoryTree.InventoryItem Root_Clothing_Hats_PartyHat_AttachGroin { get; set; } = null!;
-        public InventoryTree.InventoryItem Root_Clothing_BusinessPants_AttachGroin { get; set; } = null!;
-        public InventoryTree.InventoryItem Root_Clothing_RetroPants_WornPants { get; set; } = null!;
-        public InventoryTree.InventoryItem Root_Clothing_HappyShirt_AttachChest { get; set; } = null!;
-        public InventoryTree.InventoryItem Root_Accessories_Glasses_AttachChin { get; set; } = null!;
-        public InventoryTree.InventoryItem Root_Accessories_Watch_WornTattoo { get; set; } = null!;
+        public InventoryItem Root_Clothing_Hats_FancyHat_AttachChin { get; set; } = null!;
+        public InventoryItem Root_Clothing_Hats_PartyHat_AttachGroin { get; set; } = null!;
+        public InventoryItem Root_Clothing_BusinessPants_AttachGroin { get; set; } = null!;
+        public InventoryItem Root_Clothing_RetroPants_WornPants { get; set; } = null!;
+        public InventoryItem Root_Clothing_HappyShirt_AttachChest { get; set; } = null!;
+        public InventoryItem Root_Accessories_Glasses_AttachChin { get; set; } = null!;
+        public InventoryItem Root_Accessories_Watch_WornTattoo { get; set; } = null!;
 
 
-        public static List<InventoryTree.InventoryItem> BuildCurrentOutfit(InventoryTree sharedFolder)
+        public static List<InventoryItem> BuildCurrentOutfit(InventoryTree sharedFolder)
         {
             var inventoryMap = new InventoryMap(sharedFolder);
 
@@ -63,14 +63,6 @@ namespace LibRLV.Tests
 
             var partyHat_groin = hatsTree.AddItem(new Guid("d0000000-dddd-4ddd-8ddd-dddddddddddd"), "Party Hat", AttachmentPoint.Groin, null);
             var fancyHat_chin = hatsTree.AddItem(new Guid("d1111111-dddd-4ddd-8ddd-dddddddddddd"), "Fancy Hat", AttachmentPoint.Chin, null);
-
-            accessoriesTree.Items.Add(watch_tattoo);
-            accessoriesTree.Items.Add(glasses_chin);
-            clothingTree.Items.Add(businessPants_groin);
-            clothingTree.Items.Add(happyShirt_chest);
-            clothingTree.Items.Add(retroPants_pants);
-            hatsTree.Items.Add(partyHat_groin);
-            hatsTree.Items.Add(fancyHat_chin);
 
             return new SampleInventoryTree()
             {

@@ -531,8 +531,8 @@ namespace LibRLV.Tests
             var distance = 12.34f;
 
             _callbacks.Setup(e =>
-                e.TryGetCamAvDistMin(out distance)
-            ).ReturnsAsync(true);
+                e.TryGetCamAvDistMinAsync()
+            ).ReturnsAsync((true, distance));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -550,8 +550,8 @@ namespace LibRLV.Tests
 
             var distance = 0.0f;
             _callbacks.Setup(e =>
-                e.TryGetCamAvDistMin(out distance)
-            ).ReturnsAsync(false);
+                e.TryGetCamAvDistMinAsync()
+            ).ReturnsAsync((false, distance));
 
             Assert.False(await _rlv.ProcessMessage("@getcam_avdistmin=1234", _sender.Id, _sender.Name));
             Assert.Empty(actual);
@@ -567,8 +567,8 @@ namespace LibRLV.Tests
             var distance = 12.34f;
 
             _callbacks.Setup(e =>
-                e.TryGetCamAvDistMax(out distance)
-            ).ReturnsAsync(true);
+                e.TryGetCamAvDistMaxAsync()
+            ).ReturnsAsync((true, distance));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -586,8 +586,8 @@ namespace LibRLV.Tests
 
             var distance = 0.0f;
             _callbacks.Setup(e =>
-                e.TryGetCamAvDistMax(out distance)
-            ).ReturnsAsync(false);
+                e.TryGetCamAvDistMaxAsync()
+            ).ReturnsAsync((false, distance));
 
             Assert.False(await _rlv.ProcessMessage("@getcam_avdistmax=1234", _sender.Id, _sender.Name));
             Assert.Empty(actual);
@@ -603,8 +603,8 @@ namespace LibRLV.Tests
             var fov = 15.25f;
 
             _callbacks.Setup(e =>
-                e.TryGetCamFovMin(out fov)
-            ).ReturnsAsync(true);
+                e.TryGetCamFovMinAsync()
+            ).ReturnsAsync((true, fov));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -622,8 +622,8 @@ namespace LibRLV.Tests
 
             var fov = 0.0f;
             _callbacks.Setup(e =>
-                e.TryGetCamFovMin(out fov)
-            ).ReturnsAsync(false);
+                e.TryGetCamFovMinAsync()
+            ).ReturnsAsync((false, fov));
 
             Assert.False(await _rlv.ProcessMessage("@getcam_fovmin=1234", _sender.Id, _sender.Name));
             Assert.Empty(actual);
@@ -638,8 +638,8 @@ namespace LibRLV.Tests
 
             var fov = 45.75f;
             _callbacks.Setup(e =>
-                e.TryGetCamFovMax(out fov)
-            ).ReturnsAsync(true);
+                e.TryGetCamFovMaxAsync()
+            ).ReturnsAsync((true, fov));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -657,8 +657,8 @@ namespace LibRLV.Tests
 
             var fov = 0.0f;
             _callbacks.Setup(e =>
-                e.TryGetCamFovMax(out fov)
-            ).ReturnsAsync(false);
+                e.TryGetCamFovMaxAsync()
+            ).ReturnsAsync((false, fov));
 
             Assert.False(await _rlv.ProcessMessage("@getcam_fovmax=1234", _sender.Id, _sender.Name));
             Assert.Empty(actual);
@@ -674,8 +674,8 @@ namespace LibRLV.Tests
             var zoom = 0.75f;
 
             _callbacks.Setup(e =>
-                e.TryGetCamZoomMin(out zoom)
-            ).ReturnsAsync(true);
+                e.TryGetCamZoomMinAsync()
+            ).ReturnsAsync((true, zoom));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -693,8 +693,8 @@ namespace LibRLV.Tests
 
             var zoom = 0.0f;
             _callbacks.Setup(e =>
-                e.TryGetCamZoomMin(out zoom)
-            ).ReturnsAsync(false);
+                e.TryGetCamZoomMinAsync()
+            ).ReturnsAsync((false, zoom));
 
             Assert.False(await _rlv.ProcessMessage("@getcam_zoommin=1234", _sender.Id, _sender.Name));
             Assert.Empty(actual);
@@ -710,8 +710,8 @@ namespace LibRLV.Tests
             var fov = 25.5f;
 
             _callbacks.Setup(e =>
-                e.TryGetCamFov(out fov)
-            ).ReturnsAsync(true);
+                e.TryGetCamFovAsync()
+            ).ReturnsAsync((true, fov));
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -729,8 +729,8 @@ namespace LibRLV.Tests
 
             var fov = 0.0f;
             _callbacks.Setup(e =>
-                e.TryGetCamFov(out fov)
-            ).ReturnsAsync(false);
+                e.TryGetCamFovAsync()
+            ).ReturnsAsync((false, fov));
 
             Assert.False(await _rlv.ProcessMessage("@getcam_fov=1234", _sender.Id, _sender.Name));
             Assert.Empty(actual);

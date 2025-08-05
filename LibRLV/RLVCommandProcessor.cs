@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using LibRLV.EventArguments;
-using static LibRLV.InventoryTree;
 
 namespace LibRLV
 {
@@ -270,7 +269,8 @@ namespace LibRLV
         // @attach:[folder]=force
         private async Task<bool> HandleAttach(RLVMessage command, bool replaceExistingAttachments, bool recursive)
         {
-            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            if (!hasSharedFolder)
             {
                 return false;
             }
@@ -297,7 +297,8 @@ namespace LibRLV
 
         private async Task<bool> HandleAttachThis(RLVMessage command, bool replaceExistingAttachments, bool recursive)
         {
-            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            if (!hasSharedFolder)
             {
                 return false;
             }
@@ -372,11 +373,14 @@ namespace LibRLV
         // TODO: Add support for Attachment groups (RLVa)
         private async Task<bool> HandleRemAttach(RLVMessage command)
         {
-            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            if (!hasSharedFolder)
             {
                 return false;
             }
-            if (!await _callbacks.TryGetCurrentOutfit(out var currentOutfit))
+
+            var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync();
+            if (!hasCurrentOutfit)
             {
                 return false;
             }
@@ -435,7 +439,8 @@ namespace LibRLV
 
         private async Task<bool> HandleDetachAll(RLVMessage command)
         {
-            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            if (!hasSharedFolder)
             {
                 return false;
             }
@@ -457,7 +462,8 @@ namespace LibRLV
 
         private async Task<bool> HandleDetachThis(RLVMessage command, bool recursive)
         {
-            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            if (!hasSharedFolder)
             {
                 return false;
             }
@@ -509,7 +515,8 @@ namespace LibRLV
         // @detachme=force
         private async Task<bool> HandleDetachMe(RLVMessage command)
         {
-            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            if (!hasSharedFolder)
             {
                 return false;
             }
@@ -534,11 +541,13 @@ namespace LibRLV
         // TODO: Add support for Attachment groups (RLVa)
         private async Task<bool> HandleRemOutfit(RLVMessage command)
         {
-            if (!await _callbacks.TryGetCurrentOutfit(out var currentOutfit))
+            var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync();
+            if (!hasCurrentOutfit)
             {
                 return false;
             }
-            if (!await _callbacks.TryGetRlvInventoryTree(out var sharedFolder))
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            if (!hasSharedFolder)
             {
                 return false;
             }
@@ -683,11 +692,13 @@ namespace LibRLV
                 return false;
             }
 
-            if (!await _callbacks.TryGetObjectExists(sitTarget, out var isCurrentlySitting))
+            var objectExists = await _callbacks.ObjectExistsAsync(sitTarget);
+            if (!objectExists)
             {
                 return false;
             }
 
+            var isCurrentlySitting = await _callbacks.IsSittingAsync();
             if (isCurrentlySitting)
             {
                 if (!_manager.CanUnsit())

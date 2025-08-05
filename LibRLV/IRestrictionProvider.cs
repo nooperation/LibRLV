@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace LibRLV
 {
-    public interface IRestrictionProvider
+    internal interface IRestrictionProvider
     {
-        IReadOnlyList<RLVRestriction> GetRestrictions(RLVRestrictionType restrictionType);
-        IReadOnlyList<RLVRestriction> GetRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null);
+        IReadOnlyList<RLVRestriction> GetRestrictionsByType(RLVRestrictionType restrictionType);
+        IReadOnlyList<RLVRestriction> FindRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null);
         bool TryGetLockedFolder(Guid folderId, out LockedFolderPublic lockedFolder);
         IReadOnlyDictionary<Guid, LockedFolderPublic> GetLockedFolders();
     }

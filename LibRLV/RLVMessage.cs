@@ -2,7 +2,7 @@
 
 namespace LibRLV
 {
-    internal class RLVMessage
+    internal sealed class RLVMessage
     {
         public string Behavior { get; set; }
         public string Option { get; set; }
