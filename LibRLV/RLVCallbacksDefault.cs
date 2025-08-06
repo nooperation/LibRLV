@@ -12,7 +12,7 @@ namespace LibRLV
             return Task.CompletedTask;
         }
 
-        public virtual Task<(bool Success, string EnvInfo)> TryGetEnvironmentAsync(string settingName)
+        public virtual Task<(bool Success, string EnvironmentSettingValue)> TryGetEnvironmentSettingValueAsync(string settingName, CancellationToken cancellationToken)
         {
             if (!Enum.TryParse(settingName, true, out RLVGetEnvType settingType))
             {
@@ -103,7 +103,7 @@ namespace LibRLV
             return Task.FromResult((false, string.Empty));
         }
 
-        public virtual Task<(bool Success, string DebugInfo)> TryGetDebugInfoAsync(string settingName)
+        public virtual Task<(bool Success, string DebugSettingValue)> TryGetDebugSettingValueAsync(string settingName, CancellationToken cancellationToken)
         {
             if (!Enum.TryParse(settingName, true, out RLVGetDebugType settingType))
             {
@@ -125,67 +125,42 @@ namespace LibRLV
             return Task.FromResult((false, string.Empty));
         }
 
-        public virtual Task<(bool Success, InventoryTree? SharedFolder)> TryGetRlvInventoryTreeAsync()
-        {
-            return Task.FromResult((false, (InventoryTree?)null));
-        }
-
         public virtual Task SendInstantMessageAsync(Guid targetUser, string message, CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
         }
 
         // TODO: Replace this, just temp hack to get the data i need right now for testing
-        public Task<bool> ObjectExistsAsync(Guid objectID)
+        public Task<bool> ObjectExistsAsync(Guid objectID, CancellationToken cancellationToken)
         {
             return Task.FromResult(false);
         }
-        public Task<bool> IsSittingAsync()
+        public Task<bool> IsSittingAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(false);
         }
 
-        public virtual Task<(bool Success, Guid SitID)> TryGetSitIdAsync()
+        public virtual Task<(bool Success, Guid SitId)> TryGetSitIdAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult((false, default(Guid)));
         }
 
-        public virtual Task<(bool Success, float CamAvDistMin)> TryGetCamAvDistMinAsync()
+        public virtual Task<(bool Success, InventoryTree? SharedFolder)> TryGetSharedFolderAsync(CancellationToken cancellationToken)
         {
-            return Task.FromResult((false, default(float)));
+            return Task.FromResult((false, (InventoryTree?)null));
         }
 
-        public virtual Task<(bool Success, float CamAvDistMax)> TryGetCamAvDistMaxAsync()
+        public virtual Task<(bool Success, CameraSettings? CameraSettings)> TryGetCameraSettingsAsync(CancellationToken cancellationToken)
         {
-            return Task.FromResult((false, default(float)));
+            return Task.FromResult((false, (CameraSettings?)null));
         }
 
-        public virtual Task<(bool Success, float CamFovMin)> TryGetCamFovMinAsync()
-        {
-            return Task.FromResult((false, default(float)));
-        }
-
-        public virtual Task<(bool Success, float CamFovMax)> TryGetCamFovMaxAsync()
-        {
-            return Task.FromResult((false, default(float)));
-        }
-
-        public virtual Task<(bool Success, float CamZoomMin)> TryGetCamZoomMinAsync()
-        {
-            return Task.FromResult((false, default(float)));
-        }
-
-        public virtual Task<(bool Success, float CamFov)> TryGetCamFovAsync()
-        {
-            return Task.FromResult((false, default(float)));
-        }
-
-        public virtual Task<(bool Success, string ActiveGroupName)> TryGetActiveGroupNameAsync()
+        public virtual Task<(bool Success, string ActiveGroupName)> TryGetActiveGroupNameAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult((false, "None"));
         }
 
-        public Task<(bool Success, IReadOnlyList<InventoryItem>? CurrentOutfit)> TryGetCurrentOutfitAsync()
+        public Task<(bool Success, IReadOnlyList<InventoryItem>? CurrentOutfit)> TryGetCurrentOutfitAsync(CancellationToken cancellationToken)
         {
             IReadOnlyList<InventoryItem> currentOutfit = [];
             return Task.FromResult((false, (IReadOnlyList<InventoryItem>?)currentOutfit));

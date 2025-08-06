@@ -522,40 +522,39 @@ namespace LibRLV.Tests
 
         #endregion
 
+        private CameraSettings DefaultCameraSettings()
+        {
+            return new CameraSettings(
+               avDistMin: 1.23f,
+               avDistMax: 123.45f,
+               fovMin: 45.60f,
+               fovMax: 130.0f,
+               zoomMin: 12.34f,
+               currentFov: 91.34f
+           );
+        }
+
         #region @getcam_avdistmin=<channel_number>
         [Fact]
         public async Task GetCamAvDistMin()
         {
             var actual = _callbacks.RecordReplies();
 
-            var distance = 12.34f;
-
+            var cameraSettings = DefaultCameraSettings();
             _callbacks.Setup(e =>
-                e.TryGetCamAvDistMinAsync()
-            ).ReturnsAsync((true, distance));
+                e.TryGetCameraSettingsAsync(default)
+            ).ReturnsAsync((true, cameraSettings));
 
             var expected = new List<(int Channel, string Text)>
             {
-                (1234, distance.ToString()),
+                (1234, cameraSettings.AvDistMin.ToString()),
             };
 
             Assert.True(await _rlv.ProcessMessage("@getcam_avdistmin=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
-        [Fact]
-        public async Task GetCamAvDistMin_Default()
-        {
-            var actual = _callbacks.RecordReplies();
 
-            var distance = 0.0f;
-            _callbacks.Setup(e =>
-                e.TryGetCamAvDistMinAsync()
-            ).ReturnsAsync((false, distance));
-
-            Assert.False(await _rlv.ProcessMessage("@getcam_avdistmin=1234", _sender.Id, _sender.Name));
-            Assert.Empty(actual);
-        }
         #endregion
 
         #region @getcam_avdistmax=<channel_number>
@@ -564,33 +563,18 @@ namespace LibRLV.Tests
         {
             var actual = _callbacks.RecordReplies();
 
-            var distance = 12.34f;
-
+            var cameraSettings = DefaultCameraSettings();
             _callbacks.Setup(e =>
-                e.TryGetCamAvDistMaxAsync()
-            ).ReturnsAsync((true, distance));
+                e.TryGetCameraSettingsAsync(default)
+            ).ReturnsAsync((true, cameraSettings));
 
             var expected = new List<(int Channel, string Text)>
             {
-                (1234, distance.ToString()),
+                (1234, cameraSettings.AvDistMax.ToString()),
             };
 
             Assert.True(await _rlv.ProcessMessage("@getcam_avdistmax=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
-        }
-
-        [Fact]
-        public async Task GetCamAvDistMax_Default()
-        {
-            var actual = _callbacks.RecordReplies();
-
-            var distance = 0.0f;
-            _callbacks.Setup(e =>
-                e.TryGetCamAvDistMaxAsync()
-            ).ReturnsAsync((false, distance));
-
-            Assert.False(await _rlv.ProcessMessage("@getcam_avdistmax=1234", _sender.Id, _sender.Name));
-            Assert.Empty(actual);
         }
         #endregion
 
@@ -600,34 +584,20 @@ namespace LibRLV.Tests
         {
             var actual = _callbacks.RecordReplies();
 
-            var fov = 15.25f;
-
+            var cameraSettings = DefaultCameraSettings();
             _callbacks.Setup(e =>
-                e.TryGetCamFovMinAsync()
-            ).ReturnsAsync((true, fov));
+                e.TryGetCameraSettingsAsync(default)
+            ).ReturnsAsync((true, cameraSettings));
 
             var expected = new List<(int Channel, string Text)>
             {
-                (1234, fov.ToString()),
+                (1234, cameraSettings.FovMin.ToString()),
             };
 
             Assert.True(await _rlv.ProcessMessage("@getcam_fovmin=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
-        [Fact]
-        public async Task GetCamFovMin_Default()
-        {
-            var actual = _callbacks.RecordReplies();
-
-            var fov = 0.0f;
-            _callbacks.Setup(e =>
-                e.TryGetCamFovMinAsync()
-            ).ReturnsAsync((false, fov));
-
-            Assert.False(await _rlv.ProcessMessage("@getcam_fovmin=1234", _sender.Id, _sender.Name));
-            Assert.Empty(actual);
-        }
         #endregion
 
         #region @getcam_fovmax=<channel_number>
@@ -636,33 +606,20 @@ namespace LibRLV.Tests
         {
             var actual = _callbacks.RecordReplies();
 
-            var fov = 45.75f;
+            var cameraSettings = DefaultCameraSettings();
             _callbacks.Setup(e =>
-                e.TryGetCamFovMaxAsync()
-            ).ReturnsAsync((true, fov));
+                e.TryGetCameraSettingsAsync(default)
+            ).ReturnsAsync((true, cameraSettings));
 
             var expected = new List<(int Channel, string Text)>
             {
-                (1234, fov.ToString()),
+                (1234, cameraSettings.FovMax.ToString()),
             };
 
             Assert.True(await _rlv.ProcessMessage("@getcam_fovmax=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
-        [Fact]
-        public async Task GetCamFovMax_Default()
-        {
-            var actual = _callbacks.RecordReplies();
-
-            var fov = 0.0f;
-            _callbacks.Setup(e =>
-                e.TryGetCamFovMaxAsync()
-            ).ReturnsAsync((false, fov));
-
-            Assert.False(await _rlv.ProcessMessage("@getcam_fovmax=1234", _sender.Id, _sender.Name));
-            Assert.Empty(actual);
-        }
         #endregion
 
         #region @getcam_zoommin=<channel_number>
@@ -671,34 +628,20 @@ namespace LibRLV.Tests
         {
             var actual = _callbacks.RecordReplies();
 
-            var zoom = 0.75f;
-
+            var cameraSettings = DefaultCameraSettings();
             _callbacks.Setup(e =>
-                e.TryGetCamZoomMinAsync()
-            ).ReturnsAsync((true, zoom));
+                e.TryGetCameraSettingsAsync(default)
+            ).ReturnsAsync((true, cameraSettings));
 
             var expected = new List<(int Channel, string Text)>
             {
-                (1234, zoom.ToString()),
+                (1234, cameraSettings.ZoomMin.ToString()),
             };
 
             Assert.True(await _rlv.ProcessMessage("@getcam_zoommin=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
-        [Fact]
-        public async Task GetCamZoomMin_Default()
-        {
-            var actual = _callbacks.RecordReplies();
-
-            var zoom = 0.0f;
-            _callbacks.Setup(e =>
-                e.TryGetCamZoomMinAsync()
-            ).ReturnsAsync((false, zoom));
-
-            Assert.False(await _rlv.ProcessMessage("@getcam_zoommin=1234", _sender.Id, _sender.Name));
-            Assert.Empty(actual);
-        }
         #endregion
 
         #region @getcam_fov=<channel_number>
@@ -707,34 +650,38 @@ namespace LibRLV.Tests
         {
             var actual = _callbacks.RecordReplies();
 
-            var fov = 25.5f;
-
+            var cameraSettings = DefaultCameraSettings();
             _callbacks.Setup(e =>
-                e.TryGetCamFovAsync()
-            ).ReturnsAsync((true, fov));
+                e.TryGetCameraSettingsAsync(default)
+            ).ReturnsAsync((true, cameraSettings));
 
             var expected = new List<(int Channel, string Text)>
             {
-                (1234, fov.ToString()),
+                (1234, cameraSettings.CurrentFov.ToString()),
             };
 
             Assert.True(await _rlv.ProcessMessage("@getcam_fov=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
+        #endregion
 
-        [Fact]
-        public async Task GetCamFov_Default()
+        [Theory]
+        [InlineData("@getcam_zoommin=1234")]
+        [InlineData("@getcam_fov=1234")]
+        [InlineData("@getcam_fovmax=1234")]
+        [InlineData("@getcam_avdistmin=1234")]
+        [InlineData("@getcam_avdistmax=1234")]
+        [InlineData("@getcam_fovmin=1234")]
+        public async Task CameraSettings_Default(string command)
         {
             var actual = _callbacks.RecordReplies();
 
-            var fov = 0.0f;
             _callbacks.Setup(e =>
-                e.TryGetCamFovAsync()
-            ).ReturnsAsync((false, fov));
+                e.TryGetCameraSettingsAsync(default)
+            ).ReturnsAsync((false, null));
 
-            Assert.False(await _rlv.ProcessMessage("@getcam_fov=1234", _sender.Id, _sender.Name));
+            Assert.False(await _rlv.ProcessMessage(command, _sender.Id, _sender.Name));
             Assert.Empty(actual);
         }
-        #endregion
     }
 }

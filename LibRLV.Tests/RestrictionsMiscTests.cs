@@ -1359,7 +1359,7 @@ namespace LibRLV.Tests
             var actualGroupName = "Group Name";
 
             _callbacks.Setup(e =>
-                e.TryGetActiveGroupNameAsync()
+                e.TryGetActiveGroupNameAsync(default)
             ).ReturnsAsync((true, actualGroupName));
 
             var expected = new List<(int Channel, string Text)>
@@ -1378,7 +1378,7 @@ namespace LibRLV.Tests
             var actualGroupName = "";
 
             _callbacks.Setup(e =>
-                e.TryGetActiveGroupNameAsync()
+                e.TryGetActiveGroupNameAsync(default)
             ).ReturnsAsync((false, actualGroupName));
 
             var expected = new List<(int Channel, string Text)>

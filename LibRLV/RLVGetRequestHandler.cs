@@ -221,68 +221,68 @@ namespace LibRLV
                     }
                     case RLVDataRequest.GetCamAvDistMin:
                     {
-                        var (hasCamAvDistMin, camAvDistMin) = await _callbacks.TryGetCamAvDistMinAsync();
-                        if (!hasCamAvDistMin)
+                        var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync();
+                        if (!hasCameraSettings || cameraSettings == null)
                         {
                             return false;
                         }
 
-                        response = camAvDistMin.ToString(CultureInfo.InvariantCulture);
+                        response = cameraSettings.Value.AvDistMin.ToString(CultureInfo.InvariantCulture);
                         break;
                     }
                     case RLVDataRequest.GetCamAvDistMax:
                     {
-                        var (hasCamAvDistMax, camAvDistMax) = await _callbacks.TryGetCamAvDistMaxAsync();
-                        if (!hasCamAvDistMax)
+                        var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync();
+                        if (!hasCameraSettings || cameraSettings == null)
                         {
                             return false;
                         }
 
-                        response = camAvDistMax.ToString(CultureInfo.InvariantCulture);
+                        response = cameraSettings.Value.AvDistMax.ToString(CultureInfo.InvariantCulture);
                         break;
                     }
                     case RLVDataRequest.GetCamFovMin:
                     {
-                        var (hasCamFovMin, camFovMin) = await _callbacks.TryGetCamFovMinAsync();
-                        if (!hasCamFovMin)
+                        var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync();
+                        if (!hasCameraSettings || cameraSettings == null)
                         {
                             return false;
                         }
 
-                        response = camFovMin.ToString(CultureInfo.InvariantCulture);
+                        response = cameraSettings.Value.FovMin.ToString(CultureInfo.InvariantCulture);
                         break;
                     }
                     case RLVDataRequest.GetCamFovMax:
                     {
-                        var (hasCamFovMax, camFovMax) = await _callbacks.TryGetCamFovMaxAsync();
-                        if (!hasCamFovMax)
+                        var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync();
+                        if (!hasCameraSettings || cameraSettings == null)
                         {
                             return false;
                         }
 
-                        response = camFovMax.ToString(CultureInfo.InvariantCulture);
+                        response = cameraSettings.Value.FovMax.ToString(CultureInfo.InvariantCulture);
                         break;
                     }
                     case RLVDataRequest.GetCamZoomMin:
                     {
-                        var (hasCamZoomMin, camZoomMin) = await _callbacks.TryGetCamZoomMinAsync();
-                        if (!hasCamZoomMin)
+                        var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync();
+                        if (!hasCameraSettings || cameraSettings == null)
                         {
                             return false;
                         }
 
-                        response = camZoomMin.ToString(CultureInfo.InvariantCulture);
+                        response = cameraSettings.Value.ZoomMin.ToString(CultureInfo.InvariantCulture);
                         break;
                     }
                     case RLVDataRequest.GetCamFov:
                     {
-                        var (hasCamFov, camFov) = await _callbacks.TryGetCamFovAsync();
-                        if (!hasCamFov)
+                        var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync();
+                        if (!hasCameraSettings || cameraSettings == null)
                         {
                             return false;
                         }
 
-                        response = camFov.ToString(CultureInfo.InvariantCulture);
+                        response = cameraSettings.Value.CurrentFov.ToString(CultureInfo.InvariantCulture);
                         break;
                     }
                     case RLVDataRequest.GetGroup:
@@ -384,7 +384,7 @@ namespace LibRLV
             else if (rlvMessage.Behavior.StartsWith("getdebug_", StringComparison.OrdinalIgnoreCase))
             {
                 var commandRaw = rlvMessage.Behavior.Substring("getdebug_".Length);
-                var (success, debugInfo) = await _callbacks.TryGetDebugInfoAsync(commandRaw);
+                var (success, debugInfo) = await _callbacks.TryGetDebugSettingValueAsync(commandRaw);
 
                 if (success)
                 {
@@ -394,7 +394,7 @@ namespace LibRLV
             else if (rlvMessage.Behavior.StartsWith("getenv_", StringComparison.OrdinalIgnoreCase))
             {
                 var commandRaw = rlvMessage.Behavior.Substring("getenv_".Length);
-                var (success, envInfo) = await _callbacks.TryGetEnvironmentAsync(commandRaw);
+                var (success, envInfo) = await _callbacks.TryGetEnvironmentSettingValueAsync(commandRaw);
 
                 if (success)
                 {
@@ -496,7 +496,7 @@ namespace LibRLV
 
         private async Task<string> HandleGetInvWorn(string args)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return string.Empty;
@@ -562,7 +562,7 @@ namespace LibRLV
 
         private async Task<string> HandleFindFolders(bool stopOnFirstResult, IEnumerable<string> searchTerms, string separator = ",")
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return string.Empty;
@@ -590,7 +590,7 @@ namespace LibRLV
 
         private async Task<string> HandleGetInv(string args)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return string.Empty;
@@ -618,7 +618,7 @@ namespace LibRLV
 
         private async Task<string> HandleGetPath(bool limitToOneResult, Guid? itemId, AttachmentPoint? attachmentPoint, WearableType? wearableType)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return string.Empty;

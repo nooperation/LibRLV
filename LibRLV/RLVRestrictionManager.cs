@@ -474,7 +474,7 @@ namespace LibRLV
                 {
                     if (isAddingRestriction)
                     {
-                        await _lockedFolderManager.ProcessFolderRestrictions(newCommand);
+                        await _lockedFolderManager.ProcessFolderException(newCommand, false);
                     }
                     else
                     {
@@ -489,7 +489,7 @@ namespace LibRLV
                 {
                     if (isAddingRestriction)
                     {
-                        await _lockedFolderManager.ProcessFolderException(newCommand);
+                        await _lockedFolderManager.ProcessFolderException(newCommand, true);
                     }
                     else
                     {

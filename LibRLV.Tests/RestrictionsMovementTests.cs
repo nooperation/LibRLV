@@ -95,21 +95,21 @@ namespace LibRLV.Tests
         private void SetObjectExists(Guid objectId)
         {
             _callbacks.Setup(e =>
-                e.ObjectExistsAsync(objectId)
+                e.ObjectExistsAsync(objectId, default)
             ).ReturnsAsync(true);
         }
 
         private void SetIsSitting(bool isCurrentlySitting)
         {
             _callbacks.Setup(e =>
-                e.IsSittingAsync()
+                e.IsSittingAsync(default)
             ).ReturnsAsync(isCurrentlySitting);
         }
 
         private void SetCurrentSitId(Guid objectId)
         {
             _callbacks.Setup(e =>
-                e.TryGetSitIdAsync()
+                e.TryGetSitIdAsync(default)
             ).ReturnsAsync((objectId != Guid.Empty, objectId));
         }
 

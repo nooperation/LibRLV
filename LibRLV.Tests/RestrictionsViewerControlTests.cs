@@ -53,7 +53,7 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
 
             _callbacks.Setup(e =>
-                e.TryGetDebugInfoAsync(settingName.ToLower())
+                e.TryGetDebugSettingValueAsync(settingName.ToLower(), default)
             ).ReturnsAsync((true, settingValue));
 
             var expected = new List<(int Channel, string Text)>
@@ -103,7 +103,7 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
 
             _callbacks.Setup(e =>
-                e.TryGetEnvironmentAsync(settingName.ToLower())
+                e.TryGetEnvironmentSettingValueAsync(settingName.ToLower(), default)
             ).ReturnsAsync((true, settingValue));
 
             var expected = new List<(int Channel, string Text)>

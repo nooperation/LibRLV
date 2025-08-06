@@ -267,7 +267,7 @@ namespace LibRLV
         // @attach:[folder]=force
         private async Task<bool> HandleAttach(RLVMessage command, bool replaceExistingAttachments, bool recursive)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -295,7 +295,7 @@ namespace LibRLV
 
         private async Task<bool> HandleAttachThis(RLVMessage command, bool replaceExistingAttachments, bool recursive)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -372,7 +372,7 @@ namespace LibRLV
         // TODO: Add support for Attachment groups (RLVa)
         private async Task<bool> HandleRemAttach(RLVMessage command)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -438,7 +438,7 @@ namespace LibRLV
 
         private async Task<bool> HandleDetachAll(RLVMessage command)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -461,7 +461,7 @@ namespace LibRLV
 
         private async Task<bool> HandleDetachThis(RLVMessage command, bool recursive)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -514,7 +514,7 @@ namespace LibRLV
         // @detachme=force
         private async Task<bool> HandleDetachMe(RLVMessage command)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -545,7 +545,7 @@ namespace LibRLV
             {
                 return false;
             }
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetRlvInventoryTreeAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;

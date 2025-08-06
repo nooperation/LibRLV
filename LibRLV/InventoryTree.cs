@@ -28,6 +28,12 @@ namespace LibRLV
             _items = [];
         }
 
+        /// <summary>
+        /// Adds a child folder to this folder
+        /// </summary>
+        /// <param name="id">Folder ID</param>
+        /// <param name="name">Folder Name</param>
+        /// <returns>Newly added Folder</returns>
         public InventoryTree AddChild(Guid id, string name)
         {
             if (string.IsNullOrEmpty(name))
@@ -44,6 +50,14 @@ namespace LibRLV
             return newChild;
         }
 
+        /// <summary>
+        /// Adds an item to this folder
+        /// </summary>
+        /// <param name="id">Item ID</param>
+        /// <param name="name">Item Name</param>
+        /// <param name="attachedTo">Item attachment point if attached</param>
+        /// <param name="wornOn">Item wearable type if worn</param>
+        /// <returns>Newly added item</returns>
         public InventoryItem AddItem(Guid id, string name, AttachmentPoint? attachedTo, WearableType? wornOn)
         {
             if (string.IsNullOrEmpty(name))
@@ -57,6 +71,11 @@ namespace LibRLV
             return newItem;
         }
 
+        /// <summary>
+        /// Gets a list of items currently worn as the specified wearable type
+        /// </summary>
+        /// <param name="wearableType">Finds all items worn of this type</param>
+        /// <returns>Collection of items that are worn as the specified wearable type</returns>
         public IEnumerable<InventoryItem> GetWornItems(WearableType wearableType)
         {
             foreach (var item in Items)
@@ -76,6 +95,11 @@ namespace LibRLV
             }
         }
 
+        /// <summary>
+        /// Gets a list of items currently attached to the specified attachment point
+        /// </summary>
+        /// <param name="attachmentPoint">Finds all items attached to this attachment point</param>
+        /// <returns>Collection of items currently attached to the specified attachment point</returns>
         public IEnumerable<InventoryItem> GetAttachedItems(AttachmentPoint attachmentPoint)
         {
             foreach (var item in Items)

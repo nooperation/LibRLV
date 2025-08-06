@@ -31,7 +31,7 @@ namespace LibRLV
             return true;
         }
 
-        internal static bool GetRestrictionValueMin(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, out float val)
+        internal static bool TryGetRestrictionValueMin(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, out float val)
         {
             var restriction = _restrictionProvider.GetRestrictionsByType(restrictionType);
             if (restriction.Count == 0)
@@ -48,7 +48,7 @@ namespace LibRLV
             return true;
         }
 
-        internal static bool GetOptionalRestrictionValueMin(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, float defaultVal, out float val)
+        internal static bool TryGetOptionalRestrictionValueMin(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, float defaultVal, out float val)
         {
             var restrictions = _restrictionProvider.GetRestrictionsByType(restrictionType);
             if (restrictions.Count == 0)
@@ -173,11 +173,11 @@ namespace LibRLV
         }
         public bool CanSitTp(out float sitTpDist)
         {
-            return GetOptionalRestrictionValueMin(_restrictionProvider, RLVRestrictionType.SitTp, 1.5f, out sitTpDist);
+            return TryGetOptionalRestrictionValueMin(_restrictionProvider, RLVRestrictionType.SitTp, 1.5f, out sitTpDist);
         }
         public bool CanTpLocal(out float tpLocalDist)
         {
-            return GetOptionalRestrictionValueMin(_restrictionProvider, RLVRestrictionType.TpLocal, 0.0f, out tpLocalDist);
+            return TryGetOptionalRestrictionValueMin(_restrictionProvider, RLVRestrictionType.TpLocal, 0.0f, out tpLocalDist);
         }
         public bool CanStandTp()
         {
@@ -577,7 +577,7 @@ namespace LibRLV
         #region Touch
         public bool CanFarTouch(out float farTouchDist)
         {
-            return GetOptionalRestrictionValueMin(_restrictionProvider, RLVRestrictionType.FarTouch, 1.5f, out farTouchDist);
+            return TryGetOptionalRestrictionValueMin(_restrictionProvider, RLVRestrictionType.FarTouch, 1.5f, out farTouchDist);
         }
 
         private bool CanTouchHud(Guid objectId)
@@ -632,7 +632,7 @@ namespace LibRLV
         {
             if (distance != null)
             {
-                if (GetRestrictionValueMin(_restrictionProvider, RLVRestrictionType.FarTouch, out var maxTouchDistance))
+                if (TryGetRestrictionValueMin(_restrictionProvider, RLVRestrictionType.FarTouch, out var maxTouchDistance))
                 {
                     if (distance > maxTouchDistance)
                     {

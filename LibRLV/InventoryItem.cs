@@ -11,6 +11,14 @@ namespace LibRLV
         public WearableType? WornOn { get; set; }
         public AttachmentPoint? AttachedTo { get; set; }
 
+        /// <summary>
+        /// Creates an inventory item associated with an external folder
+        /// </summary>
+        /// <param name="id">Item ID</param>
+        /// <param name="name">Item Name</param>
+        /// <param name="externalFolderId">ID of the external folder containing this item</param>
+        /// <param name="attachedTo">Attachment point if the item is attached</param>
+        /// <param name="wornOn">Wearable type if the item is worn</param>
         public InventoryItem(Guid id, string name, Guid? externalFolderId, AttachmentPoint? attachedTo, WearableType? wornOn)
         {
             if (string.IsNullOrEmpty(name))
@@ -26,11 +34,15 @@ namespace LibRLV
             FolderId = externalFolderId;
         }
 
-        public InventoryItem(Guid id, string name, InventoryTree folder, AttachmentPoint? attachedTo, WearableType? wornOn)
+        internal InventoryItem(Guid id, string name, InventoryTree folder, AttachmentPoint? attachedTo, WearableType? wornOn)
         {
             if (string.IsNullOrEmpty(name))
             {
                 throw new ArgumentException("Name cannot be null or empty", nameof(name));
+            }
+            if (folder == null)
+            {
+                throw new ArgumentException("Folder cannot be null", nameof(folder));
             }
 
             Name = name;
