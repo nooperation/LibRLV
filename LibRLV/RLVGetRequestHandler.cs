@@ -101,27 +101,27 @@ namespace LibRLV
                 .Where(n => n.WornOn.HasValue)
                 .Select(n => n.WornOn!.Value)
                 .Distinct()
-                .ToDictionary(k => k, v => v);
+                .ToImmutableHashSet();
 
-            var sb = new StringBuilder();
+            var sb = new StringBuilder(16);
 
             // gloves,jacket,pants,shirt,shoes,skirt,socks,underpants,undershirt,skin,eyes,hair,shape,alpha,tattoo,physics
-            sb.Append(wornTypes.ContainsKey(WearableType.Gloves) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Jacket) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Pants) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Shirt) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Shoes) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Skirt) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Socks) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Underpants) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Undershirt) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Skin) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Eyes) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Hair) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Shape) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Alpha) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Tattoo) ? "1" : "0");
-            sb.Append(wornTypes.ContainsKey(WearableType.Physics) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Gloves) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Jacket) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Pants) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Shirt) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Shoes) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Skirt) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Socks) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Underpants) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Undershirt) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Skin) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Eyes) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Hair) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Shape) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Alpha) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Tattoo) ? "1" : "0");
+            sb.Append(wornTypes.Contains(WearableType.Physics) ? "1" : "0");
 
             return sb.ToString();
         }
@@ -150,7 +150,7 @@ namespace LibRLV
                 .Where(n => n.AttachedTo.HasValue)
                 .Select(n => n.AttachedTo!.Value)
                 .Distinct()
-                .ToDictionary(k => k, v => v);
+                .ToImmutableHashSet();
 
             var attachmentPointTypes = Enum.GetValues(typeof(AttachmentPoint));
             var sb = new StringBuilder(attachmentPointTypes.Length);
@@ -158,7 +158,7 @@ namespace LibRLV
             // digit corresponds directly to the value of enum, unlike ProcessGetOutfit
             foreach (AttachmentPoint attachmentPoint in attachmentPointTypes)
             {
-                sb.Append(wornTypes.ContainsKey(attachmentPoint) ? '1' : '0');
+                sb.Append(wornTypes.Contains(attachmentPoint) ? '1' : '0');
             }
 
             return sb.ToString();
@@ -220,60 +220,10 @@ namespace LibRLV
                         break;
                     }
                     case RLVDataRequest.GetCamAvDistMin:
-                    {
-                        var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync();
-                        if (!hasCameraSettings || cameraSettings == null)
-                        {
-                            return false;
-                        }
-
-                        response = cameraSettings.Value.AvDistMin.ToString(CultureInfo.InvariantCulture);
-                        break;
-                    }
                     case RLVDataRequest.GetCamAvDistMax:
-                    {
-                        var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync();
-                        if (!hasCameraSettings || cameraSettings == null)
-                        {
-                            return false;
-                        }
-
-                        response = cameraSettings.Value.AvDistMax.ToString(CultureInfo.InvariantCulture);
-                        break;
-                    }
                     case RLVDataRequest.GetCamFovMin:
-                    {
-                        var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync();
-                        if (!hasCameraSettings || cameraSettings == null)
-                        {
-                            return false;
-                        }
-
-                        response = cameraSettings.Value.FovMin.ToString(CultureInfo.InvariantCulture);
-                        break;
-                    }
                     case RLVDataRequest.GetCamFovMax:
-                    {
-                        var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync();
-                        if (!hasCameraSettings || cameraSettings == null)
-                        {
-                            return false;
-                        }
-
-                        response = cameraSettings.Value.FovMax.ToString(CultureInfo.InvariantCulture);
-                        break;
-                    }
                     case RLVDataRequest.GetCamZoomMin:
-                    {
-                        var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync();
-                        if (!hasCameraSettings || cameraSettings == null)
-                        {
-                            return false;
-                        }
-
-                        response = cameraSettings.Value.ZoomMin.ToString(CultureInfo.InvariantCulture);
-                        break;
-                    }
                     case RLVDataRequest.GetCamFov:
                     {
                         var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync();
@@ -282,9 +232,43 @@ namespace LibRLV
                             return false;
                         }
 
-                        response = cameraSettings.Value.CurrentFov.ToString(CultureInfo.InvariantCulture);
+                        switch (name)
+                        {
+                            case RLVDataRequest.GetCamAvDistMin:
+                            {
+                                response = cameraSettings.Value.AvDistMin.ToString(CultureInfo.InvariantCulture);
+                                break;
+                            }
+                            case RLVDataRequest.GetCamAvDistMax:
+                            {
+                                response = cameraSettings.Value.AvDistMax.ToString(CultureInfo.InvariantCulture);
+                                break;
+                            }
+                            case RLVDataRequest.GetCamFovMin:
+                            {
+                                response = cameraSettings.Value.FovMin.ToString(CultureInfo.InvariantCulture);
+                                break;
+                            }
+                            case RLVDataRequest.GetCamFovMax:
+                            {
+                                response = cameraSettings.Value.FovMax.ToString(CultureInfo.InvariantCulture);
+                                break;
+                            }
+                            case RLVDataRequest.GetCamZoomMin:
+                            {
+                                response = cameraSettings.Value.ZoomMin.ToString(CultureInfo.InvariantCulture);
+                                break;
+                            }
+                            case RLVDataRequest.GetCamFov:
+                            {
+                                response = cameraSettings.Value.CurrentFov.ToString(CultureInfo.InvariantCulture);
+                                break;
+                            }
+                        }
+
                         break;
                     }
+
                     case RLVDataRequest.GetGroup:
                     {
                         var (hasGroup, group) = await _callbacks.TryGetActiveGroupNameAsync();
@@ -347,8 +331,6 @@ namespace LibRLV
                     case RLVDataRequest.GetPathNew:
                     {
                         // [] | [uuid | layer | attachpt ]
-
-                        var result = new List<object>();
                         var parsedOptions = rlvMessage.Option.Split([';'], StringSplitOptions.RemoveEmptyEntries).ToList();
 
                         if (parsedOptions.Count > 1)
@@ -452,7 +434,7 @@ namespace LibRLV
             var totalItems = 0;
             GetInvWornInfo_Internal(folder, false, ref totalItems, ref totalItemsWorn);
 
-            var result = "";
+            var result = string.Empty;
             if (totalItems == 0)
             {
                 result += "0";
@@ -524,8 +506,8 @@ namespace LibRLV
 
             foreach (var folder in foldersInInv)
             {
-                var weirdItemCountThing = GetInvWornInfo(folder);
-                resultItems.Add(new InvWornInfoContainer(folder.Name, weirdItemCountThing));
+                var invWornInfo = GetInvWornInfo(folder);
+                resultItems.Add(new InvWornInfoContainer(folder.Name, invWornInfo));
             }
 
             var result = string.Join(",", resultItems);
@@ -597,7 +579,6 @@ namespace LibRLV
             }
 
             var inventoryMap = new InventoryMap(sharedFolder);
-            var folders = new List<InventoryTree>();
 
             var target = sharedFolder;
             if (args.Length != 0)

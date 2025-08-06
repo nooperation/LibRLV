@@ -14,9 +14,9 @@ namespace LibRLV
             _restrictionProvider = restrictionProvider;
         }
 
-        internal static bool TryGetRestrictionValueMax(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, out float val)
+        internal static bool TryGetRestrictionValueMax(IRestrictionProvider restrictionProvider, RLVRestrictionType restrictionType, out float val)
         {
-            var restriction = _restrictionProvider.GetRestrictionsByType(restrictionType);
+            var restriction = restrictionProvider.GetRestrictionsByType(restrictionType);
             if (restriction.Count == 0)
             {
                 val = default;
@@ -31,9 +31,9 @@ namespace LibRLV
             return true;
         }
 
-        internal static bool TryGetRestrictionValueMin(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, out float val)
+        internal static bool TryGetRestrictionValueMin(IRestrictionProvider restrictionProvider, RLVRestrictionType restrictionType, out float val)
         {
-            var restriction = _restrictionProvider.GetRestrictionsByType(restrictionType);
+            var restriction = restrictionProvider.GetRestrictionsByType(restrictionType);
             if (restriction.Count == 0)
             {
                 val = default;
@@ -48,9 +48,9 @@ namespace LibRLV
             return true;
         }
 
-        internal static bool TryGetOptionalRestrictionValueMin(IRestrictionProvider _restrictionProvider, RLVRestrictionType restrictionType, float defaultVal, out float val)
+        internal static bool TryGetOptionalRestrictionValueMin(IRestrictionProvider restrictionProvider, RLVRestrictionType restrictionType, float defaultVal, out float val)
         {
-            var restrictions = _restrictionProvider.GetRestrictionsByType(restrictionType);
+            var restrictions = restrictionProvider.GetRestrictionsByType(restrictionType);
             if (restrictions.Count == 0)
             {
                 val = defaultVal;

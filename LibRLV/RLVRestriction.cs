@@ -14,6 +14,8 @@ namespace LibRLV
         public string SenderName { get; }
         public ImmutableList<object> Args { get; }
 
+        private const float MinimumCameraDrawDistance = 0.40f;
+
         public RLVRestriction(RLVRestrictionType behavior, Guid sender, string senderName, ICollection<object> args)
         {
             Behavior = GetRealRestriction(behavior);
@@ -105,7 +107,7 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (val < 0.40f)
+                    if (val < MinimumCameraDrawDistance)
                     {
                         return false;
                     }

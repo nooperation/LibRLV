@@ -18,5 +18,10 @@ namespace LibRLV
             Option = option;
             Param = param;
         }
+
+        public override string ToString()
+        {
+            return $"{Behavior} from {SenderName} ({Sender})";
+        }
     }
 }
