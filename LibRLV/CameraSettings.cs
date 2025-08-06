@@ -1,6 +1,6 @@
 ﻿namespace LibRLV
 {
-    public readonly struct CameraSettings
+    public class CameraSettings
     {
         public CameraSettings(float avDistMin, float avDistMax, float fovMin, float fovMax, float zoomMin, float currentFov)
         {

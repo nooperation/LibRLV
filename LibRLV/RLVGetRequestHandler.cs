@@ -236,32 +236,32 @@ namespace LibRLV
                         {
                             case RLVDataRequestType.GetCamAvDistMin:
                             {
-                                response = cameraSettings.Value.AvDistMin.ToString(CultureInfo.InvariantCulture);
+                                response = cameraSettings.AvDistMin.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
                             case RLVDataRequestType.GetCamAvDistMax:
                             {
-                                response = cameraSettings.Value.AvDistMax.ToString(CultureInfo.InvariantCulture);
+                                response = cameraSettings.AvDistMax.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
                             case RLVDataRequestType.GetCamFovMin:
                             {
-                                response = cameraSettings.Value.FovMin.ToString(CultureInfo.InvariantCulture);
+                                response = cameraSettings.FovMin.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
                             case RLVDataRequestType.GetCamFovMax:
                             {
-                                response = cameraSettings.Value.FovMax.ToString(CultureInfo.InvariantCulture);
+                                response = cameraSettings.FovMax.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
                             case RLVDataRequestType.GetCamZoomMin:
                             {
-                                response = cameraSettings.Value.ZoomMin.ToString(CultureInfo.InvariantCulture);
+                                response = cameraSettings.ZoomMin.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
                             case RLVDataRequestType.GetCamFov:
                             {
-                                response = cameraSettings.Value.CurrentFov.ToString(CultureInfo.InvariantCulture);
+                                response = cameraSettings.CurrentFov.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
                         }
