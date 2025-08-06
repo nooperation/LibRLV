@@ -181,12 +181,12 @@ namespace LibRLV
                 return false;
             }
 
-            if (enforceNostrip && item.Name.ToLower(System.Globalization.CultureInfo.CurrentCulture).Contains("nostrip"))
+            if (enforceNostrip && item.Name.ToLowerInvariant().Contains("nostrip"))
             {
                 return false;
             }
 
-            if (enforceNostrip && item.Folder != null && item.Folder.Name.Contains("nostrip"))
+            if (enforceNostrip && item.Folder != null && item.Folder.Name.ToLowerInvariant().Contains("nostrip"))
             {
                 return false;
             }
@@ -309,7 +309,7 @@ namespace LibRLV
                 var parts = inventoryMap.FindFoldersContaining(false, null, null, wearableType);
                 folderPaths.AddRange(parts);
             }
-            if (RLVCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
+            else if (RLVCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
             {
                 var parts = inventoryMap.FindFoldersContaining(false, null, attachmentPoint, null);
                 folderPaths.AddRange(parts);
@@ -681,7 +681,7 @@ namespace LibRLV
 
         private async Task<bool> HandleSit(RLVMessage command)
         {
-            if (command.Option != string.Empty && !Guid.TryParse(command.Option, out var sitTarget))
+            if (!Guid.TryParse(command.Option, out var sitTarget))
             {
                 return false;
             }

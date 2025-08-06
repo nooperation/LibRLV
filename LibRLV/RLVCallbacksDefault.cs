@@ -130,12 +130,12 @@ namespace LibRLV
             return Task.CompletedTask;
         }
 
-        // TODO: Replace this, just temp hack to get the data i need right now for testing
-        public Task<bool> ObjectExistsAsync(Guid objectID, CancellationToken cancellationToken)
+        public virtual Task<bool> ObjectExistsAsync(Guid objectID, CancellationToken cancellationToken)
         {
             return Task.FromResult(false);
         }
-        public Task<bool> IsSittingAsync(CancellationToken cancellationToken)
+
+        public virtual Task<bool> IsSittingAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(false);
         }
@@ -160,7 +160,7 @@ namespace LibRLV
             return Task.FromResult((false, "None"));
         }
 
-        public Task<(bool Success, IReadOnlyList<InventoryItem>? CurrentOutfit)> TryGetCurrentOutfitAsync(CancellationToken cancellationToken)
+        public virtual Task<(bool Success, IReadOnlyList<InventoryItem>? CurrentOutfit)> TryGetCurrentOutfitAsync(CancellationToken cancellationToken)
         {
             IReadOnlyList<InventoryItem> currentOutfit = [];
             return Task.FromResult((false, (IReadOnlyList<InventoryItem>?)currentOutfit));

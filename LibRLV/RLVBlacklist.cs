@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -14,6 +15,10 @@ namespace LibRLV
 
         }
 
+        /// <summary>
+        /// Gets a copy of the current blacklist
+        /// </summary>
+        /// <returns>Copy of the active blacklist</returns>
         public IReadOnlyCollection<string> GetBlacklist()
         {
             lock (_blacklistLock)
@@ -24,24 +29,52 @@ namespace LibRLV
             }
         }
 
-        public void BlacklistCommand(string command)
+        /// <summary>
+        /// Blacklist a specific RLV behavior
+        /// </summary>
+        /// <param name="behavior">Behavior to blacklist</param>
+        public void BlacklistBehavior(string behavior)
         {
+            if (string.IsNullOrWhiteSpace(behavior))
+            {
+                throw new ArgumentException("Behavior cannot be null or empty.", nameof(behavior));
+            }
+
             lock (_blacklistLock)
             {
-                _blacklist.Add(command.ToLowerInvariant());
+                _blacklist.Add(behavior.ToLowerInvariant());
             }
         }
 
-        public void UnBlacklistCommand(string command)
+        /// <summary>
+        /// Removes a blacklisted behavior
+        /// </summary>
+        /// <param name="behavior">Behavior to un-blacklist</param>
+        public void UnBlacklistBehavior(string behavior)
         {
+            if (string.IsNullOrWhiteSpace(behavior))
+            {
+                throw new ArgumentException("Behavior cannot be null or empty.", nameof(behavior));
+            }
+
             lock (_blacklistLock)
             {
-                _blacklist.Remove(command.ToLowerInvariant());
+                _blacklist.Remove(behavior.ToLowerInvariant());
             }
         }
 
+        /// <summary>
+        /// Checks to see if the specific RLV behavior is blacklisted
+        /// </summary>
+        /// <param name="behavior">Behavior to check</param>
+        /// <returns>True if behavior is blacklisted</returns>
         public bool IsBlacklisted(string behavior)
         {
+            if (string.IsNullOrWhiteSpace(behavior))
+            {
+                return false;
+            }
+
             lock (_blacklistLock)
             {
                 return _blacklist.Contains(behavior.ToLowerInvariant());

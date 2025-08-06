@@ -132,7 +132,7 @@ namespace LibRLV.Tests
             var blacklistEntries = seed.Split(',', StringSplitOptions.RemoveEmptyEntries);
             foreach (var item in blacklistEntries)
             {
-                _rlv.Blacklist.BlacklistCommand(item);
+                _rlv.Blacklist.BlacklistBehavior(item);
             }
         }
 

@@ -27,6 +27,7 @@ namespace LibRLV
             {"alpha", WearableType.Alpha},
             {"tattoo", WearableType.Tattoo},
             {"physics", WearableType.Physics },
+            {"universal", WearableType.Universal},
         }.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
 
         internal static readonly ImmutableDictionary<string, AttachmentPoint> RLVAttachmentPointMap = new Dictionary<string, AttachmentPoint>()
@@ -114,7 +115,6 @@ namespace LibRLV
                 }
             }
 
-            attachmentPoint = AttachmentPoint.Default;
             return false;
         }
     }
