@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using LibRLV.EventArguments;
 
@@ -167,7 +168,7 @@ namespace LibRLV
             return _restrictionToNameMap.TryGetValue(restrictionType, out name);
         }
 
-        private async Task NotifyRestrictionChange(RLVRestriction restriction, bool wasAdded)
+        private async Task NotifyRestrictionChange(RLVRestriction restriction, bool wasAdded, CancellationToken cancellationToken)
         {
             if (!TryGetRestrictionNameFromType(restriction.OriginalBehavior, out var restrictionName))
             {
@@ -182,10 +183,10 @@ namespace LibRLV
 
             notification += wasAdded ? "=n" : "=y";
 
-            await NotifyRestrictionChange(restrictionName, notification);
+            await NotifyRestrictionChange(restrictionName, notification, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task NotifyRestrictionChange(string restrictionName, string notificationMessage)
+        private async Task NotifyRestrictionChange(string restrictionName, string notificationMessage, CancellationToken cancellationToken)
         {
             List<RLVRestriction> notificationRestrictions;
 
@@ -226,8 +227,8 @@ namespace LibRLV
                 await _callbacks.SendReplyAsync(
                     notificationChannel,
                     $"/{notificationMessage}",
-                    System.Threading.CancellationToken.None
-                );
+                    cancellationToken
+                ).ConfigureAwait(false);
             }
         }
 
@@ -243,7 +244,7 @@ namespace LibRLV
             }
         }
 
-        public async Task RemoveRestrictionsForObjects(IEnumerable<Guid> objectIds)
+        public async Task RemoveRestrictionsForObjects(IEnumerable<Guid> objectIds, CancellationToken cancellationToken)
         {
             var objectIdMap = objectIds.ToImmutableHashSet();
             var removedRestrictions = new List<RLVRestriction>();
@@ -267,16 +268,13 @@ namespace LibRLV
                 }
             }
 
-            var notificationTasks = new List<Task>(removedRestrictions.Count);
             foreach (var restriction in removedRestrictions)
             {
                 var handler = RestrictionUpdated;
                 handler?.Invoke(this, new RestrictionUpdatedEventArgs(restriction, false, true));
 
-                notificationTasks.Add(NotifyRestrictionChange(restriction, false));
+                await NotifyRestrictionChange(restriction, false, cancellationToken).ConfigureAwait(false);
             }
-
-            await Task.WhenAll(notificationTasks);
         }
 
         public IReadOnlyList<RLVRestriction> GetRestrictionsByType(RLVRestrictionType restrictionType)
@@ -344,7 +342,7 @@ namespace LibRLV
             return removedRestriction;
         }
 
-        private async Task RemoveRestriction(RLVRestriction restriction)
+        private async Task RemoveRestriction(RLVRestriction restriction, CancellationToken cancellationToken)
         {
             var removedRestriction = false;
 
@@ -359,10 +357,10 @@ namespace LibRLV
                 handler?.Invoke(this, new RestrictionUpdatedEventArgs(restriction, false, true));
             }
 
-            await NotifyRestrictionChange(restriction, false);
+            await NotifyRestrictionChange(restriction, false, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task AddRestriction(RLVRestriction newRestriction)
+        private async Task AddRestriction(RLVRestriction newRestriction, CancellationToken cancellationToken)
         {
             var restrictionAdded = false;
 
@@ -386,10 +384,10 @@ namespace LibRLV
                 handler?.Invoke(this, new RestrictionUpdatedEventArgs(newRestriction, true, false));
             }
 
-            await NotifyRestrictionChange(newRestriction, true);
+            await NotifyRestrictionChange(newRestriction, true, cancellationToken).ConfigureAwait(false);
         }
 
-        internal async Task<bool> ProcessClearCommand(RLVMessage command)
+        internal async Task<bool> ProcessClearCommand(RLVMessage command, CancellationToken cancellationToken)
         {
             var filteredRestrictions = _restrictionToNameMap
                 .Where(n => n.Value.Contains(command.Param.ToLowerInvariant()))
@@ -421,14 +419,14 @@ namespace LibRLV
                     }
                 }
             }
-            await _lockedFolderManager.RebuildLockedFolders();
+            await _lockedFolderManager.RebuildLockedFolders(cancellationToken).ConfigureAwait(false);
 
             foreach (var removedRestriction in removedRestrictions)
             {
                 var handler = RestrictionUpdated;
                 handler?.Invoke(this, new RestrictionUpdatedEventArgs(removedRestriction, false, true));
 
-                await NotifyRestrictionChange(removedRestriction, false);
+                await NotifyRestrictionChange(removedRestriction, false, cancellationToken).ConfigureAwait(false);
             }
 
             var notificationMessage = "clear";
@@ -437,12 +435,12 @@ namespace LibRLV
                 notificationMessage += $":{command.Param}";
             }
 
-            await NotifyRestrictionChange("clear", notificationMessage);
+            await NotifyRestrictionChange("clear", notificationMessage, cancellationToken).ConfigureAwait(false);
 
             return true;
         }
 
-        internal async Task<bool> ProcessRestrictionCommand(RLVMessage message, string option, bool isAddingRestriction)
+        internal async Task<bool> ProcessRestrictionCommand(RLVMessage message, string option, bool isAddingRestriction, CancellationToken cancellationToken)
         {
             if (!TryGetRestrictionFromName(message.Behavior, out var behavior))
             {
@@ -458,11 +456,11 @@ namespace LibRLV
 
             if (isAddingRestriction)
             {
-                await AddRestriction(newCommand);
+                await AddRestriction(newCommand, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                await RemoveRestriction(newCommand);
+                await RemoveRestriction(newCommand, cancellationToken).ConfigureAwait(false);
             }
 
             switch (newCommand.Behavior)
@@ -474,11 +472,11 @@ namespace LibRLV
                 {
                     if (isAddingRestriction)
                     {
-                        await _lockedFolderManager.ProcessFolderException(newCommand, false);
+                        await _lockedFolderManager.ProcessFolderException(newCommand, false, cancellationToken).ConfigureAwait(false);
                     }
                     else
                     {
-                        await _lockedFolderManager.RebuildLockedFolders();
+                        await _lockedFolderManager.RebuildLockedFolders(cancellationToken).ConfigureAwait(false);
                     }
                     break;
                 }
@@ -489,11 +487,11 @@ namespace LibRLV
                 {
                     if (isAddingRestriction)
                     {
-                        await _lockedFolderManager.ProcessFolderException(newCommand, true);
+                        await _lockedFolderManager.ProcessFolderException(newCommand, true, cancellationToken).ConfigureAwait(false);
                     }
                     else
                     {
-                        await _lockedFolderManager.RebuildLockedFolders();
+                        await _lockedFolderManager.RebuildLockedFolders(cancellationToken).ConfigureAwait(false);
                     }
                     break;
                 }

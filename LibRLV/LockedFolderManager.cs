@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LibRLV
 {
-    internal class LockedFolderManager
+    internal sealed class LockedFolderManager
     {
         private readonly IRLVCallbacks _callbacks;
         private readonly RLVRestrictionManager _restrictionManager;
@@ -86,7 +87,7 @@ namespace LibRLV
             }
         }
 
-        internal async Task RebuildLockedFolders()
+        internal async Task RebuildLockedFolders(CancellationToken cancellationToken)
         {
             // AttachThis/DetachThis - Only search within the #RLV root
             //  Attachment:
@@ -100,7 +101,7 @@ namespace LibRLV
             //      Find and all all the folders for all of the attachments in the specified attachment point or of the wearable type.
             //      Add those folders to the locked folder list
 
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return;
@@ -139,26 +140,26 @@ namespace LibRLV
                 }
                 foreach (var exception in detachThisExceptions)
                 {
-                    ProcessFolderException(exception, sharedFolder, inventoryMap);
+                    ProcessFolderException(exception, inventoryMap);
                 }
                 foreach (var exception in detachAllThisExceptions)
                 {
-                    ProcessFolderException(exception, sharedFolder, inventoryMap);
+                    ProcessFolderException(exception, inventoryMap);
                 }
                 foreach (var exception in attachThisExceptions)
                 {
-                    ProcessFolderException(exception, sharedFolder, inventoryMap);
+                    ProcessFolderException(exception, inventoryMap);
                 }
                 foreach (var exception in attachAllThisExceptions)
                 {
-                    ProcessFolderException(exception, sharedFolder, inventoryMap);
+                    ProcessFolderException(exception, inventoryMap);
                 }
             }
         }
 
-        internal async Task<bool> ProcessFolderException(RLVRestriction restriction, bool isException)
+        internal async Task<bool> ProcessFolderException(RLVRestriction restriction, bool isException, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -168,7 +169,7 @@ namespace LibRLV
 
             if (isException)
             {
-                return ProcessFolderException(restriction, sharedFolder, inventoryMap);
+                return ProcessFolderException(restriction, inventoryMap);
             }
             else
             {
@@ -176,7 +177,7 @@ namespace LibRLV
             }
         }
 
-        private bool ProcessFolderException(RLVRestriction exception, InventoryTree sharedFolder, InventoryMap inventoryMap)
+        private bool ProcessFolderException(RLVRestriction exception, InventoryMap inventoryMap)
         {
             if (exception.Args.Count == 0)
             {

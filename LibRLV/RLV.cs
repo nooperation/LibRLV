@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,8 +54,9 @@ namespace LibRLV
         /// <param name="message">Message containing the command or commands</param>
         /// <param name="senderId">ID of the object sending the command</param>
         /// <param name="senderName">Name of the object sending the command</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>True if all of the command were processed successfully</returns>
-        public async Task<bool> ProcessMessage(string message, Guid senderId, string senderName)
+        public async Task<bool> ProcessMessage(string message, Guid senderId, string senderName, CancellationToken cancellationToken = default)
         {
             if (!Enabled || !message.StartsWith("@", StringComparison.OrdinalIgnoreCase))
             {
@@ -66,7 +66,8 @@ namespace LibRLV
             var result = true;
             foreach (var singleMessage in message.Substring(1).Split(','))
             {
-                var isSuccessful = await ProcessSingleMessage(singleMessage, senderId, senderName);
+                cancellationToken.ThrowIfCancellationRequested();
+                var isSuccessful = await ProcessSingleMessage(singleMessage, senderId, senderName, cancellationToken).ConfigureAwait(false);
                 if (!isSuccessful)
                 {
                     result = false;
@@ -81,8 +82,9 @@ namespace LibRLV
         /// </summary>
         /// <param name="message">Instant message command</param>
         /// <param name="senderId">ID of the user sending the instant message</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>True if the command was successfully processed</returns>
-        public async Task<bool> ProcessInstantMessage(string message, Guid senderId)
+        public async Task<bool> ProcessInstantMessage(string message, Guid senderId, CancellationToken cancellationToken = default)
         {
             if (!EnableInstantMessageProcessing || !Enabled || !message.StartsWith("@", StringComparison.OrdinalIgnoreCase))
             {
@@ -94,15 +96,16 @@ namespace LibRLV
                 return false;
             }
 
-            return await GetRequestHandler.ProcessInstantMessageCommand(message.ToLowerInvariant(), senderId);
+            return await GetRequestHandler.ProcessInstantMessageCommand(message.ToLowerInvariant(), senderId, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Report the sending of a public message by the current user
         /// </summary>
         /// <param name="message">Message being sent to public chat (channel 0)</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task ReportSendPublicMessage(string message)
+        public async Task ReportSendPublicMessage(string message, CancellationToken cancellationToken = default)
         {
             IReadOnlyList<int> channels;
 
@@ -121,19 +124,19 @@ namespace LibRLV
                 }
             }
 
-            var tasks = channels
-                .Select(channel => Callbacks.SendReplyAsync(channel, message, System.Threading.CancellationToken.None));
-
-            await Task.WhenAll(tasks);
+            foreach (var channel in channels)
+            {
+                await Callbacks.SendReplyAsync(channel, message, cancellationToken).ConfigureAwait(false);
+            }
         }
-
 
         /// <summary>
         /// Report that the user has just accepted an inventory offer
         /// </summary>
         /// <param name="folderPath">Path to the accepted folder</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task ReportInventoryOfferAccepted(string folderPath)
+        public async Task ReportInventoryOfferAccepted(string folderPath, CancellationToken cancellationToken = default)
         {
             var isSharedFolder = false;
 
@@ -153,15 +156,16 @@ namespace LibRLV
                 notificationText = $"/accepted_in_inv inv_offer {folderPath}";
             }
 
-            await SendNotification(notificationText);
+            await SendNotification(notificationText, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Report that the user has just declined an inventory offer
         /// </summary>
         /// <param name="folderPath">Path to the declined folder</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task ReportInventoryOfferDeclined(string folderPath)
+        public async Task ReportInventoryOfferDeclined(string folderPath, CancellationToken cancellationToken = default)
         {
             if (folderPath.StartsWith("#RLV/", StringComparison.Ordinal))
             {
@@ -169,7 +173,7 @@ namespace LibRLV
             }
 
             var notificationText = $"/declined inv_offer {folderPath}";
-            await SendNotification(notificationText);
+            await SendNotification(notificationText, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -178,8 +182,9 @@ namespace LibRLV
         /// <param name="objectFolderId">Folder id containing the item being worn</param>
         /// <param name="isShared">True if this folder is a shared folder</param>
         /// <param name="wearableType">Type of wearable being worn</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task ReportItemWorn(Guid objectFolderId, bool isShared, WearableType wearableType)
+        public async Task ReportItemWorn(Guid objectFolderId, bool isShared, WearableType wearableType, CancellationToken cancellationToken = default)
         {
             var notificationText = "";
             var isLegal = Permissions.CanAttach(objectFolderId, isShared, null, wearableType);
@@ -193,7 +198,7 @@ namespace LibRLV
                 notificationText = $"/worn illegally {wearableType.ToString().ToLowerInvariant()}";
             }
 
-            await SendNotification(notificationText);
+            await SendNotification(notificationText, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -202,8 +207,9 @@ namespace LibRLV
         /// <param name="objectFolderId">Folder id containing the item being removed</param>
         /// <param name="isShared">True if this folder is a shared folder</param>
         /// <param name="wearableType">Type of wearable being removed</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task ReportItemUnworn(Guid objectFolderId, bool isShared, WearableType wearableType)
+        public async Task ReportItemUnworn(Guid objectFolderId, bool isShared, WearableType wearableType, CancellationToken cancellationToken = default)
         {
             var notificationText = "";
             var isLegal = Permissions.CanDetach(objectFolderId, isShared, null, wearableType);
@@ -217,7 +223,7 @@ namespace LibRLV
                 notificationText = $"/unworn illegally {wearableType.ToString().ToLowerInvariant()}";
             }
 
-            await SendNotification(notificationText);
+            await SendNotification(notificationText, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -226,8 +232,9 @@ namespace LibRLV
         /// <param name="objectFolderId">ID of the folder containing the item being attached</param>
         /// <param name="isShared">True if the folder is a shared folder</param>
         /// <param name="attachmentPoint">Attachment point where the item was attached</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task ReportItemAttached(Guid objectFolderId, bool isShared, AttachmentPoint attachmentPoint)
+        public async Task ReportItemAttached(Guid objectFolderId, bool isShared, AttachmentPoint attachmentPoint, CancellationToken cancellationToken = default)
         {
             var notificationText = "";
             var isLegal = Permissions.CanAttach(objectFolderId, isShared, attachmentPoint, null);
@@ -241,7 +248,7 @@ namespace LibRLV
                 notificationText = $"/attached illegally {attachmentPoint.ToString().ToLowerInvariant()}";
             }
 
-            await SendNotification(notificationText);
+            await SendNotification(notificationText, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -250,8 +257,9 @@ namespace LibRLV
         /// <param name="objectFolderId">ID of the folder containing the item being detached</param>
         /// <param name="isShared">True if the folder is a shared folder</param>
         /// <param name="attachmentPoint">Attachment point where the item was detached from</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task ReportItemDetached(Guid objectFolderId, bool isShared, AttachmentPoint attachmentPoint)
+        public async Task ReportItemDetached(Guid objectFolderId, bool isShared, AttachmentPoint attachmentPoint, CancellationToken cancellationToken = default)
         {
             var notificationText = "";
             var isLegal = Permissions.CanDetach(objectFolderId, isShared, attachmentPoint, null);
@@ -265,15 +273,16 @@ namespace LibRLV
                 notificationText = $"/detached illegally {attachmentPoint.ToString().ToLowerInvariant()}";
             }
 
-            await SendNotification(notificationText);
+            await SendNotification(notificationText, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Report that the current user just sat on the ground or an object
         /// </summary>
         /// <param name="objectId">Null if user sat on the ground, otherwise ID of the object being sat on</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns></returns>
-        public async Task ReportSit(Guid? objectId)
+        public async Task ReportSit(Guid? objectId, CancellationToken cancellationToken = default)
         {
             var notificationText = "";
 
@@ -304,15 +313,16 @@ namespace LibRLV
                 }
             }
 
-            await SendNotification(notificationText);
+            await SendNotification(notificationText, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Report that the user stands up from sitting on the ground or an object
         /// </summary>
         /// <param name="objectId">Null if user was sitting on the ground, otherwise ID of the object user was sitting on</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task ReportUnsit(Guid? objectId)
+        public async Task ReportUnsit(Guid? objectId, CancellationToken cancellationToken = default)
         {
             var notificationText = "";
 
@@ -343,18 +353,18 @@ namespace LibRLV
                 }
             }
 
-            await SendNotification(notificationText);
+            await SendNotification(notificationText, cancellationToken).ConfigureAwait(false);
         }
         #endregion
 
         #region Private
-        private async Task<bool> ProcessRLVMessage(RLVMessage rlvMessage)
+        private async Task<bool> ProcessRLVMessage(RLVMessage rlvMessage, CancellationToken cancellationToken)
         {
             if (Blacklist.IsBlacklisted(rlvMessage.Behavior))
             {
                 if (int.TryParse(rlvMessage.Param, out var channel))
                 {
-                    await Callbacks.SendReplyAsync(channel, "", CancellationToken.None);
+                    await Callbacks.SendReplyAsync(channel, "", cancellationToken).ConfigureAwait(false);
                 }
 
                 return false;
@@ -362,15 +372,15 @@ namespace LibRLV
 
             if (rlvMessage.Behavior == "clear")
             {
-                return await Restrictions.ProcessClearCommand(rlvMessage);
+                return await Restrictions.ProcessClearCommand(rlvMessage, cancellationToken).ConfigureAwait(false);
             }
             else if (rlvMessage.Param == "force")
             {
-                return await Commands.ProcessActionCommand(rlvMessage);
+                return await Commands.ProcessActionCommand(rlvMessage, cancellationToken).ConfigureAwait(false);
             }
             else if (rlvMessage.Param is "y" or "n" or "add" or "rem")
             {
-                return await Restrictions.ProcessRestrictionCommand(rlvMessage, rlvMessage.Option, rlvMessage.Param is "n" or "add");
+                return await Restrictions.ProcessRestrictionCommand(rlvMessage, rlvMessage.Option, rlvMessage.Param is "n" or "add", cancellationToken).ConfigureAwait(false);
             }
             else if (int.TryParse(rlvMessage.Param, out var channel))
             {
@@ -379,13 +389,13 @@ namespace LibRLV
                     return false;
                 }
 
-                return await GetRequestHandler.ProcessGetCommand(rlvMessage, channel);
+                return await GetRequestHandler.ProcessGetCommand(rlvMessage, channel, cancellationToken).ConfigureAwait(false);
             }
 
             return false;
         }
 
-        private async Task<bool> ProcessSingleMessage(string message, Guid senderId, string senderName)
+        private async Task<bool> ProcessSingleMessage(string message, Guid senderId, string senderName, CancellationToken cancellationToken)
         {
             // Special hack for @clear, which doesn't match the standard pattern of @behavior=param
             if (message.Equals("clear", StringComparison.OrdinalIgnoreCase))
@@ -396,7 +406,7 @@ namespace LibRLV
                     param: "",
                     sender: senderId,
                     senderName: senderName
-                ));
+                ), cancellationToken).ConfigureAwait(false);
             }
 
             var match = _rlvRegexPattern.Match(message);
@@ -413,13 +423,12 @@ namespace LibRLV
                 senderName: senderName
             );
 
-            return await ProcessRLVMessage(rlvMessage);
+            return await ProcessRLVMessage(rlvMessage, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task SendNotification(string notificationText)
+        private async Task SendNotification(string notificationText, CancellationToken cancellationToken)
         {
             var notificationRestrictions = Restrictions.GetRestrictionsByType(RLVRestrictionType.Notify);
-            var tasks = new List<Task>(notificationRestrictions.Count);
 
             foreach (var notificationRestriction in notificationRestrictions)
             {
@@ -435,11 +444,9 @@ namespace LibRLV
 
                 if (notificationText.Contains(filter))
                 {
-                    tasks.Add(Callbacks.SendReplyAsync(channel, notificationText, System.Threading.CancellationToken.None));
+                    await Callbacks.SendReplyAsync(channel, notificationText, cancellationToken).ConfigureAwait(false);
                 }
             }
-
-            await Task.WhenAll(tasks);
         }
         #endregion
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using LibRLV.EventArguments;
 
@@ -9,7 +10,7 @@ namespace LibRLV
 {
     public class RLVCommandProcessor
     {
-        private readonly ImmutableDictionary<string, Func<RLVMessage, Task<bool>>> _rlvActionHandlers;
+        private readonly ImmutableDictionary<string, Func<RLVMessage, CancellationToken, Task<bool>>> _rlvActionHandlers;
 
         public event EventHandler<SetRotEventArgs>? SetRot;
         public event EventHandler<AdjustHeightEventArgs>? AdjustHeight;
@@ -34,68 +35,78 @@ namespace LibRLV
             _manager = manager;
             _callbacks = callbacks;
 
-            _rlvActionHandlers = new Dictionary<string, Func<RLVMessage, Task<bool>>>()
+            _rlvActionHandlers = new Dictionary<string, Func<RLVMessage, CancellationToken, Task<bool>>>()
             {
-                { "setrot", HandleSetRot },
-                { "adjustheight", HandleAdjustHeight},
-                { "setcam_fov", HandleSetCamFOV},
-                { "tpto", HandleTpTo},
+                { "setrot", (command, cancellationToken) => HandleSetRot(command) },
+                { "adjustheight", (command, cancellationToken) => HandleAdjustHeight(command)},
+                { "setcam_fov", (command, cancellationToken) => HandleSetCamFOV(command)},
+                { "tpto", (command, cancellationToken) => HandleTpTo(command)},
                 { "sit", HandleSit},
-                { "unsit", HandleUnsit},
-                { "sitground", HandleSitGround},
+                { "unsit", (command, cancellationToken) => HandleUnsit(command)},
+                { "sitground", (command, cancellationToken) => HandleSitGround(command)},
                 { "remoutfit", HandleRemOutfit},
                 { "detachme", HandleDetachMe},
                 { "remattach", HandleRemAttach},
                 { "detach", HandleRemAttach},
                 { "detachall", HandleDetachAll},
-                { "detachthis", n => HandleDetachThis(n, false)},
-                { "detachallthis", n => HandleDetachThis(n, true)},
-                { "setgroup", HandleSetGroup},
-                { "setdebug_", HandleSetDebug},
-                { "setenv_", HandleSetEnv},
+                { "detachthis", (command, cancellationToken) => HandleDetachThis(command, false, cancellationToken)},
+                { "detachallthis", (command, cancellationToken) => HandleDetachThis(command, true, cancellationToken)},
+                { "setgroup", (command, cancellationToken) => HandleSetGroup(command)},
+                { "setdebug_", (command, cancellationToken) => HandleSetDebug(command)},
+                { "setenv_", (command, cancellationToken) => HandleSetEnv(command)},
+                { "detachallthis", (command, cancellationToken) => HandleDetachThis(command, true, cancellationToken)},
+                { "setgroup", (command, cancellationToken) => HandleSetGroup(command)},
+                { "setdebug_", (command, cancellationToken) => HandleSetDebug(command)},
+                { "setenv_", (command, cancellationToken) => HandleSetEnv(command)},
+                { "detachallthis", (command, cancellationToken) => HandleDetachThis(command, true, cancellationToken)},
+                { "setgroup", (command, cancellationToken) => HandleSetGroup(command)},
+                { "setdebug_", (command, cancellationToken) => HandleSetDebug(command)},
+                { "setenv_", (command, cancellationToken) => HandleSetEnv(command)},
+                { "detachallthis", (command, cancellationToken) => HandleDetachThis(command, true, cancellationToken)},
+                { "setgroup", (command, cancellationToken) => HandleSetGroup(command)},
+                { "setdebug_", (command, cancellationToken) => HandleSetDebug(command)},
+                { "setenv_", (command, cancellationToken) => HandleSetEnv(command)},
 
-                { "attach", n => HandleAttach(n, true, false)},
-                { "attachall", n => HandleAttach(n, true, true)},
-                { "attachover", n => HandleAttach(n, false, false)},
-                { "attachallover", n => HandleAttach(n, false, true)},
-                { "attachthis", n => HandleAttachThis(n, true, false)},
-                { "attachallthis", n => HandleAttachThis(n, true, true)},
-                { "attachthisover", n => HandleAttachThis(n, false, false)},
-                { "attachallthisover", n => HandleAttachThis(n, false, true)},
+                { "attach", (command, cancellationToken) => HandleAttach(command, true, false, cancellationToken)},
+                { "attachall", (command, cancellationToken) => HandleAttach(command, true, true, cancellationToken)},
+                { "attachover", (command, cancellationToken) => HandleAttach(command, false, false, cancellationToken)},
+                { "attachallover", (command, cancellationToken) => HandleAttach(command, false, true, cancellationToken)},
+                { "attachthis", (command, cancellationToken) => HandleAttachThis(command, true, false, cancellationToken)},
+                { "attachallthis", (command, cancellationToken) => HandleAttachThis(command, true, true, cancellationToken)},
+                { "attachthisover", (command, cancellationToken) => HandleAttachThis(command, false, false, cancellationToken)},
+                { "attachallthisover", (command, cancellationToken) => HandleAttachThis(command, false, true, cancellationToken)},
 
                 // addoutfit* -> attach* (These are all aliases of their corresponding attach command)
-                { "addoutfit", n => HandleAttach(n, true, false)},
-                { "addoutfitall", n => HandleAttach(n, true, true)},
-                { "addoutfitover", n => HandleAttach(n, false, false)},
-                { "addoutfitallover", n => HandleAttach(n, false, true)},
-                { "addoutfitthis", n => HandleAttachThis(n, true, false)},
-                { "addoutfitallthis", n => HandleAttachThis(n, true, true)},
-                { "addoutfitthisover", n => HandleAttachThis(n, false, false)},
-                { "addoutfitallthisover", n => HandleAttachThis(n, false, true)},
+                { "addoutfit", (command, cancellationToken) => HandleAttach(command, true, false, cancellationToken)},
+                { "addoutfitall", (command, cancellationToken) => HandleAttach(command, true, true, cancellationToken)},
+                { "addoutfitover", (command, cancellationToken) => HandleAttach(command, false, false, cancellationToken)},
+                { "addoutfitallover", (command, cancellationToken) => HandleAttach(command, false, true, cancellationToken)},
+                { "addoutfitthis", (command, cancellationToken) => HandleAttachThis(command, true, false, cancellationToken)},
+                { "addoutfitallthis", (command, cancellationToken) => HandleAttachThis(command, true, true, cancellationToken)},
+                { "addoutfitthisover", (command, cancellationToken) => HandleAttachThis(command, false, false, cancellationToken)},
+                { "addoutfitallthisover", (command, cancellationToken) => HandleAttachThis(command, false, true, cancellationToken)},
 
                 // *overorreplace -> *  (These are all aliases of their corresponding attach command)
-                { "attachoverorreplace", n => HandleAttach(n, true, false)},
-                { "attachalloverorreplace", n => HandleAttach(n, true, true)},
-                { "attachthisoverorreplace", n => HandleAttachThis(n, true, false)},
-                { "attachallthisoverorreplace", n => HandleAttachThis(n, true, true)},
-
-
+                { "attachoverorreplace", (command, cancellationToken) => HandleAttach(command, true, false, cancellationToken)},
+                { "attachalloverorreplace", (command, cancellationToken) => HandleAttach(command, true, true, cancellationToken)},
+                { "attachthisoverorreplace", (command, cancellationToken) => HandleAttachThis(command, true, false, cancellationToken)},
+                { "attachallthisoverorreplace", (command, cancellationToken) => HandleAttachThis(command, true, true, cancellationToken)},
             }.ToImmutableDictionary();
         }
 
-        internal async Task<bool> ProcessActionCommand(RLVMessage command)
+        internal async Task<bool> ProcessActionCommand(RLVMessage command, CancellationToken cancellationToken)
         {
             if (_rlvActionHandlers.TryGetValue(command.Behavior, out var func))
             {
-                return await func(command);
+                return await func(command, cancellationToken).ConfigureAwait(false);
             }
             else if (command.Behavior.StartsWith("setdebug_", StringComparison.OrdinalIgnoreCase))
             {
-                return await _rlvActionHandlers["setdebug_"](command);
+                return await _rlvActionHandlers["setdebug_"](command, cancellationToken).ConfigureAwait(false);
             }
             else if (command.Behavior.StartsWith("setenv_", StringComparison.OrdinalIgnoreCase))
             {
-                return await _rlvActionHandlers["setenv_"](command);
+                return await _rlvActionHandlers["setenv_"](command, cancellationToken).ConfigureAwait(false);
             }
 
             return false;
@@ -265,9 +276,9 @@ namespace LibRLV
         }
 
         // @attach:[folder]=force
-        private async Task<bool> HandleAttach(RLVMessage command, bool replaceExistingAttachments, bool recursive)
+        private async Task<bool> HandleAttach(RLVMessage command, bool replaceExistingAttachments, bool recursive, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -293,9 +304,9 @@ namespace LibRLV
             }
         }
 
-        private async Task<bool> HandleAttachThis(RLVMessage command, bool replaceExistingAttachments, bool recursive)
+        private async Task<bool> HandleAttachThis(RLVMessage command, bool replaceExistingAttachments, bool recursive, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -370,15 +381,15 @@ namespace LibRLV
 
         // @remattach[:<folder|attachpt|uuid>]=force
         // TODO: Add support for Attachment groups (RLVa)
-        private async Task<bool> HandleRemAttach(RLVMessage command)
+        private async Task<bool> HandleRemAttach(RLVMessage command, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
             }
 
-            var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync();
+            var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync(cancellationToken).ConfigureAwait(false);
             if (!hasCurrentOutfit || currentOutfit == null)
             {
                 return false;
@@ -436,9 +447,9 @@ namespace LibRLV
             return true;
         }
 
-        private async Task<bool> HandleDetachAll(RLVMessage command)
+        private async Task<bool> HandleDetachAll(RLVMessage command, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -459,9 +470,9 @@ namespace LibRLV
             return true;
         }
 
-        private async Task<bool> HandleDetachThis(RLVMessage command, bool recursive)
+        private async Task<bool> HandleDetachThis(RLVMessage command, bool recursive, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -512,9 +523,9 @@ namespace LibRLV
         }
 
         // @detachme=force
-        private async Task<bool> HandleDetachMe(RLVMessage command)
+        private async Task<bool> HandleDetachMe(RLVMessage command, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -538,14 +549,14 @@ namespace LibRLV
 
         // @remoutfit[:<folder|layer>]=force
         // TODO: Add support for Attachment groups (RLVa)
-        private async Task<bool> HandleRemOutfit(RLVMessage command)
+        private async Task<bool> HandleRemOutfit(RLVMessage command, CancellationToken cancellationToken)
         {
-            var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync();
+            var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync(cancellationToken).ConfigureAwait(false);
             if (!hasCurrentOutfit || currentOutfit == null)
             {
                 return false;
             }
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync();
+            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -679,7 +690,7 @@ namespace LibRLV
             return Task.FromResult(true);
         }
 
-        private async Task<bool> HandleSit(RLVMessage command)
+        private async Task<bool> HandleSit(RLVMessage command, CancellationToken cancellationToken)
         {
             if (!Guid.TryParse(command.Option, out var sitTarget))
             {
@@ -691,13 +702,13 @@ namespace LibRLV
                 return false;
             }
 
-            var objectExists = await _callbacks.ObjectExistsAsync(sitTarget);
+            var objectExists = await _callbacks.ObjectExistsAsync(sitTarget, cancellationToken).ConfigureAwait(false);
             if (!objectExists)
             {
                 return false;
             }
 
-            var isCurrentlySitting = await _callbacks.IsSittingAsync();
+            var isCurrentlySitting = await _callbacks.IsSittingAsync(cancellationToken).ConfigureAwait(false);
             if (isCurrentlySitting)
             {
                 if (!_manager.CanUnsit())
