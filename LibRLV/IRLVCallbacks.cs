@@ -62,11 +62,11 @@ namespace LibRLV
         Task<(bool Success, Guid SitId)> TryGetSitIdAsync(CancellationToken cancellationToken);
 
         /// <summary>
-        /// Gets the RLV shared folder inventory tree
+        /// Gets the RLV shared folder
         /// </summary>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Success flag and inventory tree if successful</returns>
-        Task<(bool Success, InventoryTree? SharedFolder)> TryGetSharedFolderAsync(CancellationToken cancellationToken);
+        /// <returns>Success flag and shared folder successful</returns>
+        Task<(bool Success, InventoryFolder? SharedFolder)> TryGetSharedFolderAsync(CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets current camera settings

@@ -203,7 +203,7 @@ namespace LibRLV
             return true;
         }
 
-        private static void CollectItemsToAttach(InventoryTree folder, bool replaceExistingAttachments, bool recursive, List<AttachmentEventArgs.AttachmentRequest> itemsToAttach)
+        private static void CollectItemsToAttach(InventoryFolder folder, bool replaceExistingAttachments, bool recursive, List<AttachmentEventArgs.AttachmentRequest> itemsToAttach)
         {
             if (folder.Name.Length > 0)
             {
@@ -301,7 +301,7 @@ namespace LibRLV
             }
 
             var inventoryMap = new InventoryMap(sharedFolder);
-            var folderPaths = new List<InventoryTree>();
+            var folderPaths = new List<InventoryFolder>();
 
             if (RLVCommon.RLVWearableTypeMap.TryGetValue(command.Option, out var wearableType))
             {
@@ -336,7 +336,7 @@ namespace LibRLV
             return true;
         }
 
-        private void CollectItemsToDetach(InventoryTree folder, InventoryMap inventoryMap, bool recursive, List<Guid> itemsToDetach)
+        private void CollectItemsToDetach(InventoryFolder folder, InventoryMap inventoryMap, bool recursive, List<Guid> itemsToDetach)
         {
             if (folder.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
             {
@@ -466,7 +466,7 @@ namespace LibRLV
                 return false;
             }
             var inventoryMap = new InventoryMap(sharedFolder);
-            var folderPaths = new List<InventoryTree>();
+            var folderPaths = new List<InventoryFolder>();
 
             if (Guid.TryParse(command.Option, out var uuid))
             {

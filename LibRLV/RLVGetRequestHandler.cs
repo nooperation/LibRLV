@@ -11,7 +11,7 @@ namespace LibRLV
 {
     internal sealed class RLVGetRequestHandler
     {
-        private readonly ImmutableDictionary<string, RLVDataRequest> _rlvDataRequestToNameMap;
+        private readonly ImmutableDictionary<string, RLVDataRequestType> _rlvDataRequestToNameMap;
         private readonly IRestrictionProvider _restrictions;
         private readonly IBlacklistProvider _blacklist;
         private readonly IRLVCallbacks _callbacks;
@@ -22,24 +22,24 @@ namespace LibRLV
             _blacklist = blacklist;
             _callbacks = callbacks;
 
-            _rlvDataRequestToNameMap = new Dictionary<string, RLVDataRequest>()
+            _rlvDataRequestToNameMap = new Dictionary<string, RLVDataRequestType>()
             {
-                { "getcam_avdistmin", RLVDataRequest.GetCamAvDistMin },
-                { "getcam_avdistmax", RLVDataRequest.GetCamAvDistMax },
-                { "getcam_fovmin", RLVDataRequest.GetCamFovMin },
-                { "getcam_fovmax", RLVDataRequest.GetCamFovMax },
-                { "getcam_zoommin", RLVDataRequest.GetCamZoomMin },
-                { "getcam_fov", RLVDataRequest.GetCamFov },
-                { "getsitid", RLVDataRequest.GetSitId },
-                { "getoutfit", RLVDataRequest.GetOutfit },
-                { "getattach", RLVDataRequest.GetAttach },
-                { "getinv", RLVDataRequest.GetInv },
-                { "getinvworn", RLVDataRequest.GetInvWorn },
-                { "findfolder", RLVDataRequest.FindFolder },
-                { "findfolders", RLVDataRequest.FindFolders },
-                { "getpath", RLVDataRequest.GetPath },
-                { "getpathnew", RLVDataRequest.GetPathNew },
-                { "getgroup", RLVDataRequest.GetGroup }
+                { "getcam_avdistmin", RLVDataRequestType.GetCamAvDistMin },
+                { "getcam_avdistmax", RLVDataRequestType.GetCamAvDistMax },
+                { "getcam_fovmin", RLVDataRequestType.GetCamFovMin },
+                { "getcam_fovmax", RLVDataRequestType.GetCamFovMax },
+                { "getcam_zoommin", RLVDataRequestType.GetCamZoomMin },
+                { "getcam_fov", RLVDataRequestType.GetCamFov },
+                { "getsitid", RLVDataRequestType.GetSitId },
+                { "getoutfit", RLVDataRequestType.GetOutfit },
+                { "getattach", RLVDataRequestType.GetAttach },
+                { "getinv", RLVDataRequestType.GetInv },
+                { "getinvworn", RLVDataRequestType.GetInvWorn },
+                { "findfolder", RLVDataRequestType.FindFolder },
+                { "findfolders", RLVDataRequestType.FindFolders },
+                { "getpath", RLVDataRequestType.GetPath },
+                { "getpathnew", RLVDataRequestType.GetPathNew },
+                { "getgroup", RLVDataRequestType.GetGroup }
             }.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
         }
 
@@ -205,7 +205,7 @@ namespace LibRLV
             {
                 switch (name)
                 {
-                    case RLVDataRequest.GetSitId:
+                    case RLVDataRequestType.GetSitId:
                     {
                         var (hasSitId, sitId) = await _callbacks.TryGetSitIdAsync(cancellationToken).ConfigureAwait(false);
                         if (!hasSitId || sitId == Guid.Empty)
@@ -219,12 +219,12 @@ namespace LibRLV
 
                         break;
                     }
-                    case RLVDataRequest.GetCamAvDistMin:
-                    case RLVDataRequest.GetCamAvDistMax:
-                    case RLVDataRequest.GetCamFovMin:
-                    case RLVDataRequest.GetCamFovMax:
-                    case RLVDataRequest.GetCamZoomMin:
-                    case RLVDataRequest.GetCamFov:
+                    case RLVDataRequestType.GetCamAvDistMin:
+                    case RLVDataRequestType.GetCamAvDistMax:
+                    case RLVDataRequestType.GetCamFovMin:
+                    case RLVDataRequestType.GetCamFovMax:
+                    case RLVDataRequestType.GetCamZoomMin:
+                    case RLVDataRequestType.GetCamFov:
                     {
                         var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync(cancellationToken).ConfigureAwait(false);
                         if (!hasCameraSettings || cameraSettings == null)
@@ -234,32 +234,32 @@ namespace LibRLV
 
                         switch (name)
                         {
-                            case RLVDataRequest.GetCamAvDistMin:
+                            case RLVDataRequestType.GetCamAvDistMin:
                             {
                                 response = cameraSettings.Value.AvDistMin.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
-                            case RLVDataRequest.GetCamAvDistMax:
+                            case RLVDataRequestType.GetCamAvDistMax:
                             {
                                 response = cameraSettings.Value.AvDistMax.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
-                            case RLVDataRequest.GetCamFovMin:
+                            case RLVDataRequestType.GetCamFovMin:
                             {
                                 response = cameraSettings.Value.FovMin.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
-                            case RLVDataRequest.GetCamFovMax:
+                            case RLVDataRequestType.GetCamFovMax:
                             {
                                 response = cameraSettings.Value.FovMax.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
-                            case RLVDataRequest.GetCamZoomMin:
+                            case RLVDataRequestType.GetCamZoomMin:
                             {
                                 response = cameraSettings.Value.ZoomMin.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
-                            case RLVDataRequest.GetCamFov:
+                            case RLVDataRequestType.GetCamFov:
                             {
                                 response = cameraSettings.Value.CurrentFov.ToString(CultureInfo.InvariantCulture);
                                 break;
@@ -269,7 +269,7 @@ namespace LibRLV
                         break;
                     }
 
-                    case RLVDataRequest.GetGroup:
+                    case RLVDataRequestType.GetGroup:
                     {
                         var (hasGroup, group) = await _callbacks.TryGetActiveGroupNameAsync(cancellationToken).ConfigureAwait(false);
 
@@ -283,7 +283,7 @@ namespace LibRLV
                         }
                         break;
                     }
-                    case RLVDataRequest.GetOutfit:
+                    case RLVDataRequestType.GetOutfit:
                     {
                         WearableType? wearableType = null;
                         if (RLVCommon.RLVWearableTypeMap.TryGetValue(rlvMessage.Option, out var wearableTypeTemp))
@@ -294,7 +294,7 @@ namespace LibRLV
                         response = await ProcessGetOutfit(wearableType, cancellationToken).ConfigureAwait(false);
                         break;
                     }
-                    case RLVDataRequest.GetAttach:
+                    case RLVDataRequestType.GetAttach:
                     {
                         AttachmentPoint? attachmentPointType = null;
                         if (RLVCommon.RLVAttachmentPointMap.TryGetValue(rlvMessage.Option, out var attachmentPointTemp))
@@ -305,14 +305,14 @@ namespace LibRLV
                         response = await ProcessGetAttach(attachmentPointType, cancellationToken).ConfigureAwait(false);
                         break;
                     }
-                    case RLVDataRequest.GetInv:
+                    case RLVDataRequestType.GetInv:
                         response = await HandleGetInv(rlvMessage.Option, cancellationToken).ConfigureAwait(false);
                         break;
-                    case RLVDataRequest.GetInvWorn:
+                    case RLVDataRequestType.GetInvWorn:
                         response = await HandleGetInvWorn(rlvMessage.Option, cancellationToken).ConfigureAwait(false);
                         break;
-                    case RLVDataRequest.FindFolder:
-                    case RLVDataRequest.FindFolders:
+                    case RLVDataRequestType.FindFolder:
+                    case RLVDataRequestType.FindFolders:
                     {
                         var findFolderParts = rlvMessage.Option.Split(';');
                         var separator = ",";
@@ -324,11 +324,11 @@ namespace LibRLV
                             separator = findFolderParts[1];
                         }
 
-                        response = await HandleFindFolders(name == RLVDataRequest.FindFolder, searchTerms, separator, cancellationToken).ConfigureAwait(false);
+                        response = await HandleFindFolders(name == RLVDataRequestType.FindFolder, searchTerms, separator, cancellationToken).ConfigureAwait(false);
                         break;
                     }
-                    case RLVDataRequest.GetPath:
-                    case RLVDataRequest.GetPathNew:
+                    case RLVDataRequestType.GetPath:
+                    case RLVDataRequestType.GetPathNew:
                     {
                         // [] | [uuid | layer | attachpt ]
                         var parsedOptions = rlvMessage.Option.Split([';'], StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -340,19 +340,19 @@ namespace LibRLV
 
                         if (parsedOptions.Count == 0)
                         {
-                            response = await HandleGetPath(name == RLVDataRequest.GetPath, rlvMessage.Sender, null, null, cancellationToken).ConfigureAwait(false);
+                            response = await HandleGetPath(name == RLVDataRequestType.GetPath, rlvMessage.Sender, null, null, cancellationToken).ConfigureAwait(false);
                         }
                         else if (Guid.TryParse(parsedOptions[0], out var uuid))
                         {
-                            response = await HandleGetPath(name == RLVDataRequest.GetPath, uuid, null, null, cancellationToken).ConfigureAwait(false);
+                            response = await HandleGetPath(name == RLVDataRequestType.GetPath, uuid, null, null, cancellationToken).ConfigureAwait(false);
                         }
                         else if (RLVCommon.RLVWearableTypeMap.TryGetValue(parsedOptions[0], out var wearableType))
                         {
-                            response = await HandleGetPath(name == RLVDataRequest.GetPath, null, null, wearableType, cancellationToken).ConfigureAwait(false);
+                            response = await HandleGetPath(name == RLVDataRequestType.GetPath, null, null, wearableType, cancellationToken).ConfigureAwait(false);
                         }
                         else if (RLVCommon.RLVAttachmentPointMap.TryGetValue(parsedOptions[0], out var attachmentPoint))
                         {
-                            response = await HandleGetPath(name == RLVDataRequest.GetPath, null, attachmentPoint, null, cancellationToken).ConfigureAwait(false);
+                            response = await HandleGetPath(name == RLVDataRequestType.GetPath, null, attachmentPoint, null, cancellationToken).ConfigureAwait(false);
                         }
                         else
                         {
@@ -409,7 +409,7 @@ namespace LibRLV
                 return $"{FolderName}|{CountIndicator}";
             }
         }
-        private static void GetInvWornInfo_Internal(InventoryTree folder, bool recursive, ref int totalItems, ref int totalItemsWorn)
+        private static void GetInvWornInfo_Internal(InventoryFolder folder, bool recursive, ref int totalItems, ref int totalItemsWorn)
         {
             totalItemsWorn += folder.Items.Count(n => n.AttachedTo != null || n.WornOn != null);
             totalItems += folder.Items.Count;
@@ -423,7 +423,7 @@ namespace LibRLV
             }
         }
 
-        private static string GetInvWornInfo(InventoryTree folder)
+        private static string GetInvWornInfo(InventoryFolder folder)
         {
             // 0 : No item is present in that folder
             // 1 : Some items are present in that folder, but none of them is worn
@@ -485,7 +485,7 @@ namespace LibRLV
             }
 
             var inventoryMap = new InventoryMap(sharedFolder);
-            var folders = new List<InventoryTree>();
+            var folders = new List<InventoryFolder>();
 
             var target = sharedFolder;
             if (args.Length != 0)
@@ -514,7 +514,7 @@ namespace LibRLV
             return result;
         }
 
-        private static void SearchFoldersForName(InventoryTree root, bool stopOnFirstResult, IEnumerable<string> searchTerms, List<InventoryTree> outFoundFolders)
+        private static void SearchFoldersForName(InventoryFolder root, bool stopOnFirstResult, IEnumerable<string> searchTerms, List<InventoryFolder> outFoundFolders)
         {
             if (searchTerms.All(root.Name.Contains))
             {
@@ -553,10 +553,10 @@ namespace LibRLV
 
             var inventoryMap = new InventoryMap(sharedFolder);
 
-            var foundFolders = new List<InventoryTree>();
+            var foundFolders = new List<InventoryFolder>();
             SearchFoldersForName(sharedFolder, stopOnFirstResult, searchTerms, foundFolders);
 
-            // TODO: Just add full path to the InventoryTree so we don't have to calculate it every time?
+            // TODO: Just add full path to the InventoryFolder so we don't have to calculate it every time?
             var foundFolderPaths = new List<string>();
             foreach (var folder in foundFolders)
             {

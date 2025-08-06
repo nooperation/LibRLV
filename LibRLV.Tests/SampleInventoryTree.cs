@@ -3,7 +3,7 @@ namespace LibRLV.Tests
 {
     public class SampleInventoryTree
     {
-        public InventoryTree Root { get; set; } = null!;
+        public InventoryFolder Root { get; set; } = null!;
         public InventoryItem Root_Clothing_Hats_FancyHat_AttachChin { get; set; } = null!;
         public InventoryItem Root_Clothing_Hats_PartyHat_AttachGroin { get; set; } = null!;
         public InventoryItem Root_Clothing_BusinessPants_AttachGroin { get; set; } = null!;
@@ -13,7 +13,7 @@ namespace LibRLV.Tests
         public InventoryItem Root_Accessories_Watch_WornTattoo { get; set; } = null!;
 
 
-        public static List<InventoryItem> BuildCurrentOutfit(InventoryTree sharedFolder)
+        public static List<InventoryItem> BuildCurrentOutfit(InventoryFolder sharedFolder)
         {
             var inventoryMap = new InventoryMap(sharedFolder);
 
@@ -47,7 +47,7 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo')
             //        \= Glasses (attached to 'chin')
 
-            var root = new InventoryTree(new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"), "#RLV");
+            var root = new InventoryFolder(new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"), "#RLV");
             var clothingTree = root.AddChild(new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Clothing");
             var hatsTree = clothingTree.AddChild(new Guid("dddddddd-dddd-4ddd-8ddd-dddddddddddd"), "Hats");
             var subHatsTree = hatsTree.AddChild(new Guid("ffffffff-0000-4000-8000-000000000000"), "Sub Hats");

@@ -47,7 +47,7 @@ namespace LibRLV
             }
         }
 
-        private void AddLockedFolder(InventoryTree folder, RLVRestriction restriction)
+        private void AddLockedFolder(InventoryFolder folder, RLVRestriction restriction)
         {
             lock (_lockedFoldersLock)
             {
@@ -196,7 +196,7 @@ namespace LibRLV
             return true;
         }
 
-        private bool ProcessFolderRestrictions(RLVRestriction restriction, InventoryTree sharedFolder, InventoryMap inventoryMap)
+        private bool ProcessFolderRestrictions(RLVRestriction restriction, InventoryFolder sharedFolder, InventoryMap inventoryMap)
         {
             if (restriction.Args.Count == 0)
             {

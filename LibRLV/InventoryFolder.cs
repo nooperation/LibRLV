@@ -3,18 +3,18 @@ using System.Collections.Generic;
 
 namespace LibRLV
 {
-    public class InventoryTree
+    public class InventoryFolder
     {
         public Guid Id { get; }
         public string Name { get; set; }
-        public InventoryTree? Parent { get; private set; }
-        public IReadOnlyList<InventoryTree> Children => _children;
+        public InventoryFolder? Parent { get; private set; }
+        public IReadOnlyList<InventoryFolder> Children => _children;
         public IReadOnlyList<InventoryItem> Items => _items;
 
-        private readonly List<InventoryTree> _children;
+        private readonly List<InventoryFolder> _children;
         private readonly List<InventoryItem> _items;
 
-        public InventoryTree(Guid id, string name)
+        public InventoryFolder(Guid id, string name)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -34,14 +34,14 @@ namespace LibRLV
         /// <param name="id">Folder ID</param>
         /// <param name="name">Folder Name</param>
         /// <returns>Newly added Folder</returns>
-        public InventoryTree AddChild(Guid id, string name)
+        public InventoryFolder AddChild(Guid id, string name)
         {
             if (string.IsNullOrEmpty(name))
             {
                 throw new ArgumentException("Name cannot be null or empty", nameof(name));
             }
 
-            var newChild = new InventoryTree(id, name)
+            var newChild = new InventoryFolder(id, name)
             {
                 Parent = this
             };

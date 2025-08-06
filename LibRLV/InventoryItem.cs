@@ -5,7 +5,7 @@ namespace LibRLV
     public class InventoryItem
     {
         public Guid Id { get; }
-        public InventoryTree? Folder { get; }
+        public InventoryFolder? Folder { get; }
         public Guid? FolderId { get; }
         public string Name { get; set; }
         public WearableType? WornOn { get; set; }
@@ -34,7 +34,7 @@ namespace LibRLV
             FolderId = externalFolderId;
         }
 
-        internal InventoryItem(Guid id, string name, InventoryTree folder, AttachmentPoint? attachedTo, WearableType? wornOn)
+        internal InventoryItem(Guid id, string name, InventoryFolder folder, AttachmentPoint? attachedTo, WearableType? wornOn)
         {
             if (string.IsNullOrEmpty(name))
             {

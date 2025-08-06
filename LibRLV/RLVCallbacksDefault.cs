@@ -145,9 +145,9 @@ namespace LibRLV
             return Task.FromResult((false, default(Guid)));
         }
 
-        public virtual Task<(bool Success, InventoryTree? SharedFolder)> TryGetSharedFolderAsync(CancellationToken cancellationToken)
+        public virtual Task<(bool Success, InventoryFolder? SharedFolder)> TryGetSharedFolderAsync(CancellationToken cancellationToken)
         {
-            return Task.FromResult((false, (InventoryTree?)null));
+            return Task.FromResult((false, (InventoryFolder?)null));
         }
 
         public virtual Task<(bool Success, CameraSettings? CameraSettings)> TryGetCameraSettingsAsync(CancellationToken cancellationToken)

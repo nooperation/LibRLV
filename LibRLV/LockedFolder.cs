@@ -5,12 +5,12 @@ namespace LibRLV
 {
     internal sealed class LockedFolder
     {
-        internal LockedFolder(InventoryTree folder)
+        internal LockedFolder(InventoryFolder folder)
         {
             Folder = folder ?? throw new ArgumentException("Folder cannot be null", nameof(folder));
         }
 
-        public InventoryTree Folder { get; }
+        public InventoryFolder Folder { get; }
 
         public ICollection<RLVRestriction> DetachRestrictions { get; } = new List<RLVRestriction>();
         public ICollection<RLVRestriction> AttachRestrictions { get; } = new List<RLVRestriction>();
