@@ -331,9 +331,9 @@ namespace LibRLV.Tests
             var actual = _callbacks.RecordReplies();
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportInventoryOffer("#RLV/~MyCuffs", RLV.InventoryOfferAction.Accepted);
-            await _rlv.ReportInventoryOffer("Objects/New Folder (3)", RLV.InventoryOfferAction.Accepted);
-            await _rlv.ReportInventoryOffer("#RLV/Foo/Bar", RLV.InventoryOfferAction.Denied);
+            await _rlv.ReportInventoryOfferAccepted("#RLV/~MyCuffs");
+            await _rlv.ReportInventoryOfferAccepted("Objects/New Folder (3)");
+            await _rlv.ReportInventoryOfferDeclined("#RLV/Foo/Bar");
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -354,10 +354,10 @@ namespace LibRLV.Tests
             var sitTarget = new Guid("11111111-1111-4111-8111-111111111111");
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportSit(RLV.SitType.Sit, sitTarget, 1.0f);
-            await _rlv.ReportSit(RLV.SitType.Stand, sitTarget, 0);
-            await _rlv.ReportSit(RLV.SitType.Sit, null, null);
-            await _rlv.ReportSit(RLV.SitType.Stand, null, null);
+            await _rlv.ReportSit(sitTarget);
+            await _rlv.ReportUnsit(sitTarget);
+            await _rlv.ReportSit(null);
+            await _rlv.ReportUnsit(null);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -382,10 +382,10 @@ namespace LibRLV.Tests
             await _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
 
-            await _rlv.ReportSit(RLV.SitType.Sit, sitTarget, 1.0f);
-            await _rlv.ReportSit(RLV.SitType.Stand, sitTarget, 1.0f);
-            await _rlv.ReportSit(RLV.SitType.Sit, null, null);
-            await _rlv.ReportSit(RLV.SitType.Stand, null, null);
+            await _rlv.ReportSit(sitTarget);
+            await _rlv.ReportUnsit(sitTarget);
+            await _rlv.ReportSit(null);
+            await _rlv.ReportUnsit(null);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -400,28 +400,6 @@ namespace LibRLV.Tests
         }
 
         [Fact]
-        public async Task NotifySitStandWithDistanceRestrictions()
-        {
-            var actual = _callbacks.RecordReplies();
-
-            var sitTarget = new Guid("11111111-1111-4111-8111-111111111111");
-
-            await _rlv.ProcessMessage("@sittp=n", _sender.Id, _sender.Name);
-            await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-
-            await _rlv.ReportSit(RLV.SitType.Sit, sitTarget, 100.0f);
-
-            var expected = new List<(int Channel, string Text)>
-            {
-                (1234, $"/notify:1234=n"),
-                (1234, $"/sat object illegally {sitTarget}"),
-            };
-
-            Assert.Equal(expected, actual);
-        }
-
-
-        [Fact]
         public async Task NotifyWear()
         {
             var actual = _callbacks.RecordReplies();
@@ -431,8 +409,8 @@ namespace LibRLV.Tests
             var folderId2 = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportWornItemChange(folderId1, false, WearableType.Skin, RLV.WornItemChange.Attached);
-            await _rlv.ReportWornItemChange(folderId2, true, WearableType.Tattoo, RLV.WornItemChange.Attached);
+            await _rlv.ReportItemWorn(folderId1, false, WearableType.Skin);
+            await _rlv.ReportItemWorn(folderId2, true, WearableType.Tattoo);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -455,7 +433,7 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage("@addoutfit:skin=n", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportWornItemChange(itemId1, false, WearableType.Skin, RLV.WornItemChange.Attached);
+            await _rlv.ReportItemWorn(itemId1, false, WearableType.Skin);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -476,8 +454,8 @@ namespace LibRLV.Tests
             var folderId2 = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportWornItemChange(folderId1, false, WearableType.Skin, RLV.WornItemChange.Detached);
-            await _rlv.ReportWornItemChange(folderId2, true, WearableType.Tattoo, RLV.WornItemChange.Detached);
+            await _rlv.ReportItemUnworn(folderId1, false, WearableType.Skin);
+            await _rlv.ReportItemUnworn(folderId2, true, WearableType.Tattoo);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -500,7 +478,7 @@ namespace LibRLV.Tests
             await _rlv.ProcessMessage("@remoutfit:skin=n", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
 
-            await _rlv.ReportWornItemChange(itemId1, false, WearableType.Skin, RLV.WornItemChange.Detached);
+            await _rlv.ReportItemUnworn(itemId1, false, WearableType.Skin);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -521,8 +499,8 @@ namespace LibRLV.Tests
             var itemId2 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportAttachedItemChange(itemId1, false, AttachmentPoint.Chest, RLV.AttachedItemChange.Attached);
-            await _rlv.ReportAttachedItemChange(itemId2, true, AttachmentPoint.Skull, RLV.AttachedItemChange.Attached);
+            await _rlv.ReportItemAttached(itemId1, false, AttachmentPoint.Chest);
+            await _rlv.ReportItemAttached(itemId2, true, AttachmentPoint.Skull);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -545,7 +523,7 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage("@addattach:chest=n", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportAttachedItemChange(itemId1, false, AttachmentPoint.Chest, RLV.AttachedItemChange.Attached);
+            await _rlv.ReportItemAttached(itemId1, false, AttachmentPoint.Chest);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -566,8 +544,8 @@ namespace LibRLV.Tests
             var folderId2 = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportAttachedItemChange(folderId1, false, AttachmentPoint.Chest, RLV.AttachedItemChange.Detached);
-            await _rlv.ReportAttachedItemChange(folderId2, true, AttachmentPoint.Skull, RLV.AttachedItemChange.Detached);
+            await _rlv.ReportItemDetached(folderId1, false, AttachmentPoint.Chest);
+            await _rlv.ReportItemDetached(folderId2, true, AttachmentPoint.Skull);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -589,7 +567,7 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage("@remattach:chest=n", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportAttachedItemChange(itemId1, false, AttachmentPoint.Chest, RLV.AttachedItemChange.Detached);
+            await _rlv.ReportItemDetached(itemId1, false, AttachmentPoint.Chest);
 
             var expected = new List<(int Channel, string Text)>
             {
