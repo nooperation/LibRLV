@@ -42,8 +42,8 @@ namespace LibRLV
                 { "setcam_fov", (command, cancellationToken) => HandleSetCamFOV(command)},
                 { "tpto", (command, cancellationToken) => HandleTpTo(command)},
                 { "sit", HandleSit},
-                { "unsit", (command, cancellationToken) => HandleUnsit(command)},
-                { "sitground", (command, cancellationToken) => HandleSitGround(command)},
+                { "unsit", (command, cancellationToken) => HandleUnsit()},
+                { "sitground", (command, cancellationToken) => HandleSitGround()},
                 { "remoutfit", HandleRemOutfit},
                 { "detachme", HandleDetachMe},
                 { "remattach", HandleRemAttach},
@@ -588,7 +588,7 @@ namespace LibRLV
             return true;
         }
 
-        private Task<bool> HandleUnsit(RLVMessage command)
+        private Task<bool> HandleUnsit()
         {
             if (!_manager.CanUnsit())
             {
@@ -601,7 +601,7 @@ namespace LibRLV
             return Task.FromResult(true);
         }
 
-        private Task<bool> HandleSitGround(RLVMessage command)
+        private Task<bool> HandleSitGround()
         {
             if (!_manager.CanSit())
             {
