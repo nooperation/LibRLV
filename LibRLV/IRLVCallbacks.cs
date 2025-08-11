@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace LibRLV
 {
-    public interface IRLVCallbacks
+    public interface IRlvCallbacks
     {
         /// <summary>
         /// Sends a message on the given channel
@@ -26,10 +26,10 @@ namespace LibRLV
         /// <summary>
         /// Checks if an object exists in the world
         /// </summary>
-        /// <param name="objectID">Object ID to check</param>
+        /// <param name="objectId">Object ID to check</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>True if the object exists</returns>
-        Task<bool> ObjectExistsAsync(Guid objectID, CancellationToken cancellationToken);
+        Task<bool> ObjectExistsAsync(Guid objectId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Checks if the user is currently sitting
@@ -66,7 +66,7 @@ namespace LibRLV
         /// </summary>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Success flag and shared folder successful</returns>
-        Task<(bool Success, InventoryFolder? SharedFolder)> TryGetSharedFolderAsync(CancellationToken cancellationToken);
+        Task<(bool Success, RlvSharedFolder? SharedFolder)> TryGetSharedFolderAsync(CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets current camera settings
@@ -88,6 +88,6 @@ namespace LibRLV
         /// </summary>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Success flag and current outfit if successful</returns>
-        Task<(bool Success, IReadOnlyList<InventoryItem>? CurrentOutfit)> TryGetCurrentOutfitAsync(CancellationToken cancellationToken);
+        Task<(bool Success, IReadOnlyList<RlvInventoryItem>? CurrentOutfit)> TryGetCurrentOutfitAsync(CancellationToken cancellationToken);
     }
 }

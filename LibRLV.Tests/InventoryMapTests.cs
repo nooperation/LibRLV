@@ -207,7 +207,7 @@
 
             var inventoryMap = new InventoryMap(sharedFolder);
 
-            var actual = inventoryMap.FindFoldersContaining(false, null, AttachmentPoint.Chin, null);
+            var actual = inventoryMap.FindFoldersContaining(false, null, RlvAttachmentPoint.Chin, null);
 
             var expected = new[] {
                 hatsFolder,
@@ -230,7 +230,7 @@
             var inventoryMap = new InventoryMap(sharedFolder);
 
             // What this returns doesn't seem to be really defined. 'return single result' is deprecated since there can be multiple results nowadays
-            var actual = inventoryMap.FindFoldersContaining(true, null, AttachmentPoint.Chin, null);
+            var actual = inventoryMap.FindFoldersContaining(true, null, RlvAttachmentPoint.Chin, null);
 
             var expected = new[] {
                 accessoriesFolder,
@@ -251,7 +251,7 @@
 
             var inventoryMap = new InventoryMap(sharedFolder);
 
-            var actual = inventoryMap.FindFoldersContaining(false, null, null, WearableType.Pants);
+            var actual = inventoryMap.FindFoldersContaining(false, null, null, RlvWearableType.Pants);
 
             var expected = new[] {
                 clothingFolder

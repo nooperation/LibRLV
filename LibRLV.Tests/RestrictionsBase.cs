@@ -7,19 +7,19 @@ namespace LibRLV.Tests
         public record RlvObject(string Name, Guid Id);
 
         protected readonly RlvObject _sender;
-        protected readonly Mock<IRLVCallbacks> _callbacks;
-        protected readonly RLV _rlv;
+        protected readonly Mock<IRlvCallbacks> _callbacks;
+        protected readonly RlvService _rlv;
 
         public const float FloatTolerance = 0.00001f;
 
         public RestrictionsBase()
         {
             _sender = new RlvObject("Sender 1", new Guid("ffffffff-ffff-4fff-8fff-ffffffffffff"));
-            _callbacks = new Mock<IRLVCallbacks>();
-            _rlv = new RLV(_callbacks.Object, true);
+            _callbacks = new Mock<IRlvCallbacks>();
+            _rlv = new RlvService(_callbacks.Object, true);
         }
 
-        protected async Task CheckSimpleCommand(string cmd, Func<RLVPermissionsService, bool> canFunc)
+        protected async Task CheckSimpleCommand(string cmd, Func<RlvPermissionsService, bool> canFunc)
         {
             await _rlv.ProcessMessage($"@{cmd}=n", _sender.Id, _sender.Name);
             Assert.False(canFunc(_rlv.Permissions));

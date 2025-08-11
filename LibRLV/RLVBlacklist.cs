@@ -5,12 +5,12 @@ using System.Linq;
 
 namespace LibRLV
 {
-    public class RLVBlacklist : IBlacklistProvider
+    public class RlvBlacklist : IBlacklistProvider
     {
         private readonly HashSet<string> _blacklist = new();
         private readonly object _blacklistLock = new();
 
-        internal RLVBlacklist()
+        internal RlvBlacklist()
         {
 
         }

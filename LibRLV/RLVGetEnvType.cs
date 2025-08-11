@@ -1,6 +1,6 @@
 ﻿namespace LibRLV
 {
-    public enum RLVGetEnvType
+    public enum RlvGetEnvType
     {
         Daytime,
         Preset,

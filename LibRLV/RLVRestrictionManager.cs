@@ -9,149 +9,149 @@ using LibRLV.EventArguments;
 
 namespace LibRLV
 {
-    public class RLVRestrictionManager : IRestrictionProvider
+    public class RlvRestrictionManager : IRestrictionProvider
     {
-        private static readonly ImmutableDictionary<string, RLVRestrictionType> _nameToRestrictionMap = new Dictionary<string, RLVRestrictionType>(StringComparer.OrdinalIgnoreCase)
+        private static readonly ImmutableDictionary<string, RlvRestrictionType> _nameToRestrictionMap = new Dictionary<string, RlvRestrictionType>(StringComparer.OrdinalIgnoreCase)
         {
-            { "notify", RLVRestrictionType.Notify },
-            { "permissive", RLVRestrictionType.Permissive },
-            { "fly", RLVRestrictionType.Fly },
-            { "jump", RLVRestrictionType.Jump },
-            { "temprun", RLVRestrictionType.TempRun },
-            { "alwaysrun", RLVRestrictionType.AlwaysRun },
-            { "camzoommax", RLVRestrictionType.CamZoomMax },
-            { "camzoommin", RLVRestrictionType.CamZoomMin },
-            { "camdrawmin", RLVRestrictionType.CamDrawMin },
-            { "camdrawmax", RLVRestrictionType.CamDrawMax },
-            { "setcam_fovmin", RLVRestrictionType.SetCamFovMin },
-            { "setcam_fovmax", RLVRestrictionType.SetCamFovMax },
-            { "camdistmax", RLVRestrictionType.CamDistMax },
-            { "camdistmin", RLVRestrictionType.CamDistMin },
-            { "camdrawalphamin", RLVRestrictionType.CamDrawAlphaMin },
-            { "camdrawalphamax", RLVRestrictionType.CamDrawAlphaMax },
-            { "setcam_avdistmax", RLVRestrictionType.SetCamAvDistMax },
-            { "setcam_avdistmin", RLVRestrictionType.SetCamAvDistMin },
-            { "camdrawcolor", RLVRestrictionType.CamDrawColor },
-            { "camunlock", RLVRestrictionType.CamUnlock },
-            { "setcam_unlock", RLVRestrictionType.SetCamUnlock },
-            { "camavdist", RLVRestrictionType.CamAvDist },
-            { "camtextures", RLVRestrictionType.CamTextures },
-            { "setcam_textures", RLVRestrictionType.SetCamTextures },
-            { "sendchat", RLVRestrictionType.SendChat },
-            { "chatshout", RLVRestrictionType.ChatShout },
-            { "chatnormal", RLVRestrictionType.ChatNormal },
-            { "chatwhisper", RLVRestrictionType.ChatWhisper },
-            { "redirchat", RLVRestrictionType.RedirChat },
-            { "recvchat", RLVRestrictionType.RecvChat },
-            { "recvchat_sec", RLVRestrictionType.RecvChatSec },
-            { "recvchatfrom", RLVRestrictionType.RecvChatFrom },
-            { "sendgesture", RLVRestrictionType.SendGesture },
-            { "emote", RLVRestrictionType.Emote },
-            { "rediremote", RLVRestrictionType.RedirEmote },
-            { "recvemote", RLVRestrictionType.RecvEmote },
-            { "recvemotefrom", RLVRestrictionType.RecvEmoteFrom },
-            { "recvemote_sec", RLVRestrictionType.RecvEmoteSec },
-            { "sendchannel", RLVRestrictionType.SendChannel },
-            { "sendchannel_sec", RLVRestrictionType.SendChannelSec },
-            { "sendchannel_except", RLVRestrictionType.SendChannelExcept },
-            { "sendim", RLVRestrictionType.SendIm },
-            { "sendim_sec", RLVRestrictionType.SendImSec },
-            { "sendimto", RLVRestrictionType.SendImTo },
-            { "startim", RLVRestrictionType.StartIm },
-            { "startimto", RLVRestrictionType.StartImTo },
-            { "recvim", RLVRestrictionType.RecvIm },
-            { "recvim_sec", RLVRestrictionType.RecvImSec },
-            { "recvimfrom", RLVRestrictionType.RecvImFrom },
-            { "tplocal", RLVRestrictionType.TpLocal },
-            { "tplm", RLVRestrictionType.TpLm },
-            { "tploc", RLVRestrictionType.TpLoc },
-            { "tplure", RLVRestrictionType.TpLure },
-            { "tplure_sec", RLVRestrictionType.TpLureSec },
-            { "sittp", RLVRestrictionType.SitTp },
-            { "standtp", RLVRestrictionType.StandTp },
-            { "accepttp", RLVRestrictionType.AcceptTp },
-            { "accepttprequest", RLVRestrictionType.AcceptTpRequest },
-            { "tprequest", RLVRestrictionType.TpRequest },
-            { "tprequest_sec", RLVRestrictionType.TpRequestSec },
-            { "showinv", RLVRestrictionType.ShowInv },
-            { "viewnote", RLVRestrictionType.ViewNote },
-            { "viewscript", RLVRestrictionType.ViewScript },
-            { "viewtexture", RLVRestrictionType.ViewTexture },
-            { "edit", RLVRestrictionType.Edit },
-            { "rez", RLVRestrictionType.Rez },
-            { "editobj", RLVRestrictionType.EditObj },
-            { "editworld", RLVRestrictionType.EditWorld },
-            { "editattach", RLVRestrictionType.EditAttach },
-            { "share", RLVRestrictionType.Share },
-            { "share_sec", RLVRestrictionType.ShareSec },
-            { "unsit", RLVRestrictionType.Unsit },
-            { "sit", RLVRestrictionType.Sit },
-            { "detach", RLVRestrictionType.Detach },
-            { "addattach", RLVRestrictionType.AddAttach },
-            { "remattach", RLVRestrictionType.RemAttach },
-            { "defaultwear", RLVRestrictionType.DefaultWear },
-            { "addoutfit", RLVRestrictionType.AddOutfit },
-            { "remoutfit", RLVRestrictionType.RemOutfit },
-            { "acceptpermission", RLVRestrictionType.AcceptPermission },
-            { "denypermission", RLVRestrictionType.DenyPermission },
-            { "unsharedwear", RLVRestrictionType.UnsharedWear },
-            { "unsharedunwear", RLVRestrictionType.UnsharedUnwear },
-            { "sharedwear", RLVRestrictionType.SharedWear },
-            { "sharedunwear", RLVRestrictionType.SharedUnwear },
-            { "detachthis", RLVRestrictionType.DetachThis },
-            { "detachallthis", RLVRestrictionType.DetachAllThis },
-            { "attachthis", RLVRestrictionType.AttachThis },
-            { "attachallthis", RLVRestrictionType.AttachAllThis },
-            { "detachthis_except", RLVRestrictionType.DetachThisExcept },
-            { "detachallthis_except", RLVRestrictionType.DetachAllThisExcept },
-            { "attachthis_except", RLVRestrictionType.AttachThisExcept },
-            { "attachallthis_except", RLVRestrictionType.AttachAllThisExcept },
-            { "fartouch", RLVRestrictionType.FarTouch },
-            { "touchfar", RLVRestrictionType.TouchFar },
-            { "touchall", RLVRestrictionType.TouchAll },
-            { "touchworld", RLVRestrictionType.TouchWorld },
-            { "touchthis", RLVRestrictionType.TouchThis },
-            { "touchme", RLVRestrictionType.TouchMe },
-            { "touchattach", RLVRestrictionType.TouchAttach },
-            { "touchattachself", RLVRestrictionType.TouchAttachSelf },
-            { "touchattachother", RLVRestrictionType.TouchAttachOther },
-            { "touchhud", RLVRestrictionType.TouchHud },
-            { "interact", RLVRestrictionType.Interact },
-            { "showworldmap", RLVRestrictionType.ShowWorldMap },
-            { "showminimap", RLVRestrictionType.ShowMiniMap },
-            { "showloc", RLVRestrictionType.ShowLoc },
-            { "shownames", RLVRestrictionType.ShowNames },
-            { "shownames_sec", RLVRestrictionType.ShowNamesSec },
-            { "shownametags", RLVRestrictionType.ShowNameTags },
-            { "shownearby", RLVRestrictionType.ShowNearby },
-            { "showhovertextall", RLVRestrictionType.ShowHoverTextAll },
-            { "showhovertext", RLVRestrictionType.ShowHoverText },
-            { "showhovertexthud", RLVRestrictionType.ShowHoverTextHud },
-            { "showhovertextworld", RLVRestrictionType.ShowHoverTextWorld },
-            { "setgroup", RLVRestrictionType.SetGroup },
-            { "setdebug", RLVRestrictionType.SetDebug },
-            { "setenv", RLVRestrictionType.SetEnv },
-            { "allowidle", RLVRestrictionType.AllowIdle },
+            { "notify", RlvRestrictionType.Notify },
+            { "permissive", RlvRestrictionType.Permissive },
+            { "fly", RlvRestrictionType.Fly },
+            { "jump", RlvRestrictionType.Jump },
+            { "temprun", RlvRestrictionType.TempRun },
+            { "alwaysrun", RlvRestrictionType.AlwaysRun },
+            { "camzoommax", RlvRestrictionType.CamZoomMax },
+            { "camzoommin", RlvRestrictionType.CamZoomMin },
+            { "camdrawmin", RlvRestrictionType.CamDrawMin },
+            { "camdrawmax", RlvRestrictionType.CamDrawMax },
+            { "setcam_fovmin", RlvRestrictionType.SetCamFovMin },
+            { "setcam_fovmax", RlvRestrictionType.SetCamFovMax },
+            { "camdistmax", RlvRestrictionType.CamDistMax },
+            { "camdistmin", RlvRestrictionType.CamDistMin },
+            { "camdrawalphamin", RlvRestrictionType.CamDrawAlphaMin },
+            { "camdrawalphamax", RlvRestrictionType.CamDrawAlphaMax },
+            { "setcam_avdistmax", RlvRestrictionType.SetCamAvDistMax },
+            { "setcam_avdistmin", RlvRestrictionType.SetCamAvDistMin },
+            { "camdrawcolor", RlvRestrictionType.CamDrawColor },
+            { "camunlock", RlvRestrictionType.CamUnlock },
+            { "setcam_unlock", RlvRestrictionType.SetCamUnlock },
+            { "camavdist", RlvRestrictionType.CamAvDist },
+            { "camtextures", RlvRestrictionType.CamTextures },
+            { "setcam_textures", RlvRestrictionType.SetCamTextures },
+            { "sendchat", RlvRestrictionType.SendChat },
+            { "chatshout", RlvRestrictionType.ChatShout },
+            { "chatnormal", RlvRestrictionType.ChatNormal },
+            { "chatwhisper", RlvRestrictionType.ChatWhisper },
+            { "redirchat", RlvRestrictionType.RedirChat },
+            { "recvchat", RlvRestrictionType.RecvChat },
+            { "recvchat_sec", RlvRestrictionType.RecvChatSec },
+            { "recvchatfrom", RlvRestrictionType.RecvChatFrom },
+            { "sendgesture", RlvRestrictionType.SendGesture },
+            { "emote", RlvRestrictionType.Emote },
+            { "rediremote", RlvRestrictionType.RedirEmote },
+            { "recvemote", RlvRestrictionType.RecvEmote },
+            { "recvemotefrom", RlvRestrictionType.RecvEmoteFrom },
+            { "recvemote_sec", RlvRestrictionType.RecvEmoteSec },
+            { "sendchannel", RlvRestrictionType.SendChannel },
+            { "sendchannel_sec", RlvRestrictionType.SendChannelSec },
+            { "sendchannel_except", RlvRestrictionType.SendChannelExcept },
+            { "sendim", RlvRestrictionType.SendIm },
+            { "sendim_sec", RlvRestrictionType.SendImSec },
+            { "sendimto", RlvRestrictionType.SendImTo },
+            { "startim", RlvRestrictionType.StartIm },
+            { "startimto", RlvRestrictionType.StartImTo },
+            { "recvim", RlvRestrictionType.RecvIm },
+            { "recvim_sec", RlvRestrictionType.RecvImSec },
+            { "recvimfrom", RlvRestrictionType.RecvImFrom },
+            { "tplocal", RlvRestrictionType.TpLocal },
+            { "tplm", RlvRestrictionType.TpLm },
+            { "tploc", RlvRestrictionType.TpLoc },
+            { "tplure", RlvRestrictionType.TpLure },
+            { "tplure_sec", RlvRestrictionType.TpLureSec },
+            { "sittp", RlvRestrictionType.SitTp },
+            { "standtp", RlvRestrictionType.StandTp },
+            { "accepttp", RlvRestrictionType.AcceptTp },
+            { "accepttprequest", RlvRestrictionType.AcceptTpRequest },
+            { "tprequest", RlvRestrictionType.TpRequest },
+            { "tprequest_sec", RlvRestrictionType.TpRequestSec },
+            { "showinv", RlvRestrictionType.ShowInv },
+            { "viewnote", RlvRestrictionType.ViewNote },
+            { "viewscript", RlvRestrictionType.ViewScript },
+            { "viewtexture", RlvRestrictionType.ViewTexture },
+            { "edit", RlvRestrictionType.Edit },
+            { "rez", RlvRestrictionType.Rez },
+            { "editobj", RlvRestrictionType.EditObj },
+            { "editworld", RlvRestrictionType.EditWorld },
+            { "editattach", RlvRestrictionType.EditAttach },
+            { "share", RlvRestrictionType.Share },
+            { "share_sec", RlvRestrictionType.ShareSec },
+            { "unsit", RlvRestrictionType.Unsit },
+            { "sit", RlvRestrictionType.Sit },
+            { "detach", RlvRestrictionType.Detach },
+            { "addattach", RlvRestrictionType.AddAttach },
+            { "remattach", RlvRestrictionType.RemAttach },
+            { "defaultwear", RlvRestrictionType.DefaultWear },
+            { "addoutfit", RlvRestrictionType.AddOutfit },
+            { "remoutfit", RlvRestrictionType.RemOutfit },
+            { "acceptpermission", RlvRestrictionType.AcceptPermission },
+            { "denypermission", RlvRestrictionType.DenyPermission },
+            { "unsharedwear", RlvRestrictionType.UnsharedWear },
+            { "unsharedunwear", RlvRestrictionType.UnsharedUnwear },
+            { "sharedwear", RlvRestrictionType.SharedWear },
+            { "sharedunwear", RlvRestrictionType.SharedUnwear },
+            { "detachthis", RlvRestrictionType.DetachThis },
+            { "detachallthis", RlvRestrictionType.DetachAllThis },
+            { "attachthis", RlvRestrictionType.AttachThis },
+            { "attachallthis", RlvRestrictionType.AttachAllThis },
+            { "detachthis_except", RlvRestrictionType.DetachThisExcept },
+            { "detachallthis_except", RlvRestrictionType.DetachAllThisExcept },
+            { "attachthis_except", RlvRestrictionType.AttachThisExcept },
+            { "attachallthis_except", RlvRestrictionType.AttachAllThisExcept },
+            { "fartouch", RlvRestrictionType.FarTouch },
+            { "touchfar", RlvRestrictionType.TouchFar },
+            { "touchall", RlvRestrictionType.TouchAll },
+            { "touchworld", RlvRestrictionType.TouchWorld },
+            { "touchthis", RlvRestrictionType.TouchThis },
+            { "touchme", RlvRestrictionType.TouchMe },
+            { "touchattach", RlvRestrictionType.TouchAttach },
+            { "touchattachself", RlvRestrictionType.TouchAttachSelf },
+            { "touchattachother", RlvRestrictionType.TouchAttachOther },
+            { "touchhud", RlvRestrictionType.TouchHud },
+            { "interact", RlvRestrictionType.Interact },
+            { "showworldmap", RlvRestrictionType.ShowWorldMap },
+            { "showminimap", RlvRestrictionType.ShowMiniMap },
+            { "showloc", RlvRestrictionType.ShowLoc },
+            { "shownames", RlvRestrictionType.ShowNames },
+            { "shownames_sec", RlvRestrictionType.ShowNamesSec },
+            { "shownametags", RlvRestrictionType.ShowNameTags },
+            { "shownearby", RlvRestrictionType.ShowNearby },
+            { "showhovertextall", RlvRestrictionType.ShowHoverTextAll },
+            { "showhovertext", RlvRestrictionType.ShowHoverText },
+            { "showhovertexthud", RlvRestrictionType.ShowHoverTextHud },
+            { "showhovertextworld", RlvRestrictionType.ShowHoverTextWorld },
+            { "setgroup", RlvRestrictionType.SetGroup },
+            { "setdebug", RlvRestrictionType.SetDebug },
+            { "setenv", RlvRestrictionType.SetEnv },
+            { "allowidle", RlvRestrictionType.AllowIdle },
         }.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
 
-        private static readonly ImmutableDictionary<RLVRestrictionType, string> _restrictionToNameMap = _nameToRestrictionMap
+        private static readonly ImmutableDictionary<RlvRestrictionType, string> _restrictionToNameMap = _nameToRestrictionMap
             .ToImmutableDictionary(k => k.Value, v => v.Key);
 
-        private readonly Dictionary<RLVRestrictionType, HashSet<RLVRestriction>> _currentRestrictions = [];
+        private readonly Dictionary<RlvRestrictionType, HashSet<RlvRestriction>> _currentRestrictions = [];
         private readonly object _currentRestrictionsLock = new();
 
-        private readonly IRLVCallbacks _callbacks;
+        private readonly IRlvCallbacks _callbacks;
         private readonly LockedFolderManager _lockedFolderManager;
 
         public event EventHandler<RestrictionUpdatedEventArgs>? RestrictionUpdated;
 
-        internal RLVRestrictionManager(IRLVCallbacks callbacks)
+        internal RlvRestrictionManager(IRlvCallbacks callbacks)
         {
             _callbacks = callbacks;
             _lockedFolderManager = new LockedFolderManager(callbacks, this);
         }
 
-        internal static bool TryGetRestrictionFromName(string name, [NotNullWhen(true)] out RLVRestrictionType? restrictionType)
+        internal static bool TryGetRestrictionFromName(string name, [NotNullWhen(true)] out RlvRestrictionType? restrictionType)
         {
             if (!_nameToRestrictionMap.TryGetValue(name, out var restrictionTypeTemp))
             {
@@ -163,12 +163,12 @@ namespace LibRLV
             return true;
         }
 
-        internal static bool TryGetRestrictionNameFromType(RLVRestrictionType restrictionType, [NotNullWhen(true)] out string? name)
+        internal static bool TryGetRestrictionNameFromType(RlvRestrictionType restrictionType, [NotNullWhen(true)] out string? name)
         {
             return _restrictionToNameMap.TryGetValue(restrictionType, out name);
         }
 
-        private async Task NotifyRestrictionChange(RLVRestriction restriction, bool wasAdded, CancellationToken cancellationToken)
+        private async Task NotifyRestrictionChange(RlvRestriction restriction, bool wasAdded, CancellationToken cancellationToken)
         {
             if (!TryGetRestrictionNameFromType(restriction.OriginalBehavior, out var restrictionName))
             {
@@ -188,11 +188,11 @@ namespace LibRLV
 
         private async Task NotifyRestrictionChange(string restrictionName, string notificationMessage, CancellationToken cancellationToken)
         {
-            List<RLVRestriction> notificationRestrictions;
+            List<RlvRestriction> notificationRestrictions;
 
             lock (_currentRestrictionsLock)
             {
-                if (!_currentRestrictions.TryGetValue(RLVRestrictionType.Notify, out var notificationRestrictionsTemp))
+                if (!_currentRestrictions.TryGetValue(RlvRestrictionType.Notify, out var notificationRestrictionsTemp))
                 {
                     return;
                 }
@@ -244,10 +244,10 @@ namespace LibRLV
             }
         }
 
-        public async Task RemoveRestrictionsForObjects(IEnumerable<Guid> objectIds, CancellationToken cancellationToken)
+        public async Task RemoveRestrictionsForObjects(IEnumerable<Guid> objectIds, CancellationToken cancellationToken = default)
         {
             var objectIdMap = objectIds.ToImmutableHashSet();
-            var removedRestrictions = new List<RLVRestriction>();
+            var removedRestrictions = new List<RlvRestriction>();
 
             lock (_currentRestrictionsLock)
             {
@@ -277,24 +277,24 @@ namespace LibRLV
             }
         }
 
-        public IReadOnlyList<RLVRestriction> GetRestrictionsByType(RLVRestrictionType restrictionType)
+        public IReadOnlyList<RlvRestriction> GetRestrictionsByType(RlvRestrictionType restrictionType)
         {
-            restrictionType = RLVRestriction.GetRealRestriction(restrictionType);
+            restrictionType = RlvRestriction.GetRealRestriction(restrictionType);
 
             lock (_currentRestrictionsLock)
             {
                 if (!_currentRestrictions.TryGetValue(restrictionType, out var restrictions))
                 {
-                    return ImmutableList<RLVRestriction>.Empty;
+                    return ImmutableList<RlvRestriction>.Empty;
                 }
 
                 return restrictions.ToImmutableList();
             }
         }
 
-        public IReadOnlyList<RLVRestriction> FindRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null)
+        public IReadOnlyList<RlvRestriction> FindRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null)
         {
-            var restrictions = new List<RLVRestriction>();
+            var restrictions = new List<RlvRestriction>();
 
             lock (_currentRestrictionsLock)
             {
@@ -325,7 +325,7 @@ namespace LibRLV
             }
         }
 
-        private bool RemoveRestriction_InternalUnsafe(RLVRestriction restriction)
+        private bool RemoveRestriction_InternalUnsafe(RlvRestriction restriction)
         {
             var removedRestriction = false;
 
@@ -342,7 +342,7 @@ namespace LibRLV
             return removedRestriction;
         }
 
-        private async Task RemoveRestriction(RLVRestriction restriction, CancellationToken cancellationToken)
+        private async Task RemoveRestriction(RlvRestriction restriction, CancellationToken cancellationToken)
         {
             var removedRestriction = false;
 
@@ -360,7 +360,7 @@ namespace LibRLV
             await NotifyRestrictionChange(restriction, false, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task AddRestriction(RLVRestriction newRestriction, CancellationToken cancellationToken)
+        private async Task AddRestriction(RlvRestriction newRestriction, CancellationToken cancellationToken)
         {
             var restrictionAdded = false;
 
@@ -387,14 +387,14 @@ namespace LibRLV
             await NotifyRestrictionChange(newRestriction, true, cancellationToken).ConfigureAwait(false);
         }
 
-        internal async Task<bool> ProcessClearCommand(RLVMessage command, CancellationToken cancellationToken)
+        internal async Task<bool> ProcessClearCommand(RlvMessage command, CancellationToken cancellationToken)
         {
             var filteredRestrictions = _restrictionToNameMap
                 .Where(n => n.Value.Contains(command.Param.ToLowerInvariant()))
                 .Select(n => n.Key)
                 .ToList();
 
-            var removedRestrictions = new List<RLVRestriction>();
+            var removedRestrictions = new List<RlvRestriction>();
             lock (_currentRestrictionsLock)
             {
                 foreach (var restrictionType in filteredRestrictions)
@@ -440,19 +440,19 @@ namespace LibRLV
             return true;
         }
 
-        internal async Task<bool> ProcessRestrictionCommand(RLVMessage message, string option, bool isAddingRestriction, CancellationToken cancellationToken)
+        internal async Task<bool> ProcessRestrictionCommand(RlvMessage message, string option, bool isAddingRestriction, CancellationToken cancellationToken)
         {
             if (!TryGetRestrictionFromName(message.Behavior, out var behavior))
             {
                 return false;
             }
 
-            if (!RLVRestriction.ParseOptions(behavior.Value, option, out var args))
+            if (!RlvRestriction.ParseOptions(behavior.Value, option, out var args))
             {
                 return false;
             }
 
-            var newCommand = new RLVRestriction(behavior.Value, message.Sender, message.SenderName, args);
+            var newCommand = new RlvRestriction(behavior.Value, message.Sender, message.SenderName, args);
 
             if (isAddingRestriction)
             {
@@ -465,10 +465,10 @@ namespace LibRLV
 
             switch (newCommand.Behavior)
             {
-                case RLVRestrictionType.DetachThis:
-                case RLVRestrictionType.DetachAllThis:
-                case RLVRestrictionType.AttachThis:
-                case RLVRestrictionType.AttachAllThis:
+                case RlvRestrictionType.DetachThis:
+                case RlvRestrictionType.DetachAllThis:
+                case RlvRestrictionType.AttachThis:
+                case RlvRestrictionType.AttachAllThis:
                 {
                     if (isAddingRestriction)
                     {
@@ -480,10 +480,10 @@ namespace LibRLV
                     }
                     break;
                 }
-                case RLVRestrictionType.DetachThisExcept:
-                case RLVRestrictionType.DetachAllThisExcept:
-                case RLVRestrictionType.AttachThisExcept:
-                case RLVRestrictionType.AttachAllThisExcept:
+                case RlvRestrictionType.DetachThisExcept:
+                case RlvRestrictionType.DetachAllThisExcept:
+                case RlvRestrictionType.AttachThisExcept:
+                case RlvRestrictionType.AttachAllThisExcept:
                 {
                     if (isAddingRestriction)
                     {

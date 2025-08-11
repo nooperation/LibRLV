@@ -9,37 +9,37 @@ using System.Threading.Tasks;
 
 namespace LibRLV
 {
-    internal sealed class RLVGetRequestHandler
+    internal sealed class RlvGetRequestHandler
     {
-        private readonly ImmutableDictionary<string, RLVDataRequestType> _rlvDataRequestToNameMap;
+        private readonly ImmutableDictionary<string, RlvDataRequestType> _rlvDataRequestToNameMap;
         private readonly IRestrictionProvider _restrictions;
         private readonly IBlacklistProvider _blacklist;
-        private readonly IRLVCallbacks _callbacks;
+        private readonly IRlvCallbacks _callbacks;
 
-        internal RLVGetRequestHandler(IBlacklistProvider blacklist, IRestrictionProvider restrictions, IRLVCallbacks callbacks)
+        internal RlvGetRequestHandler(IBlacklistProvider blacklist, IRestrictionProvider restrictions, IRlvCallbacks callbacks)
         {
             _restrictions = restrictions;
             _blacklist = blacklist;
             _callbacks = callbacks;
 
-            _rlvDataRequestToNameMap = new Dictionary<string, RLVDataRequestType>()
+            _rlvDataRequestToNameMap = new Dictionary<string, RlvDataRequestType>()
             {
-                { "getcam_avdistmin", RLVDataRequestType.GetCamAvDistMin },
-                { "getcam_avdistmax", RLVDataRequestType.GetCamAvDistMax },
-                { "getcam_fovmin", RLVDataRequestType.GetCamFovMin },
-                { "getcam_fovmax", RLVDataRequestType.GetCamFovMax },
-                { "getcam_zoommin", RLVDataRequestType.GetCamZoomMin },
-                { "getcam_fov", RLVDataRequestType.GetCamFov },
-                { "getsitid", RLVDataRequestType.GetSitId },
-                { "getoutfit", RLVDataRequestType.GetOutfit },
-                { "getattach", RLVDataRequestType.GetAttach },
-                { "getinv", RLVDataRequestType.GetInv },
-                { "getinvworn", RLVDataRequestType.GetInvWorn },
-                { "findfolder", RLVDataRequestType.FindFolder },
-                { "findfolders", RLVDataRequestType.FindFolders },
-                { "getpath", RLVDataRequestType.GetPath },
-                { "getpathnew", RLVDataRequestType.GetPathNew },
-                { "getgroup", RLVDataRequestType.GetGroup }
+                { "getcam_avdistmin", RlvDataRequestType.GetCamAvDistMin },
+                { "getcam_avdistmax", RlvDataRequestType.GetCamAvDistMax },
+                { "getcam_fovmin", RlvDataRequestType.GetCamFovMin },
+                { "getcam_fovmax", RlvDataRequestType.GetCamFovMax },
+                { "getcam_zoommin", RlvDataRequestType.GetCamZoomMin },
+                { "getcam_fov", RlvDataRequestType.GetCamFov },
+                { "getsitid", RlvDataRequestType.GetSitId },
+                { "getoutfit", RlvDataRequestType.GetOutfit },
+                { "getattach", RlvDataRequestType.GetAttach },
+                { "getinv", RlvDataRequestType.GetInv },
+                { "getinvworn", RlvDataRequestType.GetInvWorn },
+                { "findfolder", RlvDataRequestType.FindFolder },
+                { "findfolders", RlvDataRequestType.FindFolders },
+                { "getpath", RlvDataRequestType.GetPath },
+                { "getpathnew", RlvDataRequestType.GetPathNew },
+                { "getgroup", RlvDataRequestType.GetGroup }
             }.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
         }
 
@@ -62,7 +62,7 @@ namespace LibRLV
             StringBuilder sb = new StringBuilder();
             foreach (var restriction in restrictions)
             {
-                if (!RLVRestrictionManager.TryGetRestrictionNameFromType(restriction.OriginalBehavior, out var behaviorName))
+                if (!RlvRestrictionManager.TryGetRestrictionNameFromType(restriction.OriginalBehavior, out var behaviorName))
                 {
                     continue;
                 }
@@ -77,7 +77,7 @@ namespace LibRLV
             return sb.ToString();
         }
 
-        private async Task<string> ProcessGetOutfit(WearableType? specificType, CancellationToken cancellationToken)
+        private async Task<string> ProcessGetOutfit(RlvWearableType? specificType, CancellationToken cancellationToken)
         {
             var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync(cancellationToken).ConfigureAwait(false);
             if (!hasCurrentOutfit || currentOutfit == null)
@@ -106,27 +106,27 @@ namespace LibRLV
             var sb = new StringBuilder(16);
 
             // gloves,jacket,pants,shirt,shoes,skirt,socks,underpants,undershirt,skin,eyes,hair,shape,alpha,tattoo,physics
-            sb.Append(wornTypes.Contains(WearableType.Gloves) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Jacket) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Pants) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Shirt) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Shoes) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Skirt) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Socks) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Underpants) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Undershirt) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Skin) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Eyes) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Hair) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Shape) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Alpha) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Tattoo) ? "1" : "0");
-            sb.Append(wornTypes.Contains(WearableType.Physics) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Gloves) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Jacket) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Pants) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Shirt) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Shoes) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Skirt) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Socks) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Underpants) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Undershirt) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Skin) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Eyes) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Hair) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Shape) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Alpha) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Tattoo) ? "1" : "0");
+            sb.Append(wornTypes.Contains(RlvWearableType.Physics) ? "1" : "0");
 
             return sb.ToString();
         }
 
-        private async Task<string> ProcessGetAttach(AttachmentPoint? specificType, CancellationToken cancellationToken)
+        private async Task<string> ProcessGetAttach(RlvAttachmentPoint? specificType, CancellationToken cancellationToken)
         {
             var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync(cancellationToken).ConfigureAwait(false);
             if (!hasCurrentOutfit || currentOutfit == null)
@@ -152,11 +152,11 @@ namespace LibRLV
                 .Distinct()
                 .ToImmutableHashSet();
 
-            var attachmentPointTypes = Enum.GetValues(typeof(AttachmentPoint));
+            var attachmentPointTypes = Enum.GetValues(typeof(RlvAttachmentPoint));
             var sb = new StringBuilder(attachmentPointTypes.Length);
 
             // digit corresponds directly to the value of enum, unlike ProcessGetOutfit
-            foreach (AttachmentPoint attachmentPoint in attachmentPointTypes)
+            foreach (RlvAttachmentPoint attachmentPoint in attachmentPointTypes)
             {
                 sb.Append(wornTypes.Contains(attachmentPoint) ? '1' : '0');
             }
@@ -164,7 +164,7 @@ namespace LibRLV
             return sb.ToString();
         }
 
-        internal async Task<bool> ProcessGetCommand(RLVMessage rlvMessage, int channel, CancellationToken cancellationToken)
+        internal async Task<bool> ProcessGetCommand(RlvMessage rlvMessage, int channel, CancellationToken cancellationToken)
         {
             var blacklist = _blacklist.GetBlacklist();
 
@@ -173,19 +173,19 @@ namespace LibRLV
             {
                 case "version":
                 case "versionnew":
-                    response = RLV.RLVVersion;
+                    response = RlvService.RLVVersion;
                     break;
                 case "versionnum":
-                    response = RLV.RLVVersionNum;
+                    response = RlvService.RLVVersionNum;
                     break;
                 case "versionnumbl":
                     if (blacklist.Count > 0)
                     {
-                        response = $"{RLV.RLVVersionNum},{string.Join(",", blacklist)}";
+                        response = $"{RlvService.RLVVersionNum},{string.Join(",", blacklist)}";
                     }
                     else
                     {
-                        response = RLV.RLVVersionNum;
+                        response = RlvService.RLVVersionNum;
                     }
                     break;
                 case "getblacklist":
@@ -205,7 +205,7 @@ namespace LibRLV
             {
                 switch (name)
                 {
-                    case RLVDataRequestType.GetSitId:
+                    case RlvDataRequestType.GetSitId:
                     {
                         var (hasSitId, sitId) = await _callbacks.TryGetSitIdAsync(cancellationToken).ConfigureAwait(false);
                         if (!hasSitId || sitId == Guid.Empty)
@@ -219,12 +219,12 @@ namespace LibRLV
 
                         break;
                     }
-                    case RLVDataRequestType.GetCamAvDistMin:
-                    case RLVDataRequestType.GetCamAvDistMax:
-                    case RLVDataRequestType.GetCamFovMin:
-                    case RLVDataRequestType.GetCamFovMax:
-                    case RLVDataRequestType.GetCamZoomMin:
-                    case RLVDataRequestType.GetCamFov:
+                    case RlvDataRequestType.GetCamAvDistMin:
+                    case RlvDataRequestType.GetCamAvDistMax:
+                    case RlvDataRequestType.GetCamFovMin:
+                    case RlvDataRequestType.GetCamFovMax:
+                    case RlvDataRequestType.GetCamZoomMin:
+                    case RlvDataRequestType.GetCamFov:
                     {
                         var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync(cancellationToken).ConfigureAwait(false);
                         if (!hasCameraSettings || cameraSettings == null)
@@ -234,32 +234,32 @@ namespace LibRLV
 
                         switch (name)
                         {
-                            case RLVDataRequestType.GetCamAvDistMin:
+                            case RlvDataRequestType.GetCamAvDistMin:
                             {
                                 response = cameraSettings.AvDistMin.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
-                            case RLVDataRequestType.GetCamAvDistMax:
+                            case RlvDataRequestType.GetCamAvDistMax:
                             {
                                 response = cameraSettings.AvDistMax.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
-                            case RLVDataRequestType.GetCamFovMin:
+                            case RlvDataRequestType.GetCamFovMin:
                             {
                                 response = cameraSettings.FovMin.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
-                            case RLVDataRequestType.GetCamFovMax:
+                            case RlvDataRequestType.GetCamFovMax:
                             {
                                 response = cameraSettings.FovMax.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
-                            case RLVDataRequestType.GetCamZoomMin:
+                            case RlvDataRequestType.GetCamZoomMin:
                             {
                                 response = cameraSettings.ZoomMin.ToString(CultureInfo.InvariantCulture);
                                 break;
                             }
-                            case RLVDataRequestType.GetCamFov:
+                            case RlvDataRequestType.GetCamFov:
                             {
                                 response = cameraSettings.CurrentFov.ToString(CultureInfo.InvariantCulture);
                                 break;
@@ -269,7 +269,7 @@ namespace LibRLV
                         break;
                     }
 
-                    case RLVDataRequestType.GetGroup:
+                    case RlvDataRequestType.GetGroup:
                     {
                         var (hasGroup, group) = await _callbacks.TryGetActiveGroupNameAsync(cancellationToken).ConfigureAwait(false);
 
@@ -283,10 +283,10 @@ namespace LibRLV
                         }
                         break;
                     }
-                    case RLVDataRequestType.GetOutfit:
+                    case RlvDataRequestType.GetOutfit:
                     {
-                        WearableType? wearableType = null;
-                        if (RLVCommon.RLVWearableTypeMap.TryGetValue(rlvMessage.Option, out var wearableTypeTemp))
+                        RlvWearableType? wearableType = null;
+                        if (RlvCommon.RLVWearableTypeMap.TryGetValue(rlvMessage.Option, out var wearableTypeTemp))
                         {
                             wearableType = wearableTypeTemp;
                         }
@@ -294,10 +294,10 @@ namespace LibRLV
                         response = await ProcessGetOutfit(wearableType, cancellationToken).ConfigureAwait(false);
                         break;
                     }
-                    case RLVDataRequestType.GetAttach:
+                    case RlvDataRequestType.GetAttach:
                     {
-                        AttachmentPoint? attachmentPointType = null;
-                        if (RLVCommon.RLVAttachmentPointMap.TryGetValue(rlvMessage.Option, out var attachmentPointTemp))
+                        RlvAttachmentPoint? attachmentPointType = null;
+                        if (RlvCommon.RLVAttachmentPointMap.TryGetValue(rlvMessage.Option, out var attachmentPointTemp))
                         {
                             attachmentPointType = attachmentPointTemp;
                         }
@@ -305,14 +305,14 @@ namespace LibRLV
                         response = await ProcessGetAttach(attachmentPointType, cancellationToken).ConfigureAwait(false);
                         break;
                     }
-                    case RLVDataRequestType.GetInv:
+                    case RlvDataRequestType.GetInv:
                         response = await HandleGetInv(rlvMessage.Option, cancellationToken).ConfigureAwait(false);
                         break;
-                    case RLVDataRequestType.GetInvWorn:
+                    case RlvDataRequestType.GetInvWorn:
                         response = await HandleGetInvWorn(rlvMessage.Option, cancellationToken).ConfigureAwait(false);
                         break;
-                    case RLVDataRequestType.FindFolder:
-                    case RLVDataRequestType.FindFolders:
+                    case RlvDataRequestType.FindFolder:
+                    case RlvDataRequestType.FindFolders:
                     {
                         var findFolderParts = rlvMessage.Option.Split(';');
                         var separator = ",";
@@ -324,11 +324,11 @@ namespace LibRLV
                             separator = findFolderParts[1];
                         }
 
-                        response = await HandleFindFolders(name == RLVDataRequestType.FindFolder, searchTerms, separator, cancellationToken).ConfigureAwait(false);
+                        response = await HandleFindFolders(name == RlvDataRequestType.FindFolder, searchTerms, separator, cancellationToken).ConfigureAwait(false);
                         break;
                     }
-                    case RLVDataRequestType.GetPath:
-                    case RLVDataRequestType.GetPathNew:
+                    case RlvDataRequestType.GetPath:
+                    case RlvDataRequestType.GetPathNew:
                     {
                         // [] | [uuid | layer | attachpt ]
                         var parsedOptions = rlvMessage.Option.Split([';'], StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -340,19 +340,19 @@ namespace LibRLV
 
                         if (parsedOptions.Count == 0)
                         {
-                            response = await HandleGetPath(name == RLVDataRequestType.GetPath, rlvMessage.Sender, null, null, cancellationToken).ConfigureAwait(false);
+                            response = await HandleGetPath(name == RlvDataRequestType.GetPath, rlvMessage.Sender, null, null, cancellationToken).ConfigureAwait(false);
                         }
                         else if (Guid.TryParse(parsedOptions[0], out var uuid))
                         {
-                            response = await HandleGetPath(name == RLVDataRequestType.GetPath, uuid, null, null, cancellationToken).ConfigureAwait(false);
+                            response = await HandleGetPath(name == RlvDataRequestType.GetPath, uuid, null, null, cancellationToken).ConfigureAwait(false);
                         }
-                        else if (RLVCommon.RLVWearableTypeMap.TryGetValue(parsedOptions[0], out var wearableType))
+                        else if (RlvCommon.RLVWearableTypeMap.TryGetValue(parsedOptions[0], out var wearableType))
                         {
-                            response = await HandleGetPath(name == RLVDataRequestType.GetPath, null, null, wearableType, cancellationToken).ConfigureAwait(false);
+                            response = await HandleGetPath(name == RlvDataRequestType.GetPath, null, null, wearableType, cancellationToken).ConfigureAwait(false);
                         }
-                        else if (RLVCommon.RLVAttachmentPointMap.TryGetValue(parsedOptions[0], out var attachmentPoint))
+                        else if (RlvCommon.RLVAttachmentPointMap.TryGetValue(parsedOptions[0], out var attachmentPoint))
                         {
-                            response = await HandleGetPath(name == RLVDataRequestType.GetPath, null, attachmentPoint, null, cancellationToken).ConfigureAwait(false);
+                            response = await HandleGetPath(name == RlvDataRequestType.GetPath, null, attachmentPoint, null, cancellationToken).ConfigureAwait(false);
                         }
                         else
                         {
@@ -409,7 +409,7 @@ namespace LibRLV
                 return $"{FolderName}|{CountIndicator}";
             }
         }
-        private static void GetInvWornInfo_Internal(InventoryFolder folder, bool recursive, ref int totalItems, ref int totalItemsWorn)
+        private static void GetInvWornInfo_Internal(RlvSharedFolder folder, bool recursive, ref int totalItems, ref int totalItemsWorn)
         {
             totalItemsWorn += folder.Items.Count(n => n.AttachedTo != null || n.WornOn != null);
             totalItems += folder.Items.Count;
@@ -423,7 +423,7 @@ namespace LibRLV
             }
         }
 
-        private static string GetInvWornInfo(InventoryFolder folder)
+        private static string GetInvWornInfo(RlvSharedFolder folder)
         {
             // 0 : No item is present in that folder
             // 1 : Some items are present in that folder, but none of them is worn
@@ -485,12 +485,12 @@ namespace LibRLV
             }
 
             var inventoryMap = new InventoryMap(sharedFolder);
-            var folders = new List<InventoryFolder>();
+            var folders = new List<RlvSharedFolder>();
 
             var target = sharedFolder;
             if (args.Length != 0)
             {
-                if (!inventoryMap.TryGetFolderFromPath(args, true, out target))
+                if (!inventoryMap.TryGetFolderFromPath(args, false, out target))
                 {
                     return string.Empty;
                 }
@@ -514,7 +514,7 @@ namespace LibRLV
             return result;
         }
 
-        private static void SearchFoldersForName(InventoryFolder root, bool stopOnFirstResult, IEnumerable<string> searchTerms, List<InventoryFolder> outFoundFolders)
+        private static void SearchFoldersForName(RlvSharedFolder root, bool stopOnFirstResult, IEnumerable<string> searchTerms, List<RlvSharedFolder> outFoundFolders)
         {
             if (searchTerms.All(root.Name.Contains))
             {
@@ -542,7 +542,6 @@ namespace LibRLV
             }
         }
 
-        // TODO: Set separator = "," once cancellationToken defaults to default as well
         private async Task<string> HandleFindFolders(bool stopOnFirstResult, IEnumerable<string> searchTerms, string separator, CancellationToken cancellationToken)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
@@ -553,7 +552,7 @@ namespace LibRLV
 
             var inventoryMap = new InventoryMap(sharedFolder);
 
-            var foundFolders = new List<InventoryFolder>();
+            var foundFolders = new List<RlvSharedFolder>();
             SearchFoldersForName(sharedFolder, stopOnFirstResult, searchTerms, foundFolders);
 
             // TODO: Just add full path to the InventoryFolder so we don't have to calculate it every time?
@@ -584,7 +583,7 @@ namespace LibRLV
             var target = sharedFolder;
             if (args.Length != 0)
             {
-                if (!inventoryMap.TryGetFolderFromPath(args, true, out target))
+                if (!inventoryMap.TryGetFolderFromPath(args, false, out target))
                 {
                     return string.Empty;
                 }
@@ -598,7 +597,7 @@ namespace LibRLV
             return result;
         }
 
-        private async Task<string> HandleGetPath(bool limitToOneResult, Guid? itemId, AttachmentPoint? attachmentPoint, WearableType? wearableType, CancellationToken cancellationToken)
+        private async Task<string> HandleGetPath(bool limitToOneResult, Guid? itemId, RlvAttachmentPoint? attachmentPoint, RlvWearableType? wearableType, CancellationToken cancellationToken)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
@@ -631,7 +630,7 @@ namespace LibRLV
             switch (message)
             {
                 case "@version":
-                    await _callbacks.SendInstantMessageAsync(senderId, RLV.RLVVersion, cancellationToken).ConfigureAwait(false);
+                    await _callbacks.SendInstantMessageAsync(senderId, RlvService.RLVVersion, cancellationToken).ConfigureAwait(false);
                     return true;
                 case "@getblacklist":
                     var blacklist = _blacklist.GetBlacklist();

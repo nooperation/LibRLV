@@ -6,8 +6,8 @@ namespace LibRLV
 {
     internal interface IRestrictionProvider
     {
-        IReadOnlyList<RLVRestriction> GetRestrictionsByType(RLVRestrictionType restrictionType);
-        IReadOnlyList<RLVRestriction> FindRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null);
+        IReadOnlyList<RlvRestriction> GetRestrictionsByType(RlvRestrictionType restrictionType);
+        IReadOnlyList<RlvRestriction> FindRestrictions(string behaviorNameFilter = "", Guid? senderFilter = null);
         bool TryGetLockedFolder(Guid folderId, [NotNullWhen(true)] out LockedFolderPublic? lockedFolder);
         IReadOnlyDictionary<Guid, LockedFolderPublic> GetLockedFolders();
     }

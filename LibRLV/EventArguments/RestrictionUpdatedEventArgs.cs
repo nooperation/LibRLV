@@ -6,9 +6,9 @@ namespace LibRLV.EventArguments
     {
         public bool IsNew { get; }
         public bool IsDeleted { get; }
-        public RLVRestriction Restriction { get; }
+        public RlvRestriction Restriction { get; }
 
-        public RestrictionUpdatedEventArgs(RLVRestriction restriction, bool isNew, bool isDeleted)
+        public RestrictionUpdatedEventArgs(RlvRestriction restriction, bool isNew, bool isDeleted)
         {
             IsNew = isNew;
             IsDeleted = isDeleted;

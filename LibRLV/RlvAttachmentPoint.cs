@@ -1,6 +1,6 @@
 ﻿namespace LibRLV
 {
-    public enum AttachmentPoint
+    public enum RlvAttachmentPoint
     {
         Default,
         Chest,

@@ -1,6 +1,6 @@
 ﻿namespace LibRLV
 {
-    public enum RLVRestrictionType
+    public enum RlvRestrictionType
     {
         Notify,
         Permissive,

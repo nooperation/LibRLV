@@ -34,17 +34,17 @@ namespace LibRLV
 
         internal CameraRestrictions(IRestrictionProvider restrictionProvider)
         {
-            ZoomMin = GetRestrictionValueMax(restrictionProvider, RLVRestrictionType.CamZoomMin);
-            FovMin = GetRestrictionValueMax(restrictionProvider, RLVRestrictionType.SetCamFovMin);
-            AvDistMin = GetRestrictionValueMax(restrictionProvider, RLVRestrictionType.SetCamAvDistMin);
-            ZoomMax = GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamZoomMax);
-            DrawMin = GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamDrawMin);
-            DrawMax = GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamDrawMax);
-            DrawAlphaMin = GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamDrawAlphaMin);
-            DrawAlphaMax = GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamDrawAlphaMax);
-            FovMax = GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.SetCamFovMax);
-            AvDistMax = GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.SetCamAvDistMax);
-            AvDist = GetRestrictionValueMin(restrictionProvider, RLVRestrictionType.CamAvDist);
+            ZoomMin = GetRestrictionValueMax(restrictionProvider, RlvRestrictionType.CamZoomMin);
+            FovMin = GetRestrictionValueMax(restrictionProvider, RlvRestrictionType.SetCamFovMin);
+            AvDistMin = GetRestrictionValueMax(restrictionProvider, RlvRestrictionType.SetCamAvDistMin);
+            ZoomMax = GetRestrictionValueMin(restrictionProvider, RlvRestrictionType.CamZoomMax);
+            DrawMin = GetRestrictionValueMin(restrictionProvider, RlvRestrictionType.CamDrawMin);
+            DrawMax = GetRestrictionValueMin(restrictionProvider, RlvRestrictionType.CamDrawMax);
+            DrawAlphaMin = GetRestrictionValueMin(restrictionProvider, RlvRestrictionType.CamDrawAlphaMin);
+            DrawAlphaMax = GetRestrictionValueMin(restrictionProvider, RlvRestrictionType.CamDrawAlphaMax);
+            FovMax = GetRestrictionValueMin(restrictionProvider, RlvRestrictionType.SetCamFovMax);
+            AvDistMax = GetRestrictionValueMin(restrictionProvider, RlvRestrictionType.SetCamAvDistMax);
+            AvDist = GetRestrictionValueMin(restrictionProvider, RlvRestrictionType.CamAvDist);
 
             if (TryGetCamDrawColor(restrictionProvider, out var camDrawColor))
             {
@@ -55,12 +55,12 @@ namespace LibRLV
                 Texture = camtextures;
             }
 
-            IsLocked = restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SetCamUnlock).Count != 0;
+            IsLocked = restrictionProvider.GetRestrictionsByType(RlvRestrictionType.SetCamUnlock).Count != 0;
         }
 
-        private static float? GetRestrictionValueMax(IRestrictionProvider restrictionProvider, RLVRestrictionType restrictionType)
+        private static float? GetRestrictionValueMax(IRestrictionProvider restrictionProvider, RlvRestrictionType restrictionType)
         {
-            if (RLVPermissionsService.TryGetRestrictionValueMax(restrictionProvider, restrictionType, out var value))
+            if (RlvPermissionsService.TryGetRestrictionValueMax(restrictionProvider, restrictionType, out var value))
             {
                 return value;
             }
@@ -68,9 +68,9 @@ namespace LibRLV
             return null;
         }
 
-        private static float? GetRestrictionValueMin(IRestrictionProvider restrictionProvider, RLVRestrictionType restrictionType)
+        private static float? GetRestrictionValueMin(IRestrictionProvider restrictionProvider, RlvRestrictionType restrictionType)
         {
-            if (RLVPermissionsService.TryGetRestrictionValueMin(restrictionProvider, restrictionType, out var value))
+            if (RlvPermissionsService.TryGetRestrictionValueMin(restrictionProvider, restrictionType, out var value))
             {
                 return value;
             }
@@ -88,7 +88,7 @@ namespace LibRLV
             camDrawColor = default;
 
             var restrictions = restrictionProvider
-                .GetRestrictionsByType(RLVRestrictionType.CamDrawColor)
+                .GetRestrictionsByType(RlvRestrictionType.CamDrawColor)
                 .Where(n => n.Args.Count == 3 && n.Args.All(arg => arg is float))
                 .ToList();
             if (restrictions.Count == 0)
@@ -115,7 +115,7 @@ namespace LibRLV
 
         private static bool TryGetCamTexture(IRestrictionProvider restrictionProvider, [NotNullWhen(true)] out Guid? textureUUID)
         {
-            var restrictions = restrictionProvider.GetRestrictionsByType(RLVRestrictionType.SetCamTextures);
+            var restrictions = restrictionProvider.GetRestrictionsByType(RlvRestrictionType.SetCamTextures);
             if (restrictions.Count == 0)
             {
                 textureUUID = null;

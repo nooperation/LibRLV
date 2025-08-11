@@ -4,9 +4,9 @@ namespace LibRLV.EventArguments
 {
     public class SitEventArgs : EventArgs
     {
-        public Guid? Target { get; }
+        public Guid Target { get; }
 
-        public SitEventArgs(Guid? target)
+        public SitEventArgs(Guid target)
         {
             Target = target;
         }

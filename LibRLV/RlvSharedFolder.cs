@@ -3,22 +3,22 @@ using System.Collections.Generic;
 
 namespace LibRLV
 {
-    public class InventoryFolder
+    public class RlvSharedFolder
     {
         public Guid Id { get; }
         public string Name { get; set; }
-        public InventoryFolder? Parent { get; private set; }
-        public IReadOnlyList<InventoryFolder> Children => _children;
-        public IReadOnlyList<InventoryItem> Items => _items;
+        public RlvSharedFolder? Parent { get; private set; }
+        public IReadOnlyList<RlvSharedFolder> Children => _children;
+        public IReadOnlyList<RlvInventoryItem> Items => _items;
 
-        private readonly List<InventoryFolder> _children;
-        private readonly List<InventoryItem> _items;
+        private readonly List<RlvSharedFolder> _children;
+        private readonly List<RlvInventoryItem> _items;
 
-        public InventoryFolder(Guid id, string name)
+        public RlvSharedFolder(Guid id, string name)
         {
-            if (string.IsNullOrEmpty(name))
+            if (name == null)
             {
-                throw new ArgumentException("Name cannot be null or empty", nameof(name));
+                throw new ArgumentException("Name cannot be null", nameof(name));
             }
 
             Id = id;
@@ -34,14 +34,14 @@ namespace LibRLV
         /// <param name="id">Folder ID</param>
         /// <param name="name">Folder Name</param>
         /// <returns>Newly added Folder</returns>
-        public InventoryFolder AddChild(Guid id, string name)
+        public RlvSharedFolder AddChild(Guid id, string name)
         {
             if (string.IsNullOrEmpty(name))
             {
                 throw new ArgumentException("Name cannot be null or empty", nameof(name));
             }
 
-            var newChild = new InventoryFolder(id, name)
+            var newChild = new RlvSharedFolder(id, name)
             {
                 Parent = this
             };
@@ -58,14 +58,14 @@ namespace LibRLV
         /// <param name="attachedTo">Item attachment point if attached</param>
         /// <param name="wornOn">Item wearable type if worn</param>
         /// <returns>Newly added item</returns>
-        public InventoryItem AddItem(Guid id, string name, AttachmentPoint? attachedTo, WearableType? wornOn)
+        public RlvInventoryItem AddItem(Guid id, string name, RlvAttachmentPoint? attachedTo, RlvWearableType? wornOn)
         {
             if (string.IsNullOrEmpty(name))
             {
                 throw new ArgumentException("Name cannot be null or empty", nameof(name));
             }
 
-            var newItem = new InventoryItem(id, name, this, attachedTo, wornOn);
+            var newItem = new RlvInventoryItem(id, name, this, attachedTo, wornOn);
 
             _items.Add(newItem);
             return newItem;
@@ -76,7 +76,7 @@ namespace LibRLV
         /// </summary>
         /// <param name="wearableType">Finds all items worn of this type</param>
         /// <returns>Collection of items that are worn as the specified wearable type</returns>
-        public IEnumerable<InventoryItem> GetWornItems(WearableType wearableType)
+        public IEnumerable<RlvInventoryItem> GetWornItems(RlvWearableType wearableType)
         {
             foreach (var item in Items)
             {
@@ -100,7 +100,7 @@ namespace LibRLV
         /// </summary>
         /// <param name="attachmentPoint">Finds all items attached to this attachment point</param>
         /// <returns>Collection of items currently attached to the specified attachment point</returns>
-        public IEnumerable<InventoryItem> GetAttachedItems(AttachmentPoint attachmentPoint)
+        public IEnumerable<RlvInventoryItem> GetAttachedItems(RlvAttachmentPoint attachmentPoint)
         {
             foreach (var item in Items)
             {

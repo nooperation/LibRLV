@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LibRLV
 {
-    public class RLV
+    public class RlvService
     {
         public const string RLVVersion = "RestrainedLove viewer v3.4.3 (RLVa 2.4.2)";
         public const string RLVVersionNum = "2040213";
@@ -14,8 +14,8 @@ namespace LibRLV
         private volatile bool _enabled;
         private volatile bool _enableInstantMessageProcessing;
 
-        internal IRLVCallbacks Callbacks { get; }
-        internal RLVGetRequestHandler GetRequestHandler { get; }
+        internal IRlvCallbacks Callbacks { get; }
+        internal RlvGetRequestHandler GetRequestHandler { get; }
 
         private readonly Regex _rlvRegexPattern = new(@"(?<behavior>[^:=]+)(:(?<option>[^=]*))?=(?<param>.+)", RegexOptions.Compiled);
 
@@ -31,19 +31,19 @@ namespace LibRLV
             set => _enableInstantMessageProcessing = value;
         }
 
-        public RLVCommandProcessor Commands { get; }
-        public RLVRestrictionManager Restrictions { get; }
-        public RLVPermissionsService Permissions { get; }
-        public RLVBlacklist Blacklist { get; }
+        public RlvCommandProcessor Commands { get; }
+        public RlvRestrictionManager Restrictions { get; }
+        public RlvPermissionsService Permissions { get; }
+        public RlvBlacklist Blacklist { get; }
 
-        public RLV(IRLVCallbacks callbacks, bool enabled)
+        public RlvService(IRlvCallbacks callbacks, bool enabled)
         {
             Callbacks = callbacks;
-            Blacklist = new RLVBlacklist();
-            Restrictions = new RLVRestrictionManager(Callbacks);
-            GetRequestHandler = new RLVGetRequestHandler(Blacklist, Restrictions, Callbacks);
-            Permissions = new RLVPermissionsService(Restrictions);
-            Commands = new RLVCommandProcessor(Permissions, Callbacks);
+            Blacklist = new RlvBlacklist();
+            Restrictions = new RlvRestrictionManager(Callbacks);
+            GetRequestHandler = new RlvGetRequestHandler(Blacklist, Restrictions, Callbacks);
+            Permissions = new RlvPermissionsService(Restrictions);
+            Commands = new RlvCommandProcessor(Permissions, Callbacks);
             Enabled = enabled;
         }
 
@@ -184,7 +184,7 @@ namespace LibRLV
         /// <param name="wearableType">Type of wearable being worn</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task ReportItemWorn(Guid objectFolderId, bool isShared, WearableType wearableType, CancellationToken cancellationToken = default)
+        public async Task ReportItemWorn(Guid objectFolderId, bool isShared, RlvWearableType wearableType, CancellationToken cancellationToken = default)
         {
             var notificationText = "";
             var isLegal = Permissions.CanAttach(objectFolderId, isShared, null, wearableType);
@@ -209,7 +209,7 @@ namespace LibRLV
         /// <param name="wearableType">Type of wearable being removed</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task ReportItemUnworn(Guid objectFolderId, bool isShared, WearableType wearableType, CancellationToken cancellationToken = default)
+        public async Task ReportItemUnworn(Guid objectFolderId, bool isShared, RlvWearableType wearableType, CancellationToken cancellationToken = default)
         {
             var notificationText = "";
             var isLegal = Permissions.CanDetach(objectFolderId, isShared, null, wearableType);
@@ -234,7 +234,7 @@ namespace LibRLV
         /// <param name="attachmentPoint">Attachment point where the item was attached</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task ReportItemAttached(Guid objectFolderId, bool isShared, AttachmentPoint attachmentPoint, CancellationToken cancellationToken = default)
+        public async Task ReportItemAttached(Guid objectFolderId, bool isShared, RlvAttachmentPoint attachmentPoint, CancellationToken cancellationToken = default)
         {
             var notificationText = "";
             var isLegal = Permissions.CanAttach(objectFolderId, isShared, attachmentPoint, null);
@@ -259,7 +259,7 @@ namespace LibRLV
         /// <param name="attachmentPoint">Attachment point where the item was detached from</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task ReportItemDetached(Guid objectFolderId, bool isShared, AttachmentPoint attachmentPoint, CancellationToken cancellationToken = default)
+        public async Task ReportItemDetached(Guid objectFolderId, bool isShared, RlvAttachmentPoint attachmentPoint, CancellationToken cancellationToken = default)
         {
             var notificationText = "";
             var isLegal = Permissions.CanDetach(objectFolderId, isShared, attachmentPoint, null);
@@ -358,7 +358,7 @@ namespace LibRLV
         #endregion
 
         #region Private
-        private async Task<bool> ProcessRLVMessage(RLVMessage rlvMessage, CancellationToken cancellationToken)
+        private async Task<bool> ProcessRLVMessage(RlvMessage rlvMessage, CancellationToken cancellationToken)
         {
             if (Blacklist.IsBlacklisted(rlvMessage.Behavior))
             {
@@ -400,7 +400,7 @@ namespace LibRLV
             // Special hack for @clear, which doesn't match the standard pattern of @behavior=param
             if (message.Equals("clear", StringComparison.OrdinalIgnoreCase))
             {
-                return await ProcessRLVMessage(new RLVMessage(
+                return await ProcessRLVMessage(new RlvMessage(
                     behavior: "clear",
                     option: "",
                     param: "",
@@ -415,7 +415,7 @@ namespace LibRLV
                 return false;
             }
 
-            var rlvMessage = new RLVMessage(
+            var rlvMessage = new RlvMessage(
                 behavior: match.Groups["behavior"].Value.ToLowerInvariant(),
                 option: match.Groups["option"].Value,
                 param: match.Groups["param"].Value.ToLowerInvariant(),
@@ -428,7 +428,7 @@ namespace LibRLV
 
         private async Task SendNotification(string notificationText, CancellationToken cancellationToken)
         {
-            var notificationRestrictions = Restrictions.GetRestrictionsByType(RLVRestrictionType.Notify);
+            var notificationRestrictions = Restrictions.GetRestrictionsByType(RlvRestrictionType.Notify);
 
             foreach (var notificationRestriction in notificationRestrictions)
             {

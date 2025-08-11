@@ -4,20 +4,20 @@ namespace LibRLV.EventArguments
 {
     public class SetGroupEventArgs : EventArgs
     {
-        public string GroupName { get; }
-        public string Role { get; }
+        public string? GroupName { get; }
+        public string? RoleName { get; }
         public Guid GroupId { get; }
 
-        public SetGroupEventArgs(string groupName, string role)
+        public SetGroupEventArgs(string groupName, string roleName)
         {
             GroupName = groupName;
-            Role = role;
+            RoleName = roleName;
             GroupId = Guid.Empty;
         }
-        public SetGroupEventArgs(Guid groupID, string role)
+        public SetGroupEventArgs(Guid groupID, string roleName)
         {
             GroupName = string.Empty;
-            Role = role;
+            RoleName = roleName;
             GroupId = groupID;
         }
     }

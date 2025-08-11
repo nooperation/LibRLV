@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace LibRLV
 {
-    public class RLVCallbacksDefault : IRLVCallbacks
+    public class RlvCallbacksDefault : IRlvCallbacks
     {
         public virtual Task SendReplyAsync(int channel, string message, CancellationToken cancellationToken)
         {
@@ -14,89 +14,89 @@ namespace LibRLV
 
         public virtual Task<(bool Success, string EnvironmentSettingValue)> TryGetEnvironmentSettingValueAsync(string settingName, CancellationToken cancellationToken)
         {
-            if (!Enum.TryParse(settingName, true, out RLVGetEnvType settingType))
+            if (!Enum.TryParse(settingName, true, out RlvGetEnvType settingType))
             {
                 return Task.FromResult((false, string.Empty));
             }
 
             switch (settingType)
             {
-                case RLVGetEnvType.Daytime:
-                case RLVGetEnvType.AmbientR:
-                case RLVGetEnvType.AmbientG:
-                case RLVGetEnvType.AmbientB:
-                case RLVGetEnvType.AmbientI:
-                case RLVGetEnvType.BlueDensityR:
-                case RLVGetEnvType.BlueDensityG:
-                case RLVGetEnvType.BlueDensityB:
-                case RLVGetEnvType.BlueDensityI:
-                case RLVGetEnvType.BlueHorizonR:
-                case RLVGetEnvType.BlueHorizonG:
-                case RLVGetEnvType.BlueHorizonB:
-                case RLVGetEnvType.BlueHorizonI:
-                case RLVGetEnvType.CloudColorR:
-                case RLVGetEnvType.CloudColorG:
-                case RLVGetEnvType.CloudColorB:
-                case RLVGetEnvType.CloudColorI:
-                case RLVGetEnvType.CloudCoverage:
-                case RLVGetEnvType.CloudX:
-                case RLVGetEnvType.CloudY:
-                case RLVGetEnvType.CloudD:
-                case RLVGetEnvType.CloudDetailX:
-                case RLVGetEnvType.CloudDetailY:
-                case RLVGetEnvType.CloudDetailD:
-                case RLVGetEnvType.CloudScale:
-                case RLVGetEnvType.CloudScrollX:
-                case RLVGetEnvType.CloudScrollY:
-                case RLVGetEnvType.CloudVariance:
-                case RLVGetEnvType.DensityMultiplier:
-                case RLVGetEnvType.DistanceMultiplier:
-                case RLVGetEnvType.DropletRadius:
-                case RLVGetEnvType.EastAngle:
-                case RLVGetEnvType.IceLevel:
-                case RLVGetEnvType.HazeDensity:
-                case RLVGetEnvType.HazeHorizon:
-                case RLVGetEnvType.MaxAltitude:
-                case RLVGetEnvType.MoistureLevel:
-                case RLVGetEnvType.MoonAzim:
-                case RLVGetEnvType.MoonNBrightness:
-                case RLVGetEnvType.MoonElev:
-                case RLVGetEnvType.MoonScale:
-                case RLVGetEnvType.SceneGamma:
-                case RLVGetEnvType.StarBrightness:
-                case RLVGetEnvType.SunGlowFocus:
-                case RLVGetEnvType.SunAzim:
-                case RLVGetEnvType.SunElev:
-                case RLVGetEnvType.SunScale:
-                case RLVGetEnvType.SunMoonPosition:
-                case RLVGetEnvType.SunMoonColorR:
-                case RLVGetEnvType.SunMoonColorG:
-                case RLVGetEnvType.SunMoonColorB:
-                case RLVGetEnvType.SunMoonColorI:
+                case RlvGetEnvType.Daytime:
+                case RlvGetEnvType.AmbientR:
+                case RlvGetEnvType.AmbientG:
+                case RlvGetEnvType.AmbientB:
+                case RlvGetEnvType.AmbientI:
+                case RlvGetEnvType.BlueDensityR:
+                case RlvGetEnvType.BlueDensityG:
+                case RlvGetEnvType.BlueDensityB:
+                case RlvGetEnvType.BlueDensityI:
+                case RlvGetEnvType.BlueHorizonR:
+                case RlvGetEnvType.BlueHorizonG:
+                case RlvGetEnvType.BlueHorizonB:
+                case RlvGetEnvType.BlueHorizonI:
+                case RlvGetEnvType.CloudColorR:
+                case RlvGetEnvType.CloudColorG:
+                case RlvGetEnvType.CloudColorB:
+                case RlvGetEnvType.CloudColorI:
+                case RlvGetEnvType.CloudCoverage:
+                case RlvGetEnvType.CloudX:
+                case RlvGetEnvType.CloudY:
+                case RlvGetEnvType.CloudD:
+                case RlvGetEnvType.CloudDetailX:
+                case RlvGetEnvType.CloudDetailY:
+                case RlvGetEnvType.CloudDetailD:
+                case RlvGetEnvType.CloudScale:
+                case RlvGetEnvType.CloudScrollX:
+                case RlvGetEnvType.CloudScrollY:
+                case RlvGetEnvType.CloudVariance:
+                case RlvGetEnvType.DensityMultiplier:
+                case RlvGetEnvType.DistanceMultiplier:
+                case RlvGetEnvType.DropletRadius:
+                case RlvGetEnvType.EastAngle:
+                case RlvGetEnvType.IceLevel:
+                case RlvGetEnvType.HazeDensity:
+                case RlvGetEnvType.HazeHorizon:
+                case RlvGetEnvType.MaxAltitude:
+                case RlvGetEnvType.MoistureLevel:
+                case RlvGetEnvType.MoonAzim:
+                case RlvGetEnvType.MoonNBrightness:
+                case RlvGetEnvType.MoonElev:
+                case RlvGetEnvType.MoonScale:
+                case RlvGetEnvType.SceneGamma:
+                case RlvGetEnvType.StarBrightness:
+                case RlvGetEnvType.SunGlowFocus:
+                case RlvGetEnvType.SunAzim:
+                case RlvGetEnvType.SunElev:
+                case RlvGetEnvType.SunScale:
+                case RlvGetEnvType.SunMoonPosition:
+                case RlvGetEnvType.SunMoonColorR:
+                case RlvGetEnvType.SunMoonColorG:
+                case RlvGetEnvType.SunMoonColorB:
+                case RlvGetEnvType.SunMoonColorI:
                     return Task.FromResult((true, "0"));
 
-                case RLVGetEnvType.Ambient:
-                case RLVGetEnvType.BlueDensity:
-                case RLVGetEnvType.BlueHorizon:
-                case RLVGetEnvType.CloudColor:
-                case RLVGetEnvType.Cloud:
-                case RLVGetEnvType.CloudDetail:
-                case RLVGetEnvType.SunMoonColor:
+                case RlvGetEnvType.Ambient:
+                case RlvGetEnvType.BlueDensity:
+                case RlvGetEnvType.BlueHorizon:
+                case RlvGetEnvType.CloudColor:
+                case RlvGetEnvType.Cloud:
+                case RlvGetEnvType.CloudDetail:
+                case RlvGetEnvType.SunMoonColor:
                     return Task.FromResult((true, "0;0;0"));
 
-                case RLVGetEnvType.CloudScroll:
+                case RlvGetEnvType.CloudScroll:
                     return Task.FromResult((true, "0;0"));
 
-                case RLVGetEnvType.Preset:
-                case RLVGetEnvType.Asset:
+                case RlvGetEnvType.Preset:
+                case RlvGetEnvType.Asset:
                     return Task.FromResult((true, ""));
 
-                case RLVGetEnvType.MoonImage:
-                case RLVGetEnvType.SunImage:
-                case RLVGetEnvType.CloudImage:
+                case RlvGetEnvType.MoonImage:
+                case RlvGetEnvType.SunImage:
+                case RlvGetEnvType.CloudImage:
                     return Task.FromResult((true, Guid.Empty.ToString()));
 
-                case RLVGetEnvType.SunGlowSize:
+                case RlvGetEnvType.SunGlowSize:
                     return Task.FromResult((true, "1"));
             }
 
@@ -105,20 +105,20 @@ namespace LibRLV
 
         public virtual Task<(bool Success, string DebugSettingValue)> TryGetDebugSettingValueAsync(string settingName, CancellationToken cancellationToken)
         {
-            if (!Enum.TryParse(settingName, true, out RLVGetDebugType settingType))
+            if (!Enum.TryParse(settingName, true, out RlvGetDebugType settingType))
             {
                 return Task.FromResult((false, string.Empty));
             }
 
             switch (settingType)
             {
-                case RLVGetDebugType.AvatarSex:
-                case RLVGetDebugType.RestrainedLoveForbidGiveToRLV:
-                case RLVGetDebugType.WindLightUseAtmosShaders:
+                case RlvGetDebugType.AvatarSex:
+                case RlvGetDebugType.RestrainedLoveForbidGiveToRLV:
+                case RlvGetDebugType.WindLightUseAtmosShaders:
                     return Task.FromResult((true, "0"));
 
-                case RLVGetDebugType.RenderResolutionDivisor:
-                case RLVGetDebugType.RestrainedLoveNoSetEnv:
+                case RlvGetDebugType.RenderResolutionDivisor:
+                case RlvGetDebugType.RestrainedLoveNoSetEnv:
                     return Task.FromResult((true, "1"));
             }
 
@@ -130,7 +130,7 @@ namespace LibRLV
             return Task.CompletedTask;
         }
 
-        public virtual Task<bool> ObjectExistsAsync(Guid objectID, CancellationToken cancellationToken)
+        public virtual Task<bool> ObjectExistsAsync(Guid objectId, CancellationToken cancellationToken)
         {
             return Task.FromResult(false);
         }
@@ -145,9 +145,9 @@ namespace LibRLV
             return Task.FromResult((false, default(Guid)));
         }
 
-        public virtual Task<(bool Success, InventoryFolder? SharedFolder)> TryGetSharedFolderAsync(CancellationToken cancellationToken)
+        public virtual Task<(bool Success, RlvSharedFolder? SharedFolder)> TryGetSharedFolderAsync(CancellationToken cancellationToken)
         {
-            return Task.FromResult((false, (InventoryFolder?)null));
+            return Task.FromResult((false, (RlvSharedFolder?)null));
         }
 
         public virtual Task<(bool Success, CameraSettings? CameraSettings)> TryGetCameraSettingsAsync(CancellationToken cancellationToken)
@@ -160,10 +160,10 @@ namespace LibRLV
             return Task.FromResult((false, "None"));
         }
 
-        public virtual Task<(bool Success, IReadOnlyList<InventoryItem>? CurrentOutfit)> TryGetCurrentOutfitAsync(CancellationToken cancellationToken)
+        public virtual Task<(bool Success, IReadOnlyList<RlvInventoryItem>? CurrentOutfit)> TryGetCurrentOutfitAsync(CancellationToken cancellationToken)
         {
-            IReadOnlyList<InventoryItem> currentOutfit = [];
-            return Task.FromResult((false, (IReadOnlyList<InventoryItem>?)currentOutfit));
+            IReadOnlyList<RlvInventoryItem> currentOutfit = [];
+            return Task.FromResult((false, (IReadOnlyList<RlvInventoryItem>?)currentOutfit));
         }
     }
 }

@@ -2,14 +2,14 @@
 
 namespace LibRLV
 {
-    public class InventoryItem
+    public class RlvInventoryItem
     {
         public Guid Id { get; }
-        public InventoryFolder? Folder { get; }
+        public RlvSharedFolder? Folder { get; }
         public Guid? FolderId { get; }
         public string Name { get; set; }
-        public WearableType? WornOn { get; set; }
-        public AttachmentPoint? AttachedTo { get; set; }
+        public RlvWearableType? WornOn { get; set; }
+        public RlvAttachmentPoint? AttachedTo { get; set; }
 
         /// <summary>
         /// Creates an inventory item associated with an external folder
@@ -19,7 +19,7 @@ namespace LibRLV
         /// <param name="externalFolderId">ID of the external folder containing this item</param>
         /// <param name="attachedTo">Attachment point if the item is attached</param>
         /// <param name="wornOn">Wearable type if the item is worn</param>
-        public InventoryItem(Guid id, string name, Guid? externalFolderId, AttachmentPoint? attachedTo, WearableType? wornOn)
+        public RlvInventoryItem(Guid id, string name, Guid? externalFolderId, RlvAttachmentPoint? attachedTo, RlvWearableType? wornOn)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -34,7 +34,7 @@ namespace LibRLV
             FolderId = externalFolderId;
         }
 
-        internal InventoryItem(Guid id, string name, InventoryFolder folder, AttachmentPoint? attachedTo, WearableType? wornOn)
+        internal RlvInventoryItem(Guid id, string name, RlvSharedFolder folder, RlvAttachmentPoint? attachedTo, RlvWearableType? wornOn)
         {
             if (string.IsNullOrEmpty(name))
             {

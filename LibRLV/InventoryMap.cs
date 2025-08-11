@@ -7,24 +7,24 @@ namespace LibRLV
 {
     public class InventoryMap
     {
-        public ImmutableDictionary<Guid, InventoryItem> Items { get; }
-        public ImmutableDictionary<Guid, InventoryFolder> Folders { get; }
-        public InventoryFolder Root { get; }
+        public ImmutableDictionary<Guid, RlvInventoryItem> Items { get; }
+        public ImmutableDictionary<Guid, RlvSharedFolder> Folders { get; }
+        public RlvSharedFolder Root { get; }
 
         /// <summary>
         /// Creates a mapping of all items and folders for a given InventoryFolder.
         /// </summary>
         /// <param name="root">Root of the shared folder. Generally the #RLV folder.</param>
         /// <exception cref="ArgumentNullException">root is null</exception>
-        public InventoryMap(InventoryFolder root)
+        public InventoryMap(RlvSharedFolder root)
         {
             if (root == null)
             {
                 throw new ArgumentNullException(nameof(root));
             }
 
-            var itemsTemp = new Dictionary<Guid, InventoryItem>();
-            var foldersTemp = new Dictionary<Guid, InventoryFolder>();
+            var itemsTemp = new Dictionary<Guid, RlvInventoryItem>();
+            var foldersTemp = new Dictionary<Guid, RlvSharedFolder>();
             CreateInventoryMap(root, foldersTemp, itemsTemp);
 
             Root = root;
@@ -46,7 +46,7 @@ namespace LibRLV
         /// <param name="skipPrivateFolders">If true, ignores folders starting with '.'</param>
         /// <param name="folder">The found folder, or null if not found</param>
         /// <returns>True if folder was found, false otherwise</returns>
-        public bool TryGetFolderFromPath(string path, bool skipPrivateFolders, [NotNullWhen(returnValue: true)] out InventoryFolder? folder)
+        public bool TryGetFolderFromPath(string path, bool skipPrivateFolders, [NotNullWhen(returnValue: true)] out RlvSharedFolder? folder)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -57,7 +57,7 @@ namespace LibRLV
             var iter = Root;
             while (true)
             {
-                InventoryFolder? candidate = null;
+                RlvSharedFolder? candidate = null;
                 var candidateNameLengthSelected = 0;
                 var candidatePathRemaining = string.Empty;
                 var candidateHasPrefix = false;
@@ -151,13 +151,13 @@ namespace LibRLV
         /// <param name="attachmentPoint">If specified, find all folders containing an item currently attached to this attachment point</param>
         /// <param name="wearableType">If specified, find all folders containing an item currently worn as this type</param>
         /// <returns>Collection of folders matching the search criteria</returns>
-        public IEnumerable<InventoryFolder> FindFoldersContaining(
+        public IEnumerable<RlvSharedFolder> FindFoldersContaining(
             bool limitToOneResult,
             Guid? itemId,
-            AttachmentPoint? attachmentPoint,
-            WearableType? wearableType)
+            RlvAttachmentPoint? attachmentPoint,
+            RlvWearableType? wearableType)
         {
-            var folders = new List<InventoryFolder>();
+            var folders = new List<RlvSharedFolder>();
 
             if (itemId.HasValue)
             {
@@ -263,9 +263,9 @@ namespace LibRLV
         }
 
         private static void CreateInventoryMap(
-            InventoryFolder root,
-            Dictionary<Guid, InventoryFolder> folders,
-            Dictionary<Guid, InventoryItem> items)
+            RlvSharedFolder root,
+            Dictionary<Guid, RlvSharedFolder> folders,
+            Dictionary<Guid, RlvInventoryItem> items)
         {
             if (folders.ContainsKey(root.Id))
             {

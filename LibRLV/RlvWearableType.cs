@@ -1,6 +1,6 @@
 ﻿namespace LibRLV
 {
-    public enum WearableType
+    public enum RlvWearableType
     {
         Shape = 0,
         Skin = 1,

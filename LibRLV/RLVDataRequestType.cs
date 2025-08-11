@@ -1,6 +1,6 @@
 ﻿namespace LibRLV
 {
-    internal enum RLVDataRequestType
+    internal enum RlvDataRequestType
     {
         GetCamAvDistMin,
         GetCamAvDistMax,

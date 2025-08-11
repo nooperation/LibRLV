@@ -8,9 +8,9 @@ using LibRLV.EventArguments;
 
 namespace LibRLV
 {
-    public class RLVCommandProcessor
+    public class RlvCommandProcessor
     {
-        private readonly ImmutableDictionary<string, Func<RLVMessage, CancellationToken, Task<bool>>> _rlvActionHandlers;
+        private readonly ImmutableDictionary<string, Func<RlvMessage, CancellationToken, Task<bool>>> _rlvActionHandlers;
 
         public event EventHandler<SetRotEventArgs>? SetRot;
         public event EventHandler<AdjustHeightEventArgs>? AdjustHeight;
@@ -27,15 +27,15 @@ namespace LibRLV
         public event EventHandler<SetSettingEventArgs>? SetDebug;
 
         // TODO: Swap manager out with an interface once it's been solidified into only useful stuff
-        private readonly RLVPermissionsService _manager;
-        private readonly IRLVCallbacks _callbacks;
+        private readonly RlvPermissionsService _manager;
+        private readonly IRlvCallbacks _callbacks;
 
-        internal RLVCommandProcessor(RLVPermissionsService manager, IRLVCallbacks callbacks)
+        internal RlvCommandProcessor(RlvPermissionsService manager, IRlvCallbacks callbacks)
         {
             _manager = manager;
             _callbacks = callbacks;
 
-            _rlvActionHandlers = new Dictionary<string, Func<RLVMessage, CancellationToken, Task<bool>>>()
+            _rlvActionHandlers = new Dictionary<string, Func<RlvMessage, CancellationToken, Task<bool>>>()
             {
                 { "setrot", (command, cancellationToken) => HandleSetRot(command) },
                 { "adjustheight", (command, cancellationToken) => HandleAdjustHeight(command)},
@@ -82,7 +82,7 @@ namespace LibRLV
             }.ToImmutableDictionary();
         }
 
-        internal async Task<bool> ProcessActionCommand(RLVMessage command, CancellationToken cancellationToken)
+        internal async Task<bool> ProcessActionCommand(RlvMessage command, CancellationToken cancellationToken)
         {
             if (_rlvActionHandlers.TryGetValue(command.Behavior, out var func))
             {
@@ -100,7 +100,7 @@ namespace LibRLV
             return false;
         }
 
-        private Task<bool> HandleSetDebug(RLVMessage command)
+        private Task<bool> HandleSetDebug(RlvMessage command)
         {
             var separatorIndex = command.Behavior.IndexOf('_');
             if (separatorIndex == -1)
@@ -120,7 +120,7 @@ namespace LibRLV
             return Task.FromResult(true);
         }
 
-        private Task<bool> HandleSetEnv(RLVMessage command)
+        private Task<bool> HandleSetEnv(RlvMessage command)
         {
             var separatorIndex = command.Behavior.IndexOf('_');
             if (separatorIndex == -1)
@@ -140,7 +140,7 @@ namespace LibRLV
             return Task.FromResult(true);
         }
 
-        private Task<bool> HandleSetGroup(RLVMessage command)
+        private Task<bool> HandleSetGroup(RlvMessage command)
         {
             var argParts = command.Option.Split([';'], StringSplitOptions.RemoveEmptyEntries);
             if (argParts.Length == 0)
@@ -168,7 +168,7 @@ namespace LibRLV
             return Task.FromResult(true);
         }
 
-        private bool CanRemAttachItem(InventoryItem item, bool enforceNostrip)
+        private bool CanRemAttachItem(RlvInventoryItem item, bool enforceNostrip)
         {
             if (item.WornOn == null && item.AttachedTo == null)
             {
@@ -195,7 +195,7 @@ namespace LibRLV
                 return false;
             }
 
-            if (item.WornOn is WearableType.Skin or WearableType.Shape or WearableType.Eyes or WearableType.Hair)
+            if (item.WornOn is RlvWearableType.Skin or RlvWearableType.Shape or RlvWearableType.Eyes or RlvWearableType.Hair)
             {
                 return false;
             }
@@ -203,7 +203,7 @@ namespace LibRLV
             return true;
         }
 
-        private static void CollectItemsToAttach(InventoryFolder folder, bool replaceExistingAttachments, bool recursive, List<AttachmentEventArgs.AttachmentRequest> itemsToAttach)
+        private static void CollectItemsToAttach(RlvSharedFolder folder, bool replaceExistingAttachments, bool recursive, List<AttachmentEventArgs.AttachmentRequest> itemsToAttach)
         {
             if (folder.Name.Length > 0)
             {
@@ -217,8 +217,8 @@ namespace LibRLV
                 }
             }
 
-            AttachmentPoint? folderAttachmentPoint = null;
-            if (RLVCommon.TryGetAttachmentPointFromItemName(folder.Name, out var attachmentPointTemp))
+            RlvAttachmentPoint? folderAttachmentPoint = null;
+            if (RlvCommon.TryGetAttachmentPointFromItemName(folder.Name, out var attachmentPointTemp))
             {
                 folderAttachmentPoint = attachmentPointTemp;
             }
@@ -235,7 +235,7 @@ namespace LibRLV
                     continue;
                 }
 
-                if (RLVCommon.TryGetAttachmentPointFromItemName(item.Name, out var attachmentPoint))
+                if (RlvCommon.TryGetAttachmentPointFromItemName(item.Name, out var attachmentPoint))
                 {
                     itemsToAttach.Add(new AttachmentEventArgs.AttachmentRequest(item.Id, attachmentPoint.Value, replaceExistingAttachments));
                 }
@@ -245,7 +245,7 @@ namespace LibRLV
                 }
                 else
                 {
-                    itemsToAttach.Add(new AttachmentEventArgs.AttachmentRequest(item.Id, AttachmentPoint.Default, replaceExistingAttachments));
+                    itemsToAttach.Add(new AttachmentEventArgs.AttachmentRequest(item.Id, RlvAttachmentPoint.Default, replaceExistingAttachments));
                 }
             }
 
@@ -264,7 +264,7 @@ namespace LibRLV
         }
 
         // @attach:[folder]=force
-        private async Task<bool> HandleAttach(RLVMessage command, bool replaceExistingAttachments, bool recursive, CancellationToken cancellationToken)
+        private async Task<bool> HandleAttach(RlvMessage command, bool replaceExistingAttachments, bool recursive, CancellationToken cancellationToken)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
@@ -273,7 +273,7 @@ namespace LibRLV
             }
             var inventoryMap = new InventoryMap(sharedFolder);
 
-            if (!inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
+            if (!inventoryMap.TryGetFolderFromPath(command.Option, false, out var folder))
             {
                 var handler = Attach;
                 handler?.Invoke(this, new AttachmentEventArgs([]));
@@ -292,7 +292,7 @@ namespace LibRLV
             }
         }
 
-        private async Task<bool> HandleAttachThis(RLVMessage command, bool replaceExistingAttachments, bool recursive, CancellationToken cancellationToken)
+        private async Task<bool> HandleAttachThis(RlvMessage command, bool replaceExistingAttachments, bool recursive, CancellationToken cancellationToken)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
@@ -301,19 +301,19 @@ namespace LibRLV
             }
 
             var inventoryMap = new InventoryMap(sharedFolder);
-            var folderPaths = new List<InventoryFolder>();
+            var folderPaths = new List<RlvSharedFolder>();
 
-            if (RLVCommon.RLVWearableTypeMap.TryGetValue(command.Option, out var wearableType))
+            if (RlvCommon.RLVWearableTypeMap.TryGetValue(command.Option, out var wearableType))
             {
                 var parts = inventoryMap.FindFoldersContaining(false, null, null, wearableType);
                 folderPaths.AddRange(parts);
             }
-            else if (RLVCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
+            else if (RlvCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
             {
                 var parts = inventoryMap.FindFoldersContaining(false, null, attachmentPoint, null);
                 folderPaths.AddRange(parts);
             }
-            else if (inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
+            else if (inventoryMap.TryGetFolderFromPath(command.Option, false, out var folder))
             {
                 folderPaths.Add(folder);
             }
@@ -336,7 +336,7 @@ namespace LibRLV
             return true;
         }
 
-        private void CollectItemsToDetach(InventoryFolder folder, InventoryMap inventoryMap, bool recursive, List<Guid> itemsToDetach)
+        private void CollectItemsToDetach(RlvSharedFolder folder, InventoryMap inventoryMap, bool recursive, List<Guid> itemsToDetach)
         {
             if (folder.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
             {
@@ -369,7 +369,7 @@ namespace LibRLV
 
         // @remattach[:<folder|attachpt|uuid>]=force
         // TODO: Add support for Attachment groups (RLVa)
-        private async Task<bool> HandleRemAttach(RLVMessage command, CancellationToken cancellationToken)
+        private async Task<bool> HandleRemAttach(RlvMessage command, CancellationToken cancellationToken)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
@@ -398,11 +398,11 @@ namespace LibRLV
                     }
                 }
             }
-            else if (inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
+            else if (inventoryMap.TryGetFolderFromPath(command.Option, false, out var folder))
             {
                 CollectItemsToDetach(folder, inventoryMap, false, itemIdsToDetach);
             }
-            else if (RLVCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
+            else if (RlvCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
             {
                 itemIdsToDetach = currentOutfit
                     .Where(n =>
@@ -435,7 +435,7 @@ namespace LibRLV
             return true;
         }
 
-        private async Task<bool> HandleDetachAll(RLVMessage command, CancellationToken cancellationToken)
+        private async Task<bool> HandleDetachAll(RlvMessage command, CancellationToken cancellationToken)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
@@ -444,7 +444,7 @@ namespace LibRLV
             }
             var inventoryMap = new InventoryMap(sharedFolder);
 
-            if (!inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
+            if (!inventoryMap.TryGetFolderFromPath(command.Option, false, out var folder))
             {
                 return false;
             }
@@ -458,7 +458,7 @@ namespace LibRLV
             return true;
         }
 
-        private async Task<bool> HandleDetachThis(RLVMessage command, bool recursive, CancellationToken cancellationToken)
+        private async Task<bool> HandleDetachThis(RlvMessage command, bool recursive, CancellationToken cancellationToken)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
@@ -466,7 +466,7 @@ namespace LibRLV
                 return false;
             }
             var inventoryMap = new InventoryMap(sharedFolder);
-            var folderPaths = new List<InventoryFolder>();
+            var folderPaths = new List<RlvSharedFolder>();
 
             if (Guid.TryParse(command.Option, out var uuid))
             {
@@ -478,17 +478,17 @@ namespace LibRLV
                     }
                 }
             }
-            else if (RLVCommon.RLVWearableTypeMap.TryGetValue(command.Option, out var wearableType))
+            else if (RlvCommon.RLVWearableTypeMap.TryGetValue(command.Option, out var wearableType))
             {
                 var parts = inventoryMap.FindFoldersContaining(false, null, null, wearableType);
                 folderPaths.AddRange(parts);
             }
-            else if (RLVCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
+            else if (RlvCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
             {
                 var parts = inventoryMap.FindFoldersContaining(false, null, attachmentPoint, null);
                 folderPaths.AddRange(parts);
             }
-            else if (inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
+            else if (inventoryMap.TryGetFolderFromPath(command.Option, false, out var folder))
             {
                 folderPaths.Add(folder);
             }
@@ -511,7 +511,7 @@ namespace LibRLV
         }
 
         // @detachme=force
-        private async Task<bool> HandleDetachMe(RLVMessage command, CancellationToken cancellationToken)
+        private async Task<bool> HandleDetachMe(RlvMessage command, CancellationToken cancellationToken)
         {
             var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
@@ -537,7 +537,7 @@ namespace LibRLV
 
         // @remoutfit[:<folder|layer>]=force
         // TODO: Add support for Attachment groups (RLVa)
-        private async Task<bool> HandleRemOutfit(RLVMessage command, CancellationToken cancellationToken)
+        private async Task<bool> HandleRemOutfit(RlvMessage command, CancellationToken cancellationToken)
         {
             var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync(cancellationToken).ConfigureAwait(false);
             if (!hasCurrentOutfit || currentOutfit == null)
@@ -553,13 +553,13 @@ namespace LibRLV
             var inventoryMap = new InventoryMap(sharedFolder);
 
             Guid? folderId = null;
-            WearableType? wearableType = null;
+            RlvWearableType? wearableType = null;
 
-            if (RLVCommon.RLVWearableTypeMap.TryGetValue(command.Option, out var wearableTypeTemp))
+            if (RlvCommon.RLVWearableTypeMap.TryGetValue(command.Option, out var wearableTypeTemp))
             {
                 wearableType = wearableTypeTemp;
             }
-            else if (inventoryMap.TryGetFolderFromPath(command.Option, true, out var folder))
+            else if (inventoryMap.TryGetFolderFromPath(command.Option, false, out var folder))
             {
                 folderId = folder.Id;
             }
@@ -614,7 +614,7 @@ namespace LibRLV
             return Task.FromResult(true);
         }
 
-        private Task<bool> HandleSetRot(RLVMessage command)
+        private Task<bool> HandleSetRot(RlvMessage command)
         {
             if (!float.TryParse(command.Option, out var angleInRadians))
             {
@@ -627,7 +627,7 @@ namespace LibRLV
             return Task.FromResult(true);
         }
 
-        private Task<bool> HandleAdjustHeight(RLVMessage command)
+        private Task<bool> HandleAdjustHeight(RlvMessage command)
         {
             var args = command.Option.Split([';'], StringSplitOptions.RemoveEmptyEntries);
             if (args.Length < 1)
@@ -659,7 +659,7 @@ namespace LibRLV
             return Task.FromResult(true);
         }
 
-        private Task<bool> HandleSetCamFOV(RLVMessage command)
+        private Task<bool> HandleSetCamFOV(RlvMessage command)
         {
             var cameraRestrictions = _manager.GetCameraRestrictions();
             if (cameraRestrictions.IsLocked)
@@ -678,7 +678,7 @@ namespace LibRLV
             return Task.FromResult(true);
         }
 
-        private async Task<bool> HandleSit(RLVMessage command, CancellationToken cancellationToken)
+        private async Task<bool> HandleSit(RlvMessage command, CancellationToken cancellationToken)
         {
             if (!Guid.TryParse(command.Option, out var sitTarget))
             {
@@ -716,7 +716,7 @@ namespace LibRLV
             return true;
         }
 
-        private Task<bool> HandleTpTo(RLVMessage command)
+        private Task<bool> HandleTpTo(RlvMessage command)
         {
             // @tpto is inhibited by @tploc=n, by @unsit too.
             if (!_manager.CanTpLoc())

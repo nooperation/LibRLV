@@ -19,22 +19,22 @@ namespace LibRLV
         /// <summary>
         /// All Detach restrictions for this folder
         /// </summary>
-        public IReadOnlyList<RLVRestriction> DetachRestrictions { get; }
+        public IReadOnlyList<RlvRestriction> DetachRestrictions { get; }
 
         /// <summary>
         /// All Attach restrictions for this folder
         /// </summary>
-        public IReadOnlyList<RLVRestriction> AttachRestrictions { get; }
+        public IReadOnlyList<RlvRestriction> AttachRestrictions { get; }
 
         /// <summary>
         /// All Detach exceptions for this folder
         /// </summary>
-        public IReadOnlyList<RLVRestriction> DetachExceptions { get; }
+        public IReadOnlyList<RlvRestriction> DetachExceptions { get; }
 
         /// <summary>
         /// All Attach exceptions for this folder
         /// </summary>
-        public IReadOnlyList<RLVRestriction> AttachExceptions { get; }
+        public IReadOnlyList<RlvRestriction> AttachExceptions { get; }
 
 
         /// <summary>

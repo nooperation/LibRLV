@@ -1,6 +1,6 @@
 ﻿namespace LibRLV
 {
-    public enum RLVGetDebugType
+    public enum RlvGetDebugType
     {
         AvatarSex,
         RenderResolutionDivisor,

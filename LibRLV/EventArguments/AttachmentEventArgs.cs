@@ -8,10 +8,10 @@ namespace LibRLV.EventArguments
         public class AttachmentRequest
         {
             public Guid ItemId { get; }
-            public AttachmentPoint AttachmentPoint { get; }
+            public RlvAttachmentPoint AttachmentPoint { get; }
             public bool ReplaceExistingAttachments { get; }
 
-            public AttachmentRequest(Guid itemId, AttachmentPoint attachmentPoint, bool replaceExistingAttachments)
+            public AttachmentRequest(Guid itemId, RlvAttachmentPoint attachmentPoint, bool replaceExistingAttachments)
             {
                 ItemId = itemId;
                 AttachmentPoint = attachmentPoint;

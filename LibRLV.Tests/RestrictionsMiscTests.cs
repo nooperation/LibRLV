@@ -9,8 +9,8 @@ namespace LibRLV.Tests
 
         #region General
         [Theory]
-        [InlineData(1234, RLV.RLVVersion)]
-        [InlineData(-1234, RLV.RLVVersion)]
+        [InlineData(1234, RlvService.RLVVersion)]
+        [InlineData(-1234, RlvService.RLVVersion)]
         public async Task CheckChannelResponseGood(int channel, string expectedReply)
         {
             var actual = _callbacks.RecordReplies();
@@ -50,7 +50,7 @@ namespace LibRLV.Tests
             await _rlv.ProcessInstantMessage("@version", _sender.Id);
 
             _callbacks.Verify(c =>
-                c.SendInstantMessageAsync(_sender.Id, RLV.RLVVersion, It.IsAny<CancellationToken>()),
+                c.SendInstantMessageAsync(_sender.Id, RlvService.RLVVersion, It.IsAny<CancellationToken>()),
                 Times.Once);
 
             _callbacks.VerifyNoOtherCalls();
@@ -60,9 +60,9 @@ namespace LibRLV.Tests
         #region @version @versionnew @versionnum
 
         [Theory]
-        [InlineData("@version", 1234, RLV.RLVVersion)]
-        [InlineData("@versionnew", 1234, RLV.RLVVersion)]
-        [InlineData("@versionnum", 1234, RLV.RLVVersionNum)]
+        [InlineData("@version", 1234, RlvService.RLVVersion)]
+        [InlineData("@versionnew", 1234, RlvService.RLVVersion)]
+        [InlineData("@versionnum", 1234, RlvService.RLVVersionNum)]
         public async Task CheckVersions(string command, int channel, string expectedResponse)
         {
             var actual = _callbacks.RecordReplies();
@@ -85,8 +85,8 @@ namespace LibRLV.Tests
         #region @versionnumbl=<channel_number>
 
         [Theory]
-        [InlineData("", RLV.RLVVersionNum)]
-        [InlineData("sendim,recvim", RLV.RLVVersionNum + ",recvim,sendim")]
+        [InlineData("", RlvService.RLVVersionNum)]
+        [InlineData("sendim,recvim", RlvService.RLVVersionNum + ",recvim,sendim")]
         public async Task VersionNumBL(string seed, string expectedResponse)
         {
             var actual = _callbacks.RecordReplies();
@@ -409,8 +409,8 @@ namespace LibRLV.Tests
             var folderId2 = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportItemWorn(folderId1, false, WearableType.Skin);
-            await _rlv.ReportItemWorn(folderId2, true, WearableType.Tattoo);
+            await _rlv.ReportItemWorn(folderId1, false, RlvWearableType.Skin);
+            await _rlv.ReportItemWorn(folderId2, true, RlvWearableType.Tattoo);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -433,7 +433,7 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage("@addoutfit:skin=n", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportItemWorn(itemId1, false, WearableType.Skin);
+            await _rlv.ReportItemWorn(itemId1, false, RlvWearableType.Skin);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -454,8 +454,8 @@ namespace LibRLV.Tests
             var folderId2 = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportItemUnworn(folderId1, false, WearableType.Skin);
-            await _rlv.ReportItemUnworn(folderId2, true, WearableType.Tattoo);
+            await _rlv.ReportItemUnworn(folderId1, false, RlvWearableType.Skin);
+            await _rlv.ReportItemUnworn(folderId2, true, RlvWearableType.Tattoo);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -478,7 +478,7 @@ namespace LibRLV.Tests
             await _rlv.ProcessMessage("@remoutfit:skin=n", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
 
-            await _rlv.ReportItemUnworn(itemId1, false, WearableType.Skin);
+            await _rlv.ReportItemUnworn(itemId1, false, RlvWearableType.Skin);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -499,8 +499,8 @@ namespace LibRLV.Tests
             var itemId2 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportItemAttached(itemId1, false, AttachmentPoint.Chest);
-            await _rlv.ReportItemAttached(itemId2, true, AttachmentPoint.Skull);
+            await _rlv.ReportItemAttached(itemId1, false, RlvAttachmentPoint.Chest);
+            await _rlv.ReportItemAttached(itemId2, true, RlvAttachmentPoint.Skull);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -523,7 +523,7 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage("@addattach:chest=n", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportItemAttached(itemId1, false, AttachmentPoint.Chest);
+            await _rlv.ReportItemAttached(itemId1, false, RlvAttachmentPoint.Chest);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -544,8 +544,8 @@ namespace LibRLV.Tests
             var folderId2 = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportItemDetached(folderId1, false, AttachmentPoint.Chest);
-            await _rlv.ReportItemDetached(folderId2, true, AttachmentPoint.Skull);
+            await _rlv.ReportItemDetached(folderId1, false, RlvAttachmentPoint.Chest);
+            await _rlv.ReportItemDetached(folderId2, true, RlvAttachmentPoint.Skull);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -567,7 +567,7 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage("@remattach:chest=n", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportItemDetached(itemId1, false, AttachmentPoint.Chest);
+            await _rlv.ReportItemDetached(itemId1, false, RlvAttachmentPoint.Chest);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -799,13 +799,13 @@ namespace LibRLV.Tests
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, null));
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, null));
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, null));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, null));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, null));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, null));
 
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, objectId1));
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, objectId1));
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, objectId1));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, objectId1));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, objectId1));
         }
 
         [Fact]
@@ -815,13 +815,13 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage("@edit=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, null));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, null));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, null));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, null));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, null));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, null));
 
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, objectId1));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, objectId1));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, objectId1));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, objectId1));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, objectId1));
         }
 
         [Fact]
@@ -833,17 +833,17 @@ namespace LibRLV.Tests
             await _rlv.ProcessMessage("@edit=n", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage($"@edit:{objectId1}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, null));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, null));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, null));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, null));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, null));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, null));
 
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, objectId1));
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, objectId1));
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, objectId1));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, objectId1));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, objectId1));
 
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, objectId2));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, objectId2));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, objectId2));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, objectId2));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, objectId2));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, objectId2));
         }
 
         [Fact]
@@ -854,17 +854,17 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage($"@editobj:{objectId1}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, null));
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, null));
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, null));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, null));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, null));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, null));
 
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, objectId1));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, objectId1));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, objectId1));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, objectId1));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, objectId1));
 
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, objectId2));
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, objectId2));
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, objectId2));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, objectId2));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, objectId2));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, objectId2));
         }
 
         [Fact]
@@ -874,13 +874,13 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage($"@editworld=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, null));
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, null));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, null));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, null));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, null));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, null));
 
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, objectId1));
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, objectId1));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, objectId1));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, objectId1));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, objectId1));
         }
 
         [Fact]
@@ -890,13 +890,13 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage($"@editattach=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, null));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, null));
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, null));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, null));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, null));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, null));
 
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, objectId1));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, objectId1));
-            Assert.True(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, objectId1));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, objectId1));
+            Assert.True(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, objectId1));
         }
 
         #endregion
@@ -998,14 +998,14 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage($"@interact=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.False(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.False(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.False(_rlv.Permissions.CanTouch(RLVPermissionsService.TouchLocation.Hud, objectId1, null, null));
+            Assert.False(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.AttachedSelf, objectId1, null, null));
+            Assert.False(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.AttachedOther, objectId1, userId1, null));
+            Assert.False(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
+            Assert.False(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.Hud, objectId1, null, null));
 
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Attached, objectId1));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.RezzedInWorld, objectId1));
-            Assert.False(_rlv.Permissions.CanEdit(RLVPermissionsService.ObjectLocation.Hud, objectId1));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Attached, objectId1));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.RezzedInWorld, objectId1));
+            Assert.False(_rlv.Permissions.CanEdit(RlvPermissionsService.ObjectLocation.Hud, objectId1));
 
             Assert.False(_rlv.Permissions.CanRez());
 
@@ -1166,8 +1166,8 @@ namespace LibRLV.Tests
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.Hud, objectId1));
         }
 
         [Fact]
@@ -1178,8 +1178,8 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage("@showhovertextall=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.World, objectId1));
-            Assert.False(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.Hud, objectId1));
+            Assert.False(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.World, objectId1));
+            Assert.False(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.Hud, objectId1));
         }
 
         #endregion
@@ -1191,8 +1191,8 @@ namespace LibRLV.Tests
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.Hud, objectId1));
         }
 
         [Fact]
@@ -1203,11 +1203,11 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage($"@showhovertext:{objectId1}=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.World, objectId1));
-            Assert.False(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.Hud, objectId1));
+            Assert.False(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.World, objectId1));
+            Assert.False(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.Hud, objectId1));
 
-            Assert.True(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.World, objectId2));
-            Assert.True(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.Hud, objectId2));
+            Assert.True(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.World, objectId2));
+            Assert.True(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.Hud, objectId2));
         }
 
         #endregion
@@ -1219,8 +1219,8 @@ namespace LibRLV.Tests
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.Hud, objectId1));
         }
 
         [Fact]
@@ -1231,11 +1231,11 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage($"@showhovertexthud=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.World, objectId1));
-            Assert.False(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.World, objectId1));
+            Assert.False(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.Hud, objectId1));
 
-            Assert.True(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.World, objectId2));
-            Assert.False(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.Hud, objectId2));
+            Assert.True(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.World, objectId2));
+            Assert.False(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.Hud, objectId2));
         }
 
         #endregion
@@ -1247,8 +1247,8 @@ namespace LibRLV.Tests
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
-            Assert.True(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.Hud, objectId1));
+            Assert.True(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.Hud, objectId1));
         }
 
         [Fact]
@@ -1259,11 +1259,11 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage($"@showhovertextworld=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.World, objectId1));
-            Assert.True(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.Hud, objectId1));
+            Assert.False(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.World, objectId1));
+            Assert.True(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.Hud, objectId1));
 
-            Assert.False(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.World, objectId2));
-            Assert.True(_rlv.Permissions.CanShowHoverText(RLVPermissionsService.HoverTextLocation.Hud, objectId2));
+            Assert.False(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.World, objectId2));
+            Assert.True(_rlv.Permissions.CanShowHoverText(RlvPermissionsService.HoverTextLocation.Hud, objectId2));
         }
 
         #endregion
@@ -1285,7 +1285,7 @@ namespace LibRLV.Tests
 
             Assert.Equal("Group Name", raised.Arguments.GroupName);
             Assert.Equal(Guid.Empty, raised.Arguments.GroupId);
-            Assert.Equal(string.Empty, raised.Arguments.Role);
+            Assert.Equal(string.Empty, raised.Arguments.RoleName);
         }
 
         [Fact]
@@ -1298,7 +1298,7 @@ namespace LibRLV.Tests
             );
 
             Assert.Equal("Group Name", raised.Arguments.GroupName);
-            Assert.Equal("Admin Role", raised.Arguments.Role);
+            Assert.Equal("Admin Role", raised.Arguments.RoleName);
             Assert.Equal(Guid.Empty, raised.Arguments.GroupId);
         }
 
@@ -1315,7 +1315,7 @@ namespace LibRLV.Tests
 
             Assert.Equal(string.Empty, raised.Arguments.GroupName);
             Assert.Equal(objectId1, raised.Arguments.GroupId);
-            Assert.Equal(string.Empty, raised.Arguments.Role);
+            Assert.Equal(string.Empty, raised.Arguments.RoleName);
         }
 
         #endregion
