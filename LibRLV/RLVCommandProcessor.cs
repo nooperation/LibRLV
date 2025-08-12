@@ -313,18 +313,8 @@ namespace LibRLV
 
         private void CollectItemsToDetach(RlvSharedFolder folder, InventoryMap inventoryMap, bool recursive, List<Guid> itemsToDetach)
         {
-            if (folder.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
             foreach (var item in folder.Items)
             {
-                if (!CanRemAttachItem(item, true))
-                {
-                    continue;
-                }
-
                 itemsToDetach.Add(item.Id);
             }
 
@@ -472,6 +462,11 @@ namespace LibRLV
             var itemIdsToDetach = new List<Guid>();
             foreach (var item in folderPaths)
             {
+                if(item.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
                 CollectItemsToDetach(item, inventoryMap, recursive, itemIdsToDetach);
             }
 
