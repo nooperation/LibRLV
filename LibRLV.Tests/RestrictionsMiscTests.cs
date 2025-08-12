@@ -1,5 +1,4 @@
-﻿using LibRLV.EventArguments;
-using Moq;
+﻿using Moq;
 
 namespace LibRLV.Tests
 {
@@ -13,7 +12,7 @@ namespace LibRLV.Tests
         [InlineData(-1234, RlvService.RLVVersion)]
         public async Task CheckChannelResponseGood(int channel, string expectedReply)
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage($"@versionnew={channel}", _sender.Id, _sender.Name);
 
@@ -33,7 +32,7 @@ namespace LibRLV.Tests
         public async Task CheckChannelResponseBad(string command)
         {
             Assert.False(await _rlv.ProcessMessage(command, _sender.Id, _sender.Name));
-            _callbacks.VerifyNoOtherCalls();
+            _queryCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -49,11 +48,11 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessInstantMessage("@version", _sender.Id);
 
-            _callbacks.Verify(c =>
+            _actionCallbacks.Verify(c =>
                 c.SendInstantMessageAsync(_sender.Id, RlvService.RLVVersion, It.IsAny<CancellationToken>()),
                 Times.Once);
 
-            _callbacks.VerifyNoOtherCalls();
+            _queryCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -65,7 +64,7 @@ namespace LibRLV.Tests
         [InlineData("@versionnum", 1234, RlvService.RLVVersionNum)]
         public async Task CheckVersions(string command, int channel, string expectedResponse)
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage($"{command}={channel}", _sender.Id, _sender.Name);
 
@@ -89,7 +88,7 @@ namespace LibRLV.Tests
         [InlineData("sendim,recvim", RlvService.RLVVersionNum + ",recvim,sendim")]
         public async Task VersionNumBL(string seed, string expectedResponse)
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             SeedBlacklist(seed);
 
             await _rlv.ProcessMessage("@versionnumbl=1234", _sender.Id, _sender.Name);
@@ -112,7 +111,7 @@ namespace LibRLV.Tests
         [InlineData("@getblacklist", 1234, "", "")]
         public async Task GetBlacklist(string command, int channel, string seed, string expectedResponse)
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             SeedBlacklist(seed);
 
             await _rlv.ProcessMessage($"{command}={channel}", _sender.Id, _sender.Name);
@@ -147,11 +146,11 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessInstantMessage(command, _sender.Id);
 
-            _callbacks.Verify(c =>
+            _actionCallbacks.Verify(c =>
                 c.SendInstantMessageAsync(_sender.Id, expected, It.IsAny<CancellationToken>()),
                 Times.Once);
 
-            _callbacks.VerifyNoOtherCalls();
+            _queryCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -164,7 +163,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task Notify()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
@@ -185,7 +184,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifyFiltered()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage("@notify:1234;run=add", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@sendim=n", _sender.Id, _sender.Name);
@@ -203,7 +202,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifyMultiCommand()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@sendim=n,sendim:group_name=add,alwaysrun=n", _sender.Id, _sender.Name);
@@ -222,7 +221,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifyMultiChannels()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@notify:12345=add", _sender.Id, _sender.Name);
@@ -243,7 +242,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifyMultiChannelsFiltered()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@notify:12345;im=add", _sender.Id, _sender.Name);
@@ -275,16 +274,16 @@ namespace LibRLV.Tests
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
 
-            _callbacks.Verify(c => c.SendReplyAsync(1234, "/notify:1234=n", It.IsAny<CancellationToken>()), Times.Once);
-            _callbacks.Verify(c => c.SendReplyAsync(1234, expectedReply, It.IsAny<CancellationToken>()), Times.Once);
+            _actionCallbacks.Verify(c => c.SendReplyAsync(1234, "/notify:1234=n", It.IsAny<CancellationToken>()), Times.Once);
+            _actionCallbacks.Verify(c => c.SendReplyAsync(1234, expectedReply, It.IsAny<CancellationToken>()), Times.Once);
 
-            _callbacks.VerifyNoOtherCalls();
+            _queryCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
         public async Task NotifyClear_Filtered()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
@@ -305,7 +304,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifyClear()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             var sender2Id = new Guid("11111111-1111-4111-8111-111111111111");
 
@@ -328,7 +327,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifyInventoryOffer()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
             await _rlv.ReportInventoryOfferAccepted("#RLV/~MyCuffs");
@@ -349,7 +348,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifySitStandLegal()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             var sitTarget = new Guid("11111111-1111-4111-8111-111111111111");
 
@@ -374,7 +373,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifySitStandWithRestrictions()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             var sitTarget = new Guid("11111111-1111-4111-8111-111111111111");
 
@@ -402,7 +401,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifyWear()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             var folderId1 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
@@ -426,7 +425,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifyWear_Illegal()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             var itemId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
@@ -447,7 +446,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifyUnWear()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             var folderId1 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
@@ -470,7 +469,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifyUnWear_illegal()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             var itemId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
@@ -492,7 +491,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifyAttached()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             var itemId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
@@ -516,7 +515,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifyAttached_Illegal()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             var itemId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
@@ -537,7 +536,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifyDetached()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             var folderId1 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
@@ -560,7 +559,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task NotifyDetached_Illegal()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             var itemId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
@@ -668,7 +667,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetStatus()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             await _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
@@ -689,7 +688,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetStatus_filtered()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             await _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
@@ -710,7 +709,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetStatus_customSeparator()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             await _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
@@ -735,7 +734,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetStatusAll()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sender2 = new RlvObject("Sender 2", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             await _rlv.ProcessMessage("@fly=n", _sender.Id, _sender.Name);
@@ -1277,29 +1276,37 @@ namespace LibRLV.Tests
         [Fact]
         public async Task SetGroup_ByName()
         {
-            var raised = await Assert.RaisesAsync<SetGroupEventArgs>(
-                 attach: n => _rlv.Commands.SetGroup += n,
-                 detach: n => _rlv.Commands.SetGroup -= n,
-                 testCode: () => _rlv.ProcessMessage("@setgroup:Group Name=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks
+                .Setup(e => e.SetGroupAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+             .Returns(Task.CompletedTask);
 
-            Assert.Equal("Group Name", raised.Arguments.GroupName);
-            Assert.Equal(Guid.Empty, raised.Arguments.GroupId);
-            Assert.Equal(string.Empty, raised.Arguments.RoleName);
+            // Act
+            await _rlv.ProcessMessage("@setgroup:Group Name=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.SetGroupAsync("Group Name", null, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
         public async Task SetGroup_ByNameAndRole()
         {
-            var raised = await Assert.RaisesAsync<SetGroupEventArgs>(
-                 attach: n => _rlv.Commands.SetGroup += n,
-                 detach: n => _rlv.Commands.SetGroup -= n,
-                 testCode: () => _rlv.ProcessMessage("@setgroup:Group Name;Admin Role=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks
+                .Setup(e => e.SetGroupAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+             .Returns(Task.CompletedTask);
 
-            Assert.Equal("Group Name", raised.Arguments.GroupName);
-            Assert.Equal("Admin Role", raised.Arguments.RoleName);
-            Assert.Equal(Guid.Empty, raised.Arguments.GroupId);
+            // Act
+            await _rlv.ProcessMessage("@setgroup:Group Name;Admin Role=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.SetGroupAsync("Group Name", "Admin Role", It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -1307,15 +1314,39 @@ namespace LibRLV.Tests
         {
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
 
-            var raised = await Assert.RaisesAsync<SetGroupEventArgs>(
-                 attach: n => _rlv.Commands.SetGroup += n,
-                 detach: n => _rlv.Commands.SetGroup -= n,
-                 testCode: () => _rlv.ProcessMessage($"@setgroup:{objectId1}=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks
+                .Setup(e => e.SetGroupAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
-            Assert.Equal(string.Empty, raised.Arguments.GroupName);
-            Assert.Equal(objectId1, raised.Arguments.GroupId);
-            Assert.Equal(string.Empty, raised.Arguments.RoleName);
+            // Act
+            await _rlv.ProcessMessage($"@setgroup:{objectId1}=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.SetGroupAsync(objectId1, null, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task SetGroup_ByIdAndRole()
+        {
+            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
+
+            _actionCallbacks
+                .Setup(e => e.SetGroupAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            await _rlv.ProcessMessage($"@setgroup:{objectId1};Admin Role=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.SetGroupAsync(objectId1, "Admin Role", It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         #endregion
@@ -1333,10 +1364,10 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetGroup_Default()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var actualGroupName = "Group Name";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetActiveGroupNameAsync(default)
             ).ReturnsAsync((true, actualGroupName));
 
@@ -1352,10 +1383,10 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetGroup_NoGroup()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var actualGroupName = "";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetActiveGroupNameAsync(default)
             ).ReturnsAsync((false, actualGroupName));
 

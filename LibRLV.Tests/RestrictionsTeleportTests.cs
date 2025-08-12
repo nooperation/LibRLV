@@ -1,4 +1,4 @@
-﻿using LibRLV.EventArguments;
+﻿using Moq;
 
 namespace LibRLV.Tests
 {
@@ -190,50 +190,55 @@ namespace LibRLV.Tests
         [Fact]
         public async Task TpTo_Default()
         {
-            var raised = await Assert.RaisesAsync<TpToEventArgs>(
-                attach: n => _rlv.Commands.TpTo += n,
-                detach: n => _rlv.Commands.TpTo -= n,
-                testCode: () => _rlv.ProcessMessage("@tpto:1.5/2.5/3.5=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks
+                .Setup(e => e.TpToAsync(It.IsAny<float>(), It.IsAny<float>(), It.IsAny<float>(), It.IsAny<string?>(), It.IsAny<float?>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
-            Assert.Equal(1.5f, raised.Arguments.X, FloatTolerance);
-            Assert.Equal(2.5f, raised.Arguments.Y, FloatTolerance);
-            Assert.Equal(3.5f, raised.Arguments.Z, FloatTolerance);
-            Assert.Null(raised.Arguments.RegionName);
-            Assert.Null(raised.Arguments.Lookat);
+            // Act
+            await _rlv.ProcessMessage("@tpto:1.5/2.5/3.5=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.TpToAsync(1.5f, 2.5f, 3.5f, null, null, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
         public async Task TpTo_WithRegion()
         {
-            var raised = await Assert.RaisesAsync<TpToEventArgs>(
-                attach: n => _rlv.Commands.TpTo += n,
-                detach: n => _rlv.Commands.TpTo -= n,
-                testCode: () => _rlv.ProcessMessage("@tpto:Region Name/1.5/2.5/3.5=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks
+                .Setup(e => e.TpToAsync(It.IsAny<float>(), It.IsAny<float>(), It.IsAny<float>(), It.IsAny<string?>(), It.IsAny<float?>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
-            Assert.Equal(1.5f, raised.Arguments.X, FloatTolerance);
-            Assert.Equal(2.5f, raised.Arguments.Y, FloatTolerance);
-            Assert.Equal(3.5f, raised.Arguments.Z, FloatTolerance);
-            Assert.Equal("Region Name", raised.Arguments.RegionName);
-            Assert.Null(raised.Arguments.Lookat);
+            // Act
+            await _rlv.ProcessMessage("@tpto:Region Name/1.5/2.5/3.5=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.TpToAsync(1.5f, 2.5f, 3.5f, "Region Name", null, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
         public async Task TpTo_WithRegionAndLookAt()
         {
-            var raised = await Assert.RaisesAsync<TpToEventArgs>(
-                attach: n => _rlv.Commands.TpTo += n,
-                detach: n => _rlv.Commands.TpTo -= n,
-                testCode: () => _rlv.ProcessMessage("@tpto:Region Name/1.5/2.5/3.5;3.1415=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks
+                .Setup(e => e.TpToAsync(It.IsAny<float>(), It.IsAny<float>(), It.IsAny<float>(), It.IsAny<string?>(), It.IsAny<float?>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
-            Assert.Equal(1.5f, raised.Arguments.X, FloatTolerance);
-            Assert.Equal(2.5f, raised.Arguments.Y, FloatTolerance);
-            Assert.Equal(3.5f, raised.Arguments.Z, FloatTolerance);
-            Assert.Equal("Region Name", raised.Arguments.RegionName);
-            Assert.NotNull(raised.Arguments.Lookat);
-            Assert.Equal(3.1415f, raised.Arguments.Lookat.Value, FloatTolerance);
+            // Act
+            await _rlv.ProcessMessage("@tpto:Region Name/1.5/2.5/3.5;3.1415=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.TpToAsync(1.5f, 2.5f, 3.5f, "Region Name", 3.1415f, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -241,14 +246,15 @@ namespace LibRLV.Tests
         {
             await _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
-            var raisedEvent = false;
-            _rlv.Commands.TpTo += (sender, args) =>
-            {
-                raisedEvent = true;
-            };
+            _actionCallbacks
+                .Setup(e => e.TpToAsync(It.IsAny<float>(), It.IsAny<float>(), It.IsAny<float>(), It.IsAny<string?>(), It.IsAny<float?>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
+            // Act
             Assert.False(await _rlv.ProcessMessage("@tpto:1.5/2.5/3.5=force", _sender.Id, _sender.Name));
-            Assert.False(raisedEvent);
+
+            // Assert
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -256,14 +262,15 @@ namespace LibRLV.Tests
         {
             await _rlv.ProcessMessage("@tploc=n", _sender.Id, _sender.Name);
 
-            var raisedEvent = false;
-            _rlv.Commands.TpTo += (sender, args) =>
-            {
-                raisedEvent = true;
-            };
+            _actionCallbacks
+                .Setup(e => e.TpToAsync(It.IsAny<float>(), It.IsAny<float>(), It.IsAny<float>(), It.IsAny<string?>(), It.IsAny<float?>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
+            // Act
             Assert.False(await _rlv.ProcessMessage("@tpto:1.5/2.5/3.5=force", _sender.Id, _sender.Name));
-            Assert.False(raisedEvent);
+
+            // Assert
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         #endregion

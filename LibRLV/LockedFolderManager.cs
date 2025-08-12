@@ -10,15 +10,15 @@ namespace LibRLV
 {
     internal sealed class LockedFolderManager
     {
-        private readonly IRlvCallbacks _callbacks;
+        private readonly IRlvQueryCallbacks _queryCallbacks;
         private readonly RlvRestrictionManager _restrictionManager;
 
         private readonly Dictionary<Guid, LockedFolder> _lockedFolders = [];
         private readonly object _lockedFoldersLock = new();
 
-        internal LockedFolderManager(IRlvCallbacks callbacks, RlvRestrictionManager restrictionManager)
+        internal LockedFolderManager(IRlvQueryCallbacks queryCallbacks, RlvRestrictionManager restrictionManager)
         {
-            _callbacks = callbacks;
+            _queryCallbacks = queryCallbacks;
             _restrictionManager = restrictionManager;
         }
 
@@ -101,7 +101,7 @@ namespace LibRLV
             //      Find and all all the folders for all of the attachments in the specified attachment point or of the wearable type.
             //      Add those folders to the locked folder list
 
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
+            var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return;
@@ -159,7 +159,7 @@ namespace LibRLV
 
         internal async Task<bool> ProcessFolderException(RlvRestriction restriction, bool isException, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
+            var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;

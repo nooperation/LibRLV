@@ -4,7 +4,7 @@ namespace LibRLV.Tests
 {
     public static class CallbackMockExtensions
     {
-        public static List<(int Channel, string Text)> RecordReplies(this Mock<IRlvCallbacks> mock)
+        public static List<(int Channel, string Text)> RecordReplies(this Mock<IRlvActionCallbacks> mock)
         {
             var list = new List<(int Channel, string Text)>();
 

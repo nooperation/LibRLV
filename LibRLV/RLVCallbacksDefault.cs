@@ -5,13 +5,91 @@ using System.Threading.Tasks;
 
 namespace LibRLV
 {
-    public class RlvCallbacksDefault : IRlvCallbacks
+    public class RlvActionCallbacksDefault : IRlvActionCallbacks
     {
         public virtual Task SendReplyAsync(int channel, string message, CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
         }
 
+        public virtual Task SendInstantMessageAsync(Guid targetUser, string message, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task AdjustHeightAsync(float distance, float factor, float delta, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task AttachAsync(IReadOnlyList<AttachmentRequest> itemsToAttach, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task DetachAsync(IReadOnlyList<Guid> itemIds, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task RemOutfitAsync(IReadOnlyList<Guid> itemIds, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task SetCamFOVAsync(float fovInRadians, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task SetDebugAsync(string settingName, string settingValue, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task SetEnvAsync(string settingName, string settingValue, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task SetGroupAsync(string groupName, string? roleName, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task SetGroupAsync(Guid groupId, string? roleName, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task SetRotAsync(float angleInRadians, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task SitAsync(Guid target, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task SitGroundAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task TpToAsync(float x, float y, float z, string? regionName, float? lookat, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task UnsitAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+    }
+
+    public class RlvCallbacksDefault : IRlvQueryCallbacks
+    {
         public virtual Task<(bool Success, string EnvironmentSettingValue)> TryGetEnvironmentSettingValueAsync(string settingName, CancellationToken cancellationToken)
         {
             if (!Enum.TryParse(settingName, true, out RlvGetEnvType settingType))
@@ -123,11 +201,6 @@ namespace LibRLV
             }
 
             return Task.FromResult((false, string.Empty));
-        }
-
-        public virtual Task SendInstantMessageAsync(Guid targetUser, string message, CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
         }
 
         public virtual Task<bool> ObjectExistsAsync(Guid objectId, CancellationToken cancellationToken)

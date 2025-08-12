@@ -1,5 +1,4 @@
-﻿using LibRLV.EventArguments;
-using Moq;
+﻿using Moq;
 
 namespace LibRLV.Tests
 {
@@ -203,43 +202,38 @@ namespace LibRLV.Tests
         [Fact]
         public async Task SetCamFov()
         {
-            var raised = await Assert.RaisesAsync<SetCamFOVEventArgs>(
-                 attach: n => _rlv.Commands.SetCamFOV += n,
-                 detach: n => _rlv.Commands.SetCamFOV -= n,
-                 testCode: () => _rlv.ProcessMessage("@setcam_fov:1.75=force", _sender.Id, _sender.Name)
-             );
+            Assert.True(await _rlv.ProcessMessage("@setcam_fov:1.75=force", _sender.Id, _sender.Name));
 
-            Assert.Equal(1.75f, raised.Arguments.FOVInRadians, FloatTolerance);
+            _actionCallbacks.Verify(x => x.SetCamFOVAsync(
+                1.75f,
+                It.IsAny<CancellationToken>()
+            ), Times.Once);
         }
 
         [Fact]
         public async Task SetCamFov_Restricted()
         {
-            var raisedEvent = false;
-            _rlv.Commands.SetCamFOV += (sender, args) =>
-            {
-                raisedEvent = true;
-            };
-
             await _rlv.ProcessMessage("@setcam_unlock=n", _sender.Id, _sender.Name);
 
             Assert.False(await _rlv.ProcessMessage("@setcam_fov:1.75=force", _sender.Id, _sender.Name));
-            Assert.False(raisedEvent);
+
+            _actionCallbacks.Verify(x => x.SetCamFOVAsync(
+                It.IsAny<float>(),
+                It.IsAny<CancellationToken>()
+            ), Times.Never);
         }
 
         [Fact]
         public async Task SetCamFov_Restricted_Synonym()
         {
-            var raisedEvent = false;
-            _rlv.Commands.SetCamFOV += (sender, args) =>
-            {
-                raisedEvent = true;
-            };
-
             await _rlv.ProcessMessage("@camunlock=n", _sender.Id, _sender.Name);
 
             Assert.False(await _rlv.ProcessMessage("@setcam_fov:1.75=force", _sender.Id, _sender.Name));
-            Assert.False(raisedEvent);
+
+            _actionCallbacks.Verify(x => x.SetCamFOVAsync(
+                It.IsAny<float>(),
+                It.IsAny<CancellationToken>()
+            ), Times.Never);
         }
         #endregion
 
@@ -538,10 +532,10 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetCamAvDistMin()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             var cameraSettings = DefaultCameraSettings();
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCameraSettingsAsync(default)
             ).ReturnsAsync((true, cameraSettings));
 
@@ -561,10 +555,10 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetCamAvDistMax()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             var cameraSettings = DefaultCameraSettings();
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCameraSettingsAsync(default)
             ).ReturnsAsync((true, cameraSettings));
 
@@ -582,10 +576,10 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetCamFovMin()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             var cameraSettings = DefaultCameraSettings();
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCameraSettingsAsync(default)
             ).ReturnsAsync((true, cameraSettings));
 
@@ -604,10 +598,10 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetCamFovMax()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             var cameraSettings = DefaultCameraSettings();
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCameraSettingsAsync(default)
             ).ReturnsAsync((true, cameraSettings));
 
@@ -626,10 +620,10 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetCamZoomMin()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             var cameraSettings = DefaultCameraSettings();
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCameraSettingsAsync(default)
             ).ReturnsAsync((true, cameraSettings));
 
@@ -648,10 +642,10 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetCamFov()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             var cameraSettings = DefaultCameraSettings();
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCameraSettingsAsync(default)
             ).ReturnsAsync((true, cameraSettings));
 
@@ -674,9 +668,9 @@ namespace LibRLV.Tests
         [InlineData("@getcam_fovmin=1234")]
         public async Task CameraSettings_Default(string command)
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCameraSettingsAsync(default)
             ).ReturnsAsync((false, null));
 

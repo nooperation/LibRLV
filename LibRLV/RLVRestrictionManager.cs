@@ -140,14 +140,16 @@ namespace LibRLV
         private readonly Dictionary<RlvRestrictionType, HashSet<RlvRestriction>> _currentRestrictions = [];
         private readonly object _currentRestrictionsLock = new();
 
-        private readonly IRlvCallbacks _callbacks;
+        private readonly IRlvQueryCallbacks _queryCallbacks;
+        private readonly IRlvActionCallbacks _actionCallbacks;
         private readonly LockedFolderManager _lockedFolderManager;
 
         public event EventHandler<RestrictionUpdatedEventArgs>? RestrictionUpdated;
 
-        internal RlvRestrictionManager(IRlvCallbacks callbacks)
+        internal RlvRestrictionManager(IRlvQueryCallbacks callbacks, IRlvActionCallbacks actionCallbacks)
         {
-            _callbacks = callbacks;
+            _queryCallbacks = callbacks;
+            _actionCallbacks = actionCallbacks;
             _lockedFolderManager = new LockedFolderManager(callbacks, this);
         }
 
@@ -224,7 +226,7 @@ namespace LibRLV
                     continue;
                 }
 
-                await _callbacks.SendReplyAsync(
+                await _actionCallbacks.SendReplyAsync(
                     notificationChannel,
                     $"/{notificationMessage}",
                     cancellationToken

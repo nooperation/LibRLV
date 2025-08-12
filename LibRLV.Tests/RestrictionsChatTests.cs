@@ -81,7 +81,7 @@
         [Fact]
         public async Task IsRedirChat_RedirectChat()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
             await _rlv.ReportSendPublicMessage("Hello World");
@@ -98,7 +98,7 @@
         [Fact]
         public async Task IsRedirChat_RedirectChatMultiple()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@redirchat:5678=add", _sender.Id, _sender.Name);
@@ -118,7 +118,7 @@
         [Fact]
         public async Task IsRedirChat_RedirectChatEmote()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage("@redirchat:1234=add", _sender.Id, _sender.Name);
 
@@ -329,7 +329,7 @@
         [Fact]
         public async Task IsRedirEmote_RedirectEmote()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
             await _rlv.ReportSendPublicMessage("/me says Hello World");
@@ -346,7 +346,7 @@
         [Fact]
         public async Task IsRedirEmote_RedirectEmoteMultiple()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@rediremote:5678=n", _sender.Id, _sender.Name);
@@ -366,7 +366,7 @@
         [Fact]
         public async Task IsRedirEmote_RedirectEmoteChat()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             await _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
             await _rlv.ReportSendPublicMessage("Hello World");

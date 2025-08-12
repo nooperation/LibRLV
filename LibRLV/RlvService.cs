@@ -14,7 +14,8 @@ namespace LibRLV
         private volatile bool _enabled;
         private volatile bool _enableInstantMessageProcessing;
 
-        internal IRlvCallbacks Callbacks { get; }
+        internal IRlvQueryCallbacks Callbacks { get; }
+        internal IRlvActionCallbacks ActionCallbacks { get; }
         internal RlvGetRequestHandler GetRequestHandler { get; }
 
         private readonly Regex _rlvRegexPattern = new(@"(?<behavior>[^:=]+)(:(?<option>[^=]*))?=(?<param>.+)", RegexOptions.Compiled);
@@ -36,14 +37,16 @@ namespace LibRLV
         public RlvPermissionsService Permissions { get; }
         public RlvBlacklist Blacklist { get; }
 
-        public RlvService(IRlvCallbacks callbacks, bool enabled)
+        public RlvService(IRlvQueryCallbacks callbacks, IRlvActionCallbacks actionCallbacks, bool enabled)
         {
             Callbacks = callbacks;
+            ActionCallbacks = actionCallbacks;
+
             Blacklist = new RlvBlacklist();
-            Restrictions = new RlvRestrictionManager(Callbacks);
-            GetRequestHandler = new RlvGetRequestHandler(Blacklist, Restrictions, Callbacks);
+            Restrictions = new RlvRestrictionManager(Callbacks, actionCallbacks);
+            GetRequestHandler = new RlvGetRequestHandler(Blacklist, Restrictions, Callbacks, actionCallbacks);
             Permissions = new RlvPermissionsService(Restrictions);
-            Commands = new RlvCommandProcessor(Permissions, Callbacks);
+            Commands = new RlvCommandProcessor(Permissions, Callbacks, actionCallbacks);
             Enabled = enabled;
         }
 
@@ -126,7 +129,7 @@ namespace LibRLV
 
             foreach (var channel in channels)
             {
-                await Callbacks.SendReplyAsync(channel, message, cancellationToken).ConfigureAwait(false);
+                await ActionCallbacks.SendReplyAsync(channel, message, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -364,7 +367,7 @@ namespace LibRLV
             {
                 if (int.TryParse(rlvMessage.Param, out var channel))
                 {
-                    await Callbacks.SendReplyAsync(channel, "", cancellationToken).ConfigureAwait(false);
+                    await ActionCallbacks.SendReplyAsync(channel, "", cancellationToken).ConfigureAwait(false);
                 }
 
                 return false;
@@ -444,7 +447,7 @@ namespace LibRLV
 
                 if (notificationText.Contains(filter))
                 {
-                    await Callbacks.SendReplyAsync(channel, notificationText, cancellationToken).ConfigureAwait(false);
+                    await ActionCallbacks.SendReplyAsync(channel, notificationText, cancellationToken).ConfigureAwait(false);
                 }
             }
         }

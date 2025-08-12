@@ -1,5 +1,4 @@
-﻿using LibRLV.EventArguments;
-using Moq;
+﻿using Moq;
 
 namespace LibRLV.Tests
 {
@@ -74,7 +73,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -93,7 +92,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -114,7 +113,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -133,7 +132,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -163,7 +162,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -182,7 +181,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -203,7 +202,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -222,7 +221,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -248,27 +247,39 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.WornOn = RlvWearableType.Skin;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
-                 attach: n => _rlv.Commands.RemOutfit += n,
-                 detach: n => _rlv.Commands.RemOutfit -= n,
-                 testCode: () => _rlv.ProcessMessage("@remoutfit=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.RemOutfitAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>
             {
-                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
-            }.Order();
+                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@remoutfit=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.RemOutfitAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Fact]
@@ -294,28 +305,40 @@ namespace LibRLV.Tests
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
-                 attach: n => _rlv.Commands.RemOutfit += n,
-                 detach: n => _rlv.Commands.RemOutfit -= n,
-                 testCode: () => _rlv.ProcessMessage("@remoutfit=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.RemOutfitAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>
             {
-                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
+                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
                 externalWearable.Id
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@remoutfit=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.RemOutfitAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Fact]
@@ -340,28 +363,39 @@ namespace LibRLV.Tests
 
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
-
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
-                 attach: n => _rlv.Commands.RemOutfit += n,
-                 detach: n => _rlv.Commands.RemOutfit -= n,
-                 testCode: () => _rlv.ProcessMessage("@remoutfit:tattoo=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.RemOutfitAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>
             {
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
                 externalWearable.Id
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@remoutfit:tattoo=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.RemOutfitAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Fact]
@@ -374,26 +408,38 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.WornOn = RlvWearableType.Tattoo;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
-                 attach: n => _rlv.Commands.RemOutfit += n,
-                 detach: n => _rlv.Commands.RemOutfit -= n,
-                 testCode: () => _rlv.ProcessMessage("@remoutfit:Clothing/Hats=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.RemOutfitAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>
             {
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@remoutfit:Clothing/Hats=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.RemOutfitAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Fact]
@@ -403,26 +449,38 @@ namespace LibRLV.Tests
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
-                 attach: n => _rlv.Commands.RemOutfit += n,
-                 detach: n => _rlv.Commands.RemOutfit -= n,
-                 testCode: () => _rlv.ProcessMessage("@remoutfit:tattoo=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.RemOutfitAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>
             {
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@remoutfit:tattoo=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.RemOutfitAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Fact]
@@ -434,25 +492,35 @@ namespace LibRLV.Tests
 
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = RlvWearableType.Skin;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<RemOutfitEventArgs>(
-                 attach: n => _rlv.Commands.RemOutfit += n,
-                 detach: n => _rlv.Commands.RemOutfit -= n,
-                 testCode: () => _rlv.ProcessMessage("@remoutfit:skin=force", _sender.Id, _sender.Name)
+            _actionCallbacks.Setup(e =>
+                e.RemOutfitAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
+
+            var expected = new HashSet<Guid>();
+
+            // Act
+            await _rlv.ProcessMessage("@remoutfit:skin=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.RemOutfitAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
             );
-
-            var expected = new List<Guid>()
-            {
-            }.Order();
-
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
         }
         #endregion
 
@@ -460,10 +528,10 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetOutfit_WearingNothing()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>();
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
@@ -479,7 +547,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetOutfit_ExternalItems()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             var currentOutfit = new List<RlvInventoryItem>();
 
@@ -499,7 +567,7 @@ namespace LibRLV.Tests
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
@@ -515,14 +583,14 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetOutfit_WearingSomeItems()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>()
             {
                 new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, RlvWearableType.Socks),
                 new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, RlvWearableType.Hair)
             };
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
@@ -538,7 +606,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetOutfit_WearingEverything()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>();
             foreach (var item in Enum.GetValues<RlvWearableType>())
             {
@@ -555,7 +623,7 @@ namespace LibRLV.Tests
                     item));
             }
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
@@ -571,13 +639,13 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetOutfit_Specific_Exists()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>()
             {
                 new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, RlvWearableType.Socks)
             };
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
@@ -593,13 +661,13 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetOutfit_Specific_NotExists()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>()
             {
                 new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, RlvWearableType.Hair)
             };
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
@@ -619,10 +687,10 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetAttach_WearingNothing()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>();
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
@@ -638,7 +706,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetAttach_ExternalItems()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
             var currentOutfit = new List<RlvInventoryItem>();
             var externalWearable = new RlvInventoryItem(
@@ -657,7 +725,7 @@ namespace LibRLV.Tests
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
@@ -673,14 +741,14 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetAttach_WearingSomeItems()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>()
             {
                 new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), RlvAttachmentPoint.LeftFoot, null ),
                 new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), RlvAttachmentPoint.Skull, null)
             };
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
@@ -696,7 +764,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetAttach_WearingEverything()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>();
             foreach (var item in Enum.GetValues<RlvAttachmentPoint>())
             {
@@ -708,7 +776,7 @@ namespace LibRLV.Tests
                     null));
             }
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
@@ -724,13 +792,13 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetAttach_Specific_Exists()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>()
             {
                 new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), RlvAttachmentPoint.LeftFoot, null ),
             };
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
@@ -746,13 +814,13 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetAttach_Specific_NotExists()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>()
             {
                 new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), RlvAttachmentPoint.Skull, null)
             };
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
@@ -797,22 +865,34 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage("@detachme=force", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@detachme=force", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Fact]
@@ -823,22 +903,34 @@ namespace LibRLV.Tests
 
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "nostrip Party Hat";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage("@detachme=force", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@detachme=force", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
         #endregion
 
@@ -850,11 +942,11 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetInv()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -870,7 +962,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetInv_Outfits()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
@@ -885,7 +977,7 @@ namespace LibRLV.Tests
             var item1 = outfitsFolder.AddItem(new Guid("12312399-0001-0001-8999-999999999999"), "First Item", null, null);
             var item2 = outfitsFolder.AddItem(new Guid("12312399-0001-0002-8999-999999999999"), "Second Item", null, null);
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -901,7 +993,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetInv_Outfits_Inventory()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
@@ -912,7 +1004,7 @@ namespace LibRLV.Tests
             var outfitSubfolder1 = outfitsFolder.AddChild(outfitSubfolder1Id, "First outfit");
             var item1 = outfitSubfolder1.AddItem(new Guid("12312399-0001-0001-8999-999999999999"), "First Item", null, null);
             var item2 = outfitSubfolder1.AddItem(new Guid("12312399-0001-0002-8999-999999999999"), "Second Item", null, null);
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -928,11 +1020,11 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetInv_Subfolder()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -948,11 +1040,11 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetInv_Empty()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -968,11 +1060,11 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetInv_Invalid()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1014,11 +1106,11 @@ namespace LibRLV.Tests
             // 2: Some items are present in that folder, and some of them are worn
             // 3: Some items are present in that folder, and all of them are worn
             //
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1058,7 +1150,7 @@ namespace LibRLV.Tests
             // 2: Some items are present in that folder, and some of them are worn
             // 3: Some items are present in that folder, and all of them are worn
             //
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
@@ -1070,7 +1162,7 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = RlvWearableType.Tattoo;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1110,7 +1202,7 @@ namespace LibRLV.Tests
             // 2: Some items are present in that folder, and some of them are worn
             // 3: Some items are present in that folder, and all of them are worn
             //
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
@@ -1122,7 +1214,7 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1162,11 +1254,11 @@ namespace LibRLV.Tests
             // 2: Some items are present in that folder, and some of them are worn
             // 3: Some items are present in that folder, and all of them are worn
             //
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1206,11 +1298,11 @@ namespace LibRLV.Tests
             // 2: Some items are present in that folder, and some of them are worn
             // 3: Some items are present in that folder, and all of them are worn
             //
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1247,11 +1339,11 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo')
             //        \= Glasses (attached to 'chin')
 
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1266,11 +1358,11 @@ namespace LibRLV.Tests
         [Fact]
         public async Task FindFolder_SearchOrder()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1286,7 +1378,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task FindFolder_IgnorePrivate()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
@@ -1294,7 +1386,7 @@ namespace LibRLV.Tests
             var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
             hatsFolder.Name = ".Hats";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1310,7 +1402,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task FindFolder_IgnoreTildePrefix()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
@@ -1318,7 +1410,7 @@ namespace LibRLV.Tests
             var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
             hatsFolder.Name = "~Hats";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1355,11 +1447,11 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo')
             //        \= Glasses (attached to 'chin')
 
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1394,11 +1486,11 @@ namespace LibRLV.Tests
             //        |= Watch (worn on 'tattoo')
             //        \= Glasses (attached to 'chin')
 
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1417,11 +1509,11 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetPathNew_BySender()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1437,11 +1529,11 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetPathNew_ByUUID()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1457,7 +1549,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetPathNew_ByUUID_Unknown()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
@@ -1469,7 +1561,7 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1485,7 +1577,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetPathNew_ByAttach()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
@@ -1497,7 +1589,7 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1510,10 +1602,11 @@ namespace LibRLV.Tests
             Assert.Equal(expected, actual);
         }
 
+
         [Fact]
         public async Task GetPathNew_ByWorn()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
@@ -1522,7 +1615,7 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = RlvWearableType.Tattoo;
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = RlvWearableType.Pants;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -1558,24 +1651,36 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name = "Fancy Hat (chin)";
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (Spine)";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:Clothing/Hats=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Attach everything in the Clothing/Hats folder
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Spine, replaceExistingAttachments),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}:Clothing/Hats=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -1592,25 +1697,37 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
             sampleTree.Root_Clothing_HappyShirt_AttachChest.Name = "Happy Shirt (chest)";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Attach everything in the Clothing folder. Make sure clothing types (RlvWearableType) are also included
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, RlvAttachmentPoint.Chest, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -1626,22 +1743,34 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = RlvAttachmentPoint.Chest;
             sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = RlvWearableType.Pants;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Attach nothing because everything in this folder is already attached
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -1668,25 +1797,36 @@ namespace LibRLV.Tests
             // Item name overrides folder name
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name = "Fancy Hat (skull)";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:{clothingFolder.Name}/{hatsFolder.Name}=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            // Attach everything under the "Clothing/Hats (spine)" folder, attaching everything to the Spine point unless the item explicitly
-            //  specifies a different attachment point such as "Fancy Hat (skull)".
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            // Attach everything under the "Clothing/Hats (spine)" folder, attaching everything to the Spine point unless the item explicitly specifies a different attachment point such as "Fancy Hat (skull)".
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Skull, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Spine, replaceExistingAttachments),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}:{clothingFolder.Name}/{hatsFolder.Name}=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -1713,24 +1853,36 @@ namespace LibRLV.Tests
             var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
             hatsFolder.Name = "+Hats";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:{clothingFolder.Name}/{hatsFolder.Name}=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Attach everything inside of the Clothing/Hats folder, but force 'add to' logic due to the + prefix on the hats folder
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, false),
                 new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Spine, false),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}:{clothingFolder.Name}/{hatsFolder.Name}=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -1757,24 +1909,36 @@ namespace LibRLV.Tests
             var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
             clothingFolder.Name = ".clothing";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:{clothingFolder.Name}/{hatsFolder.Name}=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // This is allowed even though we're targeting a private folder. Only private subfolders are ignored
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Spine, replaceExistingAttachments),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}:{clothingFolder.Name}/{hatsFolder.Name}=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
         #endregion
 
@@ -1801,27 +1965,39 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name = "Fancy Hat (chin)";
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (Spine)";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Attach everything inside of of the Clothing folder, and all of its subfolders recursively
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, RlvAttachmentPoint.Pelvis, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Spine, replaceExistingAttachments),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -1849,26 +2025,37 @@ namespace LibRLV.Tests
             var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
             hatsFolder.Name = ".hats";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            // Attach everything inside of of the Clothing folder, and all of its subfolders recursively. The hats folder has a special . prefix,
-            //   which means it will be ignored
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            // Attach everything inside of of the Clothing folder, and all of its subfolders recursively. The hats folder has a special . prefix, which means it will be ignored
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, RlvAttachmentPoint.Pelvis, replaceExistingAttachments),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -1896,28 +2083,39 @@ namespace LibRLV.Tests
             var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
             hatsFolder.Name = "+hats";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            // Attach everything inside of of the Clothing folder, and all of its subfolders recursively. The hats folder has a special + prefix,
-            //   which means it will use 'add to' logic instead of 'replace' logic when attaching
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            // Attach everything inside of of the Clothing folder, and all of its subfolders recursively. The hats folder has a special + prefix, which means it will use 'add to' logic instead of 'replace' logic when attaching
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, RlvAttachmentPoint.Pelvis, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, false),
                 new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Spine, false),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}:Clothing=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         #endregion
@@ -1943,24 +2141,36 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name = "Fancy Hat (chin)";
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (Spine)";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Attach everything in #RLV/Clothing/Hats because that's where the source item (fancy hat) is calling @attachthis from
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Spine, replaceExistingAttachments),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -1987,26 +2197,37 @@ namespace LibRLV.Tests
             var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
             clothingFolder.Name = "+clothing";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            // Attach everything in #RLV/+clothing because that's where the source item (business pants) is calling @attachthis
-            //   from, but use 'add-to' logic instead of 'replace' logic
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            // Attach everything in #RLV/+clothing because that's where the source item (business pants) is calling @attachthis from, but use 'add-to' logic instead of 'replace' logic
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, RlvAttachmentPoint.Groin, false),
                 new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, RlvAttachmentPoint.Spine, false),
                 new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, RlvAttachmentPoint.Default, false),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -2033,25 +2254,37 @@ namespace LibRLV.Tests
             var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
             hatsFolder.Name = "(skull) hats";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            // Attach everything in #RLV/Clothing/+Hats because that's where the source item (fancy hat) is calling @attachthis
-            //   from, but attach "party hat" to the skull because it doesn't specify an attachment point but the folder name does
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            // Attach everything in #RLV/Clothing/+Hats because that's where the source item (fancy hat) is calling @attachthis from,
+            // but attach "party hat" to the skull because it doesn't specify an attachment point but the folder name does
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Skull, replaceExistingAttachments),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -2078,22 +2311,34 @@ namespace LibRLV.Tests
             var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
             hatsFolder.Name = ".hats";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Nothing from ./Clothing/.Hats is worn because it's private, even though the sender exists in this folder
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -2142,28 +2387,40 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (spine)";
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = RlvAttachmentPoint.Spine;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:spine=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Attach happy shirt because it's in the same folder as our business pants (attached to spine).
             // Attach retro pants because it's in the same folder as our business pants (attached to spine).
             // Attach fancy hat because it's in the same folder as our party hat (attached to spine)
             // Don't attach BusinessPants or PartyHat because they are already attached
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, RlvAttachmentPoint.Chest, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, replaceExistingAttachments),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}:spine=force", sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -2203,25 +2460,37 @@ namespace LibRLV.Tests
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = RlvWearableType.Tattoo;
             sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = RlvWearableType.Tattoo;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:tattoo=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // We are currently wearing Tattoo items in "./Clothing" and "./Accessories". Wear everything from these two folders
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Accessories_Glasses_AttachChin.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}:tattoo=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
         #endregion
 
@@ -2247,27 +2516,39 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name = "Fancy Hat (chin)";
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (Spine)";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_RetroPants_WornPants.Id, sampleTree.Root_Clothing_RetroPants_WornPants.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Attach everything inside of of the Clothing folder (sender exists in the clothing folder), and all of its subfolders recursively
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, RlvAttachmentPoint.Pelvis, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Spine, replaceExistingAttachments),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_RetroPants_WornPants.Id, sampleTree.Root_Clothing_RetroPants_WornPants.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -2295,26 +2576,38 @@ namespace LibRLV.Tests
             var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
             hatsFolder.Name = ".hats";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_RetroPants_WornPants.Id, sampleTree.Root_Clothing_RetroPants_WornPants.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Attach everything inside of of the Clothing folder (sender exists in the clothing folder), and all of its subfolders recursively.
             //   The hats folder has a special . prefix, which means it will be ignored
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, RlvAttachmentPoint.Pelvis, replaceExistingAttachments),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_RetroPants_WornPants.Id, sampleTree.Root_Clothing_RetroPants_WornPants.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -2342,28 +2635,40 @@ namespace LibRLV.Tests
             var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
             hatsFolder.Name = "+hats";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_RetroPants_WornPants.Id, sampleTree.Root_Clothing_RetroPants_WornPants.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Attach everything inside of of the Clothing folder (sender exists in the clothing folder), and all of its subfolders recursively.
             //   The hats folder has a special + prefix, which means it will use 'add to' logic instead of 'replace' logic when attaching
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, RlvAttachmentPoint.Pelvis, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, false),
                 new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Spine, false),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}=force", sampleTree.Root_Clothing_RetroPants_WornPants.Id, sampleTree.Root_Clothing_RetroPants_WornPants.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -2410,30 +2715,42 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name = "Fancy Hat (chin)";
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (neck)";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:spine=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Attach happy shirt because it's in the same folder as our business pants (attached to spine).
             // Attach retro pants because it's in the same folder as our business pants (attached to spine).
             // Attach fancy hat because it's in a subfolder of our business pants
             // Attach party hat because it's in a subfolder of our business pants
             // Don't attach BusinessPants because they are already attached
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, RlvAttachmentPoint.Chest, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Neck, replaceExistingAttachments),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}:spine=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -2479,30 +2796,42 @@ namespace LibRLV.Tests
             sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name = "Fancy Hat (chin)";
             sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (neck)";
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<AttachmentEventArgs>(
-                 attach: n => _rlv.Commands.Attach += n,
-                 detach: n => _rlv.Commands.Attach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:tattoo=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Attach happy shirt because it's in the same folder as our retro pants (worn as tattoo).
             // Attach retro pants because it's in the same folder as our retro pants (worn as tattoo).
             // Attach fancy hat because it's in a subfolder of our retro pants
             // Attach party hat because it's in a subfolder of our retro pants
             // Don't attach retro pants because they are already attached
-            var expected = new List<AttachmentEventArgs.AttachmentRequest>()
+            var expected = new HashSet<AttachmentRequest>()
             {
                 new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, RlvAttachmentPoint.Chest, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, replaceExistingAttachments),
                 new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Neck, replaceExistingAttachments),
-            }.OrderBy(n => n.ItemId);
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemsToAttach.OrderBy(n => n.ItemId));
+            // Act
+            await _rlv.ProcessMessage($"@{command}:tattoo=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
         #endregion
 
@@ -2516,31 +2845,43 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Remove everything except for clothing despite what you would think. Just how things go.
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
-                 sampleTree.Root_Accessories_Glasses_AttachChin.Id,
-            }.Order();
+                sampleTree.Root_Accessories_Glasses_AttachChin.Id,
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -2568,22 +2909,20 @@ namespace LibRLV.Tests
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Remove everything except for clothing despite what you would think. Just how things go.
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
@@ -2591,9 +2930,23 @@ namespace LibRLV.Tests
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
                 sampleTree.Root_Accessories_Glasses_AttachChin.Id,
                 externalAttachable.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -2605,27 +2958,39 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -2646,28 +3011,40 @@ namespace LibRLV.Tests
 
             currentOutfit.Add(externalAttachable);
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 externalAttachable.Id
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -2679,25 +3056,37 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage(command, _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
             };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage(command, _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -2709,26 +3098,38 @@ namespace LibRLV.Tests
             var sharedFolder = sampleTree.Root;
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id}=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id
             };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id}=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Theory]
@@ -2756,26 +3157,38 @@ namespace LibRLV.Tests
             currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id}=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id
             };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id}=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
         #endregion
 
@@ -2786,27 +3199,39 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage("@detachall:Clothing=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Everything under the clothing folder, and all of its subfolders will be removed
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
                 sampleTree.Root_Clothing_RetroPants_WornPants.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@detachall:Clothing=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
         #endregion
 
@@ -2817,25 +3242,37 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage("@detachthis=force", sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, sampleTree.Root_Clothing_HappyShirt_AttachChest.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Everything under the clothing folder will be detached because happy shirt exists in the clothing folder
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
                 sampleTree.Root_Clothing_RetroPants_WornPants.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@detachthis=force", sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, sampleTree.Root_Clothing_HappyShirt_AttachChest.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Fact]
@@ -2865,27 +3302,39 @@ namespace LibRLV.Tests
 
             sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = RlvAttachmentPoint.Chest;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage("@detachthis:chest=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Everything under the clothing and accessories folder will be detached, not recursive
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
                 sampleTree.Root_Clothing_RetroPants_WornPants.Id,
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
                 sampleTree.Root_Accessories_Glasses_AttachChin.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@detachthis:chest=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Fact]
@@ -2915,27 +3364,39 @@ namespace LibRLV.Tests
 
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = RlvWearableType.Pants;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage("@detachthis:pants=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Everything under the clothing and accessories folder will be detached, not recursive
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
                 sampleTree.Root_Clothing_RetroPants_WornPants.Id,
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
                 sampleTree.Root_Accessories_Glasses_AttachChin.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@detachthis:pants=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Fact]
@@ -2968,24 +3429,36 @@ namespace LibRLV.Tests
 
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = RlvWearableType.Pants;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage("@detachthis:pants=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Only accessories will be removed even though pants exist in our clothing folder. The clothing folder is private ".clothing"
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
                 sampleTree.Root_Accessories_Glasses_AttachChin.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@detachthis:pants=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
         #endregion
 
@@ -2996,27 +3469,39 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage("@detachallthis=force", sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, sampleTree.Root_Clothing_HappyShirt_AttachChest.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Everything under the clothing folder (and its subfolders recursively) will be detached because happy shirt exists in the clothing folder
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
                 sampleTree.Root_Clothing_RetroPants_WornPants.Id,
                 sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@detachallthis=force", sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, sampleTree.Root_Clothing_HappyShirt_AttachChest.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Fact]
@@ -3046,18 +3531,16 @@ namespace LibRLV.Tests
 
             sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = RlvAttachmentPoint.Chest;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage("@detachallthis:chest=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Everything under the clothing and accessories folder will be detached, and their subfolders recursively
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
@@ -3066,9 +3549,23 @@ namespace LibRLV.Tests
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
                 sampleTree.Root_Accessories_Glasses_AttachChin.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@detachallthis:chest=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
 
@@ -3099,18 +3596,16 @@ namespace LibRLV.Tests
 
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = RlvWearableType.Pants;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage("@detachallthis:pants=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
             // Everything under the clothing and accessories folder will be detached, recursive
-            var expected = new List<Guid>()
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
@@ -3119,9 +3614,23 @@ namespace LibRLV.Tests
                 sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
                 sampleTree.Root_Accessories_Glasses_AttachChin.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@detachallthis:pants=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
 
         [Fact]
@@ -3155,28 +3664,39 @@ namespace LibRLV.Tests
 
             sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = RlvWearableType.Pants;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            var raised = await Assert.RaisesAsync<DetachEventArgs>(
-                 attach: n => _rlv.Commands.Detach += n,
-                 detach: n => _rlv.Commands.Detach -= n,
-                 testCode: () => _rlv.ProcessMessage("@detachallthis:pants=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
 
-            // Everything under the clothing and accessories folder will be detached, recursive.
-            //   Hats will be excluded because they are in a private folder ".hats"
-            var expected = new List<Guid>()
+            // Everything under the clothing and accessories folder will be detached, recursive. Hats will be excluded because they are in a private folder ".hats"
+            var expected = new HashSet<Guid>()
             {
                 sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
                 sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
                 sampleTree.Root_Clothing_RetroPants_WornPants.Id,
                 sampleTree.Root_Accessories_Watch_WornTattoo.Id,
                 sampleTree.Root_Accessories_Glasses_AttachChin.Id,
-            }.Order();
+            };
 
-            Assert.Equal(expected, raised.Arguments.ItemIds.Order());
+            // Act
+            await _rlv.ProcessMessage("@detachallthis:pants=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
         }
         #endregion
 
@@ -3188,7 +3708,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3223,7 +3743,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3260,7 +3780,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3296,7 +3816,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3332,7 +3852,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3371,7 +3891,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3405,7 +3925,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3439,7 +3959,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3473,7 +3993,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3507,7 +4027,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3545,7 +4065,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3584,7 +4104,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3619,7 +4139,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3657,7 +4177,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3692,7 +4212,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3729,7 +4249,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3765,7 +4285,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3801,7 +4321,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3839,7 +4359,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3873,7 +4393,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3907,7 +4427,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3941,7 +4461,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -3975,7 +4495,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -4013,7 +4533,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -4052,7 +4572,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
@@ -4087,7 +4607,7 @@ namespace LibRLV.Tests
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 

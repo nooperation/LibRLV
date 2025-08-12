@@ -514,7 +514,7 @@ namespace LibRLV
         public override string ToString()
         {
             var argsString = "";
-            if(Args != null)
+            if (Args != null)
             {
                 argsString = string.Join(", ", Args);
             }

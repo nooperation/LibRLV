@@ -1,5 +1,4 @@
-﻿using LibRLV.EventArguments;
-using Moq;
+﻿using Moq;
 
 namespace LibRLV.Tests
 {
@@ -41,13 +40,19 @@ namespace LibRLV.Tests
         [Fact]
         public async Task SetRot()
         {
-            var raised = await Assert.RaisesAsync<SetRotEventArgs>(
-                 attach: n => _rlv.Commands.SetRot += n,
-                 detach: n => _rlv.Commands.SetRot -= n,
-                 testCode: () => _rlv.ProcessMessage("@setrot:1.5=force", _sender.Id, _sender.Name)
-             );
+            _actionCallbacks
+                .Setup(e => e.SetRotAsync(It.IsAny<float>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
-            Assert.Equal(1.5f, raised.Arguments.AngleInRadians, FloatTolerance);
+            // Act
+            await _rlv.ProcessMessage("@setrot:1.5=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.SetRotAsync(1.5f, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -55,30 +60,37 @@ namespace LibRLV.Tests
         [Fact]
         public async Task AdjustHeight()
         {
-            var raised = await Assert.RaisesAsync<AdjustHeightEventArgs>(
-                 attach: n => _rlv.Commands.AdjustHeight += n,
-                 detach: n => _rlv.Commands.AdjustHeight -= n,
-                 testCode: () => _rlv.ProcessMessage("@adjustheight:4.3;1.25=force", _sender.Id, _sender.Name)
-             );
+            _actionCallbacks
+                .Setup(e => e.AdjustHeightAsync(It.IsAny<float>(), It.IsAny<float>(), It.IsAny<float>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
-            Assert.Equal(4.3f, raised.Arguments.Distance, FloatTolerance);
-            Assert.Equal(1.25f, raised.Arguments.Factor, FloatTolerance);
-            Assert.Equal(0.0f, raised.Arguments.Delta, FloatTolerance);
+            // Act
+            await _rlv.ProcessMessage("@adjustheight:4.3;1.25=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AdjustHeightAsync(4.3f, 1.25f, 0.0f, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
         public async Task AdjustHeight_WithDelta()
         {
-            var raised = await Assert.RaisesAsync<AdjustHeightEventArgs>(
-                 attach: n => _rlv.Commands.AdjustHeight += n,
-                 detach: n => _rlv.Commands.AdjustHeight -= n,
-                 testCode: () => _rlv.ProcessMessage("@adjustheight:4.3;1.25;12.34=force", _sender.Id, _sender.Name)
-             );
+            _actionCallbacks
+                .Setup(e => e.AdjustHeightAsync(It.IsAny<float>(), It.IsAny<float>(), It.IsAny<float>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
+            // Act
+            await _rlv.ProcessMessage("@adjustheight:4.3;1.25;12.34=force", _sender.Id, _sender.Name);
 
-            Assert.Equal(4.3f, raised.Arguments.Distance, FloatTolerance);
-            Assert.Equal(1.25f, raised.Arguments.Factor, FloatTolerance);
-            Assert.Equal(12.34f, raised.Arguments.Delta, FloatTolerance);
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AdjustHeightAsync(4.3f, 1.25f, 12.34f, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -94,21 +106,21 @@ namespace LibRLV.Tests
         #region @sit:<uuid>=force
         private void SetObjectExists(Guid objectId)
         {
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.ObjectExistsAsync(objectId, default)
             ).ReturnsAsync(true);
         }
 
         private void SetIsSitting(bool isCurrentlySitting)
         {
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.IsSittingAsync(default)
             ).ReturnsAsync(isCurrentlySitting);
         }
 
         private void SetCurrentSitId(Guid objectId)
         {
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetSitIdAsync(default)
             ).ReturnsAsync((objectId != Guid.Empty, objectId));
         }
@@ -120,13 +132,19 @@ namespace LibRLV.Tests
             SetObjectExists(objectId1);
             SetIsSitting(false);
 
-            var raised = await Assert.RaisesAsync<SitEventArgs>(
-                attach: n => _rlv.Commands.Sit += n,
-                detach: n => _rlv.Commands.Sit -= n,
-                testCode: () => _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks
+                .Setup(e => e.SitAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
-            Assert.Equal(objectId1, raised.Arguments.Target);
+            // Act
+            await _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.SitAsync(objectId1, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -138,13 +156,19 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
-            var raised = await Assert.RaisesAsync<SitEventArgs>(
-                attach: n => _rlv.Commands.Sit += n,
-                detach: n => _rlv.Commands.Sit -= n,
-                testCode: () => _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name)
-            );
+            _actionCallbacks
+                .Setup(e => e.SitAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
-            Assert.Equal(objectId1, raised.Arguments.Target);
+            // Act
+            await _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.SitAsync(objectId1, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -156,14 +180,15 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage("@unsit=n", _sender.Id, _sender.Name);
 
-            var raisedEvent = false;
-            _rlv.Commands.TpTo += (sender, args) =>
-            {
-                raisedEvent = true;
-            };
+            _actionCallbacks
+                .Setup(e => e.SitAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
+            // Act
             Assert.False(await _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
-            Assert.False(raisedEvent);
+
+            // Assert
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
 
@@ -176,14 +201,15 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage("@sit=n", _sender.Id, _sender.Name);
 
-            var raisedEvent = false;
-            _rlv.Commands.TpTo += (sender, args) =>
-            {
-                raisedEvent = true;
-            };
+            _actionCallbacks
+                .Setup(e => e.SitAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
+            // Act
             Assert.False(await _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
-            Assert.False(raisedEvent);
+
+            // Assert
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -195,14 +221,15 @@ namespace LibRLV.Tests
 
             await _rlv.ProcessMessage("@standtp=n", _sender.Id, _sender.Name);
 
-            var raisedEvent = false;
-            _rlv.Commands.TpTo += (sender, args) =>
-            {
-                raisedEvent = true;
-            };
+            _actionCallbacks
+                .Setup(e => e.SitAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
+            // Act
             Assert.False(await _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
-            Assert.False(raisedEvent);
+
+            // Assert
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -211,14 +238,15 @@ namespace LibRLV.Tests
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             // SetupSitTarget(objectId1, true); <-- Don't setup sit target for this test
 
-            var raisedEvent = false;
-            _rlv.Commands.TpTo += (sender, args) =>
-            {
-                raisedEvent = true;
-            };
+            _actionCallbacks
+                .Setup(e => e.SitAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
+            // Act
             Assert.False(await _rlv.ProcessMessage($"@sit:{objectId1}=force", _sender.Id, _sender.Name));
-            Assert.False(raisedEvent);
+
+            // Assert
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -227,7 +255,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetSitID()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             SetCurrentSitId(Guid.Empty);
 
             await _rlv.ProcessMessage("@getsitid=1234", _sender.Id, _sender.Name);
@@ -243,7 +271,7 @@ namespace LibRLV.Tests
         [Fact]
         public async Task GetSitID_Default()
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
             var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
             SetCurrentSitId(objectId1);
 

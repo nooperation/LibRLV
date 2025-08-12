@@ -14,13 +14,15 @@ namespace LibRLV
         private readonly ImmutableDictionary<string, RlvDataRequestType> _rlvDataRequestToNameMap;
         private readonly IRestrictionProvider _restrictions;
         private readonly IBlacklistProvider _blacklist;
-        private readonly IRlvCallbacks _callbacks;
+        private readonly IRlvQueryCallbacks _queryCallbacks;
+        private readonly IRlvActionCallbacks _actionCallbacks;
 
-        internal RlvGetRequestHandler(IBlacklistProvider blacklist, IRestrictionProvider restrictions, IRlvCallbacks callbacks)
+        internal RlvGetRequestHandler(IBlacklistProvider blacklist, IRestrictionProvider restrictions, IRlvQueryCallbacks queryCallbacks, IRlvActionCallbacks actionCallbacks)
         {
             _restrictions = restrictions;
             _blacklist = blacklist;
-            _callbacks = callbacks;
+            _queryCallbacks = queryCallbacks;
+            _actionCallbacks = actionCallbacks;
 
             _rlvDataRequestToNameMap = new Dictionary<string, RlvDataRequestType>()
             {
@@ -79,7 +81,7 @@ namespace LibRLV
 
         private async Task<string> ProcessGetOutfit(RlvWearableType? specificType, CancellationToken cancellationToken)
         {
-            var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync(cancellationToken).ConfigureAwait(false);
+            var (hasCurrentOutfit, currentOutfit) = await _queryCallbacks.TryGetCurrentOutfitAsync(cancellationToken).ConfigureAwait(false);
             if (!hasCurrentOutfit || currentOutfit == null)
             {
                 return string.Empty;
@@ -128,7 +130,7 @@ namespace LibRLV
 
         private async Task<string> ProcessGetAttach(RlvAttachmentPoint? specificType, CancellationToken cancellationToken)
         {
-            var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync(cancellationToken).ConfigureAwait(false);
+            var (hasCurrentOutfit, currentOutfit) = await _queryCallbacks.TryGetCurrentOutfitAsync(cancellationToken).ConfigureAwait(false);
             if (!hasCurrentOutfit || currentOutfit == null)
             {
                 return string.Empty;
@@ -207,7 +209,7 @@ namespace LibRLV
                 {
                     case RlvDataRequestType.GetSitId:
                     {
-                        var (hasSitId, sitId) = await _callbacks.TryGetSitIdAsync(cancellationToken).ConfigureAwait(false);
+                        var (hasSitId, sitId) = await _queryCallbacks.TryGetSitIdAsync(cancellationToken).ConfigureAwait(false);
                         if (!hasSitId || sitId == Guid.Empty)
                         {
                             response = "NULL_KEY";
@@ -226,7 +228,7 @@ namespace LibRLV
                     case RlvDataRequestType.GetCamZoomMin:
                     case RlvDataRequestType.GetCamFov:
                     {
-                        var (hasCameraSettings, cameraSettings) = await _callbacks.TryGetCameraSettingsAsync(cancellationToken).ConfigureAwait(false);
+                        var (hasCameraSettings, cameraSettings) = await _queryCallbacks.TryGetCameraSettingsAsync(cancellationToken).ConfigureAwait(false);
                         if (!hasCameraSettings || cameraSettings == null)
                         {
                             return false;
@@ -271,7 +273,7 @@ namespace LibRLV
 
                     case RlvDataRequestType.GetGroup:
                     {
-                        var (hasGroup, group) = await _callbacks.TryGetActiveGroupNameAsync(cancellationToken).ConfigureAwait(false);
+                        var (hasGroup, group) = await _queryCallbacks.TryGetActiveGroupNameAsync(cancellationToken).ConfigureAwait(false);
 
                         if (!hasGroup)
                         {
@@ -366,7 +368,7 @@ namespace LibRLV
             else if (rlvMessage.Behavior.StartsWith("getdebug_", StringComparison.OrdinalIgnoreCase))
             {
                 var commandRaw = rlvMessage.Behavior.Substring("getdebug_".Length);
-                var (success, debugInfo) = await _callbacks.TryGetDebugSettingValueAsync(commandRaw, cancellationToken).ConfigureAwait(false);
+                var (success, debugInfo) = await _queryCallbacks.TryGetDebugSettingValueAsync(commandRaw, cancellationToken).ConfigureAwait(false);
 
                 if (success)
                 {
@@ -376,7 +378,7 @@ namespace LibRLV
             else if (rlvMessage.Behavior.StartsWith("getenv_", StringComparison.OrdinalIgnoreCase))
             {
                 var commandRaw = rlvMessage.Behavior.Substring("getenv_".Length);
-                var (success, envInfo) = await _callbacks.TryGetEnvironmentSettingValueAsync(commandRaw, cancellationToken).ConfigureAwait(false);
+                var (success, envInfo) = await _queryCallbacks.TryGetEnvironmentSettingValueAsync(commandRaw, cancellationToken).ConfigureAwait(false);
 
                 if (success)
                 {
@@ -386,7 +388,7 @@ namespace LibRLV
 
             if (response != null)
             {
-                await _callbacks.SendReplyAsync(channel, response, cancellationToken).ConfigureAwait(false);
+                await _actionCallbacks.SendReplyAsync(channel, response, cancellationToken).ConfigureAwait(false);
                 return true;
             }
 
@@ -478,7 +480,7 @@ namespace LibRLV
 
         private async Task<string> HandleGetInvWorn(string args, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
+            var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return string.Empty;
@@ -544,7 +546,7 @@ namespace LibRLV
 
         private async Task<string> HandleFindFolders(bool stopOnFirstResult, IEnumerable<string> searchTerms, string separator, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
+            var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return string.Empty;
@@ -572,7 +574,7 @@ namespace LibRLV
 
         private async Task<string> HandleGetInv(string args, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
+            var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return string.Empty;
@@ -599,7 +601,7 @@ namespace LibRLV
 
         private async Task<string> HandleGetPath(bool limitToOneResult, Guid? itemId, RlvAttachmentPoint? attachmentPoint, RlvWearableType? wearableType, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
+            var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return string.Empty;
@@ -630,11 +632,11 @@ namespace LibRLV
             switch (message)
             {
                 case "@version":
-                    await _callbacks.SendInstantMessageAsync(senderId, RlvService.RLVVersion, cancellationToken).ConfigureAwait(false);
+                    await _actionCallbacks.SendInstantMessageAsync(senderId, RlvService.RLVVersion, cancellationToken).ConfigureAwait(false);
                     return true;
                 case "@getblacklist":
                     var blacklist = _blacklist.GetBlacklist();
-                    await _callbacks.SendInstantMessageAsync(senderId, string.Join(",", blacklist), cancellationToken).ConfigureAwait(false);
+                    await _actionCallbacks.SendInstantMessageAsync(senderId, string.Join(",", blacklist), cancellationToken).ConfigureAwait(false);
                     return true;
             }
 

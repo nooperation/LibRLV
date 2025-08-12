@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using LibRLV.EventArguments;
 
 namespace LibRLV
 {
@@ -12,38 +11,26 @@ namespace LibRLV
     {
         private readonly ImmutableDictionary<string, Func<RlvMessage, CancellationToken, Task<bool>>> _rlvActionHandlers;
 
-        public event EventHandler<SetRotEventArgs>? SetRot;
-        public event EventHandler<AdjustHeightEventArgs>? AdjustHeight;
-        public event EventHandler<SetCamFOVEventArgs>? SetCamFOV;
-        public event EventHandler<TpToEventArgs>? TpTo;
-        public event EventHandler<SitEventArgs>? Sit;
-        public event EventHandler? Unsit;
-        public event EventHandler? SitGround;
-        public event EventHandler<RemOutfitEventArgs>? RemOutfit;
-        public event EventHandler<AttachmentEventArgs>? Attach;
-        public event EventHandler<DetachEventArgs>? Detach;
-        public event EventHandler<SetGroupEventArgs>? SetGroup;
-        public event EventHandler<SetSettingEventArgs>? SetEnv;
-        public event EventHandler<SetSettingEventArgs>? SetDebug;
-
         // TODO: Swap manager out with an interface once it's been solidified into only useful stuff
         private readonly RlvPermissionsService _manager;
-        private readonly IRlvCallbacks _callbacks;
+        private readonly IRlvQueryCallbacks _queryCallbacks;
+        private readonly IRlvActionCallbacks _actionCallbacks;
 
-        internal RlvCommandProcessor(RlvPermissionsService manager, IRlvCallbacks callbacks)
+        internal RlvCommandProcessor(RlvPermissionsService manager, IRlvQueryCallbacks callbacks, IRlvActionCallbacks actionCallbacks)
         {
             _manager = manager;
-            _callbacks = callbacks;
+            _queryCallbacks = callbacks;
+            _actionCallbacks = actionCallbacks;
 
             _rlvActionHandlers = new Dictionary<string, Func<RlvMessage, CancellationToken, Task<bool>>>()
             {
-                { "setrot", (command, cancellationToken) => HandleSetRot(command) },
-                { "adjustheight", (command, cancellationToken) => HandleAdjustHeight(command)},
-                { "setcam_fov", (command, cancellationToken) => HandleSetCamFOV(command)},
-                { "tpto", (command, cancellationToken) => HandleTpTo(command)},
+                { "setrot", HandleSetRot },
+                { "adjustheight", HandleAdjustHeight},
+                { "setcam_fov", HandleSetCamFOV},
+                { "tpto", HandleTpTo},
                 { "sit", HandleSit},
-                { "unsit", (command, cancellationToken) => HandleUnsit()},
-                { "sitground", (command, cancellationToken) => HandleSitGround()},
+                { "unsit", HandleUnsit},
+                { "sitground", HandleSitGround},
                 { "remoutfit", HandleRemOutfit},
                 { "detachme", HandleDetachMe},
                 { "remattach", HandleRemAttach},
@@ -51,9 +38,9 @@ namespace LibRLV
                 { "detachall", HandleDetachAll},
                 { "detachthis", (command, cancellationToken) => HandleDetachThis(command, false, cancellationToken)},
                 { "detachallthis", (command, cancellationToken) => HandleDetachThis(command, true, cancellationToken)},
-                { "setgroup", (command, cancellationToken) => HandleSetGroup(command)},
-                { "setdebug_", (command, cancellationToken) => HandleSetDebug(command)},
-                { "setenv_", (command, cancellationToken) => HandleSetEnv(command)},
+                { "setgroup", HandleSetGroup},
+                { "setdebug_", HandleSetDebug},
+                { "setenv_", HandleSetEnv},
 
                 { "attach", (command, cancellationToken) => HandleAttach(command, true, false, cancellationToken)},
                 { "attachall", (command, cancellationToken) => HandleAttach(command, true, true, cancellationToken)},
@@ -100,55 +87,51 @@ namespace LibRLV
             return false;
         }
 
-        private Task<bool> HandleSetDebug(RlvMessage command)
+        private async Task<bool> HandleSetDebug(RlvMessage command, CancellationToken cancellationToken)
         {
             var separatorIndex = command.Behavior.IndexOf('_');
             if (separatorIndex == -1)
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             var settingName = command.Behavior.Substring(separatorIndex + 1);
             if (settingName.Length == 0)
             {
-                return Task.FromResult(false);
+                return false;
             }
 
-            var handler = SetDebug;
-            handler?.Invoke(this, new SetSettingEventArgs(settingName, command.Option));
-
-            return Task.FromResult(true);
+            await _actionCallbacks.SetDebugAsync(settingName, command.Option, cancellationToken).ConfigureAwait(false);
+            return true;
         }
 
-        private Task<bool> HandleSetEnv(RlvMessage command)
+        private async Task<bool> HandleSetEnv(RlvMessage command, CancellationToken cancellationToken)
         {
             var separatorIndex = command.Behavior.IndexOf('_');
             if (separatorIndex == -1)
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             var settingName = command.Behavior.Substring(separatorIndex + 1);
             if (settingName.Length == 0)
             {
-                return Task.FromResult(false);
+                return false;
             }
 
-            var handler = SetEnv;
-            handler?.Invoke(this, new SetSettingEventArgs(settingName, command.Option));
-
-            return Task.FromResult(true);
+            await _actionCallbacks.SetEnvAsync(settingName, command.Option, cancellationToken).ConfigureAwait(false);
+            return true;
         }
 
-        private Task<bool> HandleSetGroup(RlvMessage command)
+        private async Task<bool> HandleSetGroup(RlvMessage command, CancellationToken cancellationToken)
         {
             var argParts = command.Option.Split([';'], StringSplitOptions.RemoveEmptyEntries);
             if (argParts.Length == 0)
             {
-                return Task.FromResult(false);
+                return false;
             }
 
-            var groupRole = string.Empty;
+            string? groupRole = null;
             if (argParts.Length > 1)
             {
                 groupRole = argParts[1];
@@ -156,16 +139,14 @@ namespace LibRLV
 
             if (Guid.TryParse(argParts[0], out var groupId))
             {
-                var handler = SetGroup;
-                handler?.Invoke(this, new SetGroupEventArgs(groupId, groupRole));
+                await _actionCallbacks.SetGroupAsync(groupId, groupRole, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                var handler = SetGroup;
-                handler?.Invoke(this, new SetGroupEventArgs(argParts[0], groupRole));
+                await _actionCallbacks.SetGroupAsync(argParts[0], groupRole, cancellationToken).ConfigureAwait(false);
             }
 
-            return Task.FromResult(true);
+            return true;
         }
 
         private bool CanRemAttachItem(RlvInventoryItem item, bool enforceNostrip)
@@ -203,7 +184,7 @@ namespace LibRLV
             return true;
         }
 
-        private static void CollectItemsToAttach(RlvSharedFolder folder, bool replaceExistingAttachments, bool recursive, List<AttachmentEventArgs.AttachmentRequest> itemsToAttach)
+        private static void CollectItemsToAttach(RlvSharedFolder folder, bool replaceExistingAttachments, bool recursive, List<AttachmentRequest> itemsToAttach)
         {
             if (folder.Name.Length > 0)
             {
@@ -237,15 +218,15 @@ namespace LibRLV
 
                 if (RlvCommon.TryGetAttachmentPointFromItemName(item.Name, out var attachmentPoint))
                 {
-                    itemsToAttach.Add(new AttachmentEventArgs.AttachmentRequest(item.Id, attachmentPoint.Value, replaceExistingAttachments));
+                    itemsToAttach.Add(new AttachmentRequest(item.Id, attachmentPoint.Value, replaceExistingAttachments));
                 }
                 else if (folderAttachmentPoint != null)
                 {
-                    itemsToAttach.Add(new AttachmentEventArgs.AttachmentRequest(item.Id, folderAttachmentPoint.Value, replaceExistingAttachments));
+                    itemsToAttach.Add(new AttachmentRequest(item.Id, folderAttachmentPoint.Value, replaceExistingAttachments));
                 }
                 else
                 {
-                    itemsToAttach.Add(new AttachmentEventArgs.AttachmentRequest(item.Id, RlvAttachmentPoint.Default, replaceExistingAttachments));
+                    itemsToAttach.Add(new AttachmentRequest(item.Id, RlvAttachmentPoint.Default, replaceExistingAttachments));
                 }
             }
 
@@ -266,7 +247,7 @@ namespace LibRLV
         // @attach:[folder]=force
         private async Task<bool> HandleAttach(RlvMessage command, bool replaceExistingAttachments, bool recursive, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
+            var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -275,26 +256,22 @@ namespace LibRLV
 
             if (!inventoryMap.TryGetFolderFromPath(command.Option, false, out var folder))
             {
-                var handler = Attach;
-                handler?.Invoke(this, new AttachmentEventArgs([]));
-
+                await _actionCallbacks.AttachAsync(Array.Empty<AttachmentRequest>(), cancellationToken).ConfigureAwait(false);
                 return false;
             }
             else
             {
-                var itemsToAttach = new List<AttachmentEventArgs.AttachmentRequest>();
+                var itemsToAttach = new List<AttachmentRequest>();
                 CollectItemsToAttach(folder, replaceExistingAttachments, recursive, itemsToAttach);
 
-                var handler = Attach;
-                handler?.Invoke(this, new AttachmentEventArgs(itemsToAttach));
-
+                await _actionCallbacks.AttachAsync(itemsToAttach, cancellationToken).ConfigureAwait(false);
                 return true;
             }
         }
 
         private async Task<bool> HandleAttachThis(RlvMessage command, bool replaceExistingAttachments, bool recursive, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
+            var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -323,16 +300,14 @@ namespace LibRLV
                 folderPaths.AddRange(parts);
             }
 
-            var itemsToAttach = new List<AttachmentEventArgs.AttachmentRequest>();
+            var itemsToAttach = new List<AttachmentRequest>();
 
             foreach (var item in folderPaths)
             {
                 CollectItemsToAttach(item, replaceExistingAttachments, recursive, itemsToAttach);
             }
 
-            var handler = Attach;
-            handler?.Invoke(this, new AttachmentEventArgs(itemsToAttach));
-
+            await _actionCallbacks.AttachAsync(itemsToAttach, cancellationToken).ConfigureAwait(false);
             return true;
         }
 
@@ -371,13 +346,13 @@ namespace LibRLV
         // TODO: Add support for Attachment groups (RLVa)
         private async Task<bool> HandleRemAttach(RlvMessage command, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
+            var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
             }
 
-            var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync(cancellationToken).ConfigureAwait(false);
+            var (hasCurrentOutfit, currentOutfit) = await _queryCallbacks.TryGetCurrentOutfitAsync(cancellationToken).ConfigureAwait(false);
             if (!hasCurrentOutfit || currentOutfit == null)
             {
                 return false;
@@ -429,15 +404,13 @@ namespace LibRLV
                 return false;
             }
 
-            var handler = Detach;
-            handler?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
-
+            await _actionCallbacks.DetachAsync(itemIdsToDetach, cancellationToken).ConfigureAwait(false);
             return true;
         }
 
         private async Task<bool> HandleDetachAll(RlvMessage command, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
+            var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -452,15 +425,13 @@ namespace LibRLV
             var itemIdsToDetach = new List<Guid>();
             CollectItemsToDetach(folder, inventoryMap, true, itemIdsToDetach);
 
-            var handler = Detach;
-            handler?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
-
+            await _actionCallbacks.DetachAsync(itemIdsToDetach, cancellationToken).ConfigureAwait(false);
             return true;
         }
 
         private async Task<bool> HandleDetachThis(RlvMessage command, bool recursive, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
+            var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -504,16 +475,14 @@ namespace LibRLV
                 CollectItemsToDetach(item, inventoryMap, recursive, itemIdsToDetach);
             }
 
-            var handler = Detach;
-            handler?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
-
+            await _actionCallbacks.DetachAsync(itemIdsToDetach, cancellationToken).ConfigureAwait(false);
             return true;
         }
 
         // @detachme=force
         private async Task<bool> HandleDetachMe(RlvMessage command, CancellationToken cancellationToken)
         {
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
+            var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -529,9 +498,7 @@ namespace LibRLV
                 }
             }
 
-            var handler = Detach;
-            handler?.Invoke(this, new DetachEventArgs(itemIdsToDetach));
-
+            await _actionCallbacks.DetachAsync(itemIdsToDetach, cancellationToken).ConfigureAwait(false);
             return true;
         }
 
@@ -539,12 +506,12 @@ namespace LibRLV
         // TODO: Add support for Attachment groups (RLVa)
         private async Task<bool> HandleRemOutfit(RlvMessage command, CancellationToken cancellationToken)
         {
-            var (hasCurrentOutfit, currentOutfit) = await _callbacks.TryGetCurrentOutfitAsync(cancellationToken).ConfigureAwait(false);
+            var (hasCurrentOutfit, currentOutfit) = await _queryCallbacks.TryGetCurrentOutfitAsync(cancellationToken).ConfigureAwait(false);
             if (!hasCurrentOutfit || currentOutfit == null)
             {
                 return false;
             }
-            var (hasSharedFolder, sharedFolder) = await _callbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
+            var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
             {
                 return false;
@@ -582,62 +549,54 @@ namespace LibRLV
                 .Distinct()
                 .ToList();
 
-            var handler = RemOutfit;
-            handler?.Invoke(this, new RemOutfitEventArgs(itemIdsToDetach));
-
+            await _actionCallbacks.RemOutfitAsync(itemIdsToDetach, cancellationToken).ConfigureAwait(false);
             return true;
         }
 
-        private Task<bool> HandleUnsit()
+        private async Task<bool> HandleUnsit(RlvMessage command, CancellationToken cancellationToken)
         {
             if (!_manager.CanUnsit())
             {
-                return Task.FromResult(false);
+                return false;
             }
 
-            var handler = Unsit;
-            handler?.Invoke(this, new EventArgs());
-
-            return Task.FromResult(true);
+            await _actionCallbacks.UnsitAsync(cancellationToken).ConfigureAwait(false);
+            return true;
         }
 
-        private Task<bool> HandleSitGround()
+        private async Task<bool> HandleSitGround(RlvMessage command, CancellationToken cancellationToken)
         {
             if (!_manager.CanSit())
             {
-                return Task.FromResult(false);
+                return false;
             }
 
-            var handler = SitGround;
-            handler?.Invoke(this, new EventArgs());
-
-            return Task.FromResult(true);
+            await _actionCallbacks.SitGroundAsync(cancellationToken).ConfigureAwait(false);
+            return true;
         }
 
-        private Task<bool> HandleSetRot(RlvMessage command)
+        private async Task<bool> HandleSetRot(RlvMessage command, CancellationToken cancellationToken)
         {
             if (!float.TryParse(command.Option, out var angleInRadians))
             {
-                return Task.FromResult(false);
+                return false;
             }
 
-            var handler = SetRot;
-            handler?.Invoke(this, new SetRotEventArgs(angleInRadians));
-
-            return Task.FromResult(true);
+            await _actionCallbacks.SetRotAsync(angleInRadians, cancellationToken).ConfigureAwait(false);
+            return true;
         }
 
-        private Task<bool> HandleAdjustHeight(RlvMessage command)
+        private async Task<bool> HandleAdjustHeight(RlvMessage command, CancellationToken cancellationToken)
         {
             var args = command.Option.Split([';'], StringSplitOptions.RemoveEmptyEntries);
             if (args.Length < 1)
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             if (!float.TryParse(args[0], out var distance))
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             var factor = 1.0f;
@@ -653,29 +612,25 @@ namespace LibRLV
                 deltaInMeters = 0;
             }
 
-            var handler = AdjustHeight;
-            handler?.Invoke(this, new AdjustHeightEventArgs(distance, factor, deltaInMeters));
-
-            return Task.FromResult(true);
+            await _actionCallbacks.AdjustHeightAsync(distance, factor, deltaInMeters, cancellationToken).ConfigureAwait(false);
+            return true;
         }
 
-        private Task<bool> HandleSetCamFOV(RlvMessage command)
+        private async Task<bool> HandleSetCamFOV(RlvMessage command, CancellationToken cancellationToken)
         {
             var cameraRestrictions = _manager.GetCameraRestrictions();
             if (cameraRestrictions.IsLocked)
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             if (!float.TryParse(command.Option, out var fov))
             {
-                return Task.FromResult(false);
+                return false;
             }
 
-            var handler = SetCamFOV;
-            handler?.Invoke(this, new SetCamFOVEventArgs(fov));
-
-            return Task.FromResult(true);
+            await _actionCallbacks.SetCamFOVAsync(fov, cancellationToken).ConfigureAwait(false);
+            return true;
         }
 
         private async Task<bool> HandleSit(RlvMessage command, CancellationToken cancellationToken)
@@ -690,13 +645,13 @@ namespace LibRLV
                 return false;
             }
 
-            var objectExists = await _callbacks.ObjectExistsAsync(sitTarget, cancellationToken).ConfigureAwait(false);
+            var objectExists = await _queryCallbacks.ObjectExistsAsync(sitTarget, cancellationToken).ConfigureAwait(false);
             if (!objectExists)
             {
                 return false;
             }
 
-            var isCurrentlySitting = await _callbacks.IsSittingAsync(cancellationToken).ConfigureAwait(false);
+            var isCurrentlySitting = await _queryCallbacks.IsSittingAsync(cancellationToken).ConfigureAwait(false);
             if (isCurrentlySitting)
             {
                 if (!_manager.CanUnsit())
@@ -710,22 +665,20 @@ namespace LibRLV
                 }
             }
 
-            var handler = Sit;
-            handler?.Invoke(this, new SitEventArgs(sitTarget));
-
+            await _actionCallbacks.SitAsync(sitTarget, cancellationToken).ConfigureAwait(false);
             return true;
         }
 
-        private Task<bool> HandleTpTo(RlvMessage command)
+        private async Task<bool> HandleTpTo(RlvMessage command, CancellationToken cancellationToken)
         {
             // @tpto is inhibited by @tploc=n, by @unsit too.
             if (!_manager.CanTpLoc())
             {
-                return Task.FromResult(false);
+                return false;
             }
             if (!_manager.CanUnsit())
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             var commandArgs = command.Option.Split([';'], StringSplitOptions.RemoveEmptyEntries);
@@ -733,7 +686,7 @@ namespace LibRLV
 
             if (locationArgs.Length is < 3 or > 4)
             {
-                return Task.FromResult(false);
+                return false;
             }
 
             float? lookat = null;
@@ -741,7 +694,7 @@ namespace LibRLV
             {
                 if (!float.TryParse(commandArgs[1], out var val))
                 {
-                    return Task.FromResult(false);
+                    return false;
                 }
 
                 lookat = val;
@@ -751,21 +704,19 @@ namespace LibRLV
             {
                 if (!float.TryParse(locationArgs[0], out var x))
                 {
-                    return Task.FromResult(false);
+                    return false;
                 }
                 if (!float.TryParse(locationArgs[1], out var y))
                 {
-                    return Task.FromResult(false);
+                    return false;
                 }
                 if (!float.TryParse(locationArgs[2], out var z))
                 {
-                    return Task.FromResult(false);
+                    return false;
                 }
 
-                var handler = TpTo;
-                handler?.Invoke(this, new TpToEventArgs(x, y, z, null, lookat));
-
-                return Task.FromResult(true);
+                await _actionCallbacks.TpToAsync(x, y, z, null, lookat, cancellationToken).ConfigureAwait(false);
+                return true;
             }
             else if (locationArgs.Length == 4)
             {
@@ -773,24 +724,22 @@ namespace LibRLV
 
                 if (!float.TryParse(locationArgs[1], out var x))
                 {
-                    return Task.FromResult(false);
+                    return false;
                 }
                 if (!float.TryParse(locationArgs[2], out var y))
                 {
-                    return Task.FromResult(false);
+                    return false;
                 }
                 if (!float.TryParse(locationArgs[3], out var z))
                 {
-                    return Task.FromResult(false);
+                    return false;
                 }
 
-                var handler = TpTo;
-                handler?.Invoke(this, new TpToEventArgs(x, y, z, regionName, lookat));
-
-                return Task.FromResult(true);
+                await _actionCallbacks.TpToAsync(x, y, z, regionName, lookat, cancellationToken).ConfigureAwait(false);
+                return true;
             }
 
-            return Task.FromResult(false);
+            return false;
         }
     }
 }

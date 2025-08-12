@@ -1,11 +1,9 @@
-﻿using LibRLV.EventArguments;
-using Moq;
+﻿using Moq;
 
 namespace LibRLV.Tests
 {
     public class RestrictionsViewerControlTests : RestrictionsBase
     {
-
         #region @setdebug=<y/n>
         [Fact]
         public async Task CanSetDebug()
@@ -20,27 +18,33 @@ namespace LibRLV.Tests
         [InlineData("Unknown Setting", "Unknown Setting Success")]
         public async Task SetDebug_Default(string settingName, string settingValue)
         {
-            var raised = await Assert.RaisesAsync<SetSettingEventArgs>(
-                 attach: n => _rlv.Commands.SetDebug += n,
-                 detach: n => _rlv.Commands.SetDebug -= n,
-                 testCode: () => _rlv.ProcessMessage($"@setdebug_{settingName}:{settingValue}=force", _sender.Id, _sender.Name)
-             );
+            _actionCallbacks
+                .Setup(e => e.SetDebugAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
-            Assert.Equal(raised.Arguments.SettingName, settingName.ToLower());
-            Assert.Equal(raised.Arguments.SettingValue, settingValue);
+            // Act
+            await _rlv.ProcessMessage($"@setdebug_{settingName}:{settingValue}=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.SetDebugAsync(settingName.ToLower(), settingValue, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
         public async Task SetDebug_Invalid()
         {
-            var eventRaised = false;
-            _rlv.Commands.SetDebug += (sender, args) =>
-            {
-                eventRaised = true;
-            };
+            _actionCallbacks
+                .Setup(e => e.SetDebugAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
+            // Act
             Assert.False(await _rlv.ProcessMessage($"@setdebug_:42=force", _sender.Id, _sender.Name));
-            Assert.False(eventRaised);
+
+            // Assert
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -50,9 +54,9 @@ namespace LibRLV.Tests
         [InlineData("Unknown Setting", "Unknown Setting Success")]
         public async Task GetDebug_Default(string settingName, string settingValue)
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetDebugSettingValueAsync(settingName.ToLower(), default)
             ).ReturnsAsync((true, settingValue));
 
@@ -81,14 +85,19 @@ namespace LibRLV.Tests
         [InlineData("Unknown Setting", "Unknown Setting Success")]
         public async Task SetEnv_Default(string settingName, string settingValue)
         {
-            var raised = await Assert.RaisesAsync<SetSettingEventArgs>(
-                 attach: n => _rlv.Commands.SetEnv += n,
-                 detach: n => _rlv.Commands.SetEnv -= n,
-                 testCode: () => _rlv.ProcessMessage($"@setenv_{settingName}:{settingValue}=force", _sender.Id, _sender.Name)
-             );
+            _actionCallbacks
+                .Setup(e => e.SetEnvAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
-            Assert.Equal(raised.Arguments.SettingName, settingName.ToLower());
-            Assert.Equal(raised.Arguments.SettingValue, settingValue);
+            // Act
+            await _rlv.ProcessMessage($"@setenv_{settingName}:{settingValue}=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.SetEnvAsync(settingName.ToLower(), settingValue, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         #endregion
@@ -100,9 +109,9 @@ namespace LibRLV.Tests
         [InlineData("Unknown Setting", "Unknown Setting Success")]
         public async Task GetEnv_Default(string settingName, string settingValue)
         {
-            var actual = _callbacks.RecordReplies();
+            var actual = _actionCallbacks.RecordReplies();
 
-            _callbacks.Setup(e =>
+            _queryCallbacks.Setup(e =>
                 e.TryGetEnvironmentSettingValueAsync(settingName.ToLower(), default)
             ).ReturnsAsync((true, settingValue));
 

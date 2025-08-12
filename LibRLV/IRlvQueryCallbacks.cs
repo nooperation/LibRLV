@@ -5,24 +5,8 @@ using System.Threading.Tasks;
 
 namespace LibRLV
 {
-    public interface IRlvCallbacks
+    public interface IRlvQueryCallbacks
     {
-        /// <summary>
-        /// Sends a message on the given channel
-        /// </summary>
-        /// <param name="channel">Channel to send on</param>
-        /// <param name="message">Message to send</param>
-        /// <param name="cancellationToken">Cancellation token</param>
-        Task SendReplyAsync(int channel, string message, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Sends an instant message to a user
-        /// </summary>
-        /// <param name="targetUser">User to message</param>
-        /// <param name="message">Message to send</param>
-        /// <param name="cancellationToken">Cancellation token</param>
-        Task SendInstantMessageAsync(Guid targetUser, string message, CancellationToken cancellationToken);
-
         /// <summary>
         /// Checks if an object exists in the world
         /// </summary>
@@ -89,5 +73,35 @@ namespace LibRLV
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Success flag and current outfit if successful</returns>
         Task<(bool Success, IReadOnlyList<RlvInventoryItem>? CurrentOutfit)> TryGetCurrentOutfitAsync(CancellationToken cancellationToken);
+    }
+
+    /// <summary>
+    /// Represents a request to attach an item to the avatar
+    /// </summary>
+    public class AttachmentRequest
+    {
+        public Guid ItemId { get; }
+        public RlvAttachmentPoint AttachmentPoint { get; }
+        public bool ReplaceExistingAttachments { get; }
+
+        public AttachmentRequest(Guid itemId, RlvAttachmentPoint attachmentPoint, bool replaceExistingAttachments)
+        {
+            ItemId = itemId;
+            AttachmentPoint = attachmentPoint;
+            ReplaceExistingAttachments = replaceExistingAttachments;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is AttachmentRequest request &&
+                   ItemId.Equals(request.ItemId) &&
+                   AttachmentPoint == request.AttachmentPoint &&
+                   ReplaceExistingAttachments == request.ReplaceExistingAttachments;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(ItemId, AttachmentPoint, ReplaceExistingAttachments);
+        }
     }
 }

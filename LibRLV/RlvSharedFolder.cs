@@ -16,13 +16,8 @@ namespace LibRLV
 
         public RlvSharedFolder(Guid id, string name)
         {
-            if (name == null)
-            {
-                throw new ArgumentException("Name cannot be null", nameof(name));
-            }
-
             Id = id;
-            Name = name;
+            Name = name ?? throw new ArgumentException("Name cannot be null", nameof(name));
             Parent = null;
             _children = [];
             _items = [];

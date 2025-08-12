@@ -7,7 +7,8 @@ namespace LibRLV.Tests
         public record RlvObject(string Name, Guid Id);
 
         protected readonly RlvObject _sender;
-        protected readonly Mock<IRlvCallbacks> _callbacks;
+        protected readonly Mock<IRlvQueryCallbacks> _queryCallbacks;
+        protected readonly Mock<IRlvActionCallbacks> _actionCallbacks;
         protected readonly RlvService _rlv;
 
         public const float FloatTolerance = 0.00001f;
@@ -15,8 +16,9 @@ namespace LibRLV.Tests
         public RestrictionsBase()
         {
             _sender = new RlvObject("Sender 1", new Guid("ffffffff-ffff-4fff-8fff-ffffffffffff"));
-            _callbacks = new Mock<IRlvCallbacks>();
-            _rlv = new RlvService(_callbacks.Object, true);
+            _queryCallbacks = new Mock<IRlvQueryCallbacks>();
+            _actionCallbacks = new Mock<IRlvActionCallbacks>();
+            _rlv = new RlvService(_queryCallbacks.Object, _actionCallbacks.Object, true);
         }
 
         protected async Task CheckSimpleCommand(string cmd, Func<RlvPermissionsService, bool> canFunc)
