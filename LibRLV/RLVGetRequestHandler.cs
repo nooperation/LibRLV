@@ -288,7 +288,7 @@ namespace LibRLV
                     case RlvDataRequestType.GetOutfit:
                     {
                         RlvWearableType? wearableType = null;
-                        if (RlvCommon.RLVWearableTypeMap.TryGetValue(rlvMessage.Option, out var wearableTypeTemp))
+                        if (RlvCommon.RlvWearableTypeMap.TryGetValue(rlvMessage.Option, out var wearableTypeTemp))
                         {
                             wearableType = wearableTypeTemp;
                         }
@@ -299,7 +299,7 @@ namespace LibRLV
                     case RlvDataRequestType.GetAttach:
                     {
                         RlvAttachmentPoint? attachmentPointType = null;
-                        if (RlvCommon.RLVAttachmentPointMap.TryGetValue(rlvMessage.Option, out var attachmentPointTemp))
+                        if (RlvCommon.RlvAttachmentPointMap.TryGetValue(rlvMessage.Option, out var attachmentPointTemp))
                         {
                             attachmentPointType = attachmentPointTemp;
                         }
@@ -348,11 +348,11 @@ namespace LibRLV
                         {
                             response = await HandleGetPath(name == RlvDataRequestType.GetPath, uuid, null, null, cancellationToken).ConfigureAwait(false);
                         }
-                        else if (RlvCommon.RLVWearableTypeMap.TryGetValue(parsedOptions[0], out var wearableType))
+                        else if (RlvCommon.RlvWearableTypeMap.TryGetValue(parsedOptions[0], out var wearableType))
                         {
                             response = await HandleGetPath(name == RlvDataRequestType.GetPath, null, null, wearableType, cancellationToken).ConfigureAwait(false);
                         }
-                        else if (RlvCommon.RLVAttachmentPointMap.TryGetValue(parsedOptions[0], out var attachmentPoint))
+                        else if (RlvCommon.RlvAttachmentPointMap.TryGetValue(parsedOptions[0], out var attachmentPoint))
                         {
                             response = await HandleGetPath(name == RlvDataRequestType.GetPath, null, attachmentPoint, null, cancellationToken).ConfigureAwait(false);
                         }

@@ -266,7 +266,7 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (!RlvCommon.RLVAttachmentPointMap.TryGetValue(args[0], out var val))
+                    if (!RlvCommon.RlvAttachmentPointMap.TryGetValue(args[0], out var val))
                     {
                         return false;
                     }
@@ -289,7 +289,7 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (!RlvCommon.RLVAttachmentPointMap.TryGetValue(args[0], out var val))
+                    if (!RlvCommon.RlvAttachmentPointMap.TryGetValue(args[0], out var val))
                     {
                         return false;
                     }
@@ -312,7 +312,7 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (!RlvCommon.RLVWearableTypeMap.TryGetValue(args[0], out var val))
+                    if (!RlvCommon.RlvWearableTypeMap.TryGetValue(args[0], out var val))
                     {
                         return false;
                     }
@@ -338,12 +338,12 @@ namespace LibRLV
                         return false;
                     }
 
-                    if (RlvCommon.RLVWearableTypeMap.TryGetValue(args[0], out var wearableType))
+                    if (RlvCommon.RlvWearableTypeMap.TryGetValue(args[0], out var wearableType))
                     {
                         parsedArgs.Add(wearableType);
                         return true;
                     }
-                    else if (RlvCommon.RLVAttachmentPointMap.TryGetValue(args[0], out var attachmentPoint))
+                    else if (RlvCommon.RlvAttachmentPointMap.TryGetValue(args[0], out var attachmentPoint))
                     {
                         parsedArgs.Add(attachmentPoint);
                         return true;

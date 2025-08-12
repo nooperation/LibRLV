@@ -9,7 +9,7 @@ namespace LibRLV
 {
     public static class RlvCommon
     {
-        internal static readonly ImmutableDictionary<string, RlvWearableType> RLVWearableTypeMap = new Dictionary<string, RlvWearableType>()
+        internal static readonly ImmutableDictionary<string, RlvWearableType> RlvWearableTypeMap = new Dictionary<string, RlvWearableType>()
         {
             {"gloves", RlvWearableType.Gloves},
             {"jacket", RlvWearableType.Jacket},
@@ -30,7 +30,7 @@ namespace LibRLV
             {"universal", RlvWearableType.Universal},
         }.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
 
-        internal static readonly ImmutableDictionary<string, RlvAttachmentPoint> RLVAttachmentPointMap = new Dictionary<string, RlvAttachmentPoint>()
+        internal static readonly ImmutableDictionary<string, RlvAttachmentPoint> RlvAttachmentPointMap = new Dictionary<string, RlvAttachmentPoint>()
         {
             {"none", RlvAttachmentPoint.Default},
             {"chest", RlvAttachmentPoint.Chest },
@@ -108,7 +108,7 @@ namespace LibRLV
 
             for (var i = attachmentPointTag.Count - 1; i >= 0; i--)
             {
-                if (RLVAttachmentPointMap.TryGetValue(attachmentPointTag[i].ToLowerInvariant(), out var attachmentPointTemp))
+                if (RlvAttachmentPointMap.TryGetValue(attachmentPointTag[i].ToLowerInvariant(), out var attachmentPointTemp))
                 {
                     attachmentPoint = attachmentPointTemp;
                     return true;

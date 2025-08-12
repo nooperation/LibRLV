@@ -280,12 +280,12 @@ namespace LibRLV
             var inventoryMap = new InventoryMap(sharedFolder);
             var folderPaths = new List<RlvSharedFolder>();
 
-            if (RlvCommon.RLVWearableTypeMap.TryGetValue(command.Option, out var wearableType))
+            if (RlvCommon.RlvWearableTypeMap.TryGetValue(command.Option, out var wearableType))
             {
                 var parts = inventoryMap.FindFoldersContaining(false, null, null, wearableType);
                 folderPaths.AddRange(parts);
             }
-            else if (RlvCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
+            else if (RlvCommon.RlvAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
             {
                 var parts = inventoryMap.FindFoldersContaining(false, null, attachmentPoint, null);
                 folderPaths.AddRange(parts);
@@ -367,7 +367,7 @@ namespace LibRLV
             {
                 CollectItemsToDetach(folder, inventoryMap, false, itemIdsToDetach);
             }
-            else if (RlvCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
+            else if (RlvCommon.RlvAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
             {
                 itemIdsToDetach = currentOutfit
                     .Where(n =>
@@ -439,12 +439,12 @@ namespace LibRLV
                     }
                 }
             }
-            else if (RlvCommon.RLVWearableTypeMap.TryGetValue(command.Option, out var wearableType))
+            else if (RlvCommon.RlvWearableTypeMap.TryGetValue(command.Option, out var wearableType))
             {
                 var parts = inventoryMap.FindFoldersContaining(false, null, null, wearableType);
                 folderPaths.AddRange(parts);
             }
-            else if (RlvCommon.RLVAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
+            else if (RlvCommon.RlvAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
             {
                 var parts = inventoryMap.FindFoldersContaining(false, null, attachmentPoint, null);
                 folderPaths.AddRange(parts);
@@ -517,7 +517,7 @@ namespace LibRLV
             Guid? folderId = null;
             RlvWearableType? wearableType = null;
 
-            if (RlvCommon.RLVWearableTypeMap.TryGetValue(command.Option, out var wearableTypeTemp))
+            if (RlvCommon.RlvWearableTypeMap.TryGetValue(command.Option, out var wearableTypeTemp))
             {
                 wearableType = wearableTypeTemp;
             }
