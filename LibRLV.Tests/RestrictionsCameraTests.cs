@@ -208,6 +208,8 @@ namespace LibRLV.Tests
                 1.75f,
                 It.IsAny<CancellationToken>()
             ), Times.Once);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -221,6 +223,8 @@ namespace LibRLV.Tests
                 It.IsAny<float>(),
                 It.IsAny<CancellationToken>()
             ), Times.Never);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -234,6 +238,8 @@ namespace LibRLV.Tests
                 It.IsAny<float>(),
                 It.IsAny<CancellationToken>()
             ), Times.Never);
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 

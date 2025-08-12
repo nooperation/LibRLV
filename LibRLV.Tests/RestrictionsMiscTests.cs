@@ -32,7 +32,6 @@ namespace LibRLV.Tests
         public async Task CheckChannelResponseBad(string command)
         {
             Assert.False(await _rlv.ProcessMessage(command, _sender.Id, _sender.Name));
-            _queryCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -52,7 +51,7 @@ namespace LibRLV.Tests
                 c.SendInstantMessageAsync(_sender.Id, RlvService.RLVVersion, It.IsAny<CancellationToken>()),
                 Times.Once);
 
-            _queryCallbacks.VerifyNoOtherCalls();
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -150,7 +149,7 @@ namespace LibRLV.Tests
                 c.SendInstantMessageAsync(_sender.Id, expected, It.IsAny<CancellationToken>()),
                 Times.Once);
 
-            _queryCallbacks.VerifyNoOtherCalls();
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -277,7 +276,7 @@ namespace LibRLV.Tests
             _actionCallbacks.Verify(c => c.SendReplyAsync(1234, "/notify:1234=n", It.IsAny<CancellationToken>()), Times.Once);
             _actionCallbacks.Verify(c => c.SendReplyAsync(1234, expectedReply, It.IsAny<CancellationToken>()), Times.Once);
 
-            _queryCallbacks.VerifyNoOtherCalls();
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]

@@ -280,6 +280,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -341,6 +343,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -400,6 +404,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -444,6 +450,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -485,6 +493,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -525,6 +535,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -904,6 +916,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -942,6 +956,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -1692,6 +1708,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -1739,6 +1757,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -1782,6 +1802,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -1838,6 +1860,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -1894,6 +1918,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -1950,6 +1976,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -2009,6 +2037,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -2067,6 +2097,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -2127,6 +2159,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         #endregion
@@ -2182,6 +2216,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -2239,6 +2275,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -2296,6 +2334,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -2350,6 +2390,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -2432,6 +2474,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -2502,6 +2546,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -2560,6 +2606,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -2619,6 +2667,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -2680,6 +2730,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -2762,6 +2814,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -2843,6 +2897,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -2893,6 +2949,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -2960,6 +3018,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -3004,6 +3064,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -3059,6 +3121,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -3101,6 +3165,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -3254,6 +3320,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -3297,6 +3365,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -3340,6 +3410,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -3384,6 +3456,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -3428,6 +3502,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -3469,6 +3545,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -3531,6 +3609,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -3593,6 +3673,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -3655,6 +3737,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
@@ -3698,6 +3782,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -3762,6 +3848,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
 
@@ -3827,6 +3915,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -3893,6 +3983,8 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
         #endregion
 
