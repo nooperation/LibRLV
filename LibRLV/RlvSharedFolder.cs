@@ -51,16 +51,17 @@ namespace LibRLV
         /// <param name="id">Item ID</param>
         /// <param name="name">Item Name</param>
         /// <param name="attachedTo">Item attachment point if attached</param>
+        /// <param name="attachedPrimId">ID of the attached prim</param>
         /// <param name="wornOn">Item wearable type if worn</param>
         /// <returns>Newly added item</returns>
-        public RlvInventoryItem AddItem(Guid id, string name, RlvAttachmentPoint? attachedTo, RlvWearableType? wornOn)
+        public RlvInventoryItem AddItem(Guid id, string name, RlvAttachmentPoint? attachedTo, Guid? attachedPrimId, RlvWearableType? wornOn)
         {
             if (string.IsNullOrEmpty(name))
             {
                 throw new ArgumentException("Name cannot be null or empty", nameof(name));
             }
 
-            var newItem = new RlvInventoryItem(id, name, this, attachedTo, wornOn);
+            var newItem = new RlvInventoryItem(id, name, this, attachedTo, attachedPrimId, wornOn);
 
             _items.Add(newItem);
             return newItem;

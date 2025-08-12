@@ -294,12 +294,14 @@ namespace LibRLV.Tests
                 "External Tattoo",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 null,
+                null,
                 RlvWearableType.Tattoo);
             var externalAttachable = new RlvInventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Jaw Thing",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 RlvAttachmentPoint.Jaw,
+                new Guid("12312312-0002-4aaa-8aaa-ffffffffffff"),
                 null);
 
             currentOutfit.Add(externalWearable);
@@ -353,12 +355,14 @@ namespace LibRLV.Tests
                 "External Tattoo",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 null,
+                null,
                 RlvWearableType.Tattoo);
             var externalAttachable = new RlvInventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Jaw Thing",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 RlvAttachmentPoint.Jaw,
+                new Guid("12312312-0002-4aaa-8aaa-ffffffffffff"),
                 null);
 
             currentOutfit.Add(externalWearable);
@@ -556,12 +560,14 @@ namespace LibRLV.Tests
                 "External Tattoo",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 null,
+                null,
                 RlvWearableType.Tattoo);
             var externalAttachable = new RlvInventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Jaw Thing",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 RlvAttachmentPoint.Jaw,
+                new Guid("12312312-0002-4aaa-8aaa-ffffffffffff"),
                 null);
 
             currentOutfit.Add(externalWearable);
@@ -586,8 +592,8 @@ namespace LibRLV.Tests
             var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>()
             {
-                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, RlvWearableType.Socks),
-                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, RlvWearableType.Hair)
+                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, null, RlvWearableType.Socks),
+                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, null, RlvWearableType.Hair)
             };
 
             _queryCallbacks.Setup(e =>
@@ -620,6 +626,7 @@ namespace LibRLV.Tests
                     $"My {item}",
                     new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     null,
+                    null,
                     item));
             }
 
@@ -642,7 +649,7 @@ namespace LibRLV.Tests
             var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>()
             {
-                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, RlvWearableType.Socks)
+                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, null, RlvWearableType.Socks)
             };
 
             _queryCallbacks.Setup(e =>
@@ -664,7 +671,7 @@ namespace LibRLV.Tests
             var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>()
             {
-                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, RlvWearableType.Hair)
+                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), null, null, RlvWearableType.Hair)
             };
 
             _queryCallbacks.Setup(e =>
@@ -714,12 +721,14 @@ namespace LibRLV.Tests
                 "External Tattoo",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 null,
+                null,
                 RlvWearableType.Tattoo);
             var externalAttachable = new RlvInventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Jaw Thing",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 RlvAttachmentPoint.Jaw,
+                new Guid("12312312-0002-4aaa-8aaa-ffffffffffff"),
                 null);
 
             currentOutfit.Add(externalWearable);
@@ -744,8 +753,8 @@ namespace LibRLV.Tests
             var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>()
             {
-                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), RlvAttachmentPoint.LeftFoot, null ),
-                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), RlvAttachmentPoint.Skull, null)
+                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), RlvAttachmentPoint.LeftFoot, new Guid($"c0000000-cccc-4ccc-8ccc-ffffffffffff"), null ),
+                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), RlvAttachmentPoint.Skull, new Guid($"c0000001-cccc-4ccc-8ccc-ffffffffffff"), null)
             };
 
             _queryCallbacks.Setup(e =>
@@ -773,7 +782,9 @@ namespace LibRLV.Tests
                     $"My {item}",
                     new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"),
                     item,
-                    null));
+                    new Guid($"c{(int)item:D7}-cccc-4ccc-8ccc-ffffffffffff"),
+                    null
+                ));
             }
 
             _queryCallbacks.Setup(e =>
@@ -795,7 +806,7 @@ namespace LibRLV.Tests
             var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>()
             {
-                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), RlvAttachmentPoint.LeftFoot, null ),
+                new(new Guid($"c0000000-cccc-4ccc-8ccc-cccccccccccc"), "My Socks", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), RlvAttachmentPoint.LeftFoot, new Guid($"c0000000-cccc-4ccc-8ccc-ffffffffffff"), null ),
             };
 
             _queryCallbacks.Setup(e =>
@@ -817,7 +828,7 @@ namespace LibRLV.Tests
             var actual = _actionCallbacks.RecordReplies();
             var currentOutfit = new List<RlvInventoryItem>()
             {
-                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), RlvAttachmentPoint.Skull, null)
+                new(new Guid($"c0000001-cccc-4ccc-8ccc-cccccccccccc"), "My Hair", new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), RlvAttachmentPoint.Skull, new Guid($"c0000001-cccc-4ccc-8ccc-ffffffffffff"), null)
             };
 
             _queryCallbacks.Setup(e =>
@@ -974,8 +985,8 @@ namespace LibRLV.Tests
             var outfitSubfolder1 = outfitsFolder.AddChild(outfitSubfolder1Id, "First outfit");
             var outfitSubfolder2 = outfitsFolder.AddChild(outfitSubfolder2Id, "Second outfit");
 
-            var item1 = outfitsFolder.AddItem(new Guid("12312399-0001-0001-8999-999999999999"), "First Item", null, null);
-            var item2 = outfitsFolder.AddItem(new Guid("12312399-0001-0002-8999-999999999999"), "Second Item", null, null);
+            var item1 = outfitsFolder.AddItem(new Guid("12312399-0001-0001-8999-999999999999"), "First Item", null, null, null);
+            var item2 = outfitsFolder.AddItem(new Guid("12312399-0001-0002-8999-999999999999"), "Second Item", null, null, null);
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -1002,8 +1013,8 @@ namespace LibRLV.Tests
 
             var outfitsFolder = sampleTree.Root.AddChild(outfitsFolderId, ".outfits");
             var outfitSubfolder1 = outfitsFolder.AddChild(outfitSubfolder1Id, "First outfit");
-            var item1 = outfitSubfolder1.AddItem(new Guid("12312399-0001-0001-8999-999999999999"), "First Item", null, null);
-            var item2 = outfitSubfolder1.AddItem(new Guid("12312399-0001-0002-8999-999999999999"), "Second Item", null, null);
+            var item1 = outfitSubfolder1.AddItem(new Guid("12312399-0001-0001-8999-999999999999"), "First Item", null, null, null);
+            var item2 = outfitSubfolder1.AddItem(new Guid("12312399-0001-0002-8999-999999999999"), "Second Item", null, null, null);
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
@@ -2898,12 +2909,14 @@ namespace LibRLV.Tests
                 "External Tattoo",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 null,
+                null,
                 RlvWearableType.Tattoo);
             var externalAttachable = new RlvInventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Jaw Thing",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 RlvAttachmentPoint.Jaw,
+                new Guid("12312312-0002-4aaa-8aaa-ffffffffffff"),
                 null);
 
             currentOutfit.Add(externalWearable);
@@ -3007,6 +3020,7 @@ namespace LibRLV.Tests
                 "External Groin Thing",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 RlvAttachmentPoint.Groin,
+                new Guid("12312312-0002-4aaa-8aaa-ffffffffffff"),
                 null);
 
             currentOutfit.Add(externalAttachable);
@@ -3116,7 +3130,7 @@ namespace LibRLV.Tests
             };
 
             // Act
-            await _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id}=force", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedPrimId}=force", _sender.Id, _sender.Name);
 
             // Assert
             _actionCallbacks.Verify(e =>
@@ -3130,6 +3144,55 @@ namespace LibRLV.Tests
                 ),
                 Times.Once
             );
+
+            _actionCallbacks.VerifyNoOtherCalls();
+        }
+
+        [Theory]
+        [InlineData("detach")]
+        [InlineData("remattach")]
+        public async Task RemAttach_RemoveByUUID_IgnoreRestrictions(string command)
+        {
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
+
+            _queryCallbacks.Setup(e =>
+                e.TryGetCurrentOutfitAsync(default)
+            ).ReturnsAsync((true, currentOutfit));
+
+            _queryCallbacks.Setup(e =>
+                e.TryGetSharedFolderAsync(default)
+            ).ReturnsAsync((true, sharedFolder));
+
+            _actionCallbacks.Setup(e =>
+                e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
+
+            var expected = new HashSet<Guid>()
+            {
+                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id
+            };
+
+            await _rlv.ProcessMessage($"@detach=n", _sender.Id, _sender.Name);
+
+            // Act
+            await _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedPrimId}=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.DetachAsync(
+                    It.Is<IReadOnlyList<Guid>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
+
+            _actionCallbacks.VerifyNoOtherCalls();
         }
 
         [Theory]
@@ -3146,12 +3209,14 @@ namespace LibRLV.Tests
                 "External Tattoo",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 null,
+                null,
                 RlvWearableType.Tattoo);
             var externalAttachable = new RlvInventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
                 "External Jaw Thing",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
                 RlvAttachmentPoint.Jaw,
+                new Guid("12312312-0002-4aaa-8aaa-ffffffffffff"),
                 null);
 
             currentOutfit.Add(externalWearable);
@@ -3175,7 +3240,7 @@ namespace LibRLV.Tests
             };
 
             // Act
-            await _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id}=force", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedPrimId}=force", _sender.Id, _sender.Name);
 
             // Assert
             _actionCallbacks.Verify(e =>

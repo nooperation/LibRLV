@@ -54,15 +54,15 @@ namespace LibRLV.Tests
             var privateTree = root.AddChild(new Guid("eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"), ".private");
             var accessoriesTree = root.AddChild(new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), "Accessories");
 
-            var watch_tattoo = accessoriesTree.AddItem(new Guid("c0000000-cccc-4ccc-8ccc-cccccccccccc"), "Watch", null, RlvWearableType.Tattoo);
-            var glasses_chin = accessoriesTree.AddItem(new Guid("c1111111-cccc-4ccc-8ccc-cccccccccccc"), "Glasses", RlvAttachmentPoint.Chin, null);
+            var watch_tattoo = accessoriesTree.AddItem(new Guid("c0000000-cccc-4ccc-8ccc-cccccccccccc"), "Watch", null, null, RlvWearableType.Tattoo);
+            var glasses_chin = accessoriesTree.AddItem(new Guid("c1111111-cccc-4ccc-8ccc-cccccccccccc"), "Glasses", RlvAttachmentPoint.Chin, new Guid("c1111111-cccc-4ccc-8ccc-ffffffffffff"), null);
 
-            var businessPants_groin = clothingTree.AddItem(new Guid("b0000000-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Business Pants", RlvAttachmentPoint.Groin, null);
-            var happyShirt_chest = clothingTree.AddItem(new Guid("b1111111-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Happy Shirt", RlvAttachmentPoint.Chest, null);
-            var retroPants_pants = clothingTree.AddItem(new Guid("b2222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Retro Pants", null, RlvWearableType.Pants);
+            var businessPants_groin = clothingTree.AddItem(new Guid("b0000000-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Business Pants", RlvAttachmentPoint.Groin, new Guid("b0000000-bbbb-4bbb-8bbb-ffffffffffff"), null);
+            var happyShirt_chest = clothingTree.AddItem(new Guid("b1111111-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Happy Shirt", RlvAttachmentPoint.Chest, new Guid("b1111111-bbbb-4bbb-8bbb-ffffffffffff"), null);
+            var retroPants_pants = clothingTree.AddItem(new Guid("b2222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Retro Pants", null, null, RlvWearableType.Pants);
 
-            var partyHat_groin = hatsTree.AddItem(new Guid("d0000000-dddd-4ddd-8ddd-dddddddddddd"), "Party Hat", RlvAttachmentPoint.Groin, null);
-            var fancyHat_chin = hatsTree.AddItem(new Guid("d1111111-dddd-4ddd-8ddd-dddddddddddd"), "Fancy Hat", RlvAttachmentPoint.Chin, null);
+            var partyHat_groin = hatsTree.AddItem(new Guid("d0000000-dddd-4ddd-8ddd-dddddddddddd"), "Party Hat", RlvAttachmentPoint.Groin, new Guid("d0000000-dddd-4ddd-8ddd-ffffffffffff"), null);
+            var fancyHat_chin = hatsTree.AddItem(new Guid("d1111111-dddd-4ddd-8ddd-dddddddddddd"), "Fancy Hat", RlvAttachmentPoint.Chin, new Guid("d1111111-dddd-4ddd-8ddd-ffffffffffff"), null);
 
             return new SampleInventoryTree()
             {
