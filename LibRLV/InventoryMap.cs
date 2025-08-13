@@ -32,21 +32,7 @@ namespace LibRLV
             Folders = foldersTemp.ToImmutableDictionary();
         }
 
-        /// <summary>
-        /// Attempts to find a folder under the root rlv folder #RLV by the given path.
-        /// Folders are not case sensitive. Folders may containing a special prefix (~, +),
-        /// which will be treated as if the folder did not have the prefix, unless the path
-        /// contains the prefix as well then an exact match will be made.
-        /// Example:
-        ///     Existing shared folder path: #RLV/Clothing/+Hats/+Fancy
-        ///     search term: "clothing/hats/fancy"
-        ///     results: The object representing Clothing/+Hats/+Fancy
-        /// </summary>
-        /// <param name="path">Forward-slash separated folder path. Do not include "#RLV/" as part of the path. Do not start with or end with a forward slash.</param>
-        /// <param name="skipPrivateFolders">If true, ignores folders starting with '.'</param>
-        /// <param name="folder">The found folder, or null if not found</param>
-        /// <returns>True if folder was found, false otherwise</returns>
-        public bool TryGetFolderFromPath(string path, bool skipPrivateFolders, [NotNullWhen(returnValue: true)] out RlvSharedFolder? folder)
+        private bool TryGetFolderFromPath_Internal(string path, bool skipPrivateFolders, [NotNullWhen(returnValue: true)] out RlvSharedFolder? folder)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -138,6 +124,66 @@ namespace LibRLV
 
                 iter = candidate;
             }
+        }
+
+        /// <summary>
+        /// Attempts to find a folder under the root rlv folder #RLV by the given path.
+        /// Folders are not case sensitive. Folders may containing a special prefix (~, +),
+        /// which will be treated as if the folder did not have the prefix, unless the path
+        /// contains the prefix as well then an exact match will be made.
+        /// Example:
+        ///     Existing shared folder path: #RLV/Clothing/+Hats/+Fancy
+        ///     search term: "clothing/hats/fancy"
+        ///     results: The object representing Clothing/+Hats/+Fancy
+        /// </summary>
+        /// <param name="path">Forward-slash separated folder path. Do not include "#RLV/" as part of the path. Do not start with or end with a forward slash.</param>
+        /// <param name="skipPrivateFolders">If true, ignores folders starting with '.'</param>
+        /// <param name="folder">The found folder, or null if not found</param>
+        /// <returns>True if folder was found, false otherwise</returns>
+        public bool TryGetFolderFromPath(string path, bool skipPrivateFolders, [NotNullWhen(returnValue: true)] out RlvSharedFolder? folder)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                folder = null;
+                return false;
+            }
+
+            if(TryGetFolderFromPath_Internal(path, skipPrivateFolders, out folder))
+            {
+                return true;
+            }
+
+            // Try without a leading '/' if one was supplied "/~MyOutfit" -> "~MyOutfit"
+            if (path.StartsWith("/", StringComparison.OrdinalIgnoreCase))
+            {
+                var newPath = path.Substring(1);
+                if(TryGetFolderFromPath_Internal(newPath, skipPrivateFolders, out folder))
+                {
+                    return true;
+                }
+            }
+
+            // Try without a trailing '/' if one was supplied "~MyOutfit/" -> "~MyOutfit"
+            if (path.EndsWith("/", StringComparison.OrdinalIgnoreCase))
+            {
+                var newPath = path.Substring(path.Length - 1);
+                if (TryGetFolderFromPath_Internal(newPath, skipPrivateFolders, out folder))
+                {
+                    return true;
+                }
+            }
+
+            // Try without a leading and trailing '/' if they were both supplied "/~MyOutfit/" -> "~MyOutfit"
+            if (path.StartsWith("/", StringComparison.OrdinalIgnoreCase) && path.EndsWith("/", StringComparison.OrdinalIgnoreCase))
+            {
+                var newPath = path.Substring(1, path.Length - 2);
+                if (TryGetFolderFromPath_Internal(newPath, skipPrivateFolders, out folder))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

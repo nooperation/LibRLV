@@ -184,18 +184,16 @@ namespace LibRLV
             return true;
         }
 
-        private static void CollectItemsToAttach(RlvSharedFolder folder, bool replaceExistingAttachments, bool recursive, List<AttachmentRequest> itemsToAttach)
+        private static void CollectItemsToAttach(RlvSharedFolder folder, bool replaceExistingAttachments, bool recursive, bool skipIfPrivateFolder, List<AttachmentRequest> itemsToAttach)
         {
-            if (folder.Name.Length > 0)
+            if (skipIfPrivateFolder && folder.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
             {
-                if (folder.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
-                {
-                    return;
-                }
-                if (folder.Name.StartsWith("+", StringComparison.OrdinalIgnoreCase))
-                {
-                    replaceExistingAttachments = false;
-                }
+                return;
+            }
+
+            if (folder.Name.StartsWith("+", StringComparison.OrdinalIgnoreCase))
+            {
+                replaceExistingAttachments = false;
             }
 
             RlvAttachmentPoint? folderAttachmentPoint = null;
@@ -239,7 +237,7 @@ namespace LibRLV
                         continue;
                     }
 
-                    CollectItemsToAttach(child, replaceExistingAttachments, recursive, itemsToAttach);
+                    CollectItemsToAttach(child, replaceExistingAttachments, recursive, true, itemsToAttach);
                 }
             }
         }
@@ -262,7 +260,7 @@ namespace LibRLV
             else
             {
                 var itemsToAttach = new List<AttachmentRequest>();
-                CollectItemsToAttach(folder, replaceExistingAttachments, recursive, itemsToAttach);
+                CollectItemsToAttach(folder, replaceExistingAttachments, recursive, false, itemsToAttach);
 
                 await _actionCallbacks.AttachAsync(itemsToAttach, cancellationToken).ConfigureAwait(false);
                 return true;
@@ -304,7 +302,7 @@ namespace LibRLV
 
             foreach (var item in folderPaths)
             {
-                CollectItemsToAttach(item, replaceExistingAttachments, recursive, itemsToAttach);
+                CollectItemsToAttach(item, replaceExistingAttachments, recursive, true, itemsToAttach);
             }
 
             await _actionCallbacks.AttachAsync(itemsToAttach, cancellationToken).ConfigureAwait(false);
