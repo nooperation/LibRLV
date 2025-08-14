@@ -148,7 +148,7 @@ namespace LibRLV
                 return false;
             }
 
-            if(TryGetFolderFromPath_Internal(path, skipPrivateFolders, out folder))
+            if (TryGetFolderFromPath_Internal(path, skipPrivateFolders, out folder))
             {
                 return true;
             }
@@ -157,7 +157,7 @@ namespace LibRLV
             if (path.StartsWith("/", StringComparison.OrdinalIgnoreCase))
             {
                 var newPath = path.Substring(1);
-                if(TryGetFolderFromPath_Internal(newPath, skipPrivateFolders, out folder))
+                if (TryGetFolderFromPath_Internal(newPath, skipPrivateFolders, out folder))
                 {
                     return true;
                 }

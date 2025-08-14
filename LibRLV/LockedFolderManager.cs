@@ -200,7 +200,16 @@ namespace LibRLV
         {
             if (restriction.Args.Count == 0)
             {
-                if (!inventoryMap.Items.TryGetValue(restriction.Sender, out var item))
+                var senderItem = inventoryMap.Items
+                    .Where(n => n.Value.AttachedPrimId == restriction.Sender)
+                    .Select(n => n.Value)
+                    .FirstOrDefault();
+                if (senderItem == null)
+                {
+                    return false;
+                }
+
+                if (!inventoryMap.Items.TryGetValue(senderItem.Id, out var item))
                 {
                     return false;
                 }

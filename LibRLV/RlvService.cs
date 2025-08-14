@@ -207,15 +207,16 @@ namespace LibRLV
         /// <summary>
         /// Report that the user has removed a worn item
         /// </summary>
+        /// <param name="itemId">ID of the item being removed</param>
         /// <param name="objectFolderId">Folder id containing the item being removed</param>
         /// <param name="isShared">True if this folder is a shared folder</param>
         /// <param name="wearableType">Type of wearable being removed</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task ReportItemUnworn(Guid objectFolderId, bool isShared, RlvWearableType wearableType, CancellationToken cancellationToken = default)
+        public async Task ReportItemUnworn(Guid itemId, Guid objectFolderId, bool isShared, RlvWearableType wearableType, CancellationToken cancellationToken = default)
         {
             var notificationText = "";
-            var isLegal = Permissions.CanDetach(objectFolderId, isShared, null, wearableType);
+            var isLegal = Permissions.CanDetach(itemId, null, objectFolderId, isShared, null, wearableType);
 
             if (isLegal)
             {
@@ -257,15 +258,16 @@ namespace LibRLV
         /// <summary>
         /// Report that the user has detached an item
         /// </summary>
+        /// <param name="itemId">ID of the item being detached</param>
         /// <param name="objectFolderId">ID of the folder containing the item being detached</param>
         /// <param name="isShared">True if the folder is a shared folder</param>
         /// <param name="attachmentPoint">Attachment point where the item was detached from</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Task</returns>
-        public async Task ReportItemDetached(Guid objectFolderId, bool isShared, RlvAttachmentPoint attachmentPoint, CancellationToken cancellationToken = default)
+        public async Task ReportItemDetached(Guid itemId, Guid primId, Guid objectFolderId, bool isShared, RlvAttachmentPoint attachmentPoint, CancellationToken cancellationToken = default)
         {
             var notificationText = "";
-            var isLegal = Permissions.CanDetach(objectFolderId, isShared, attachmentPoint, null);
+            var isLegal = Permissions.CanDetach(itemId, primId, objectFolderId, isShared, attachmentPoint, null);
 
             if (isLegal)
             {

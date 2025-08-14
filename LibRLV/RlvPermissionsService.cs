@@ -628,7 +628,7 @@ namespace LibRLV
             AttachedOther,
             RezzedInWorld
         }
-        public bool CanTouch(TouchLocation location, Guid objectId, Guid? userId, float? distance)
+        public bool CanTouch(TouchLocation location, Guid primId, Guid? userId, float? distance)
         {
             if (distance != null)
             {
@@ -648,7 +648,7 @@ namespace LibRLV
 
             if (_restrictionProvider
                 .GetRestrictionsByType(RlvRestrictionType.TouchMe)
-                .Where(n => n.Sender == objectId)
+                .Where(n => n.Sender == primId)
                 .Any())
             {
                 return true;
@@ -656,7 +656,7 @@ namespace LibRLV
 
             if (_restrictionProvider
                 .GetRestrictionsByType(RlvRestrictionType.TouchThis)
-                .Where(n => n.Args.Count == 1 && n.Args[0] is Guid restrictedItemId && restrictedItemId == objectId)
+                .Where(n => n.Args.Count == 1 && n.Args[0] is Guid restrictedItemId && restrictedItemId == primId)
                 .Any())
             {
                 return false;
@@ -674,7 +674,7 @@ namespace LibRLV
             {
                 var touchWorldRestrictions = _restrictionProvider.GetRestrictionsByType(RlvRestrictionType.TouchWorld);
                 var hasException = touchWorldRestrictions
-                    .Where(n => n.IsException && n.Args.Count == 1 && n.Args[0] is Guid allowedObjectId && allowedObjectId == objectId)
+                    .Where(n => n.IsException && n.Args.Count == 1 && n.Args[0] is Guid allowedObjectId && allowedObjectId == primId)
                     .Any();
 
                 if (!hasException && touchWorldRestrictions.Any(n => n.Args.Count == 0))
@@ -692,7 +692,7 @@ namespace LibRLV
 
             if (location == TouchLocation.Hud)
             {
-                if (!CanTouchHud(objectId))
+                if (!CanTouchHud(primId))
                 {
                     return false;
                 }
@@ -842,13 +842,15 @@ namespace LibRLV
         public bool CanDetach(RlvInventoryItem item, bool isShared)
         {
             return CanDetach(
+                item.Id,
+                item.AttachedPrimId,
                 item.FolderId,
                 isShared,
                 item.AttachedTo,
                 item.WornOn
             );
         }
-        public bool CanDetach(Guid? folderId, bool isShared, RlvAttachmentPoint? attachmentPoint, RlvWearableType? wearableType)
+        public bool CanDetach(Guid? itemId, Guid? primId, Guid? folderId, bool isShared, RlvAttachmentPoint? attachmentPoint, RlvWearableType? wearableType)
         {
             if (wearableType != null && !CanDetachWearable(wearableType))
             {
@@ -865,10 +867,12 @@ namespace LibRLV
             {
                 if (restriction.Args.Count == 0)
                 {
-                    return false;
+                    if (primId != null && primId == restriction.Sender)
+                    {
+                        return false;
+                    }
                 }
-
-                if (restriction.Args[0] is RlvAttachmentPoint restrictedAttachmentPoint && attachmentPoint == restrictedAttachmentPoint)
+                else if (restriction.Args[0] is RlvAttachmentPoint restrictedAttachmentPoint && attachmentPoint == restrictedAttachmentPoint)
                 {
                     return false;
                 }

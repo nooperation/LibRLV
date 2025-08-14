@@ -7,12 +7,28 @@ namespace LibRLV
 {
     public class RlvRestriction
     {
+        /// <summary>
+        /// The behavior type
+        /// </summary>
         public RlvRestrictionType Behavior { get; }
+        /// <summary>
+        /// The original behavior type before getting translated into the common alias/synonym name "FarTouch" -> "TouchFar"
+        /// </summary>
         public RlvRestrictionType OriginalBehavior { get; }
-        public bool IsException => IsRestrictionAnException(this);
+        /// <summary>
+        /// The prim ID of the object that created this restrictions
+        /// </summary>
         public Guid Sender { get; }
+        /// <summary>
+        /// The name of the object that created this restriction
+        /// </summary>
         public string SenderName { get; }
+        /// <summary>
+        /// Arguments
+        /// </summary>
         public ImmutableList<object> Args { get; }
+
+        public bool IsException => IsRestrictionAnException(this);
 
         private const float MinimumCameraDrawDistance = 0.40f;
 

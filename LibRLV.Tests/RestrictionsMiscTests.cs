@@ -401,14 +401,13 @@ namespace LibRLV.Tests
         public async Task NotifyWear()
         {
             var actual = _actionCallbacks.RecordReplies();
-            var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
-            var folderId1 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
-            var folderId2 = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
+            var itemId1 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
+            var itemId2 = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportItemWorn(folderId1, false, RlvWearableType.Skin);
-            await _rlv.ReportItemWorn(folderId2, true, RlvWearableType.Tattoo);
+            await _rlv.ReportItemWorn(itemId1, false, RlvWearableType.Skin);
+            await _rlv.ReportItemWorn(itemId2, true, RlvWearableType.Tattoo);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -425,7 +424,6 @@ namespace LibRLV.Tests
         public async Task NotifyWear_Illegal()
         {
             var actual = _actionCallbacks.RecordReplies();
-            var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             var itemId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
@@ -452,8 +450,8 @@ namespace LibRLV.Tests
             var folderId2 = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportItemUnworn(folderId1, false, RlvWearableType.Skin);
-            await _rlv.ReportItemUnworn(folderId2, true, RlvWearableType.Tattoo);
+            await _rlv.ReportItemUnworn(wornItem.Id, folderId1, false, RlvWearableType.Skin);
+            await _rlv.ReportItemUnworn(wornItem.Id, folderId2, true, RlvWearableType.Tattoo);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -476,7 +474,7 @@ namespace LibRLV.Tests
             await _rlv.ProcessMessage("@remoutfit:skin=n", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
 
-            await _rlv.ReportItemUnworn(itemId1, false, RlvWearableType.Skin);
+            await _rlv.ReportItemUnworn(wornItem.Id, itemId1, false, RlvWearableType.Skin);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -491,7 +489,6 @@ namespace LibRLV.Tests
         public async Task NotifyAttached()
         {
             var actual = _actionCallbacks.RecordReplies();
-            var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             var itemId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
             var itemId2 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
@@ -515,7 +512,6 @@ namespace LibRLV.Tests
         public async Task NotifyAttached_Illegal()
         {
             var actual = _actionCallbacks.RecordReplies();
-            var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
 
             var itemId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
@@ -537,13 +533,14 @@ namespace LibRLV.Tests
         {
             var actual = _actionCallbacks.RecordReplies();
             var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var wornItemPrimId = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-ffffffffffff");
 
             var folderId1 = new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
             var folderId2 = new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc");
 
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportItemDetached(folderId1, false, RlvAttachmentPoint.Chest);
-            await _rlv.ReportItemDetached(folderId2, true, RlvAttachmentPoint.Skull);
+            await _rlv.ReportItemDetached(wornItem.Id, wornItemPrimId, folderId1, false, RlvAttachmentPoint.Chest);
+            await _rlv.ReportItemDetached(wornItem.Id, wornItemPrimId, folderId2, true, RlvAttachmentPoint.Skull);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -560,12 +557,13 @@ namespace LibRLV.Tests
         {
             var actual = _actionCallbacks.RecordReplies();
             var wornItem = new RlvObject("TargetItem", new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+            var wornItemPrimId = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-ffffffffffff");
 
             var itemId1 = new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
 
             await _rlv.ProcessMessage("@remattach:chest=n", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@notify:1234=add", _sender.Id, _sender.Name);
-            await _rlv.ReportItemDetached(itemId1, false, RlvAttachmentPoint.Chest);
+            await _rlv.ReportItemDetached(wornItem.Id, wornItemPrimId, itemId1, false, RlvAttachmentPoint.Chest);
 
             var expected = new List<(int Channel, string Text)>
             {

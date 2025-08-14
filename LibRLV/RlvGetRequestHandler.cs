@@ -342,7 +342,25 @@ namespace LibRLV
 
                         if (parsedOptions.Count == 0)
                         {
-                            response = await HandleGetPath(name == RlvDataRequestType.GetPath, rlvMessage.Sender, null, null, cancellationToken).ConfigureAwait(false);
+                            var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
+                            if (!hasSharedFolder || sharedFolder == null)
+                            {
+                                return false;
+                            }
+
+                            var inventoryMap = new InventoryMap(sharedFolder);
+                            var folderPaths = new List<RlvSharedFolder>();
+
+                            var senderItem = inventoryMap.Items
+                                .Where(n => n.Value.AttachedPrimId == rlvMessage.Sender)
+                                .Select(n => n.Value)
+                                .FirstOrDefault();
+                            if (senderItem == null)
+                            {
+                                return false;
+                            }
+
+                            response = await HandleGetPath(name == RlvDataRequestType.GetPath, senderItem.Id, null, null, cancellationToken).ConfigureAwait(false);
                         }
                         else if (Guid.TryParse(parsedOptions[0], out var uuid))
                         {

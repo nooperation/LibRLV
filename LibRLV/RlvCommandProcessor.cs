@@ -294,7 +294,16 @@ namespace LibRLV
             }
             else if (command.Option.Length == 0)
             {
-                var parts = inventoryMap.FindFoldersContaining(false, command.Sender, null, null);
+                var senderItem = inventoryMap.Items
+                    .Where(n => n.Value.AttachedPrimId == command.Sender)
+                    .Select(n => n.Value)
+                    .FirstOrDefault();
+                if (senderItem == null)
+                {
+                    return false;
+                }
+
+                var parts = inventoryMap.FindFoldersContaining(false, senderItem.Id, null, null);
                 folderPaths.AddRange(parts);
             }
 
@@ -453,14 +462,23 @@ namespace LibRLV
             }
             else if (command.Option.Length == 0)
             {
-                var parts = inventoryMap.FindFoldersContaining(false, command.Sender, null, null);
+                var senderItem = inventoryMap.Items
+                    .Where(n => n.Value.AttachedPrimId == command.Sender)
+                    .Select(n => n.Value)
+                    .FirstOrDefault();
+                if (senderItem == null)
+                {
+                    return false;
+                }
+
+                var parts = inventoryMap.FindFoldersContaining(false, senderItem.Id, null, null);
                 folderPaths.AddRange(parts);
             }
 
             var itemIdsToDetach = new List<Guid>();
             foreach (var item in folderPaths)
             {
-                if(item.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
+                if (item.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -482,14 +500,25 @@ namespace LibRLV
             }
             var inventoryMap = new InventoryMap(sharedFolder);
 
-            var itemIdsToDetach = new List<Guid>();
-            if (inventoryMap.Items.TryGetValue(command.Sender, out var sender))
+            var senderItem = inventoryMap.Items
+                .Where(n => n.Value.AttachedPrimId == command.Sender)
+                .Select(n => n.Value)
+                .FirstOrDefault();
+
+            if (senderItem == null)
             {
-                if (CanRemAttachItem(sender, false, false))
-                {
-                    itemIdsToDetach.Add(sender.Id);
-                }
+                return false;
             }
+
+            if (!CanRemAttachItem(senderItem, false, false))
+            {
+                return false;
+            }
+
+            var itemIdsToDetach = new List<Guid>
+            {
+                senderItem.Id
+            };
 
             await _actionCallbacks.DetachAsync(itemIdsToDetach, cancellationToken).ConfigureAwait(false);
             return true;

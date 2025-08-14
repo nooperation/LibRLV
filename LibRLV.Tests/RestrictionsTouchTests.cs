@@ -135,21 +135,22 @@
         [Fact]
         public async Task TouchThis_default()
         {
-            var objectId1 = new Guid("00000000-0000-4000-8000-000000000000");
-            var objectId2 = new Guid("11111111-1111-4111-8111-111111111111");
+            var objectPrimId1 = new Guid("00000000-0000-4000-8000-000000000000");
+            var objectPrimId2 = new Guid("11111111-1111-4111-8111-111111111111");
+
             var userId1 = new Guid("55555555-5555-4555-8555-555555555555");
 
-            await _rlv.ProcessMessage($"@touchthis:{objectId1}=add", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@touchthis:{objectPrimId1}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.AttachedSelf, objectId1, null, null));
-            Assert.False(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.AttachedOther, objectId1, userId1, null));
-            Assert.False(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.RezzedInWorld, objectId1, null, 5.0f));
-            Assert.False(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.Hud, objectId1, null, null));
+            Assert.False(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.AttachedSelf, objectPrimId1, null, null));
+            Assert.False(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.AttachedOther, objectPrimId1, userId1, null));
+            Assert.False(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.RezzedInWorld, objectPrimId1, null, 5.0f));
+            Assert.False(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.Hud, objectPrimId1, null, null));
 
-            Assert.True(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.AttachedSelf, objectId2, null, null));
-            Assert.True(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.AttachedOther, objectId2, userId1, null));
-            Assert.True(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.RezzedInWorld, objectId2, null, 5.0f));
-            Assert.True(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.Hud, objectId2, null, null));
+            Assert.True(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.AttachedSelf, objectPrimId2, null, null));
+            Assert.True(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.AttachedOther, objectPrimId2, userId1, null));
+            Assert.True(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.RezzedInWorld, objectPrimId2, null, 5.0f));
+            Assert.True(_rlv.Permissions.CanTouch(RlvPermissionsService.TouchLocation.Hud, objectPrimId2, null, null));
         }
 
         #endregion

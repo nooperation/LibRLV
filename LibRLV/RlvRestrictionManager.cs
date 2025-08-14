@@ -234,51 +234,6 @@ namespace LibRLV
             }
         }
 
-        public IEnumerable<Guid> GetTrackedObjectIds()
-        {
-            lock (_currentRestrictionsLock)
-            {
-                return _currentRestrictions
-                    .SelectMany(n => n.Value)
-                    .Select(n => n.Sender)
-                    .Distinct()
-                    .ToList();
-            }
-        }
-
-        public async Task RemoveRestrictionsForObjects(IEnumerable<Guid> objectIds, CancellationToken cancellationToken = default)
-        {
-            var objectIdMap = objectIds.ToImmutableHashSet();
-            var removedRestrictions = new List<RlvRestriction>();
-
-            lock (_currentRestrictionsLock)
-            {
-                var restrictionsToRemove = _currentRestrictions
-                    .SelectMany(n => n.Value)
-                    .Where(n => objectIdMap.Contains(n.Sender))
-                    .ToList();
-
-                foreach (var restriction in restrictionsToRemove)
-                {
-                    var removedRestriction = false;
-
-                    removedRestriction = RemoveRestriction_InternalUnsafe(restriction);
-                    if (removedRestriction)
-                    {
-                        removedRestrictions.Add(restriction);
-                    }
-                }
-            }
-
-            foreach (var restriction in removedRestrictions)
-            {
-                var handler = RestrictionUpdated;
-                handler?.Invoke(this, new RestrictionUpdatedEventArgs(restriction, false, true));
-
-                await NotifyRestrictionChange(restriction, false, cancellationToken).ConfigureAwait(false);
-            }
-        }
-
         public IReadOnlyList<RlvRestriction> GetRestrictionsByType(RlvRestrictionType restrictionType)
         {
             restrictionType = RlvRestriction.GetRealRestriction(restrictionType);
