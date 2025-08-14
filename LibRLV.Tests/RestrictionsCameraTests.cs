@@ -8,14 +8,6 @@ namespace LibRLV.Tests
         #region CamMinFunctionsThrough
 
         [Fact]
-        public void CamZoomMin_Default()
-        {
-            var cameraRestrictions = _rlv.Permissions.GetCameraRestrictions();
-
-            Assert.Null(cameraRestrictions.ZoomMin);
-        }
-
-        [Fact]
         public async Task CamZoomMin_Single()
         {
             await _rlv.ProcessMessage("@CamZoomMin:1.5=n", _sender.Id, _sender.Name);

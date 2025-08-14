@@ -30,6 +30,15 @@ namespace LibRLV.Tests
             Assert.True(canFunc(_rlv.Permissions));
         }
 
+        protected void SeedBlacklist(string seed)
+        {
+            var blacklistEntries = seed.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var item in blacklistEntries)
+            {
+                _rlv.Blacklist.BlacklistBehavior(item);
+            }
+        }
+
         //
         // RLVA stuff to implement
         //
