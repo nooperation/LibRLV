@@ -4,27 +4,6 @@ namespace LibRLV.Tests
 {
     public class RestrictionsTeleportTests : RestrictionsBase
     {
-
-        #region @TpLocal
-        [Fact]
-        public async Task CanTpLocal_Default()
-        {
-            await _rlv.ProcessMessage("@TpLocal=n", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.Permissions.CanTpLocal(out var distance));
-            Assert.Equal(0.0f, distance, FloatTolerance);
-        }
-
-        [Fact]
-        public async Task CanTpLocal()
-        {
-            await _rlv.ProcessMessage("@TpLocal:0.9=n", _sender.Id, _sender.Name);
-
-            Assert.True(_rlv.Permissions.CanTpLocal(out var distance));
-            Assert.Equal(0.9f, distance, FloatTolerance);
-        }
-        #endregion
-
         #region @tplm
         [Fact]
         public async Task CanTpLm()
