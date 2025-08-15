@@ -15,7 +15,6 @@
             await _rlv.ProcessMessage($"@recvchat:{userId1}=add", sender2.Id, sender2.Name);
             await _rlv.ProcessMessage($"@recvchat:{userId2}=add", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Permissions.CanReceiveChat("Hello world", null));
             Assert.False(_rlv.Permissions.CanReceiveChat("Hello world", userId1));
             Assert.True(_rlv.Permissions.CanReceiveChat("Hello world", userId2));
         }

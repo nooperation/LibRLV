@@ -10,7 +10,6 @@
 
             await _rlv.ProcessMessage("@startim=n", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Permissions.CanStartIM(null));
             Assert.False(_rlv.Permissions.CanStartIM(userId1));
         }
         #endregion

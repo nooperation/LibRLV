@@ -94,9 +94,6 @@ namespace LibRLV
         private static readonly Regex _attachmentPointTagRegex = new(@"\((?<tag>[^\)]+)\)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         public static bool TryGetAttachmentPointFromItemName(string itemName, [NotNullWhen(true)] out RlvAttachmentPoint? attachmentPoint)
         {
-            // TODO: There's a lot of odd logic in the original RLV method for finding the attachment point.
-            //       I'm not doing any of that outside of "Use the exact matching tag. if multiple tags exist, use
-            //       the tag near the end of the string"
             attachmentPoint = null;
 
             var attachmentPointTag = _attachmentPointTagRegex

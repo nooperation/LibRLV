@@ -307,7 +307,7 @@ namespace LibRLV
         #endregion
 
         #region Chat
-        public bool CanStartIM(Guid? userId)
+        public bool CanStartIM(Guid userId)
         {
             return CheckSecureRestriction(userId, null, RlvRestrictionType.StartIm, null, RlvRestrictionType.StartImTo);
         }
@@ -322,7 +322,7 @@ namespace LibRLV
             return CheckSecureRestriction(userId, groupName, RlvRestrictionType.RecvIm, RlvRestrictionType.RecvImSec, RlvRestrictionType.RecvImFrom);
         }
 
-        public bool CanReceiveChat(string message, Guid? userId)
+        public bool CanReceiveChat(string message, Guid userId)
         {
             if (message.StartsWith("/me ", StringComparison.OrdinalIgnoreCase))
             {

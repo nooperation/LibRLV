@@ -566,7 +566,6 @@ namespace LibRLV
             var foundFolders = new List<RlvSharedFolder>();
             SearchFoldersForName(sharedFolder, stopOnFirstResult, searchTerms, foundFolders);
 
-            // TODO: Just add full path to the InventoryFolder so we don't have to calculate it every time?
             var foundFolderPaths = new List<string>();
             foreach (var folder in foundFolders)
             {

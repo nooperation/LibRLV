@@ -35,6 +35,19 @@ namespace LibRLV
         public RlvRestriction(RlvRestrictionType behavior, Guid sender, string senderName, ICollection<object> args)
         {
             Behavior = GetRealRestriction(behavior);
+
+            // HACK: I have no idea why these two secure commands have an exception variant. Exceptions come from the non-secure
+            //       command, but are only valid if they come from the same sender. Just fudge it a little and treat these two as
+            //       non-secure exceptions
+            if (Behavior == RlvRestrictionType.SendChannelSec && args.Count == 1)
+            {
+                Behavior = RlvRestrictionType.SendChannel;
+            }
+            else if (Behavior == RlvRestrictionType.ShowNamesSec && args.Count == 1)
+            {
+                Behavior = RlvRestrictionType.ShowNames;
+            }
+
             OriginalBehavior = behavior;
             Sender = sender;
             SenderName = senderName;

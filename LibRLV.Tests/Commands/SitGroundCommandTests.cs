@@ -8,7 +8,6 @@
         [Fact]
         public async Task ForceSitGround()
         {
-            // TODO: Check reaction
             Assert.True(await _rlv.ProcessMessage("@sitground=force", _sender.Id, _sender.Name));
         }
 
