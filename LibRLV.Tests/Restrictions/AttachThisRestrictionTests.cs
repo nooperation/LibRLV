@@ -15,28 +15,28 @@ namespace LibRLV.Tests.Restrictions
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            Assert.True(await _rlv.ProcessMessage("@attachthis=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachthis=n", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
-            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_Spine, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED)
-            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_Chin, true));
 
             // #RLV/Clothing/Business Pants ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_BusinessPants_Pelvis, true));
 
             // #RLV/Clothing/Happy Shirt ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_HappyShirt, true));
 
             // #RLV/Clothing/Retro Pants ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_RetroPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Glasses, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch, true));
         }
 
         [Fact]
@@ -52,28 +52,28 @@ namespace LibRLV.Tests.Restrictions
 
             // This should lock the #RLV/Clothing folder because the Business Pants are issuing the command, which is in the Clothing folder.
             //   Business Pants cannot be attached, but hats are still attachable.
-            Assert.True(await _rlv.ProcessMessage("@attachthis=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedPrimId!.Value, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachthis=n", sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId!.Value, sampleTree.Root_Clothing_BusinessPants_Pelvis.Name));
 
             // #RLV/Clothing/Hats/Party Hat ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_Spine, true));
 
             // #RLV/Clothing/Hats/Fancy Hat ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_Chin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED)
-            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_BusinessPants_Pelvis, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED)
-            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_HappyShirt, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED)
-            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_RetroPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Glasses, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch, true));
         }
 
         [Fact]
@@ -88,28 +88,28 @@ namespace LibRLV.Tests.Restrictions
             ).ReturnsAsync((true, sharedFolder));
 
             // This should lock the Hats folder, all hats are no longer attachable
-            Assert.True(await _rlv.ProcessMessage("@attachthis:Clothing/Hats=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedPrimId!.Value, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachthis:Clothing/Hats=n", sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId!.Value, sampleTree.Root_Clothing_BusinessPants_Pelvis.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
-            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_Spine, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED)
-            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_Chin, true));
 
             // #RLV/Clothing/Business Pants ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_BusinessPants_Pelvis, true));
 
             // #RLV/Clothing/Happy Shirt ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_HappyShirt, true));
 
             // #RLV/Clothing/Retro Pants ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_RetroPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Glasses, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch, true));
         }
 
         [Fact]
@@ -124,28 +124,28 @@ namespace LibRLV.Tests.Restrictions
             ).ReturnsAsync((true, sharedFolder));
 
             // This should lock the Hats folder, all hats are no longer attachable
-            Assert.True(await _rlv.ProcessMessage("@attachthis:groin=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedPrimId!.Value, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachthis:groin=n", sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId!.Value, sampleTree.Root_Clothing_BusinessPants_Pelvis.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
-            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_Spine, true));
 
             // #RLV/Clothing/Hats/Fancy Hat (LOCKED) - folder was locked because PartyHat (groin)
-            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_Chin, true));
 
             // #RLV/Clothing/Business Pants (LOCKED)
-            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_BusinessPants_Pelvis, true));
 
             // #RLV/Clothing/Happy Shirt (LOCKED)
-            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_HappyShirt, true));
 
             // #RLV/Clothing/Retro Pants (LOCKED) - folder was locked because BusinessPants (groin)
-            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_RetroPants, true));
 
             // #RLV/Accessories/Glasses ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Glasses, true));
 
             // #RLV/Accessories/Watch ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch, true));
         }
 
         [Fact]
@@ -160,28 +160,28 @@ namespace LibRLV.Tests.Restrictions
             ).ReturnsAsync((true, sharedFolder));
 
             // This should lock the Hats folder, all hats are no longer attachable
-            Assert.True(await _rlv.ProcessMessage("@attachthis:tattoo=n", sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedPrimId!.Value, sampleTree.Root_Clothing_BusinessPants_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachthis:tattoo=n", sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId!.Value, sampleTree.Root_Clothing_BusinessPants_Pelvis.Name));
 
             // #RLV/Clothing/Hats/Party Hat ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_Spine, true));
 
             // #RLV/Clothing/Hats/Fancy Hat ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_Chin, true));
 
             // #RLV/Clothing/Business Pants ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_BusinessPants_AttachGroin, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_BusinessPants_Pelvis, true));
 
             // #RLV/Clothing/Happy Shirt ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_HappyShirt_AttachChest, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_HappyShirt, true));
 
             // #RLV/Clothing/Retro Pants ()
-            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_RetroPants, true));
 
             // #RLV/Accessories/Glasses (LOCKED) - folder was locked from Watch (tattoo)
-            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Glasses_AttachChin, true));
+            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Glasses, true));
 
             // #RLV/Accessories/Watch (LOCKED)
-            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch, true));
         }
         #endregion
 

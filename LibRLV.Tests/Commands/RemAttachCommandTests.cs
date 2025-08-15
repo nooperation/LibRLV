@@ -10,8 +10,36 @@ namespace LibRLV.Tests.Commands
         [InlineData("@remattach=force")]
         public async Task RemAttach_RemoveAllAttachments(string command)
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (attached chest) <-- Expect detach
+            //  |    |= Retro Pants (worn pants)
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached chin) <-- Expect detach
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_HappyShirt.AttachedTo = RlvAttachmentPoint.Chest;
+            sampleTree.Root_Clothing_HappyShirt.AttachedPrimId = new Guid("11111111-0001-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             _queryCallbacks.Setup(e =>
@@ -26,14 +54,10 @@ namespace LibRLV.Tests.Commands
                 e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
             ).Returns(Task.CompletedTask);
 
-            // Remove everything except for clothing despite what you would think. Just how things go.
             var expected = new HashSet<Guid>()
             {
-                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
-                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
-                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
-                sampleTree.Root_Accessories_Glasses_AttachChin.Id,
+                sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id,
+                sampleTree.Root_Clothing_HappyShirt.Id,
             };
 
             // Act
@@ -60,8 +84,40 @@ namespace LibRLV.Tests.Commands
         [InlineData("@remattach=force")]
         public async Task RemAttach_RemoveAllAttachments_ExternalItems(string command)
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (attached chest) <-- Expect detach
+            //  |    |= Retro Pants (worn pants)
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached chin) <-- Expect detach
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
+            // External
+            //   |= External Tattoo (worn tattoo)
+            //   \= External Jaw Thing (attached jaw) <-- Expect detach
+            //
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_HappyShirt.AttachedTo = RlvAttachmentPoint.Chest;
+            sampleTree.Root_Clothing_HappyShirt.AttachedPrimId = new Guid("11111111-0001-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             var externalWearable = new RlvInventoryItem(
@@ -94,14 +150,10 @@ namespace LibRLV.Tests.Commands
                 e.DetachAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>())
             ).Returns(Task.CompletedTask);
 
-            // Remove everything except for clothing despite what you would think. Just how things go.
             var expected = new HashSet<Guid>()
             {
-                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
-                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
-                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
-                sampleTree.Root_Accessories_Glasses_AttachChin.Id,
+                sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id,
+                sampleTree.Root_Clothing_HappyShirt.Id,
                 externalAttachable.Id,
             };
 
@@ -129,8 +181,36 @@ namespace LibRLV.Tests.Commands
         [InlineData("@remattach:Clothing/Hats=force")]
         public async Task RemAttach_ByFolder(string command)
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (attached chest)
+            //  |    |= Retro Pants (worn pants)
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached chin) <-- Expect detach
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_HappyShirt.AttachedTo = RlvAttachmentPoint.Chest;
+            sampleTree.Root_Clothing_HappyShirt.AttachedPrimId = new Guid("11111111-0001-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             _queryCallbacks.Setup(e =>
@@ -147,8 +227,7 @@ namespace LibRLV.Tests.Commands
 
             var expected = new HashSet<Guid>()
             {
-                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
+                sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id,
             };
 
             // Act
@@ -171,19 +250,51 @@ namespace LibRLV.Tests.Commands
         }
 
         [Theory]
-        [InlineData("@detach:groin=force")]
-        [InlineData("@remattach:groin=force")]
+        [InlineData("@detach:chest=force")]
+        [InlineData("@remattach:chest=force")]
         public async Task RemAttach_RemoveRlvAttachmentPoint(string command)
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (attached chest) <-- Expect detach
+            //  |    |= Retro Pants (worn pants)
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached chin)
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
+            // External
+            //   \= External Chest Thing (attached chest) <-- Expect detach
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_HappyShirt.AttachedTo = RlvAttachmentPoint.Chest;
+            sampleTree.Root_Clothing_HappyShirt.AttachedPrimId = new Guid("11111111-0001-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             var externalAttachable = new RlvInventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
-                "External Groin Thing",
+                "External Chest Thing",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                RlvAttachmentPoint.Groin,
+                RlvAttachmentPoint.Chest,
                 new Guid("12312312-0002-4aaa-8aaa-ffffffffffff"),
                 null);
 
@@ -203,8 +314,7 @@ namespace LibRLV.Tests.Commands
 
             var expected = new HashSet<Guid>()
             {
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
-                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
+                sampleTree.Root_Clothing_HappyShirt.Id,
                 externalAttachable.Id
             };
 
@@ -232,8 +342,36 @@ namespace LibRLV.Tests.Commands
         [InlineData("@remattach:skull=force")]
         public async Task RemAttach_RemoveNone(string command)
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (attached chest)
+            //  |    |= Retro Pants (worn pants)
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached chin)
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_HappyShirt.AttachedTo = RlvAttachmentPoint.Chest;
+            sampleTree.Root_Clothing_HappyShirt.AttachedPrimId = new Guid("11111111-0001-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             _queryCallbacks.Setup(e =>
@@ -276,8 +414,36 @@ namespace LibRLV.Tests.Commands
         [InlineData("remattach")]
         public async Task RemAttach_RemoveByUUID(string command)
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (attached chest) <-- Expected detach
+            //  |    |= Retro Pants (worn pants)
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached chin)
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_HappyShirt.AttachedTo = RlvAttachmentPoint.Chest;
+            sampleTree.Root_Clothing_HappyShirt.AttachedPrimId = new Guid("11111111-0001-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             _queryCallbacks.Setup(e =>
@@ -294,11 +460,11 @@ namespace LibRLV.Tests.Commands
 
             var expected = new HashSet<Guid>()
             {
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id
+                sampleTree.Root_Clothing_HappyShirt.Id
             };
 
             // Act
-            await _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedPrimId}=force", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_HappyShirt.AttachedPrimId}=force", _sender.Id, _sender.Name);
 
             // Assert
             _actionCallbacks.Verify(e =>
@@ -321,11 +487,37 @@ namespace LibRLV.Tests.Commands
         [InlineData("remattach")]
         public async Task RemAttach_RemoveByUUID_IgnoreRestrictions(string command)
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (attached chest) <-- Expected detach
+            //  |    |= Retro Pants (worn pants)
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached chin)
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
-            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
-            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
+            sampleTree.Root_Clothing_HappyShirt.AttachedTo = RlvAttachmentPoint.Chest;
+            sampleTree.Root_Clothing_HappyShirt.AttachedPrimId = new Guid("11111111-0001-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
@@ -341,13 +533,13 @@ namespace LibRLV.Tests.Commands
 
             var expected = new HashSet<Guid>()
             {
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id
+                sampleTree.Root_Clothing_HappyShirt.Id
             };
 
-            await _rlv.ProcessMessage($"@detachallthis:{clothingFolder.Name}=n", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@detachallthis:{sampleTree.Clothing_Folder.Name}=n", _sender.Id, _sender.Name);
 
             // Act
-            await _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedPrimId}=force", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_HappyShirt.AttachedPrimId}=force", _sender.Id, _sender.Name);
 
             // Assert
             _actionCallbacks.Verify(e =>
@@ -370,26 +562,49 @@ namespace LibRLV.Tests.Commands
         [InlineData("remattach")]
         public async Task RemAttach_RemoveByUUID_External(string command)
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (attached chest)
+            //  |    |= Retro Pants (worn pants)
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached chin)
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
+            // External
+            //   \= External Chest Thing (attached chest) <-- Expect detach
+            //
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_HappyShirt.AttachedTo = RlvAttachmentPoint.Chest;
+            sampleTree.Root_Clothing_HappyShirt.AttachedPrimId = new Guid("11111111-0001-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
-            var externalWearable = new RlvInventoryItem(
-                new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa"),
-                "External Tattoo",
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                null,
-                null,
-                RlvWearableType.Tattoo);
             var externalAttachable = new RlvInventoryItem(
                 new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
-                "External Jaw Thing",
+                "External Chest Thing",
                 new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                RlvAttachmentPoint.Jaw,
+                RlvAttachmentPoint.Chest,
                 new Guid("12312312-0002-4aaa-8aaa-ffffffffffff"),
                 null);
 
-            currentOutfit.Add(externalWearable);
             currentOutfit.Add(externalAttachable);
 
             _queryCallbacks.Setup(e =>
@@ -406,11 +621,11 @@ namespace LibRLV.Tests.Commands
 
             var expected = new HashSet<Guid>()
             {
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id
+                externalAttachable.Id
             };
 
             // Act
-            await _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedPrimId}=force", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@{command}:{externalAttachable.AttachedPrimId}=force", _sender.Id, _sender.Name);
 
             // Assert
             _actionCallbacks.Verify(e =>

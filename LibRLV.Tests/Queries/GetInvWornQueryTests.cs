@@ -45,7 +45,7 @@ namespace LibRLV.Tests.Queries
                 (1234, "|03,Clothing|33,Accessories|33"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -80,13 +80,13 @@ namespace LibRLV.Tests.Queries
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
-            sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = RlvAttachmentPoint.Groin;
-            sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = null;
-            sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = null;
-            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
-            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = RlvWearableType.Tattoo;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = null;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedTo = null;
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedTo = RlvAttachmentPoint.Groin;
+            sampleTree.Root_Clothing_HappyShirt.AttachedTo = null;
+            sampleTree.Root_Accessories_Glasses.AttachedTo = null;
+            sampleTree.Root_Clothing_RetroPants.WornOn = null;
+            sampleTree.Root_Accessories_Watch.WornOn = RlvWearableType.Tattoo;
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -97,7 +97,7 @@ namespace LibRLV.Tests.Queries
                 (1234, "|02,Clothing|22,Accessories|22"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -132,13 +132,13 @@ namespace LibRLV.Tests.Queries
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
-            sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = null;
-            sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = null;
-            sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = null;
-            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
-            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = null;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedTo = null;
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedTo = null;
+            sampleTree.Root_Clothing_HappyShirt.AttachedTo = null;
+            sampleTree.Root_Accessories_Glasses.AttachedTo = null;
+            sampleTree.Root_Clothing_RetroPants.WornOn = null;
+            sampleTree.Root_Accessories_Watch.WornOn = null;
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -149,7 +149,7 @@ namespace LibRLV.Tests.Queries
                 (1234, "|01,Clothing|11,Accessories|11"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -193,7 +193,7 @@ namespace LibRLV.Tests.Queries
                 (1234, "|00"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinvworn:Clothing/Hats/Sub Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn:Clothing/Hats/Sub Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -237,7 +237,7 @@ namespace LibRLV.Tests.Queries
                 (1234, "|33,Sub Hats|00"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinvworn:Clothing/Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn:Clothing/Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
             Assert.Equal(expected, actual);
         }
         #endregion

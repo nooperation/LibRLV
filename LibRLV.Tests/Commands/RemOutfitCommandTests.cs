@@ -8,13 +8,35 @@ namespace LibRLV.Tests.Commands
         [Fact]
         public async Task RemOutfitForce()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (worn shirt) <-- Expect removed
+            //  |    |= Retro Pants (worn pants) <-- Expect removed
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (worn tattoo) <-- Expect removed
+            //  |        \= Party Hat (worn skin, must not be removed)
+            //   \-Accessories
+            //        |= Watch (worn tattoo) <-- Expect removed
+            //        \= Glasses
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
-            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
             var sharedFolder = sampleTree.Root;
 
-            // skin, shape, eyes and hair cannot be removed
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.WornOn = RlvWearableType.Skin;
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+            sampleTree.Root_Clothing_HappyShirt.WornOn = RlvWearableType.Shirt;
+            sampleTree.Root_Accessories_Watch.WornOn = RlvWearableType.Tattoo;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.WornOn = RlvWearableType.Tattoo;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.WornOn = RlvWearableType.Skin;
+
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
@@ -30,8 +52,10 @@ namespace LibRLV.Tests.Commands
 
             var expected = new HashSet<Guid>
             {
-                sampleTree.Root_Accessories_Watch_WornTattoo.Id,
-                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+                 sampleTree.Root_Clothing_RetroPants.Id,
+                 sampleTree.Root_Clothing_HappyShirt.Id,
+                 sampleTree.Root_Accessories_Watch.Id,
+                 sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id,
             };
 
             // Act
@@ -56,8 +80,38 @@ namespace LibRLV.Tests.Commands
         [Fact]
         public async Task RemOutfitForce_ExternalItems()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (worn shirt) <-- Expect removed
+            //  |    |= Retro Pants (worn pants) <-- Expect removed
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (worn tattoo) <-- Expect removed
+            //  |        \= Party Hat (worn skin, must not be removed)
+            //   \-Accessories
+            //        |= Watch (worn tattoo)
+            //        \= Glasses
+            //
+            // External
+            //   \= External Tattoo (worn tattoo) <-- Expect removed
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+            sampleTree.Root_Clothing_HappyShirt.WornOn = RlvWearableType.Shirt;
+            sampleTree.Root_Accessories_Watch.WornOn = RlvWearableType.Tattoo;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.WornOn = RlvWearableType.Tattoo;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.WornOn = RlvWearableType.Skin;
+
             var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             var externalWearable = new RlvInventoryItem(
@@ -67,16 +121,8 @@ namespace LibRLV.Tests.Commands
                 null,
                 null,
                 RlvWearableType.Tattoo);
-            var externalAttachable = new RlvInventoryItem(
-                new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
-                "External Jaw Thing",
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                RlvAttachmentPoint.Jaw,
-                new Guid("12312312-0002-4aaa-8aaa-ffffffffffff"),
-                null);
 
             currentOutfit.Add(externalWearable);
-            currentOutfit.Add(externalAttachable);
 
             _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
@@ -92,8 +138,10 @@ namespace LibRLV.Tests.Commands
 
             var expected = new HashSet<Guid>
             {
-                sampleTree.Root_Accessories_Watch_WornTattoo.Id,
-                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+                 sampleTree.Root_Clothing_RetroPants.Id,
+                 sampleTree.Root_Clothing_HappyShirt.Id,
+                 sampleTree.Root_Accessories_Watch.Id,
+                 sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id,
                 externalWearable.Id
             };
 
@@ -119,9 +167,37 @@ namespace LibRLV.Tests.Commands
         [Fact]
         public async Task RemOutfitForce_ExternalItems_ByType()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (worn shirt)
+            //  |    |= Retro Pants (worn pants)
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (worn tattoo) <-- Expect removed
+            //  |        \= Party Hat (worn skin, must not be removed)
+            //   \-Accessories
+            //        |= Watch (worn tattoo) <-- Expect removed
+            //        \= Glasses
+            //
+            // External
+            //   \= External Tattoo (worn tattoo) <-- Expect removed
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
-            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+            sampleTree.Root_Clothing_HappyShirt.WornOn = RlvWearableType.Shirt;
+            sampleTree.Root_Accessories_Watch.WornOn = RlvWearableType.Tattoo;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.WornOn = RlvWearableType.Tattoo;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.WornOn = RlvWearableType.Skin;
 
             var externalWearable = new RlvInventoryItem(
                 new Guid("12312312-0001-4aaa-8aaa-aaaaaaaaaaaa"),
@@ -130,16 +206,10 @@ namespace LibRLV.Tests.Commands
                 null,
                 null,
                 RlvWearableType.Tattoo);
-            var externalAttachable = new RlvInventoryItem(
-                new Guid("12312312-0002-4aaa-8aaa-aaaaaaaaaaaa"),
-                "External Jaw Thing",
-                new Guid("12312312-aaaa-4aaa-8aaa-aaaaaaaaaaaa"),
-                RlvAttachmentPoint.Jaw,
-                new Guid("12312312-0002-4aaa-8aaa-ffffffffffff"),
-                null);
 
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
             currentOutfit.Add(externalWearable);
-            currentOutfit.Add(externalAttachable);
+
             _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
             ).ReturnsAsync((true, currentOutfit));
@@ -154,7 +224,8 @@ namespace LibRLV.Tests.Commands
 
             var expected = new HashSet<Guid>
             {
-                sampleTree.Root_Accessories_Watch_WornTattoo.Id,
+                sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id,
+                sampleTree.Root_Accessories_Watch.Id,
                 externalWearable.Id
             };
 
@@ -180,12 +251,36 @@ namespace LibRLV.Tests.Commands
         [Fact]
         public async Task RemOutfitForce_Folder()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (worn shirt)
+            //  |    |= Retro Pants (worn pants)
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (worn tattoo) <-- Expect removed
+            //  |        \= Party Hat (worn skin, must not be removed)
+            //   \-Accessories
+            //        |= Watch (worn tattoo)
+            //        \= Glasses
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
-            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
             var sharedFolder = sampleTree.Root;
 
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.WornOn = RlvWearableType.Tattoo;
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+            sampleTree.Root_Clothing_HappyShirt.WornOn = RlvWearableType.Shirt;
+            sampleTree.Root_Accessories_Watch.WornOn = RlvWearableType.Tattoo;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.WornOn = RlvWearableType.Tattoo;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.WornOn = RlvWearableType.Skin;
+
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
@@ -201,7 +296,7 @@ namespace LibRLV.Tests.Commands
 
             var expected = new HashSet<Guid>
             {
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
+                sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id,
             };
 
             // Act
@@ -226,9 +321,36 @@ namespace LibRLV.Tests.Commands
         [Fact]
         public async Task RemOutfitForce_Specific()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (worn shirt)
+            //  |    |= Retro Pants (worn pants)
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (worn tattoo) <-- Expect removed
+            //  |        \= Party Hat (worn skin, must not be removed)
+            //   \-Accessories
+            //        |= Watch (worn tattoo) <-- Expect removed
+            //        \= Glasses
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
-            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+            sampleTree.Root_Clothing_HappyShirt.WornOn = RlvWearableType.Shirt;
+            sampleTree.Root_Accessories_Watch.WornOn = RlvWearableType.Tattoo;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.WornOn = RlvWearableType.Tattoo;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.WornOn = RlvWearableType.Skin;
+
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)
@@ -244,7 +366,8 @@ namespace LibRLV.Tests.Commands
 
             var expected = new HashSet<Guid>
             {
-                sampleTree.Root_Accessories_Watch_WornTattoo.Id,
+                sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id,
+                sampleTree.Root_Accessories_Watch.Id,
             };
 
             // Act
@@ -269,11 +392,36 @@ namespace LibRLV.Tests.Commands
         [Fact]
         public async Task RemOutfitForce_BodyPart_Specific()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (worn shirt)
+            //  |    |= Retro Pants (worn pants)
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (worn tattoo)
+            //  |        \= Party Hat (worn skin, must not be removed)
+            //   \-Accessories
+            //        |= Watch (worn tattoo)
+            //        \= Glasses
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
-            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
             var sharedFolder = sampleTree.Root;
 
-            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = RlvWearableType.Skin;
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+            sampleTree.Root_Clothing_HappyShirt.WornOn = RlvWearableType.Shirt;
+            sampleTree.Root_Accessories_Watch.WornOn = RlvWearableType.Tattoo;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.WornOn = RlvWearableType.Tattoo;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.WornOn = RlvWearableType.Skin;
+
+            var currentOutfit = SampleInventoryTree.BuildCurrentOutfit(sampleTree.Root);
 
             _queryCallbacks.Setup(e =>
                 e.TryGetCurrentOutfitAsync(default)

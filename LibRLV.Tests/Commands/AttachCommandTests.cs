@@ -14,17 +14,6 @@ namespace LibRLV.Tests.Commands
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
-            sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = null;
-            sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = null;
-            sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = null;
-            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
-            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
-
-            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name = "Fancy Hat (chin)";
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (Spine)";
-
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
@@ -36,8 +25,8 @@ namespace LibRLV.Tests.Commands
             // Attach everything in the Clothing/Hats folder
             var expected = new HashSet<AttachmentRequest>()
             {
-                new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, replaceExistingAttachments),
-                new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Spine, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id, RlvAttachmentPoint.Chin, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_PartyHat_Spine.Id, RlvAttachmentPoint.Spine, replaceExistingAttachments),
             };
 
             // Act
@@ -68,11 +57,6 @@ namespace LibRLV.Tests.Commands
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = null;
-            sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = null;
-            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
-            sampleTree.Root_Clothing_HappyShirt_AttachChest.Name = "Happy Shirt (chest)";
-
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
@@ -84,9 +68,9 @@ namespace LibRLV.Tests.Commands
             // Attach everything in the Clothing folder. Make sure clothing types (RlvWearableType) are also included
             var expected = new HashSet<AttachmentRequest>()
             {
-                new(sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
-                new(sampleTree.Root_Clothing_HappyShirt_AttachChest.Id, RlvAttachmentPoint.Chest, replaceExistingAttachments),
-                new(sampleTree.Root_Clothing_RetroPants_WornPants.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_BusinessPants_Pelvis.Id, RlvAttachmentPoint.Pelvis, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_HappyShirt.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_RetroPants.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
             };
 
             // Act
@@ -117,9 +101,9 @@ namespace LibRLV.Tests.Commands
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = RlvAttachmentPoint.Groin;
-            sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = RlvAttachmentPoint.Chest;
-            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = RlvWearableType.Pants;
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedTo = RlvAttachmentPoint.Groin;
+            sampleTree.Root_Clothing_HappyShirt.AttachedTo = RlvAttachmentPoint.Chest;
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -162,20 +146,10 @@ namespace LibRLV.Tests.Commands
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
-            sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = null;
-            sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = null;
-            sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = null;
-            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
-            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
-
-            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
-            var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
-            hatsFolder.Name = "Hats (spine)";
+            sampleTree.Clothing_Hats_Folder.Name = "Hats (spine)";
 
             // Item name overrides folder name
-            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name = "Fancy Hat (skull)";
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.Name = "Fancy Hat (skull)";
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -188,12 +162,12 @@ namespace LibRLV.Tests.Commands
             // Attach everything under the "Clothing/Hats (spine)" folder, attaching everything to the Spine point unless the item explicitly specifies a different attachment point such as "Fancy Hat (skull)".
             var expected = new HashSet<AttachmentRequest>()
             {
-                new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Skull, replaceExistingAttachments),
-                new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Spine, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id, RlvAttachmentPoint.Skull, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_PartyHat_Spine.Id, RlvAttachmentPoint.Spine, replaceExistingAttachments),
             };
 
             // Act
-            await _rlv.ProcessMessage($"@{command}:{clothingFolder.Name}/{hatsFolder.Name}=force", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@{command}:{sampleTree.Clothing_Folder.Name}/{sampleTree.Clothing_Hats_Folder.Name}=force", _sender.Id, _sender.Name);
 
             // Assert
             _actionCallbacks.Verify(e =>
@@ -220,20 +194,7 @@ namespace LibRLV.Tests.Commands
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
-            sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = null;
-            sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = null;
-            sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = null;
-            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
-            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
-
-            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name = "Fancy Hat (chin)";
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (Spine)";
-
-            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
-            var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
-            hatsFolder.Name = "+Hats";
+            sampleTree.Clothing_Hats_Folder.Name = "+Hats";
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -246,12 +207,12 @@ namespace LibRLV.Tests.Commands
             // Attach everything inside of the Clothing/Hats folder, but force 'add to' logic due to the + prefix on the hats folder
             var expected = new HashSet<AttachmentRequest>()
             {
-                new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, false),
-                new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Spine, false),
+                new(sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id, RlvAttachmentPoint.Chin, false),
+                new(sampleTree.Root_Clothing_Hats_PartyHat_Spine.Id, RlvAttachmentPoint.Spine, false),
             };
 
             // Act
-            await _rlv.ProcessMessage($"@{command}:{clothingFolder.Name}/{hatsFolder.Name}=force", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@{command}:{sampleTree.Clothing_Folder.Name}/{sampleTree.Clothing_Hats_Folder.Name}=force", _sender.Id, _sender.Name);
 
             // Assert
             _actionCallbacks.Verify(e =>
@@ -278,20 +239,7 @@ namespace LibRLV.Tests.Commands
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.AttachedTo = null;
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedTo = null;
-            sampleTree.Root_Clothing_BusinessPants_AttachGroin.AttachedTo = null;
-            sampleTree.Root_Clothing_HappyShirt_AttachChest.AttachedTo = null;
-            sampleTree.Root_Accessories_Glasses_AttachChin.AttachedTo = null;
-            sampleTree.Root_Clothing_RetroPants_WornPants.WornOn = null;
-            sampleTree.Root_Accessories_Watch_WornTattoo.WornOn = null;
-
-            sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Name = "Fancy Hat (chin)";
-            sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name = "Party Hat (Spine)";
-
-            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
-            var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
-            clothingFolder.Name = ".clothing";
+            sampleTree.Clothing_Folder.Name = ".clothing";
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -304,12 +252,12 @@ namespace LibRLV.Tests.Commands
             // This is allowed even though we're targeting a private folder. Only private subfolders are ignored
             var expected = new HashSet<AttachmentRequest>()
             {
-                new(sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id, RlvAttachmentPoint.Chin, replaceExistingAttachments),
-                new(sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id, RlvAttachmentPoint.Spine, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id, RlvAttachmentPoint.Chin, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_Hats_PartyHat_Spine.Id, RlvAttachmentPoint.Spine, replaceExistingAttachments),
             };
 
             // Act
-            await _rlv.ProcessMessage($"@{command}:{clothingFolder.Name}/{hatsFolder.Name}=force", _sender.Id, _sender.Name);
+            await _rlv.ProcessMessage($"@{command}:{sampleTree.Clothing_Folder.Name}/{sampleTree.Clothing_Hats_Folder.Name}=force", _sender.Id, _sender.Name);
 
             // Assert
             _actionCallbacks.Verify(e =>

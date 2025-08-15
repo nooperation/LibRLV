@@ -4,13 +4,20 @@ namespace LibRLV.Tests
     public class SampleInventoryTree
     {
         public RlvSharedFolder Root { get; set; } = null!;
-        public RlvInventoryItem Root_Clothing_Hats_FancyHat_AttachChin { get; set; } = null!;
-        public RlvInventoryItem Root_Clothing_Hats_PartyHat_AttachGroin { get; set; } = null!;
-        public RlvInventoryItem Root_Clothing_BusinessPants_AttachGroin { get; set; } = null!;
-        public RlvInventoryItem Root_Clothing_RetroPants_WornPants { get; set; } = null!;
-        public RlvInventoryItem Root_Clothing_HappyShirt_AttachChest { get; set; } = null!;
-        public RlvInventoryItem Root_Accessories_Glasses_AttachChin { get; set; } = null!;
-        public RlvInventoryItem Root_Accessories_Watch_WornTattoo { get; set; } = null!;
+
+        public RlvSharedFolder Clothing_Folder { get; set; } = null!;
+        public RlvSharedFolder Clothing_Hats_Folder { get; set; } = null!;
+        public RlvSharedFolder Clothing_Hats_SubHats_Folder { get; set; } = null!;
+        public RlvSharedFolder Accessories_Folder { get; set; } = null!;
+
+
+        public RlvInventoryItem Root_Clothing_Hats_FancyHat_Chin { get; set; } = null!;
+        public RlvInventoryItem Root_Clothing_Hats_PartyHat_Spine { get; set; } = null!;
+        public RlvInventoryItem Root_Clothing_BusinessPants_Pelvis { get; set; } = null!;
+        public RlvInventoryItem Root_Clothing_RetroPants { get; set; } = null!;
+        public RlvInventoryItem Root_Clothing_HappyShirt { get; set; } = null!;
+        public RlvInventoryItem Root_Accessories_Glasses { get; set; } = null!;
+        public RlvInventoryItem Root_Accessories_Watch { get; set; } = null!;
 
 
         public static List<RlvInventoryItem> BuildCurrentOutfit(RlvSharedFolder sharedFolder)
@@ -33,47 +40,51 @@ namespace LibRLV.Tests
             //  |- .private
             //  |
             //  |- Clothing
-            //  |    |= Business Pants (attached to 'groin')
-            //  |    |= Happy Shirt (attached to 'chest')
-            //  |    |= Retro Pants (worn on 'pants')
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
             //  |    \-Hats
             //  |        |
             //  |        |- Sub Hats
             //  |        |    \ (Empty)
             //  |        |
-            //  |        |= Fancy Hat (attached to 'chin')
-            //  |        \= Party Hat (attached to 'groin')
+            //  |        |= Fancy Hat
+            //  |        \= Party Hat
             //   \-Accessories
-            //        |= Watch (worn on 'tattoo')
-            //        \= Glasses (attached to 'chin')
+            //        |= Watch
+            //        \= Glasses
 
             var root = new RlvSharedFolder(new Guid("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"), "#RLV");
-            var clothingTree = root.AddChild(new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Clothing");
-            var hatsTree = clothingTree.AddChild(new Guid("dddddddd-dddd-4ddd-8ddd-dddddddddddd"), "Hats");
-            var subHatsTree = hatsTree.AddChild(new Guid("ffffffff-0000-4000-8000-000000000000"), "Sub Hats");
+            var clothing_folder = root.AddChild(new Guid("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Clothing");
+            var clothing_hats_folder = clothing_folder.AddChild(new Guid("dddddddd-dddd-4ddd-8ddd-dddddddddddd"), "Hats");
+            var clothing_hats_subhats_folder = clothing_hats_folder.AddChild(new Guid("ffffffff-0000-4000-8000-000000000000"), "Sub Hats");
             var privateTree = root.AddChild(new Guid("eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"), ".private");
-            var accessoriesTree = root.AddChild(new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), "Accessories");
+            var accessories_folder = root.AddChild(new Guid("cccccccc-cccc-4ccc-8ccc-cccccccccccc"), "Accessories");
 
-            var watch_tattoo = accessoriesTree.AddItem(new Guid("c0000000-cccc-4ccc-8ccc-cccccccccccc"), "Watch", null, null, RlvWearableType.Tattoo);
-            var glasses_chin = accessoriesTree.AddItem(new Guid("c1111111-cccc-4ccc-8ccc-cccccccccccc"), "Glasses", RlvAttachmentPoint.Chin, new Guid("c1111111-cccc-4ccc-8ccc-ffffffffffff"), null);
+            var accessories_watch = accessories_folder.AddItem(new Guid("c0000000-cccc-4ccc-8ccc-cccccccccccc"), "Watch", null, null, null);
+            var accessories_glasses = accessories_folder.AddItem(new Guid("c1111111-cccc-4ccc-8ccc-cccccccccccc"), "Glasses", null, null, null);
 
-            var businessPants_groin = clothingTree.AddItem(new Guid("b0000000-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Business Pants", RlvAttachmentPoint.Groin, new Guid("b0000000-bbbb-4bbb-8bbb-ffffffffffff"), null);
-            var happyShirt_chest = clothingTree.AddItem(new Guid("b1111111-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Happy Shirt", RlvAttachmentPoint.Chest, new Guid("b1111111-bbbb-4bbb-8bbb-ffffffffffff"), null);
-            var retroPants_pants = clothingTree.AddItem(new Guid("b2222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Retro Pants", null, null, RlvWearableType.Pants);
+            var clothing_businessPants_pelvis = clothing_folder.AddItem(new Guid("b0000000-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Business Pants (Pelvis)", null, null, null);
+            var clothing_happyShirt = clothing_folder.AddItem(new Guid("b1111111-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Happy Shirt", null, null, null);
+            var clothing_retroPants = clothing_folder.AddItem(new Guid("b2222222-bbbb-4bbb-8bbb-bbbbbbbbbbbb"), "Retro Pants", null, null, null);
 
-            var partyHat_groin = hatsTree.AddItem(new Guid("d0000000-dddd-4ddd-8ddd-dddddddddddd"), "Party Hat", RlvAttachmentPoint.Groin, new Guid("d0000000-dddd-4ddd-8ddd-ffffffffffff"), null);
-            var fancyHat_chin = hatsTree.AddItem(new Guid("d1111111-dddd-4ddd-8ddd-dddddddddddd"), "Fancy Hat", RlvAttachmentPoint.Chin, new Guid("d1111111-dddd-4ddd-8ddd-ffffffffffff"), null);
+            var clothing_hats_partyHat_spine = clothing_hats_folder.AddItem(new Guid("d0000000-dddd-4ddd-8ddd-dddddddddddd"), "Party Hat (Spine)", null, null, null);
+            var clothing_hats_fancyHat_chin = clothing_hats_folder.AddItem(new Guid("d1111111-dddd-4ddd-8ddd-dddddddddddd"), "Fancy Hat (chin)", null, null, null);
 
             return new SampleInventoryTree()
             {
                 Root = root,
-                Root_Clothing_Hats_PartyHat_AttachGroin = partyHat_groin,
-                Root_Clothing_Hats_FancyHat_AttachChin = fancyHat_chin,
-                Root_Accessories_Glasses_AttachChin = glasses_chin,
-                Root_Clothing_BusinessPants_AttachGroin = businessPants_groin,
-                Root_Clothing_HappyShirt_AttachChest = happyShirt_chest,
-                Root_Clothing_RetroPants_WornPants = retroPants_pants,
-                Root_Accessories_Watch_WornTattoo = watch_tattoo
+                Clothing_Folder = clothing_folder,
+                Accessories_Folder = accessories_folder,
+                Clothing_Hats_Folder = clothing_hats_folder,
+                Clothing_Hats_SubHats_Folder = clothing_hats_subhats_folder,
+                Root_Clothing_Hats_PartyHat_Spine = clothing_hats_partyHat_spine,
+                Root_Clothing_Hats_FancyHat_Chin = clothing_hats_fancyHat_chin,
+                Root_Accessories_Glasses = accessories_glasses,
+                Root_Clothing_BusinessPants_Pelvis = clothing_businessPants_pelvis,
+                Root_Clothing_HappyShirt = clothing_happyShirt,
+                Root_Clothing_RetroPants = clothing_retroPants,
+                Root_Accessories_Watch = accessories_watch
             };
         }
     }

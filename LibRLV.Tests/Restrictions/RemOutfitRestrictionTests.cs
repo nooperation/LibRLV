@@ -21,13 +21,13 @@ namespace LibRLV.Tests.Restrictions
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            Assert.True(await _rlv.ProcessMessage("@remoutfit=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@remoutfit=n", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
 
             // #RLV/Clothing/Retro Pants
-            Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_RetroPants, true));
 
             // #RLV/Accessories/Watch
-            Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Accessories_Watch, true));
         }
 
         [Fact]
@@ -40,13 +40,13 @@ namespace LibRLV.Tests.Restrictions
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            Assert.True(await _rlv.ProcessMessage("@remoutfit:pants=n", sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Name));
+            Assert.True(await _rlv.ProcessMessage("@remoutfit:pants=n", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
 
             // #RLV/Clothing/Retro Pants
-            Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_RetroPants_WornPants, true));
+            Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_RetroPants, true));
 
             // #RLV/Accessories/Watch
-            Assert.True(_rlv.Permissions.CanDetach(sampleTree.Root_Accessories_Watch_WornTattoo, true));
+            Assert.True(_rlv.Permissions.CanDetach(sampleTree.Root_Accessories_Watch, true));
         }
         #endregion
 

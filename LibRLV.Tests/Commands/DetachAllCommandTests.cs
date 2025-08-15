@@ -8,8 +8,36 @@ namespace LibRLV.Tests.Commands
         [Fact]
         public async Task DetachAllForce_Recursive()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (worn pants) <-- Expected detach
+            //  |    |= Retro Pants (attached pelvis) <-- Expected detach
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached chin) <-- Expected detach
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses (worn pants)
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_RetroPants.AttachedTo = RlvAttachmentPoint.Pelvis;
+            sampleTree.Root_Clothing_RetroPants.AttachedPrimId = new Guid("11111111-0002-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Accessories_Glasses.WornOn = RlvWearableType.Pants;
+            sampleTree.Root_Clothing_HappyShirt.WornOn = RlvWearableType.Pants;
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -22,11 +50,9 @@ namespace LibRLV.Tests.Commands
             // Everything under the clothing folder, and all of its subfolders will be removed
             var expected = new HashSet<Guid>()
             {
-                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
-                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
-                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
-                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+                sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id,
+                sampleTree.Root_Clothing_HappyShirt.Id,
+                sampleTree.Root_Clothing_RetroPants.Id,
             };
 
             // Act
@@ -51,8 +77,36 @@ namespace LibRLV.Tests.Commands
         [Fact]
         public async Task DetachAllForce_Recursive_IgnoreRestrictions()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (worn pants) <-- Expected detach
+            //  |    |= Retro Pants (attached pelvis) <-- Expected detach
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached chin) <-- Expected detach
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses (worn pants)
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_RetroPants.AttachedTo = RlvAttachmentPoint.Pelvis;
+            sampleTree.Root_Clothing_RetroPants.AttachedPrimId = new Guid("11111111-0002-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Accessories_Glasses.WornOn = RlvWearableType.Pants;
+            sampleTree.Root_Clothing_HappyShirt.WornOn = RlvWearableType.Pants;
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -66,11 +120,9 @@ namespace LibRLV.Tests.Commands
             //  being detached - commands bypass these restrictions
             var expected = new HashSet<Guid>()
             {
-                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
-                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
-                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
-                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+                sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id,
+                sampleTree.Root_Clothing_HappyShirt.Id,
+                sampleTree.Root_Clothing_RetroPants.Id,
             };
             await _rlv.ProcessMessage("@detachthis:Clothing=n", _sender.Id, _sender.Name);
 
@@ -96,11 +148,38 @@ namespace LibRLV.Tests.Commands
         [Fact]
         public async Task DetachAllForce_Recursive_PrivateTargetDir()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- .clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (worn pants) <-- Expected detach
+            //  |    |= Retro Pants (attached pelvis) <-- Expected detach
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached chin) <-- Expected detach
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses (worn pants)
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
-            clothingFolder.Name = ".clothing";
+            sampleTree.Clothing_Folder.Name = ".clothing";
+
+            sampleTree.Root_Clothing_RetroPants.AttachedTo = RlvAttachmentPoint.Pelvis;
+            sampleTree.Root_Clothing_RetroPants.AttachedPrimId = new Guid("11111111-0002-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Accessories_Glasses.WornOn = RlvWearableType.Pants;
+            sampleTree.Root_Clothing_HappyShirt.WornOn = RlvWearableType.Pants;
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -113,11 +192,9 @@ namespace LibRLV.Tests.Commands
             // Everything under the clothing folder, and all of its subfolders will be removed
             var expected = new HashSet<Guid>()
             {
-                sampleTree.Root_Clothing_Hats_FancyHat_AttachChin.Id,
-                sampleTree.Root_Clothing_Hats_PartyHat_AttachGroin.Id,
-                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
-                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
-                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+                sampleTree.Root_Clothing_Hats_FancyHat_Chin.Id,
+                sampleTree.Root_Clothing_HappyShirt.Id,
+                sampleTree.Root_Clothing_RetroPants.Id,
             };
 
             // Act
@@ -142,13 +219,39 @@ namespace LibRLV.Tests.Commands
         [Fact]
         public async Task DetachAllForce_Recursive_PrivateSubFolders()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- .clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt (worn pants) <-- Expected detach
+            //  |    |= Retro Pants (attached pelvis) <-- Expected detach
+            //  |    \- .hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat (attached chin)
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses (worn pants)
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            var clothingFolder = sampleTree.Root.Children.Where(n => n.Name == "Clothing").First();
-            var hatsFolder = clothingFolder.Children.Where(n => n.Name == "Hats").First();
-            clothingFolder.Name = ".clothing";
-            hatsFolder.Name = ".hats";
+            sampleTree.Clothing_Folder.Name = ".clothing";
+            sampleTree.Clothing_Hats_Folder.Name = ".hats";
+
+            sampleTree.Root_Clothing_RetroPants.AttachedTo = RlvAttachmentPoint.Pelvis;
+            sampleTree.Root_Clothing_RetroPants.AttachedPrimId = new Guid("11111111-0002-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Accessories_Glasses.WornOn = RlvWearableType.Pants;
+            sampleTree.Root_Clothing_HappyShirt.WornOn = RlvWearableType.Pants;
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -161,9 +264,8 @@ namespace LibRLV.Tests.Commands
             // Everything under the .clothing folder, and all of its non-private subfolders will be removed, except the private .hats folder
             var expected = new HashSet<Guid>()
             {
-                sampleTree.Root_Clothing_BusinessPants_AttachGroin.Id,
-                sampleTree.Root_Clothing_HappyShirt_AttachChest.Id,
-                sampleTree.Root_Clothing_RetroPants_WornPants.Id,
+                sampleTree.Root_Clothing_HappyShirt.Id,
+                sampleTree.Root_Clothing_RetroPants.Id,
             };
 
             // Act

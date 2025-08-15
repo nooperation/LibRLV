@@ -275,10 +275,26 @@ namespace LibRLV
                 return false;
             }
 
+            var skipHiddenFolders = true;
             var inventoryMap = new InventoryMap(sharedFolder);
             var folderPaths = new List<RlvSharedFolder>();
 
-            if (RlvCommon.RlvWearableTypeMap.TryGetValue(command.Option, out var wearableType))
+            if (command.Option.Length == 0)
+            {
+                var senderItem = inventoryMap.Items
+                    .Where(n => n.Value.AttachedPrimId == command.Sender)
+                    .Select(n => n.Value)
+                    .FirstOrDefault();
+                if (senderItem == null)
+                {
+                    return false;
+                }
+
+                var parts = inventoryMap.FindFoldersContaining(false, senderItem.Id, null, null);
+                folderPaths.AddRange(parts);
+                skipHiddenFolders = false;
+            }
+            else if (RlvCommon.RlvWearableTypeMap.TryGetValue(command.Option, out var wearableType))
             {
                 var parts = inventoryMap.FindFoldersContaining(false, null, null, wearableType);
                 folderPaths.AddRange(parts);
@@ -292,36 +308,35 @@ namespace LibRLV
             {
                 folderPaths.Add(folder);
             }
-            else if (command.Option.Length == 0)
+            else
             {
-                var senderItem = inventoryMap.Items
-                    .Where(n => n.Value.AttachedPrimId == command.Sender)
-                    .Select(n => n.Value)
-                    .FirstOrDefault();
-                if (senderItem == null)
-                {
-                    return false;
-                }
-
-                var parts = inventoryMap.FindFoldersContaining(false, senderItem.Id, null, null);
-                folderPaths.AddRange(parts);
+                return false;
             }
 
             var itemsToAttach = new List<AttachmentRequest>();
-
             foreach (var item in folderPaths)
             {
-                CollectItemsToAttach(item, replaceExistingAttachments, recursive, true, itemsToAttach);
+                CollectItemsToAttach(item, replaceExistingAttachments, recursive, skipHiddenFolders, itemsToAttach);
             }
 
             await _actionCallbacks.AttachAsync(itemsToAttach, cancellationToken).ConfigureAwait(false);
             return true;
         }
 
-        private static void CollectItemsToDetach(RlvSharedFolder folder, InventoryMap inventoryMap, bool recursive, List<Guid> itemsToDetach)
+        private static void CollectItemsToDetach(RlvSharedFolder folder, InventoryMap inventoryMap, bool recursive, bool skipIfPrivateFolder, List<Guid> itemsToDetach)
         {
+            if (skipIfPrivateFolder && folder.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
             foreach (var item in folder.Items)
             {
+                if (item.AttachedTo == null && item.WornOn == null)
+                {
+                    continue;
+                }
+
                 itemsToDetach.Add(item.Id);
             }
 
@@ -329,12 +344,7 @@ namespace LibRLV
             {
                 foreach (var child in folder.Children)
                 {
-                    if (child.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
-
-                    CollectItemsToDetach(child, inventoryMap, recursive, itemsToDetach);
+                    CollectItemsToDetach(child, inventoryMap, recursive, true, itemsToDetach);
                 }
             }
         }
@@ -372,7 +382,7 @@ namespace LibRLV
             }
             else if (inventoryMap.TryGetFolderFromPath(command.Option, false, out var folder))
             {
-                CollectItemsToDetach(folder, inventoryMap, false, itemIdsToDetach);
+                CollectItemsToDetach(folder, inventoryMap, false, false, itemIdsToDetach);
             }
             else if (RlvCommon.RlvAttachmentPointMap.TryGetValue(command.Option, out var attachmentPoint))
             {
@@ -420,7 +430,7 @@ namespace LibRLV
             }
 
             var itemIdsToDetach = new List<Guid>();
-            CollectItemsToDetach(folder, inventoryMap, true, itemIdsToDetach);
+            CollectItemsToDetach(folder, inventoryMap, true, false, itemIdsToDetach);
 
             await _actionCallbacks.DetachAsync(itemIdsToDetach, cancellationToken).ConfigureAwait(false);
             return true;
@@ -435,8 +445,24 @@ namespace LibRLV
             }
             var inventoryMap = new InventoryMap(sharedFolder);
             var folderPaths = new List<RlvSharedFolder>();
+            var ignoreHiddenFolders = true;
 
-            if (Guid.TryParse(command.Option, out var uuid))
+            if (command.Option.Length == 0)
+            {
+                var senderItem = inventoryMap.Items
+                    .Where(n => n.Value.AttachedPrimId == command.Sender)
+                    .Select(n => n.Value)
+                    .FirstOrDefault();
+                if (senderItem == null)
+                {
+                    return false;
+                }
+
+                var parts = inventoryMap.FindFoldersContaining(false, senderItem.Id, null, null);
+                folderPaths.AddRange(parts);
+                ignoreHiddenFolders = false;
+            }
+            else if (Guid.TryParse(command.Option, out var uuid))
             {
                 if (inventoryMap.Items.TryGetValue(uuid, out var item))
                 {
@@ -460,30 +486,15 @@ namespace LibRLV
             {
                 folderPaths.Add(folder);
             }
-            else if (command.Option.Length == 0)
+            else
             {
-                var senderItem = inventoryMap.Items
-                    .Where(n => n.Value.AttachedPrimId == command.Sender)
-                    .Select(n => n.Value)
-                    .FirstOrDefault();
-                if (senderItem == null)
-                {
-                    return false;
-                }
-
-                var parts = inventoryMap.FindFoldersContaining(false, senderItem.Id, null, null);
-                folderPaths.AddRange(parts);
+                return false;
             }
 
             var itemIdsToDetach = new List<Guid>();
             foreach (var item in folderPaths)
             {
-                if (item.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                CollectItemsToDetach(item, inventoryMap, recursive, itemIdsToDetach);
+                CollectItemsToDetach(item, inventoryMap, recursive, ignoreHiddenFolders, itemIdsToDetach);
             }
 
             await _actionCallbacks.DetachAsync(itemIdsToDetach, cancellationToken).ConfigureAwait(false);
