@@ -16,7 +16,7 @@ namespace LibRLV.Tests.Restrictions
             //  |    |= Business Pants
             //  |    |= Happy Shirt
             //  |    |= Retro Pants
-            //  |    \- Hats
+            //  |    \- Hats [Locked]
             //  |        |
             //  |        |- Sub Hats
             //  |        |    \ (Empty)
@@ -60,6 +60,16 @@ namespace LibRLV.Tests.Restrictions
 
             // #RLV/Accessories/Watch ()
             Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch, true));
+
+            var lockedFolders = _rlv.Restrictions.GetLockedFolders();
+            Assert.Single(lockedFolders);
+
+            Assert.True(lockedFolders.TryGetValue(sampleTree.Clothing_Hats_Folder.Id, out var hatsFolderLocked));
+
+            Assert.Empty(hatsFolderLocked.AttachExceptions);
+            Assert.Single(hatsFolderLocked.AttachRestrictions);
+            Assert.Empty(hatsFolderLocked.DetachExceptions);
+            Assert.Empty(hatsFolderLocked.DetachRestrictions);
         }
 
         [Fact]
@@ -119,6 +129,16 @@ namespace LibRLV.Tests.Restrictions
 
             // #RLV/Accessories/Watch ()
             Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch, true));
+
+            var lockedFolders = _rlv.Restrictions.GetLockedFolders();
+            Assert.Single(lockedFolders);
+
+            Assert.True(lockedFolders.TryGetValue(sampleTree.Clothing_Folder.Id, out var clothingFolderLocked));
+
+            Assert.Empty(clothingFolderLocked.AttachExceptions);
+            Assert.Single(clothingFolderLocked.AttachRestrictions);
+            Assert.Empty(clothingFolderLocked.DetachExceptions);
+            Assert.Empty(clothingFolderLocked.DetachRestrictions);
         }
 
         [Fact]
@@ -173,6 +193,16 @@ namespace LibRLV.Tests.Restrictions
 
             // #RLV/Accessories/Watch ()
             Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch, true));
+
+            var lockedFolders = _rlv.Restrictions.GetLockedFolders();
+            Assert.Single(lockedFolders);
+
+            Assert.True(lockedFolders.TryGetValue(sampleTree.Clothing_Hats_Folder.Id, out var hatsFolderLocked));
+
+            Assert.Empty(hatsFolderLocked.AttachExceptions);
+            Assert.Single(hatsFolderLocked.AttachRestrictions);
+            Assert.Empty(hatsFolderLocked.DetachExceptions);
+            Assert.Empty(hatsFolderLocked.DetachRestrictions);
         }
 
         [Fact]
@@ -234,6 +264,22 @@ namespace LibRLV.Tests.Restrictions
 
             // #RLV/Accessories/Watch ()
             Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch, true));
+
+            var lockedFolders = _rlv.Restrictions.GetLockedFolders();
+            Assert.Equal(2, lockedFolders.Count);
+
+            Assert.True(lockedFolders.TryGetValue(sampleTree.Clothing_Hats_Folder.Id, out var hatsFolderLocked));
+            Assert.True(lockedFolders.TryGetValue(sampleTree.Clothing_Folder.Id, out var clothingFolderLocked));
+
+            Assert.Empty(hatsFolderLocked.AttachExceptions);
+            Assert.Single(hatsFolderLocked.AttachRestrictions);
+            Assert.Empty(hatsFolderLocked.DetachExceptions);
+            Assert.Empty(hatsFolderLocked.DetachRestrictions);
+
+            Assert.Empty(clothingFolderLocked.AttachExceptions);
+            Assert.Single(clothingFolderLocked.AttachRestrictions);
+            Assert.Empty(clothingFolderLocked.DetachExceptions);
+            Assert.Empty(clothingFolderLocked.DetachRestrictions);
         }
 
         [Fact]
@@ -243,7 +289,7 @@ namespace LibRLV.Tests.Restrictions
             //  |
             //  |- .private
             //  |
-            //  |- Clothing [LOCKED, no-attach]
+            //  |- Clothing
             //  |    |= Business Pants
             //  |    |= Happy Shirt
             //  |    |= Retro Pants
@@ -292,6 +338,71 @@ namespace LibRLV.Tests.Restrictions
 
             // #RLV/Accessories/Watch (LOCKED)
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch, true));
+
+            var lockedFolders = _rlv.Restrictions.GetLockedFolders();
+            Assert.Single(lockedFolders);
+
+            Assert.True(lockedFolders.TryGetValue(sampleTree.Accessories_Folder.Id, out var accessoriesFolderLocked));
+
+            Assert.Equal(sampleTree.Accessories_Folder.Name, accessoriesFolderLocked.Name);
+            Assert.Equal(sampleTree.Accessories_Folder.Id, accessoriesFolderLocked.Id);
+            Assert.True(accessoriesFolderLocked.CanDetach);
+            Assert.False(accessoriesFolderLocked.CanAttach);
+            Assert.True(accessoriesFolderLocked.IsLocked);
+
+            Assert.Empty(accessoriesFolderLocked.AttachExceptions);
+            Assert.Single(accessoriesFolderLocked.AttachRestrictions);
+            Assert.Empty(accessoriesFolderLocked.DetachExceptions);
+            Assert.Empty(accessoriesFolderLocked.DetachRestrictions);
+        }
+
+        [Fact]
+        public async Task AttachThis_ByWornLayer_AddRem()
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch (Worn as tattoo)
+            //        \= Glasses
+            //
+
+            // TryGetRlvInventoryTree
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Accessories_Watch.WornOn = RlvWearableType.Tattoo;
+
+            _queryCallbacks.Setup(e =>
+                e.TryGetSharedFolderAsync(default)
+            ).ReturnsAsync((true, sharedFolder));
+
+            // This should lock the Hats folder, all hats are no longer attachable
+            Assert.True(await _rlv.ProcessMessage("@attachthis:tattoo=n", _sender.Id, _sender.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachthis:tattoo=y", _sender.Id, _sender.Name));
+
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_Spine, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_FancyHat_Chin, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_BusinessPants_Pelvis, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_HappyShirt, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_RetroPants, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Glasses, true));
+            Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch, true));
+
+            var lockedFolders = _rlv.Restrictions.GetLockedFolders();
+            Assert.Empty(lockedFolders);
         }
         #endregion
     }

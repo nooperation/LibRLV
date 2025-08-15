@@ -70,6 +70,71 @@ namespace LibRLV.Tests.Commands
         }
 
         [Theory]
+        [InlineData("attachthis", true)]
+        [InlineData("attachthisoverorreplace", true)]
+        [InlineData("attachthisover", false)]
+        public async Task AttachThis_ById(string command, bool replaceExistingAttachments)
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants <-- Expect attach
+            //  |    |= Happy Shirt (Attached to chest)
+            //  |    |= Retro Pants  <-- Expect attach
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_HappyShirt.AttachedTo = RlvAttachmentPoint.Chest;
+            sampleTree.Root_Clothing_HappyShirt.AttachedPrimId = new Guid("11111111-0001-4aaa-8aaa-ffffffffffff");
+
+            _queryCallbacks.Setup(e =>
+                e.TryGetSharedFolderAsync(default)
+            ).ReturnsAsync((true, sharedFolder));
+
+            _actionCallbacks.Setup(e =>
+                e.AttachAsync(It.IsAny<IReadOnlyList<AttachmentRequest>>(), It.IsAny<CancellationToken>())
+            ).Returns(Task.CompletedTask);
+
+            var expected = new HashSet<AttachmentRequest>()
+            {
+                new(sampleTree.Root_Clothing_RetroPants.Id, RlvAttachmentPoint.Default, replaceExistingAttachments),
+                new(sampleTree.Root_Clothing_BusinessPants_Pelvis.Id, RlvAttachmentPoint.Pelvis, replaceExistingAttachments),
+            };
+
+            // Act
+            await _rlv.ProcessMessage($"@{command}:{sampleTree.Root_Clothing_HappyShirt.AttachedPrimId}=force", _sender.Id, _sender.Name);
+
+            // Assert
+            _actionCallbacks.Verify(e =>
+                e.AttachAsync(
+                    It.Is<IReadOnlyList<AttachmentRequest>>(ids =>
+                        ids != null &&
+                        ids.Count == expected.Count &&
+                        expected.SetEquals(ids)
+                    ),
+                    It.IsAny<CancellationToken>()
+                ),
+                Times.Once
+            );
+
+            _actionCallbacks.VerifyNoOtherCalls();
+        }
+
+
+        [Theory]
         [InlineData("attachthis")]
         [InlineData("attachthisoverorreplace")]
         [InlineData("attachthisover")]
@@ -403,7 +468,7 @@ namespace LibRLV.Tests.Commands
 
             _actionCallbacks.VerifyNoOtherCalls();
         }
-        #endregion
 
+        #endregion
     }
 }

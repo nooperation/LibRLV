@@ -285,6 +285,22 @@ namespace LibRLV
                 folderPaths.AddRange(parts);
                 skipHiddenFolders = false;
             }
+            else if (Guid.TryParse(command.Option, out var attachedPrimId))
+            {
+                var item = inventoryMap.Items
+                    .Where(n => n.Value.AttachedPrimId == attachedPrimId)
+                    .Select(n => n.Value)
+                    .FirstOrDefault();
+                if (item == null)
+                {
+                    return false;
+                }
+
+                if (item.FolderId.HasValue && inventoryMap.Folders.TryGetValue(item.FolderId.Value, out var folder))
+                {
+                    folderPaths.Add(folder);
+                }
+            }
             else if (RlvCommon.RlvWearableTypeMap.TryGetValue(command.Option, out var wearableType))
             {
                 var parts = inventoryMap.FindFoldersContaining(false, null, null, wearableType);
@@ -444,14 +460,20 @@ namespace LibRLV
                 folderPaths.AddRange(parts);
                 ignoreHiddenFolders = false;
             }
-            else if (Guid.TryParse(command.Option, out var uuid))
+            else if (Guid.TryParse(command.Option, out var attachedPrimId))
             {
-                if (inventoryMap.Items.TryGetValue(uuid, out var item))
+                var item = inventoryMap.Items
+                    .Where(n => n.Value.AttachedPrimId == attachedPrimId)
+                    .Select(n => n.Value)
+                    .FirstOrDefault();
+                if (item == null)
                 {
-                    if (item.FolderId.HasValue && inventoryMap.Folders.TryGetValue(item.FolderId.Value, out var folder))
-                    {
-                        folderPaths.Add(folder);
-                    }
+                    return false;
+                }
+
+                if (item.FolderId.HasValue && inventoryMap.Folders.TryGetValue(item.FolderId.Value, out var folder))
+                {
+                    folderPaths.Add(folder);
                 }
             }
             else if (RlvCommon.RlvWearableTypeMap.TryGetValue(command.Option, out var wearableType))
@@ -463,10 +485,6 @@ namespace LibRLV
             {
                 var parts = inventoryMap.FindFoldersContaining(false, null, attachmentPoint, null);
                 folderPaths.AddRange(parts);
-            }
-            else if (inventoryMap.TryGetFolderFromPath(command.Option, false, out var folder))
-            {
-                folderPaths.Add(folder);
             }
             else
             {
