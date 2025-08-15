@@ -311,10 +311,6 @@ namespace LibRLV
                 var parts = inventoryMap.FindFoldersContaining(false, null, attachmentPoint, null);
                 folderPaths.AddRange(parts);
             }
-            else if (inventoryMap.TryGetFolderFromPath(command.Option, false, out var folder))
-            {
-                folderPaths.Add(folder);
-            }
             else
             {
                 return false;

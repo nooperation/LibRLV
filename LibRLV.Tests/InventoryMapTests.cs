@@ -136,6 +136,108 @@
             Assert.Equal(foundFolder, sampleTree.Clothing_Hats_Folder);
         }
 
+        [Fact]
+        public void TryGetFolderFromPath_FolderNameWithSlashPrefix()
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- /Clo//thing//
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
+            //  |    \- //h/ats/
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
+
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Clothing_Folder.Name = "/Clothing";
+
+            var inventoryMap = new InventoryMap(sharedFolder);
+
+            Assert.True(inventoryMap.TryGetFolderFromPath($"{sampleTree.Clothing_Folder.Name}", true, out var foundFolder));
+            Assert.Equal(foundFolder, sampleTree.Clothing_Folder);
+        }
+
+        [Fact]
+        public void TryGetFolderFromPath_FolderNameWithSlashSuffix()
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- /Clo//thing//
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
+            //  |    \- //h/ats/
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
+
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Clothing_Folder.Name = "Clothing/";
+
+            var inventoryMap = new InventoryMap(sharedFolder);
+
+            Assert.True(inventoryMap.TryGetFolderFromPath($"{sampleTree.Clothing_Folder.Name}", true, out var foundFolder));
+            Assert.Equal(foundFolder, sampleTree.Clothing_Folder);
+        }
+
+        [Fact]
+        public void TryGetFolderFromPath_FolderNameWithSlashAffix()
+        {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- /Clo//thing//
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
+            //  |    \- //h/ats/
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
+
+            var sampleTree = SampleInventoryTree.BuildInventoryTree();
+            var sharedFolder = sampleTree.Root;
+
+            sampleTree.Clothing_Folder.Name = "/Clothing/";
+
+            var inventoryMap = new InventoryMap(sharedFolder);
+
+            Assert.True(inventoryMap.TryGetFolderFromPath($"{sampleTree.Clothing_Folder.Name}", true, out var foundFolder));
+            Assert.Equal(foundFolder, sampleTree.Clothing_Folder);
+        }
+
 
         [Fact]
         public void TryGetFolderFromPath_ContendingFoldersWithSlashes()
