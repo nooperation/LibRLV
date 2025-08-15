@@ -9,8 +9,31 @@ namespace LibRLV.Tests.Restrictions
         [Fact]
         public async Task DetachAllThis()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
+            //  |    \- Hats <-- Expected locked, no-detach
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat <-- No detach
+            //  |        \= Party Hat (Attached to spine) <-- No detach
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedTo = RlvAttachmentPoint.Spine;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -43,8 +66,31 @@ namespace LibRLV.Tests.Restrictions
         [Fact]
         public async Task DetachAllThis_Recursive()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing <-- Expected locked, no-detach
+            //  |    |= Business Pants (Attached pelvis) <-- No detach
+            //  |    |= Happy Shirt <-- No detach
+            //  |    |= Retro Pants <-- No detach
+            //  |    \- Hats <-- Expected locked, no-detach
+            //  |        |
+            //  |        |- Sub Hats <-- Expected locked, no-detach
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat <-- No detach
+            //  |        \= Party Hat <-- No detach
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedTo = RlvAttachmentPoint.Pelvis;
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -77,6 +123,26 @@ namespace LibRLV.Tests.Restrictions
         [Fact]
         public async Task DetachAllThis_Recursive_Path()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing <-- Expected locked, no-detach
+            //  |    |= Business Pants <-- No detach
+            //  |    |= Happy Shirt <-- No detach
+            //  |    |= Retro Pants <-- No detach
+            //  |    \- Hats <-- Expected locked, no-detach
+            //  |        |
+            //  |        |- Sub Hats <-- Expected locked, no-detach
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat <-- No detach
+            //  |        \= Party Hat <-- No detach
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
@@ -84,7 +150,7 @@ namespace LibRLV.Tests.Restrictions
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            Assert.True(await _rlv.ProcessMessage("@detachallthis:Clothing=n", sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId!.Value, sampleTree.Root_Clothing_BusinessPants_Pelvis.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachallthis:Clothing=n", _sender.Id, _sender.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
             Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_Spine, true));
@@ -111,14 +177,36 @@ namespace LibRLV.Tests.Restrictions
         [Fact]
         public async Task DetachAllThis_Recursive_Worn()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing <-- Expected locked, no-detach
+            //  |    |= Business Pants <-- No detach
+            //  |    |= Happy Shirt <-- No detach
+            //  |    |= Retro Pants (Worn pants) <-- No detach 
+            //  |    \- Hats <-- Expected locked, no-detach
+            //  |        |
+            //  |        |- Sub Hats <-- Expected locked, no-detach
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat <-- No detach
+            //  |        \= Party Hat <-- No detach
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            Assert.True(await _rlv.ProcessMessage("@detachallthis:pants=n", sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId!.Value, sampleTree.Root_Clothing_BusinessPants_Pelvis.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachallthis:pants=n", _sender.Id, _sender.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
             Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_Spine, true));
@@ -145,14 +233,36 @@ namespace LibRLV.Tests.Restrictions
         [Fact]
         public async Task DetachAllThis_Recursive_Attached()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing <-- Expected locked, no-detach
+            //  |    |= Business Pants (Attached chest) <-- No detach
+            //  |    |= Happy Shirt <-- No detach
+            //  |    |= Retro Pants <-- No detach 
+            //  |    \- Hats <-- Expected locked, no-detach
+            //  |        |
+            //  |        |- Sub Hats <-- Expected locked, no-detach
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat <-- No detach
+            //  |        \= Party Hat <-- No detach
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedTo = RlvAttachmentPoint.Chest;
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            Assert.True(await _rlv.ProcessMessage("@detachallthis:chest=n", sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId!.Value, sampleTree.Root_Clothing_BusinessPants_Pelvis.Name));
+            Assert.True(await _rlv.ProcessMessage("@detachallthis:chest=n", _sender.Id, _sender.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED) - Parent folder locked recursively
             Assert.False(_rlv.Permissions.CanDetach(sampleTree.Root_Clothing_Hats_PartyHat_Spine, true));

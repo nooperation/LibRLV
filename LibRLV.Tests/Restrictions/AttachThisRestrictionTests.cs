@@ -8,8 +8,31 @@ namespace LibRLV.Tests.Restrictions
         [Fact]
         public async Task AttachThis()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat
+            //  |        \= Party Hat (Attached to spine)
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedTo = RlvAttachmentPoint.Spine;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -42,9 +65,31 @@ namespace LibRLV.Tests.Restrictions
         [Fact]
         public async Task AttachThis_NotRecursive()
         {
-            // TryGetRlvInventoryTree
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing [LOCKED, no-attach]
+            //  |    |= Business Pants (Attached to pelvis)
+            //  |    |= Happy Shirt <-- No Attach
+            //  |    |= Retro Pants <-- No Attach
+            //  |    \- Hats
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedTo = RlvAttachmentPoint.Pelvis;
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId = new Guid("11111111-0001-4aaa-8aaa-ffffffffffff");
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
@@ -79,7 +124,26 @@ namespace LibRLV.Tests.Restrictions
         [Fact]
         public async Task AttachThis_ByPath()
         {
-            // TryGetRlvInventoryTree
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
+            //  |    \- Hats [LOCKED - NO-ATTACH]
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat <-- Cannot attach
+            //  |        \= Party Hat <-- Cannot attach
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
@@ -87,8 +151,7 @@ namespace LibRLV.Tests.Restrictions
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
-            // This should lock the Hats folder, all hats are no longer attachable
-            Assert.True(await _rlv.ProcessMessage("@attachthis:Clothing/Hats=n", sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId!.Value, sampleTree.Root_Clothing_BusinessPants_Pelvis.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachthis:Clothing/Hats=n", _sender.Id, _sender.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_Spine, true));
@@ -115,16 +178,41 @@ namespace LibRLV.Tests.Restrictions
         [Fact]
         public async Task AttachThis_ByRlvAttachmentPoint()
         {
-            // TryGetRlvInventoryTree
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing [LOCKED, no-attach]
+            //  |    |= Business Pants (Attached to pelvis)
+            //  |    |= Happy Shirt <-- No attach
+            //  |    |= Retro Pants <-- No attach
+            //  |    \- Hats Clothing [LOCKED, no-attach]
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat  (Attached to pelvis)
+            //  |        \= Party Hat <-- No attach
+            //   \-Accessories
+            //        |= Watch
+            //        \= Glasses
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedTo = RlvAttachmentPoint.Pelvis;
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId = new Guid("11111111-0001-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedTo = RlvAttachmentPoint.Pelvis;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId = new Guid("11111111-0002-4aaa-8aaa-ffffffffffff");
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
             // This should lock the Hats folder, all hats are no longer attachable
-            Assert.True(await _rlv.ProcessMessage("@attachthis:groin=n", sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId!.Value, sampleTree.Root_Clothing_BusinessPants_Pelvis.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachthis:pelvis=n", _sender.Id, _sender.Name));
 
             // #RLV/Clothing/Hats/Party Hat (LOCKED)
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_Spine, true));
@@ -151,16 +239,38 @@ namespace LibRLV.Tests.Restrictions
         [Fact]
         public async Task AttachThis_ByWornLayer()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing [LOCKED, no-attach]
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
+            //  |    \- Hats Clothing 
+            //  |        |
+            //  |        |- Sub Hats
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat
+            //  |        \= Party Hat
+            //   \-Accessories [LOCKED, no-attach]
+            //        |= Watch (Worn as tattoo)
+            //        \= Glasses
+            //
+
             // TryGetRlvInventoryTree
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Accessories_Watch.WornOn = RlvWearableType.Tattoo;
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
 
             // This should lock the Hats folder, all hats are no longer attachable
-            Assert.True(await _rlv.ProcessMessage("@attachthis:tattoo=n", sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId!.Value, sampleTree.Root_Clothing_BusinessPants_Pelvis.Name));
+            Assert.True(await _rlv.ProcessMessage("@attachthis:tattoo=n", _sender.Id, _sender.Name));
 
             // #RLV/Clothing/Hats/Party Hat ()
             Assert.True(_rlv.Permissions.CanAttach(sampleTree.Root_Clothing_Hats_PartyHat_Spine, true));
@@ -184,6 +294,5 @@ namespace LibRLV.Tests.Restrictions
             Assert.False(_rlv.Permissions.CanAttach(sampleTree.Root_Accessories_Watch, true));
         }
         #endregion
-
     }
 }
