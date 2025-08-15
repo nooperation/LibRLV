@@ -281,16 +281,7 @@ namespace LibRLV
 
             if (command.Option.Length == 0)
             {
-                var senderItem = inventoryMap.Items
-                    .Where(n => n.Value.AttachedPrimId == command.Sender)
-                    .Select(n => n.Value)
-                    .FirstOrDefault();
-                if (senderItem == null)
-                {
-                    return false;
-                }
-
-                var parts = inventoryMap.FindFoldersContaining(false, senderItem.Id, null, null);
+                var parts = inventoryMap.FindFoldersContaining(false, command.Sender, null, null);
                 folderPaths.AddRange(parts);
                 skipHiddenFolders = false;
             }
@@ -449,16 +440,7 @@ namespace LibRLV
 
             if (command.Option.Length == 0)
             {
-                var senderItem = inventoryMap.Items
-                    .Where(n => n.Value.AttachedPrimId == command.Sender)
-                    .Select(n => n.Value)
-                    .FirstOrDefault();
-                if (senderItem == null)
-                {
-                    return false;
-                }
-
-                var parts = inventoryMap.FindFoldersContaining(false, senderItem.Id, null, null);
+                var parts = inventoryMap.FindFoldersContaining(false, command.Sender, null, null);
                 folderPaths.AddRange(parts);
                 ignoreHiddenFolders = false;
             }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace LibRLV
 {
@@ -187,32 +188,36 @@ namespace LibRLV
         }
 
         /// <summary>
-        /// Finds all folders containing the specified itemId, all folders containing an item
+        /// Finds all folders containing the specified attachedPrimId, all folders containing an item
         /// that is attached to the specified attachment point, or all folders containing an
         /// item that is worn as the specified wearable type. Only one search criteria may be
         /// specified.
         /// </summary>
         /// <param name="limitToOneResult">Deprecated, should always be false. Returns only the first found folder. This only exists to support the deprecated @GetPath command</param>
-        /// <param name="itemId">If specified, find the folder containing this item ID</param>
+        /// <param name="attachedPrimId">If specified, find the folder containing this prim ID</param>
         /// <param name="attachmentPoint">If specified, find all folders containing an item currently attached to this attachment point</param>
         /// <param name="wearableType">If specified, find all folders containing an item currently worn as this type</param>
         /// <returns>Collection of folders matching the search criteria</returns>
         public IEnumerable<RlvSharedFolder> FindFoldersContaining(
             bool limitToOneResult,
-            Guid? itemId,
+            Guid? attachedPrimId,
             RlvAttachmentPoint? attachmentPoint,
             RlvWearableType? wearableType)
         {
             var folders = new List<RlvSharedFolder>();
 
-            if (itemId.HasValue)
+            if (attachedPrimId.HasValue)
             {
-                if (!Items.TryGetValue(itemId.Value, out var item))
+                var senderItem = Items
+                    .Where(n => n.Value.AttachedPrimId == attachedPrimId)
+                    .Select(n => n.Value)
+                    .FirstOrDefault();
+                if (senderItem == null)
                 {
                     return [];
                 }
 
-                if (!item.FolderId.HasValue || !Folders.TryGetValue(item.FolderId.Value, out var folder))
+                if (!senderItem.FolderId.HasValue || !Folders.TryGetValue(senderItem.FolderId.Value, out var folder))
                 {
                     return [];
                 }

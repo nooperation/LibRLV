@@ -338,9 +338,13 @@
 
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedTo = RlvAttachmentPoint.Spine;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId = new Guid("11111111-0002-4aaa-8aaa-ffffffffffff");
+
             var inventoryMap = new InventoryMap(sharedFolder);
 
-            var actual = inventoryMap.FindFoldersContaining(false, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Id, null, null);
+            var actual = inventoryMap.FindFoldersContaining(false, sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId, null, null);
 
             var expected = new[] {
                 sampleTree.Clothing_Hats_Folder

@@ -332,7 +332,7 @@ namespace LibRLV
                     case RlvDataRequestType.GetPath:
                     case RlvDataRequestType.GetPathNew:
                     {
-                        // [] | [uuid | layer | attachpt ]
+                        // [] | [attachedPrimId | layer | attachpt ]
                         var parsedOptions = rlvMessage.Option.Split([';'], StringSplitOptions.RemoveEmptyEntries).ToList();
 
                         if (parsedOptions.Count > 1)
@@ -351,20 +351,11 @@ namespace LibRLV
                             var inventoryMap = new InventoryMap(sharedFolder);
                             var folderPaths = new List<RlvSharedFolder>();
 
-                            var senderItem = inventoryMap.Items
-                                .Where(n => n.Value.AttachedPrimId == rlvMessage.Sender)
-                                .Select(n => n.Value)
-                                .FirstOrDefault();
-                            if (senderItem == null)
-                            {
-                                return false;
-                            }
-
-                            response = await HandleGetPath(name == RlvDataRequestType.GetPath, senderItem.Id, null, null, cancellationToken).ConfigureAwait(false);
+                            response = await HandleGetPath(name == RlvDataRequestType.GetPath, rlvMessage.Sender, null, null, cancellationToken).ConfigureAwait(false);
                         }
-                        else if (Guid.TryParse(parsedOptions[0], out var uuid))
+                        else if (Guid.TryParse(parsedOptions[0], out var attachedPrimId))
                         {
-                            response = await HandleGetPath(name == RlvDataRequestType.GetPath, uuid, null, null, cancellationToken).ConfigureAwait(false);
+                            response = await HandleGetPath(name == RlvDataRequestType.GetPath, attachedPrimId, null, null, cancellationToken).ConfigureAwait(false);
                         }
                         else if (RlvCommon.RlvWearableTypeMap.TryGetValue(parsedOptions[0], out var wearableType))
                         {
@@ -617,7 +608,7 @@ namespace LibRLV
             return result;
         }
 
-        private async Task<string> HandleGetPath(bool limitToOneResult, Guid? itemId, RlvAttachmentPoint? attachmentPoint, RlvWearableType? wearableType, CancellationToken cancellationToken)
+        private async Task<string> HandleGetPath(bool limitToOneResult, Guid? attachedPrimId, RlvAttachmentPoint? attachmentPoint, RlvWearableType? wearableType, CancellationToken cancellationToken)
         {
             var (hasSharedFolder, sharedFolder) = await _queryCallbacks.TryGetSharedFolderAsync(cancellationToken).ConfigureAwait(false);
             if (!hasSharedFolder || sharedFolder == null)
@@ -626,7 +617,7 @@ namespace LibRLV
             }
 
             var inventoryMap = new InventoryMap(sharedFolder);
-            var folders = inventoryMap.FindFoldersContaining(limitToOneResult, itemId, attachmentPoint, wearableType);
+            var folders = inventoryMap.FindFoldersContaining(limitToOneResult, attachedPrimId, attachmentPoint, wearableType);
 
             var sb = new StringBuilder();
             foreach (var folder in folders.OrderBy(n => n.Name))

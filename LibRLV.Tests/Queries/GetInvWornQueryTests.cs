@@ -36,6 +36,25 @@ namespace LibRLV.Tests.Queries
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedTo = RlvAttachmentPoint.Pelvis;
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId = new Guid("11111111-0001-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_HappyShirt.AttachedTo = RlvAttachmentPoint.Pelvis;
+            sampleTree.Root_Clothing_HappyShirt.AttachedPrimId = new Guid("11111111-0002-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedTo = RlvAttachmentPoint.Spine;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId = new Guid("11111111-0004-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Accessories_Glasses.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Accessories_Glasses.AttachedPrimId = new Guid("11111111-0005-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_RetroPants.WornOn = RlvWearableType.Pants;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.WornOn = RlvWearableType.Pants;
+            sampleTree.Root_Accessories_Watch.WornOn = RlvWearableType.Tattoo;
+
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
@@ -45,7 +64,7 @@ namespace LibRLV.Tests.Queries
                 (1234, "|03,Clothing|33,Accessories|33"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -57,19 +76,19 @@ namespace LibRLV.Tests.Queries
             //  |- .private
             //  |
             //  |- Clothing
-            //  |    |= Business Pants (attached to 'groin')
-            //  |    |= Happy Shirt (attached to 'chest')
-            //  |    |= Retro Pants (worn on 'pants')
+            //  |    |= Business Pants (attached to 'pelvis')
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
             //  |    \-Hats
             //  |        |
             //  |        |- Sub Hats
             //  |        |    \ (Empty)
             //  |        |
-            //  |        |= Fancy Hat (attached to 'chin')
-            //  |        \= Party Hat (attached to 'groin')
+            //  |        |= Fancy Hat
+            //  |        \= Party Hat
             //   \-Accessories
             //        |= Watch (worn on 'tattoo')
-            //        \= Glasses (attached to 'chin')
+            //        \= Glasses
             //
             // 0: No item is present in that folder
             // 1: Some items are present in that folder, but none of them is worn
@@ -80,12 +99,9 @@ namespace LibRLV.Tests.Queries
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = null;
-            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedTo = null;
-            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedTo = RlvAttachmentPoint.Groin;
-            sampleTree.Root_Clothing_HappyShirt.AttachedTo = null;
-            sampleTree.Root_Accessories_Glasses.AttachedTo = null;
-            sampleTree.Root_Clothing_RetroPants.WornOn = null;
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedTo = RlvAttachmentPoint.Pelvis;
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId = new Guid("11111111-0001-4aaa-8aaa-ffffffffffff");
+
             sampleTree.Root_Accessories_Watch.WornOn = RlvWearableType.Tattoo;
 
             _queryCallbacks.Setup(e =>
@@ -97,7 +113,7 @@ namespace LibRLV.Tests.Queries
                 (1234, "|02,Clothing|22,Accessories|22"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -109,19 +125,19 @@ namespace LibRLV.Tests.Queries
             //  |- .private
             //  |
             //  |- Clothing
-            //  |    |= Business Pants (attached to 'groin')
-            //  |    |= Happy Shirt (attached to 'chest')
-            //  |    |= Retro Pants (worn on 'pants')
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
             //  |    \-Hats
             //  |        |
             //  |        |- Sub Hats
             //  |        |    \ (Empty)
             //  |        |
-            //  |        |= Fancy Hat (attached to 'chin')
-            //  |        \= Party Hat (attached to 'groin')
+            //  |        |= Fancy Hat
+            //  |        \= Party Hat
             //   \-Accessories
-            //        |= Watch (worn on 'tattoo')
-            //        \= Glasses (attached to 'chin')
+            //        |= Watch
+            //        \= Glasses
             //
             // 0: No item is present in that folder
             // 1: Some items are present in that folder, but none of them is worn
@@ -132,14 +148,6 @@ namespace LibRLV.Tests.Queries
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
-            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = null;
-            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedTo = null;
-            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedTo = null;
-            sampleTree.Root_Clothing_HappyShirt.AttachedTo = null;
-            sampleTree.Root_Accessories_Glasses.AttachedTo = null;
-            sampleTree.Root_Clothing_RetroPants.WornOn = null;
-            sampleTree.Root_Accessories_Watch.WornOn = null;
-
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
@@ -149,7 +157,7 @@ namespace LibRLV.Tests.Queries
                 (1234, "|01,Clothing|11,Accessories|11"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -161,19 +169,19 @@ namespace LibRLV.Tests.Queries
             //  |- .private
             //  |
             //  |- Clothing
-            //  |    |= Business Pants (attached to 'groin')
-            //  |    |= Happy Shirt (attached to 'chest')
-            //  |    |= Retro Pants (worn on 'pants')
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
             //  |    \-Hats
             //  |        |
             //  |        |- Sub Hats
             //  |        |    \ (Empty)
             //  |        |
-            //  |        |= Fancy Hat (attached to 'chin')
-            //  |        \= Party Hat (attached to 'groin')
+            //  |        |= Fancy Hat
+            //  |        \= Party Hat
             //   \-Accessories
-            //        |= Watch (worn on 'tattoo')
-            //        \= Glasses (attached to 'chin')
+            //        |= Watch
+            //        \= Glasses
             //
             // 0: No item is present in that folder
             // 1: Some items are present in that folder, but none of them is worn
@@ -193,7 +201,7 @@ namespace LibRLV.Tests.Queries
                 (1234, "|00"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinvworn:Clothing/Hats/Sub Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn:Clothing/Hats/Sub Hats=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -205,19 +213,19 @@ namespace LibRLV.Tests.Queries
             //  |- .private
             //  |
             //  |- Clothing
-            //  |    |= Business Pants (attached to 'groin')
-            //  |    |= Happy Shirt (attached to 'chest')
-            //  |    |= Retro Pants (worn on 'pants')
+            //  |    |= Business Pants
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
             //  |    \-Hats
             //  |        |
             //  |        |- Sub Hats
             //  |        |    \ (Empty)
             //  |        |
-            //  |        |= Fancy Hat (attached to 'chin')
-            //  |        \= Party Hat (attached to 'groin')
+            //  |        |= Fancy Hat (attached to 'Chin')
+            //  |        \= Party Hat (attached to 'Spine')
             //   \-Accessories
-            //        |= Watch (worn on 'tattoo')
-            //        \= Glasses (attached to 'chin')
+            //        |= Watch
+            //        \= Glasses
             //
             // 0: No item is present in that folder
             // 1: Some items are present in that folder, but none of them is worn
@@ -228,6 +236,12 @@ namespace LibRLV.Tests.Queries
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
 
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedTo = RlvAttachmentPoint.Spine;
+            sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId = new Guid("11111111-0001-4aaa-8aaa-ffffffffffff");
+
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedTo = RlvAttachmentPoint.Chin;
+            sampleTree.Root_Clothing_Hats_FancyHat_Chin.AttachedPrimId = new Guid("11111111-0002-4aaa-8aaa-ffffffffffff");
+
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
             ).ReturnsAsync((true, sharedFolder));
@@ -237,7 +251,7 @@ namespace LibRLV.Tests.Queries
                 (1234, "|33,Sub Hats|00"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinvworn:Clothing/Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinvworn:Clothing/Hats=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
         #endregion

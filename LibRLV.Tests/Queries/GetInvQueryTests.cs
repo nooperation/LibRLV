@@ -21,7 +21,7 @@ namespace LibRLV.Tests.Queries
                 (1234, "Clothing,Accessories"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinv=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinv=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -52,7 +52,7 @@ namespace LibRLV.Tests.Queries
                 (1234, $"{outfitSubfolder1.Name},{outfitSubfolder2.Name}"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinv:.outfits=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinv:.outfits=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -75,7 +75,7 @@ namespace LibRLV.Tests.Queries
                 (1234, $"{outfitSubfolder1.Name}"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinv:/~MyOutfits=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinv:/~MyOutfits=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -98,7 +98,7 @@ namespace LibRLV.Tests.Queries
                 (1234, $"{outfitSubfolder1.Name}"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinv:~MyOutfits/=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinv:~MyOutfits/=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -121,7 +121,7 @@ namespace LibRLV.Tests.Queries
                 (1234, $"{outfitSubfolder1.Name}"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinv:/~MyOutfits/=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinv:/~MyOutfits/=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -148,7 +148,7 @@ namespace LibRLV.Tests.Queries
                 (1234, $""),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinv:.outfits/First outfit=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinv:.outfits/First outfit=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -168,7 +168,7 @@ namespace LibRLV.Tests.Queries
                 (1234, "Sub Hats"),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinv:Clothing/Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinv:Clothing/Hats=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -188,7 +188,7 @@ namespace LibRLV.Tests.Queries
                 (1234, ""),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinv:Clothing/Hats/Sub Hats=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinv:Clothing/Hats/Sub Hats=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
 
@@ -208,7 +208,7 @@ namespace LibRLV.Tests.Queries
                 (1234, ""),
             };
 
-            Assert.True(await _rlv.ProcessMessage("@getinv:Invalid Folder=1234", sampleTree.Root_Clothing_Hats_PartyHat_Spine.AttachedPrimId!.Value, sampleTree.Root_Clothing_Hats_PartyHat_Spine.Name));
+            Assert.True(await _rlv.ProcessMessage("@getinv:Invalid Folder=1234", _sender.Id, _sender.Name));
             Assert.Equal(expected, actual);
         }
         #endregion

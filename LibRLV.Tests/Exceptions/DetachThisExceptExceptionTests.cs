@@ -9,8 +9,31 @@ namespace LibRLV.Tests.Exceptions
         [Fact]
         public async Task DetachAllThis_Recursive_Except()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing [Expected locked, but has exceptions]
+            //  |    |= Business Pants (Attached to pelvis)
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
+            //  |    \- Hats [Expected locked, but has exceptions]
+            //  |        |
+            //  |        |- Sub Hats [Expected locked]
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch (Worn as Tattoo)
+            //        \= Glasses
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedTo = RlvAttachmentPoint.Pelvis;
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)

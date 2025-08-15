@@ -4,13 +4,37 @@ namespace LibRLV.Tests.Exceptions
 {
     public class AttachThisExceptExceptionTests : RestrictionsBase
     {
+
         #region @attachthis_except:<folder>=<rem/add>
 
         [Fact]
-        public async Task AttachAllThis_Recursive_Except()
+        public async Task AttachThisExcept_Default()
         {
+            // #RLV
+            //  |
+            //  |- .private
+            //  |
+            //  |- Clothing [Expected locked]
+            //  |    |= Business Pants (Attached to pelvis)
+            //  |    |= Happy Shirt
+            //  |    |= Retro Pants
+            //  |    \- Hats [Expected locked, but has exceptions]
+            //  |        |
+            //  |        |- Sub Hats [Expected locked]
+            //  |        |    \ (Empty)
+            //  |        |
+            //  |        |= Fancy Hat
+            //  |        \= Party Hat
+            //   \-Accessories
+            //        |= Watch (Worn as Tattoo)
+            //        \= Glasses
+            //
+
             var sampleTree = SampleInventoryTree.BuildInventoryTree();
             var sharedFolder = sampleTree.Root;
+
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedTo = RlvAttachmentPoint.Pelvis;
+            sampleTree.Root_Clothing_BusinessPants_Pelvis.AttachedPrimId = new Guid("11111111-0003-4aaa-8aaa-ffffffffffff");
 
             _queryCallbacks.Setup(e =>
                 e.TryGetSharedFolderAsync(default)
