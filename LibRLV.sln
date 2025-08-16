@@ -7,6 +7,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibRLV", "LibRLV\LibRLV.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibRLV.Tests", "LibRLV.Tests\LibRLV.Tests.csproj", "{695B9BE1-3E51-4FDB-BEEE-1F9DC8DFD669}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.md = Readme.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibRLV.Example", "LibRLV.Example\LibRLV.Example.csproj", "{A5FCBDE1-AFE5-4BC7-8150-701E76026E2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +28,10 @@ Global
 		{695B9BE1-3E51-4FDB-BEEE-1F9DC8DFD669}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{695B9BE1-3E51-4FDB-BEEE-1F9DC8DFD669}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{695B9BE1-3E51-4FDB-BEEE-1F9DC8DFD669}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5FCBDE1-AFE5-4BC7-8150-701E76026E2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5FCBDE1-AFE5-4BC7-8150-701E76026E2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5FCBDE1-AFE5-4BC7-8150-701E76026E2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5FCBDE1-AFE5-4BC7-8150-701E76026E2A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
