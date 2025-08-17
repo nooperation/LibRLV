@@ -114,14 +114,14 @@ namespace LibRLV
 
             if (message.StartsWith("/me ", StringComparison.OrdinalIgnoreCase))
             {
-                if (!Permissions.IsRedirEmote(out channels))
+                if (!Permissions.TryGetRedirEmoteChannels(out channels))
                 {
                     return;
                 }
             }
             else
             {
-                if (!Permissions.IsRedirChat(out channels))
+                if (!Permissions.TryGetRedirChatChannels(out channels))
                 {
                     return;
                 }

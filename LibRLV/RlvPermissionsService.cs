@@ -171,13 +171,13 @@ namespace LibRLV
         {
             return _restrictionProvider.GetRestrictionsByType(RlvRestrictionType.TpLoc).Count == 0;
         }
-        public bool CanSitTp(out float sitTpDist)
+        public bool CanSitTp(out float maxDistance)
         {
-            return TryGetOptionalRestrictionValueMin(_restrictionProvider, RlvRestrictionType.SitTp, 1.5f, out sitTpDist);
+            return TryGetOptionalRestrictionValueMin(_restrictionProvider, RlvRestrictionType.SitTp, 1.5f, out maxDistance);
         }
-        public bool CanTpLocal(out float tpLocalDist)
+        public bool CanTpLocal(out float maxDistance)
         {
-            return TryGetOptionalRestrictionValueMin(_restrictionProvider, RlvRestrictionType.TpLocal, 0.0f, out tpLocalDist);
+            return TryGetOptionalRestrictionValueMin(_restrictionProvider, RlvRestrictionType.TpLocal, 0.0f, out maxDistance);
         }
         public bool CanStandTp()
         {
@@ -359,7 +359,7 @@ namespace LibRLV
             return _restrictionProvider.GetRestrictionsByType(RlvRestrictionType.SendGesture).Count == 0;
         }
 
-        public bool IsRedirChat(out IReadOnlyList<int> channels)
+        public bool TryGetRedirChatChannels(out IReadOnlyList<int> channels)
         {
             channels = _restrictionProvider
                 .GetRestrictionsByType(RlvRestrictionType.RedirChat)
@@ -371,7 +371,7 @@ namespace LibRLV
             return channels.Count > 0;
         }
 
-        public bool IsRedirEmote(out IReadOnlyList<int> channels)
+        public bool TryGetRedirEmoteChannels(out IReadOnlyList<int> channels)
         {
             channels = _restrictionProvider
                 .GetRestrictionsByType(RlvRestrictionType.RedirEmote)
@@ -575,9 +575,9 @@ namespace LibRLV
         }
 
         #region Touch
-        public bool CanFarTouch(out float farTouchDist)
+        public bool TryGetMaxFarTouchDistance(out float maxDistance)
         {
-            return TryGetOptionalRestrictionValueMin(_restrictionProvider, RlvRestrictionType.FarTouch, 1.5f, out farTouchDist);
+            return TryGetOptionalRestrictionValueMin(_restrictionProvider, RlvRestrictionType.FarTouch, 1.5f, out maxDistance);
         }
 
         private bool CanTouchHud(Guid objectId)

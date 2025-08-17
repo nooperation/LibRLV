@@ -11,7 +11,7 @@
         {
             await _rlv.ProcessMessage($"@{command}:0.9=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Permissions.CanFarTouch(out var distance));
+            Assert.True(_rlv.Permissions.TryGetMaxFarTouchDistance(out var distance));
             Assert.Equal(0.9f, distance);
         }
 
@@ -22,7 +22,7 @@
         {
             await _rlv.ProcessMessage($"@{command}:0.9=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Permissions.CanFarTouch(out var distance));
+            Assert.True(_rlv.Permissions.TryGetMaxFarTouchDistance(out var distance));
             Assert.Equal(0.9f, distance);
         }
 
@@ -33,7 +33,7 @@
         {
             await _rlv.ProcessMessage($"@{command}=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Permissions.CanFarTouch(out var distance));
+            Assert.True(_rlv.Permissions.TryGetMaxFarTouchDistance(out var distance));
             Assert.Equal(1.5f, distance);
         }
 
@@ -47,11 +47,11 @@
             await _rlv.ProcessMessage($"@{command1}:12.34=n", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage($"@{command2}:6.78=n", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Permissions.CanFarTouch(out var actualDistance2));
+            Assert.True(_rlv.Permissions.TryGetMaxFarTouchDistance(out var actualDistance2));
 
             await _rlv.ProcessMessage($"@{command1}:6.78=y", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Permissions.CanFarTouch(out var actualDistance1));
+            Assert.True(_rlv.Permissions.TryGetMaxFarTouchDistance(out var actualDistance1));
 
             Assert.Equal(12.34f, actualDistance1, FloatTolerance);
             Assert.Equal(6.78f, actualDistance2, FloatTolerance);

@@ -8,7 +8,7 @@
         {
             await _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Permissions.IsRedirEmote(out var channels));
+            Assert.True(_rlv.Permissions.TryGetRedirEmoteChannels(out var channels));
 
             var expected = new List<int>
             {
@@ -24,7 +24,7 @@
             await _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@rediremote:1234=rem", _sender.Id, _sender.Name);
 
-            Assert.False(_rlv.Permissions.IsRedirEmote(out var channels));
+            Assert.False(_rlv.Permissions.TryGetRedirEmoteChannels(out var channels));
         }
 
         [Fact]
@@ -33,7 +33,7 @@
             await _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
             await _rlv.ProcessMessage("@rediremote:12345=add", _sender.Id, _sender.Name);
 
-            Assert.True(_rlv.Permissions.IsRedirEmote(out var channels));
+            Assert.True(_rlv.Permissions.TryGetRedirEmoteChannels(out var channels));
 
             var expected = new List<int>
             {
@@ -52,7 +52,7 @@
             await _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
             await _rlv.ReportSendPublicMessage("/me says Hello World");
 
-            Assert.True(_rlv.Permissions.IsRedirEmote(out var channels));
+            Assert.True(_rlv.Permissions.TryGetRedirEmoteChannels(out var channels));
             var expected = new List<(int Channel, string Text)>
             {
                 (1234, "/me says Hello World"),
@@ -70,7 +70,7 @@
             await _rlv.ProcessMessage("@rediremote:5678=n", _sender.Id, _sender.Name);
 
             await _rlv.ReportSendPublicMessage("/me says Hello World");
-            _rlv.Permissions.IsRedirEmote(out var channels);
+            _rlv.Permissions.TryGetRedirEmoteChannels(out var channels);
 
             var expected = new List<(int Channel, string Text)>
             {
@@ -89,7 +89,7 @@
             await _rlv.ProcessMessage("@rediremote:1234=add", _sender.Id, _sender.Name);
             await _rlv.ReportSendPublicMessage("Hello World");
 
-            Assert.True(_rlv.Permissions.IsRedirEmote(out var channels));
+            Assert.True(_rlv.Permissions.TryGetRedirEmoteChannels(out var channels));
             Assert.Empty(actual);
         }
 
